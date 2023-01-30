@@ -269,16 +269,21 @@ addMarkersToMap track =
                 [ ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
                 , ( "lat", E.float <| Angle.inDegrees latitude )
                 ]
-
-        lastPoint =
-            DomainModel.skipCount track.trackTree
     in
     mapCommands <|
-        E.object
-            [ ( "Cmd", E.string "Mark" )
-            , ( "orange", encodePos <| gpxPointFromIndex track.currentPosition track.trackTree )
-            , ( "purple", encodePos <| gpxPointFromIndex lastPoint track.trackTree )
-            ]
+        case track.markerPosition of
+            Just purple ->
+                E.object
+                    [ ( "Cmd", E.string "Mark" )
+                    , ( "orange", encodePos <| gpxPointFromIndex track.currentPosition track.trackTree )
+                    , ( "purple", encodePos <| gpxPointFromIndex purple track.trackTree )
+                    ]
+
+            Nothing ->
+                E.object
+                    [ ( "Cmd", E.string "Mark" )
+                    , ( "orange", encodePos <| gpxPointFromIndex track.currentPosition track.trackTree )
+                    ]
 
 
 msgDecoder : Decoder String

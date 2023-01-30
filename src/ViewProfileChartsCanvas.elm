@@ -1,4 +1,4 @@
-module ViewProfileCharts exposing
+module ViewProfileChartsCanvas exposing
     ( ClickZone(..)
     , handleClick
     , initialiseView
@@ -24,6 +24,7 @@ import Length
 import PaneContext exposing (PaneId, paneIdToString)
 import Pixels exposing (Pixels, inPixels)
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
+import Point3d
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
@@ -276,6 +277,13 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             in
             ( newContext, [ Actions.RenderProfile newContext ] )
 
+        SetEmphasis _ ->
+            (context , [])
+
+        MouseMove event ->
+            (context , [])
+
+
 
 view :
     ProfileContext
@@ -348,9 +356,11 @@ initialiseView suffix treeNode currentContext =
         Nothing ->
             { contextSuffix = suffix
             , dragAction = DragNone
+            , orbiting = Nothing
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
             , focalPoint = Quantity.half <| DomainModel.trueLength treeNode
+            , focalPoint3d = Point3d.origin
             , followSelectedPoint = False
             , metresPerPixel = 10.0
             , waitingForClickDelay = False

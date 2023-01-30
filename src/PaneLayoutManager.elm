@@ -22,6 +22,7 @@ import DomainModel exposing (skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
@@ -54,7 +55,8 @@ import ViewMap
 import ViewMode exposing (ViewMode(..))
 import ViewPlan
 import ViewProfileChartContext
-import ViewProfileCharts
+import ViewProfileChartsCanvas
+import ViewProfileChartsWebGL
 import ViewPureStyles exposing (..)
 import ViewThirdPerson
 
@@ -192,6 +194,20 @@ update :
     -> ( PaneLayoutOptions, List (ToolAction msg) )
 update paneMsg msgWrapper mTrack graph contentArea options previews =
     let
+        currentPane id =
+            case id of
+                Pane1 ->
+                    options.pane1
+
+                Pane2 ->
+                    options.pane2
+
+                Pane3 ->
+                    options.pane3
+
+                Pane4 ->
+                    options.pane4
+
         updatePaneWith :
             PaneId
             -> (PaneContext -> ( PaneContext, List (ToolAction msg) ))
@@ -199,22 +215,8 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
         updatePaneWith id updateFn =
             -- Helper avoids tedious repetition of these case statements.
             let
-                currentPane =
-                    case id of
-                        Pane1 ->
-                            options.pane1
-
-                        Pane2 ->
-                            options.pane2
-
-                        Pane3 ->
-                            options.pane3
-
-                        Pane4 ->
-                            options.pane4
-
                 ( updatedPane, actions ) =
-                    updateFn currentPane
+                    updateFn (currentPane id)
 
                 updatedOptions =
                     case id of
@@ -384,13 +386,23 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                                 ( Just track, Just profile ) ->
                                     let
                                         ( new, act ) =
-                                            ViewProfileCharts.update
-                                                imageMsg
-                                                (msgWrapper << ProfileViewMessage Pane1)
-                                                track
-                                                (dimensionsWithLayout options.paneLayout contentArea)
-                                                previews
-                                                profile
+                                            if (currentPane paneId).activeView == ViewProfileCanvas then
+                                                ViewProfileChartsCanvas.update
+                                                    imageMsg
+                                                    (msgWrapper << ProfileViewMessage Pane1)
+                                                    track
+                                                    (dimensionsWithLayout options.paneLayout contentArea)
+                                                    previews
+                                                    profile
+
+                                            else
+                                                ViewProfileChartsWebGL.update
+                                                    imageMsg
+                                                    (msgWrapper << ProfileViewMessage Pane1)
+                                                    track
+                                                    (dimensionsWithLayout options.paneLayout contentArea)
+                                                    previews
+                                                    profile
                                     in
                                     ( Just new, act )
 
@@ -568,7 +580,7 @@ initialisePane track options pane =
                 ViewThirdPerson.initialiseView 0 track.trackTree pane.firstPersonContext
         , profileContext =
             Just <|
-                ViewProfileCharts.initialiseView
+                ViewProfileChartsCanvas.initialiseView
                     (paneIdToString pane.paneId)
                     track.trackTree
                     pane.profileContext
@@ -599,13 +611,14 @@ viewModeChoices location msgWrapper context options =
             [ Input.optionWith ViewMap <| localise "Map"
             , Input.optionWith ViewThird <| localise "Perspective"
             , Input.optionWith ViewFirst <| localise "Rider"
-            , Input.optionWith ViewProfile <| localise "Profile"
+            , Input.optionWith ViewProfileCanvas <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| localise "OldProfile"
             , Input.optionWith ViewPlan <| localise "Plan"
             , Input.optionWith ViewGraph <| localise "Route"
             , Input.optionWith ViewInfo <| localise "About"
             ]
     in
-    row [ width fill ]
+    row [ width fill, Font.size 12 ]
         [ Input.radioRow
             [ spacing 5
             , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
@@ -633,20 +646,23 @@ viewModeChoicesNoMap location msgWrapper pane =
         reducedOptionList =
             [ Input.optionWith ViewThird <| localise "Perspective"
             , Input.optionWith ViewFirst <| localise "Rider"
-            , Input.optionWith ViewProfile <| localise "Profile"
+            , Input.optionWith ViewProfileCanvas <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| localise "OldProfile"
             , Input.optionWith ViewPlan <| localise "Plan"
             , Input.optionWith ViewGraph <| localise "Route"
             ]
     in
-    Input.radioRow
-        [ spacing 5
-        , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+    row [ width fill, Font.size 12 ]
+        [ Input.radioRow
+            [ spacing 5
+            , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+            ]
+            { onChange = msgWrapper << SetViewMode pane.paneId
+            , selected = Just pane.activeView
+            , label = Input.labelHidden "Choose view"
+            , options = reducedOptionList
+            }
         ]
-        { onChange = msgWrapper << SetViewMode pane.paneId
-        , selected = Just pane.activeView
-        , label = Input.labelHidden "Choose view"
-        , options = reducedOptionList
-        }
 
 
 takeHalf qty =
@@ -682,7 +698,7 @@ paintProfileCharts :
 paintProfileCharts panes imperial track segments previews =
     let
         paintIfProfileVisible pane =
-            if pane.activeView == ViewProfile then
+            if pane.activeView == ViewProfileCanvas then
                 case pane.profileContext of
                     Just context ->
                         Cmd.batch
@@ -703,30 +719,41 @@ paintProfileCharts panes imperial track segments previews =
 
             else
                 Cmd.none
+
+        visiblePanes =
+            case panes.paneLayout of
+                PanesOne ->
+                    [ panes.pane1 ]
+
+                PanesLeftRight ->
+                    [ panes.pane1, panes.pane2 ]
+
+                PanesUpperLower ->
+                    [ panes.pane1, panes.pane2 ]
+
+                PanesOnePlusTwo ->
+                    [ panes.pane1, panes.pane2, panes.pane3 ]
+
+                PanesGrid ->
+                    [ panes.pane1, panes.pane2, panes.pane3, panes.pane4 ]
     in
-    --TODO: Consider the pane layout.
-    Cmd.batch
-        [ paintIfProfileVisible panes.pane1
-        , paintIfProfileVisible panes.pane2
-        , paintIfProfileVisible panes.pane3
-        , paintIfProfileVisible panes.pane4
-        ]
+    Cmd.batch <| List.map paintIfProfileVisible visiblePanes
 
 
 profileViewHandlesClick : String -> Length.Length -> PaneLayoutOptions -> TrackLoaded msg -> Maybe Int
 profileViewHandlesClick container trackDistance options track =
     case container |> String.split "." |> List.Extra.last of
         Just "1" ->
-            ViewProfileCharts.handleClick trackDistance options.pane1.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane1.profileContext track
 
         Just "2" ->
-            ViewProfileCharts.handleClick trackDistance options.pane2.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane2.profileContext track
 
         Just "3" ->
-            ViewProfileCharts.handleClick trackDistance options.pane3.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane3.profileContext track
 
         Just "4" ->
-            ViewProfileCharts.handleClick trackDistance options.pane4.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane4.profileContext track
 
         _ ->
             Nothing
@@ -807,14 +834,28 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewProfile) <|
+                , conditionallyVisible (pane.activeView == ViewProfileCanvas) <|
                     case pane.profileContext of
                         Just context ->
-                            ViewProfileCharts.view
+                            ViewProfileChartsCanvas.view
                                 context
                                 pane.paneId
                                 ( paneWidth, paneHeight )
                                 (msgWrapper << ProfileViewMessage pane.paneId)
+
+                        _ ->
+                            none
+                , conditionallyVisible (pane.activeView == ViewProfileWebGL) <|
+                    case ( pane.profileContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewProfileChartsWebGL.view
+                                context
+                                ( paneWidth, paneHeight )
+                                track
+                                segments
+                                (msgWrapper << ProfileViewMessage pane.paneId)
+                                previews
+                                imperial
 
                         _ ->
                             none
@@ -980,7 +1021,8 @@ viewHelper =
     , ( ViewThird, "third" )
     , ( ViewFirst, "first" )
     , ( ViewPlan, "plan" )
-    , ( ViewProfile, "profile" )
+    , ( ViewProfileCanvas, "profile" )
+    , ( ViewProfileWebGL, "profNew")
     , ( ViewMap, "map" )
     , ( ViewGraph, "route" )
     ]

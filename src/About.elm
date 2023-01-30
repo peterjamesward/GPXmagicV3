@@ -3,11 +3,29 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.0 (e15ca346)
+# GPXmagic v3.9.4 (5432cf5a)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.4
+
+"Buy Me A Coffee" should work now!
+
+## 3.9.3
+
+Added "smooth blend" option to Nudge. This creates a smooth curve either end of the nudged
+zone, using a cosine function. Thanks to DC for your persistence.
+
+## 3.9.2
+
+Fix bug that caused Purple marker to appear on map when route loaded.
+
+## 3.9.1
+
+Previous Profile view available as "Profile 2". You can have them both open, either, none,
+to suit your M.O.
 
 ## 3.9.0
 

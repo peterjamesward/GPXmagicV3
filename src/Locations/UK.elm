@@ -81,9 +81,10 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
                 , ( "flat", """Drawers""" )
                 , ( "grid", """Grid of four""" )
                 , ( "Map", """Map""" )
-                , ( "Perspective", """Perspective""" )
+                , ( "Perspective", """3-D""" )
                 , ( "Rider", """Rider""" )
-                , ( "Profile", """Profile""" )
+                , ( "Profile", """Profile 1""" )
+                , ( "OldProfile", """Profile 2""")
                 , ( "Plan", """Plan""" )
                 , ( "Route", """Route""" )
                 , ( "About", """About""" )
@@ -651,9 +652,11 @@ Purple marker, the Purple marker is moved there; this can give you more control 
                 , ( "-1cm", """-1cm""" )
                 , ( "-10cm", """-10cm""" )
                 , ( "-1m", """-1m""" )
-                , ( "fade", """Fade in/out""" )
+                , ( "fade", """Fade in/out """ )
                 , ( "Apply", """Apply""" )
                 , ( "Zero", """Reset sliders""" )
+                , ( "easing", """Smooth blend""")
+                , ( "spacing", """Spacing """)
                 , ( "info", """
 Sometimes all it takes is a little _Nudge_.
 

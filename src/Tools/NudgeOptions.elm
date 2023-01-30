@@ -7,7 +7,9 @@ import Quantity exposing (Quantity)
 
 
 type alias Options =
-    { horizontal : Quantity Float Meters
-    , vertical : Quantity Float Meters
-    , fadeExtent : Quantity Float Meters
+    { horizontal : Length.Length
+    , vertical : Length.Length
+    , fadeExtent : Length.Length
+    , cosineEasing : Bool
+    , easingSpacing : Length.Length
     }

@@ -5,7 +5,9 @@ Title bar display not showing track name when loaded from URL.
 
 Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
-Delete should display "Sorry" message when _almost_ all track is selected.
+Delete should display "Sorry" message unless one leaf remains.
+
+No preview for single point nudge without fade.
 
 --- 
 
@@ -38,6 +40,18 @@ Maybe Google street view window can follow Orange.
 ---
 
 # BACKLOG
+
+## Picture button
+
+Add button to images to allow screen capture. Because easy.
+
+## Refactor Main -> Tools
+
+Follow the Nudge example of the Tool providing the new Orange & Purple locations.
+(Further tidies up repetitive code in Main.)
+
+I genuinely think this will open the door to a much cleaner control flow, perhaps deprecating
+actions (yes, after all that) and using the track/newTrack diff to drive command generation.
 
 ## Create nice road book page with export capability
 

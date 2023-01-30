@@ -1122,7 +1122,9 @@ topLoadingBar model =
 
 buyMeACoffeeButton =
     newTabLink
-        [ alignRight ]
+        [ alignRight
+        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always NoOp)
+        ]
         { url = "https://www.buymeacoffee.com/Peterward"
         , label =
             image [ height (Element.px 30), width (Element.px 130) ]
@@ -1491,15 +1493,8 @@ performActionsOnModel actions model =
                     }
 
                 ( NudgeApplyWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Nudge.applyUsingOptions options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.Nudge.applyUsingOptions options track
                         , needsRendering = True
                     }
 
