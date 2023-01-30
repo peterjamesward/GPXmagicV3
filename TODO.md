@@ -26,14 +26,11 @@ Put the Strava login button inside the Strava tool.
 Have to use the Electron main process to do the request.
 >https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
 
-Local storage perhaps not working (state not restored).
-> Seems to remember tool state but not the splitters.
-
 Multiple windows sharing views on common model?
 > Need to understand the Electron process model and how stuff can be shared.
 
 Merge from master.
-> Need some updates.
+> Need some updates (profiles, buymeacoffee)
 
 Maybe Google street view window can follow Orange.
 > Undoubtedly, it becomes another view, but would worry about rate limits.
