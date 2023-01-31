@@ -17,6 +17,7 @@ No preview for single point nudge without fade.
 
 Works!
 
+Can I use same Elm code base for both -- pass in a flag perhaps?
 
 How to make installers.
 > electron-forge works now I have the latest Node.js.
