@@ -1,4 +1,17 @@
-module Tools.StravaTypes exposing (StravaActivity, StravaActivityStatus(..), StravaActivityStreams, StravaAltitudeStream, StravaDistanceStream, StravaLatLng, StravaLatLngStream, StravaRoute, StravaRouteStatus(..), StravaSegment, StravaSegmentStatus(..), StravaSegmentStreams)
+module Tools.StravaTypes exposing
+    ( StravaActivity
+    , StravaActivityStatus(..)
+    , StravaActivityStreams
+    , StravaAltitudeStream
+    , StravaDistanceStream
+    , StravaLatLng
+    , StravaLatLngStream
+    , StravaRoute
+    , StravaRouteStatus(..)
+    , StravaSegment
+    , StravaSegmentStatus(..)
+    , StravaSegmentStreams
+    )
 
 
 type alias StravaSegment =

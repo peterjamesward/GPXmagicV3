@@ -30,6 +30,9 @@ Put the Strava login button inside the Strava tool.
 Have to use the Electron main process to do the request.
 >https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
 
+I think we have to just make sure we route a ConnectionInfo msg to StravaTools.update with
+the token that we will get from the JS Auth library.
+
 Multiple windows sharing views on common model?
 > Need to understand the Electron process model and how stuff can be shared.
 > Not a priority.

@@ -1,4 +1,4 @@
-module Tools.StravaTools exposing
+port module Tools.StravaTools exposing
     ( Msg(..)
     , clearSegmentData
     , defaultOptions
@@ -23,6 +23,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Http
 import Iso8601
+import Json.Encode as E
 import Length
 import List.Extra
 import OAuth as O
@@ -37,6 +38,14 @@ import Tools.StravaTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
 import ViewPureStyles exposing (displayName, neatToolsBorder)
+
+--TODO: Send request for OAuth out of the command port. (See MapController)
+
+port oauthCommands : E.Value -> Cmd msg
+
+--TODO: Receive OAuth response with token via a subscription, and have Main send it to our update.
+
+port oauthResponses : (E.Value -> msg) -> Sub msg
 
 
 toolId =
