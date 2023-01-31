@@ -17,10 +17,10 @@ No preview for single point nudge without fade.
 
 Works!
 
-**CHECKOUT** https://www.npmjs.com/package/elm-desktop-app
+**CHECK THIS OUT** https://www.npmjs.com/package/elm-desktop-app
 
 How to make installers.
-> electron-forge, works now I have the latest Node.js.
+> electron-forge works now I have the latest Node.js.
 
 Is OAuth possible?
 Yes, if Strava accepts localhost (and it seems that it does).
@@ -30,12 +30,6 @@ Have to use the Electron main process to do the request.
 
 Multiple windows sharing views on common model?
 > Need to understand the Electron process model and how stuff can be shared.
-
-Merge from master.
-> Need some updates (profiles, buymeacoffee)
-
-Maybe Google street view window can follow Orange.
-> Undoubtedly, it becomes another view, but would worry about rate limits.
 
 ---
 
