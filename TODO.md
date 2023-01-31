@@ -17,10 +17,11 @@ No preview for single point nudge without fade.
 
 Works!
 
-**CHECK THIS OUT** https://www.npmjs.com/package/elm-desktop-app
 
 How to make installers.
 > electron-forge works now I have the latest Node.js.
+> Just need to make it work on Windows.
+Looked at https://www.npmjs.com/package/elm-desktop-app, unconvinced of benefits.
 
 Is OAuth possible?
 Yes, if Strava accepts localhost (and it seems that it does).
@@ -30,6 +31,7 @@ Have to use the Electron main process to do the request.
 
 Multiple windows sharing views on common model?
 > Need to understand the Electron process model and how stuff can be shared.
+> Not a priority.
 
 ---
 
