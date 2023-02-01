@@ -119,7 +119,7 @@ function oauthMessageHandler(msg) {
 
     switch (msg.Cmd) {
         case 'RequestAuth':
-            console.log(msg);
+            //console.log(msg);
             electronAPI.requestAuth(msg.config);
             break;
     };

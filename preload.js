@@ -5,5 +5,5 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    requestAuth: (title) => ipcRenderer.send('requestAuth', title)
+    requestAuth: (config) => ipcRenderer.send('requestAuth', config)
 });

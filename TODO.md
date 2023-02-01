@@ -28,7 +28,7 @@ Is OAuth possible?
 Yes, if Strava accepts localhost (and it seems that it does).
 Put the Strava login button inside the Strava tool.
 Have to use the Electron main process to do the request.
->https://github.com/googlesamples/appauth-js-electron-sample
+> https://github.com/chamerling/electron-oauth2
 > ^deprecated, better?: https://github.com/googlesamples/appauth-js-electron-sample
 
 I think we have to just make sure we route a ConnectionInfo msg to StravaTools.update with

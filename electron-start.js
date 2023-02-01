@@ -4,6 +4,9 @@ var electron = require('electron')
 var app = electron.app;  // Module to control application life.
 var BrowserWindow = electron.BrowserWindow;  // Module to create native browser window.
 
+const ipcMain = electron.ipcMain;
+const electronOauth2 = require('electron-oauth2');
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
 var mainWindow = null;
@@ -42,12 +45,15 @@ app.on('ready', function() {
     mainWindow = null;
   });
 
-    mainWindow.on('strava-oauth', (event, arg) => {
+    ipcMain.on('requestAuth', (event, config) => {
 
-        const stravaOAuth = electronOauth2(arg.config, windowParams);
+        console.log(config);
+        console.log("Trying Oauth...")
+        const stravaOAuth = electronOauth2(config, windowParams);
 
         stravaOAuth.getAccessToken({})
             .then(token => {
+                console.log("Got token" + token)
                 event.sender.send('token', token);
             }, err => {
                 console.log('Error while getting token', err);
