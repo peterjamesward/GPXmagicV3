@@ -533,10 +533,10 @@ view location imperial options msgWrapper track =
                         , max =
                             Length.inMeters <|
                                 if imperial then
-                                    Length.feet 160.0
+                                    Length.feet 330.0
 
                                 else
-                                    Length.meters 50.0
+                                    Length.meters 100.0
                         , step = Nothing
                         , value = Length.inMeters options.fadeExtent
                         , thumb = Input.defaultThumb

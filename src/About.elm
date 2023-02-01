@@ -9,6 +9,10 @@ aboutText =
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.9.5
+
+Max nudge fade area increasing to 100m.
+
 ## 3.9.4
 
 "Buy Me A Coffee" should work now!
