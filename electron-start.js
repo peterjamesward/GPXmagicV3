@@ -5,7 +5,6 @@ var app = electron.app;  // Module to control application life.
 var BrowserWindow = electron.BrowserWindow;  // Module to create native browser window.
 
 const ipcMain = electron.ipcMain;
-const electronOauth2 = require('electron-oauth2');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
@@ -35,7 +34,7 @@ app.on('ready', function() {
   mainWindow.loadURL('file://' + __dirname + '/site/index.html');
 
   // Open the devtools.
-  mainWindow.openDevTools();
+  //mainWindow.openDevTools();
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function() {
@@ -49,9 +48,11 @@ app.on('ready', function() {
 
         console.log(config);
         console.log("Trying Oauth...")
-        const stravaOAuth = electronOauth2(config, windowParams);
+        const stravaOAuth = OAuth(config, windowParams);
 
-        stravaOAuth.getAccessToken({})
+        const options = config.scope;
+
+        stravaOAuth.getAccessToken(options)
             .then(token => {
                 console.log("Got token" + token)
                 event.sender.send('token', token);
@@ -65,7 +66,135 @@ app.on('ready', function() {
 // Shim for OAuth module, driven by Elm code via the renderer process.
 const windowParams = {
     alwaysOnTop: true,
-    autoHideMenuBar: true,
-    webPreferences: { nodeIntegration: false}
+    autoHideMenuBar: false,
+    webPreferences: { nodeIntegration: false }
 };
 
+// Put OAuth stuff in here instead of as a module, so I can adjust.
+
+
+const Promise = require('pinkie-promise');
+const queryString = require('querystring');
+const fetch = require('node-fetch');
+const objectAssign = require('object-assign');
+const nodeUrl = require('url');
+
+function OAuth (config, windowParams) {
+
+  function getAuthorizationCode(opts) {
+    opts = opts || {};
+
+    if (!config.redirectUri) {
+      config.redirectUri = 'urn:ietf:wg:oauth:2.0:oob';
+    }
+
+    var urlParams = {
+      response_type: 'code',
+      redirect_uri: config.redirectUri,
+      client_id: config.clientId
+    };
+
+    if (opts.scope) {
+      urlParams.scope = opts.scope;
+    }
+
+    if (opts.accessType) {
+      urlParams.access_type = opts.accessType;
+    }
+
+    var url = config.authorizationUrl + '?' + queryString.stringify(urlParams);
+    console.log(url);
+
+    return new Promise(function (resolve, reject) {
+      const authWindow = new BrowserWindow(windowParams || {'use-content-size': true});
+
+      authWindow.loadURL(url);
+      authWindow.show();
+
+      function onCallback(url) {
+        var url_parts = nodeUrl.parse(url, true);
+        var query = url_parts.query;
+        var code = query.code;
+        var error = query.error;
+
+        if (code) {
+            authWindow.removeAllListeners('closed');
+            if (url.indexOf('http://localhost') === 0) {
+                console.log("GOT CODE: " + code);
+                resolve(code);
+                setImmediate(function () {
+                            authWindow.close();
+                          });
+          }
+        }
+      }
+
+      authWindow.webContents.on('will-navigate', (event, url) => {
+        onCallback(url);
+      });
+
+      authWindow.webContents.on('will-redirect', (event, url) => {
+        console.log("REDIRECT" + url );
+        if (url.indexOf('http://localhost') === 0)
+            event.preventDefault();
+        onCallback(url);
+      });
+
+      authWindow.webContents.on('did-get-redirect-request', (event, oldUrl, newUrl) => {
+        onCallback(newUrl);
+      });
+
+    });
+  }
+
+  function tokenRequest(data) {
+    const header = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    if (config.useBasicAuthorizationHeader) {
+      header.Authorization = 'Basic ' + new Buffer(config.clientId + ':' + config.clientSecret).toString('base64');
+    } else {
+      objectAssign(data, {
+        client_id: config.clientId,
+        client_secret: config.clientSecret
+      });
+    }
+
+    return fetch(config.tokenUrl, {
+      method: 'POST',
+      headers: header,
+      body: queryString.stringify(data)
+    }).then(res => {
+      return res.json();
+    });
+  }
+
+  function getAccessToken(opts) {
+    return getAuthorizationCode(opts)
+      .then(authorizationCode => {
+        var tokenRequestData = {
+          code: authorizationCode,
+          grant_type: 'authorization_code',
+          redirect_uri: config.redirectUri
+        };
+        tokenRequestData = Object.assign(tokenRequestData, opts.additionalTokenRequestData);
+        return tokenRequest(tokenRequestData);
+      });
+  }
+
+  function refreshToken(refreshToken) {
+    return tokenRequest({
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+      redirect_uri: config.redirectUri
+    });
+  }
+
+  return {
+    getAuthorizationCode: getAuthorizationCode,
+    getAccessToken: getAccessToken,
+    refreshToken: refreshToken
+  };
+};

@@ -69,9 +69,9 @@ requestAuthorisation =
             E.object
                 [ ( "clientId", E.string StravaAuth.configuration.clientId )
                 , ( "clientSecret", E.string StravaAuth.configuration.clientSecret )
-                , ( "authorisationUrl", E.string <| Url.toString StravaAuth.configuration.authorizationEndpoint )
+                , ( "authorizationUrl", E.string <| Url.toString StravaAuth.configuration.authorizationEndpoint )
                 , ( "tokenUrl", E.string <| Url.toString StravaAuth.configuration.tokenEndpoint )
-                , ( "useBasicAuthorizationHeader", E.bool False )
+                , ( "useBasicAuthorizationHeader", E.bool True )
                 , ( "redirectUri", E.string "http://localhost" )
                 , ( "scope", E.string "read_all,activity:read_all" )
                 ]

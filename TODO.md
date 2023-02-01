@@ -25,11 +25,11 @@ How to make installers.
 Looked at https://www.npmjs.com/package/elm-desktop-app, unconvinced of benefits.
 
 Is OAuth possible?
-Yes, if Strava accepts localhost (and it seems that it does).
-Put the Strava login button inside the Strava tool.
-Have to use the Electron main process to do the request.
 > https://github.com/chamerling/electron-oauth2
+> https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
 > ^deprecated, better?: https://github.com/googlesamples/appauth-js-electron-sample
+> 
+> Tempted to hand-craft it: https://developers.strava.com/docs/getting-started/#oauth
 
 I think we have to just make sure we route a ConnectionInfo msg to StravaTools.update with
 the token that we will get from the Auth library.
