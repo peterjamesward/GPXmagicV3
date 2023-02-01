@@ -39,11 +39,26 @@ import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
 import ViewPureStyles exposing (displayName, neatToolsBorder)
 
+
+
 --TODO: Send request for OAuth out of the command port. (See MapController)
+--TODO: Add this port into gpxmagic,js, where it calls up to the main process.
+
 
 port oauthCommands : E.Value -> Cmd msg
 
+
+requestAuthorisation : Cmd msg
+requestAuthorisation =
+    oauthCommands <|
+        E.object
+            [ ( "Cmd", E.string "Auth" ) ]
+
+
+
 --TODO: Receive OAuth response with token via a subscription, and have Main send it to our update.
+--TODO: Decode JSON and store token if successful.
+
 
 port oauthResponses : (E.Value -> msg) -> Sub msg
 
