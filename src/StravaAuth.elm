@@ -1,4 +1,11 @@
-module StravaAuth exposing (convertBytes, getStravaToken, init, stravaButton, update)
+module StravaAuth exposing
+    ( configuration
+    , convertBytes
+    , getStravaToken
+    , init
+    , stravaButton
+    , update
+    )
 
 import Base64.Encode as Base64
 import Browser.Navigation as Navigation exposing (Key)

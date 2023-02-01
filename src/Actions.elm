@@ -129,6 +129,7 @@ type ToolAction msg
     | UsePhysicsModel
     | TryRemoteLoadIfGiven
     | ProfileClick String Float --- CAUTION, check units.
+    | RequestStravaAuth
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

@@ -3,6 +3,7 @@ port module Tools.StravaTools exposing
     , clearSegmentData
     , defaultOptions
     , paste
+    , requestAuthorisation
     , segmentName
     , toolId
     , toolStateChange
@@ -29,6 +30,8 @@ import List.Extra
 import OAuth as O
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import StravaAuth
+import StravaClientSecret exposing (clientSecret)
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -36,6 +39,7 @@ import Tools.StravaDataLoad exposing (..)
 import Tools.StravaOptions exposing (Options, StravaStatus(..))
 import Tools.StravaTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
+import Url
 import Url.Builder as Builder
 import ViewPureStyles exposing (displayName, neatToolsBorder)
 
@@ -50,9 +54,32 @@ port oauthCommands : E.Value -> Cmd msg
 
 requestAuthorisation : Cmd msg
 requestAuthorisation =
+    {- We shall pass this config from Elm.
+       var config = {
+           clientId: 'CLIENT_ID',
+           clientSecret: 'CLIENT_SECRET',
+           authorizationUrl: 'AUTHORIZATION_URL',
+           tokenUrl: 'TOKEN_URL',
+           useBasicAuthorizationHeader: false,
+           redirectUri: 'http://localhost'
+       };
+    -}
+    let
+        config =
+            E.object
+                [ ( "clientId", E.string StravaAuth.configuration.clientId )
+                , ( "clientSecret", E.string StravaAuth.configuration.clientSecret )
+                , ( "authorisationUrl", E.string <| Url.toString StravaAuth.configuration.authorizationEndpoint )
+                , ( "tokenUrl", E.string <| Url.toString StravaAuth.configuration.tokenEndpoint )
+                , ( "useBasicAuthorizationHeader", E.bool True )
+                , ( "redirectUri", E.string "http://localhost" )
+                ]
+    in
     oauthCommands <|
         E.object
-            [ ( "Cmd", E.string "Auth" ) ]
+            [ ( "Cmd", E.string "RequestAuth" )
+            , ( "config", config )
+            ]
 
 
 
@@ -84,6 +111,7 @@ type Msg
     | ClearSegment
     | ConnectionInfo O.Token
     | SetAltitudeMatch Bool
+    | SignInRequested
 
 
 defaultOptions : Options
@@ -127,6 +155,11 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg settings wrap track =
     case msg of
+        SignInRequested ->
+            ( settings
+            , [ Actions.RequestStravaAuth ]
+            )
+
         ConnectionInfo token ->
             ( { settings | stravaStatus = StravaConnected token }, [] )
 
@@ -831,4 +864,16 @@ viewStravaTab location options wrap track =
                 ]
 
             ( StravaDisconnected, _ ) ->
-                [ i18n "connect" ]
+                [ Input.button
+                    [ height <| px 24, moveUp 10 ]
+                    { onPress = Just <| wrap SignInRequested
+                    , label =
+                        image
+                            [ mouseOver [ alpha 0.7 ]
+                            , width <| px 160
+                            ]
+                            { src = Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
+                            , description = "Connect to Strava"
+                            }
+                    }
+                ]

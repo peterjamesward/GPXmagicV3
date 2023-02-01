@@ -2485,6 +2485,9 @@ performActionCommands actions model =
         performAction : ToolAction Msg -> Cmd Msg
         performAction action =
             case ( action, model.track ) of
+                ( RequestStravaAuth, _ ) ->
+                    Tools.StravaTools.requestAuthorisation
+
                 ( SetCurrent _, Just track ) ->
                     MapPortController.addMarkersToMap track
 

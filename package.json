@@ -3,6 +3,7 @@
   "version": "3.9.2",
   "main": "electron-start.js",
   "dependencies": {
+    "electron-oauth2": "^3.0.0",
     "electron-squirrel-startup": "^1.0.0"
   },
   "scripts": {
