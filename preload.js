@@ -7,3 +7,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('electronAPI', {
     requestAuth: (config) => ipcRenderer.send('requestAuth', config)
 });
+
+ipcRenderer.on('token', (_event, token) => {
+    console.log("BACK IS THE TOKEN NOW: " + token);
+})

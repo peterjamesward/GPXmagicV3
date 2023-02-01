@@ -54,7 +54,7 @@ app.on('ready', function() {
 
         stravaOAuth.getAccessToken(options)
             .then(token => {
-                console.log("Got token" + token)
+                //console.log("Got token" + token)
                 event.sender.send('token', token);
             }, err => {
                 console.log('Error while getting token', err);
