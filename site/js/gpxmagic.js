@@ -1,5 +1,4 @@
 
-
 const app = Elm.Main.init({
     node: document.getElementById("myapp"),
     flags: rememberedBytes()
@@ -121,7 +120,7 @@ function oauthMessageHandler(msg) {
     switch (msg.Cmd) {
         case 'RequestAuth':
             console.log(msg);
-            ipcRenderer.send('strava-oauth', msg.config);
+            electronAPI.requestAuth(msg.config);
             break;
     };
 };

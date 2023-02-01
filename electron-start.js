@@ -1,4 +1,6 @@
-var electron = require('electron');
+const path = require('path')
+var electron = require('electron')
+
 var app = electron.app;  // Module to control application life.
 var BrowserWindow = electron.BrowserWindow;  // Module to create native browser window.
 
@@ -20,7 +22,11 @@ app.on('window-all-closed', function() {
 // initialization and is ready to create browser windows.
 app.on('ready', function() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1000, height: 800});
+  mainWindow = new BrowserWindow(
+  {width: 1000,
+   height: 800,
+   webPreferences: { preload: path.join(__dirname, 'preload.js') }
+  });
 
   // and load the index.html of the app.
   mainWindow.loadURL('file://' + __dirname + '/site/index.html');
