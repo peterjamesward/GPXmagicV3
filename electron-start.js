@@ -20,7 +20,7 @@ app.on('window-all-closed', function() {
 // initialization and is ready to create browser windows.
 app.on('ready', function() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600});
+  mainWindow = new BrowserWindow({width: 1000, height: 800});
 
   // and load the index.html of the app.
   mainWindow.loadURL('file://' + __dirname + '/site/index.html');
@@ -35,4 +35,25 @@ app.on('ready', function() {
     // when you should delete the corresponding element.
     mainWindow = null;
   });
+
+    mainWindow.on('strava-oauth', (event, arg) => {
+
+        const stravaOAuth = electronOauth2(arg.config, windowParams);
+
+        stravaOAuth.getAccessToken({})
+            .then(token => {
+                event.sender.send('token', token);
+            }, err => {
+                console.log('Error while getting token', err);
+        });
+    });
+
 });
+
+// Shim for OAuth module, driven by Elm code via the renderer process.
+const windowParams = {
+    alwaysOnTop: true,
+    autoHideMenuBar: true,
+    webPreferences: { nodeIntegration: false}
+};
+
