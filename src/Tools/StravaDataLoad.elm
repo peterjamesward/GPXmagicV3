@@ -1,4 +1,15 @@
-module Tools.StravaDataLoad exposing (requestStravaActivity, requestStravaActivityStreams, requestStravaRoute, requestStravaRouteHeader, requestStravaSegment, requestStravaSegmentStreams, stravaApiRoot, stravaProcessRoute, stravaProcessSegment)
+module Tools.StravaDataLoad exposing
+    ( exchangeCodeForToken
+    , requestStravaActivity
+    , requestStravaActivityStreams
+    , requestStravaRoute
+    , requestStravaRouteHeader
+    , requestStravaSegment
+    , requestStravaSegmentStreams
+    , stravaApiRoot
+    , stravaProcessRoute
+    , stravaProcessSegment
+    )
 
 import Angle
 import Direction2d
@@ -8,6 +19,8 @@ import Json.Decode as D exposing (field)
 import Length
 import OAuth exposing (Token, useToken)
 import Spherical
+import StravaAuth
+import String.Interpolate
 import Tools.StravaTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder exposing (string)
@@ -28,6 +41,55 @@ stravaProcessRoute response =
 
         Err err ->
             StravaRouteError (httpErrorString err)
+
+
+exchangeCodeForToken : (Result Http.Error String -> msg) -> String -> Cmd msg
+exchangeCodeForToken msg code =
+    {- EXAMPLE FROM STRAVA:
+         curl -X POST https://www.strava.com/api/v3/oauth/token \
+           -d client_id=ReplaceWithClientID \
+           -d client_secret=ReplaceWithClientSecret \
+           -d code=ReplaceWithCode \
+           -d grant_type=authorization_code
+
+       RESPONSE:
+          {
+            "token_type": "Bearer",
+            "expires_at": 1568775134,
+            "expires_in": 21600,
+            "refresh_token": "e5n567567...",
+            "access_token": "a4b945687g...",
+            "athlete": {
+              #{summary athlete representation}
+            }
+          }
+    -}
+    let
+        queryBody =
+            String.dropLeft 1 <|
+            Builder.relative []
+                [ Builder.string "client_id" StravaAuth.configuration.clientId
+                , Builder.string "client_secret" StravaAuth.configuration.clientSecret
+                , Builder.string "code" code
+                , Builder.string "grant_type" "authorization_code"
+                ]
+            --String.Interpolate.interpolate
+            --    """client_id={0}&client_secret={1}&code={2}&grant_type={3}"""
+            --    [ StravaAuth.configuration.clientId
+            --    , StravaAuth.configuration.clientSecret
+            --    , code
+            --    , "authorization_code"
+            --    ]
+    in
+    Http.request
+        { method = "POST"
+        , headers = []
+        , url = Builder.crossOrigin stravaApiRoot [ "api", "v3", "oauth", "token" ] []
+        , body = Http.stringBody "" queryBody
+        , expect = Http.expectJson msg stravaTokenDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 requestStravaSegment : (Result Http.Error StravaSegment -> msg) -> String -> Token -> Cmd msg
@@ -100,6 +162,23 @@ stravaSegmentDecoder =
         (D.at [ "elevation_low" ] D.float)
         (D.at [ "start_latlng" ] (D.list D.float))
         (D.at [ "end_latlng" ] (D.list D.float))
+
+
+stravaTokenDecoder : D.Decoder String
+stravaTokenDecoder =
+    {-
+       {
+         "token_type": "Bearer",
+         "expires_at": 1568775134,
+         "expires_in": 21600,
+         "refresh_token": "e5n567567...",
+         "access_token": "a4b945687g...",
+         "athlete": {
+           #{summary athlete representation}
+         }
+       }
+    -}
+    D.field "access_token" D.string
 
 
 

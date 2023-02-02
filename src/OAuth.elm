@@ -1,5 +1,5 @@
 module OAuth exposing
-    ( Token, useToken
+    ( Token(..), useToken
     , ErrorCode(..), errorCodeFromString
     , TokenType, TokenString, makeToken, makeRefreshToken
     )

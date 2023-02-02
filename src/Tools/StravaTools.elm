@@ -2,6 +2,8 @@ port module Tools.StravaTools exposing
     ( Msg(..)
     , clearSegmentData
     , defaultOptions
+    , haveReceivedToken
+    , oauthResponses
     , paste
     , requestAuthorisation
     , segmentName
@@ -10,7 +12,6 @@ port module Tools.StravaTools exposing
     , trackFromActivity
     , update
     , viewStravaTab
-    , oauthResponses
     )
 
 import Actions exposing (ToolAction(..))
@@ -28,11 +29,10 @@ import Iso8601
 import Json.Encode as E
 import Length
 import List.Extra
-import OAuth as O
+import OAuth
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import StravaAuth
-import StravaClientSecret exposing (clientSecret)
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -43,11 +43,6 @@ import TrackLoaded exposing (TrackLoaded)
 import Url
 import Url.Builder as Builder
 import ViewPureStyles exposing (displayName, neatToolsBorder)
-
-
-
---TODO: Send request for OAuth out of the command port. (See MapController)
---TODO: Add this port into gpxmagic,js, where it calls up to the main process.
 
 
 port oauthCommands : E.Value -> Cmd msg
@@ -84,11 +79,6 @@ requestAuthorisation =
             ]
 
 
-
---TODO: Receive OAuth response with token via a subscription, and have Main send it to our update.
---TODO: Decode JSON and store token if successful.
-
-
 port oauthResponses : (E.Value -> msg) -> Sub msg
 
 
@@ -111,7 +101,7 @@ type Msg
     | LoadExternalSegment
     | PasteSegment
     | ClearSegment
-    | ConnectionInfo O.Token
+    | ConnectionInfo String
     | SetAltitudeMatch Bool
     | SignInRequested
 
@@ -149,6 +139,15 @@ toolStateChange opened colour options track =
             )
 
 
+haveReceivedToken : String -> Options -> Options
+haveReceivedToken token settings =
+    let
+        _ =
+            Debug.log "TOKEN" token
+    in
+    { settings | stravaStatus = StravaConnected <| OAuth.Bearer token }
+
+
 update :
     Msg
     -> Options
@@ -163,7 +162,8 @@ update msg settings wrap track =
             )
 
         ConnectionInfo token ->
-            ( { settings | stravaStatus = StravaConnected token }, [] )
+            -- Unused now
+            ( settings, [] )
 
         UserChangedRouteId url ->
             let

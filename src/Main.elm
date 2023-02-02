@@ -121,7 +121,8 @@ type Msg
     | DisplayWelcome
     | RGTOptions Tools.RGTOptions.Msg
     | ProfilePaint
-    | OAuthMsg E.Value
+    | OAuthCodeReceived E.Value
+    | OAuthTokenReceived (Result Http.Error String)
     | NoOp
 
 
@@ -338,24 +339,36 @@ update msg model =
                     )
     in
     case msg of
-        OAuthMsg jsonToken ->
-            let
-                _ =
-                    Debug.log "TOKEN" jsonToken
-
-                token =
-                    D.decodeValue D.string jsonToken
-            in
-            case token of
-                Ok string ->
-                    let
-                        _ =
-                            Debug.log "DECODED" string
-                    in
-                    ( model, Cmd.none )
+        OAuthCodeReceived jsonCode ->
+            -- This should mean we have an authorization code, but we need a token.
+            case D.decodeValue D.string jsonCode of
+                Ok code ->
+                    ( model
+                    , Tools.StravaDataLoad.exchangeCodeForToken OAuthTokenReceived code
+                    )
 
                 _ ->
                     ( model, Cmd.none )
+
+        OAuthTokenReceived token ->
+            let
+                tools =
+                    model.toolOptions
+
+                newStrava =
+                    case token of
+                        Ok isToken ->
+                            Tools.StravaTools.haveReceivedToken isToken tools.stravaSettings
+
+                        Err _ ->
+                            tools.stravaSettings
+
+                newTools =
+                    { tools | stravaSettings = newStrava }
+            in
+            ( { model | toolOptions = newTools }
+            , Cmd.none
+            )
 
         DisplayWelcome ->
             ( { model | infoText = Just ( "main", "welcome" ) }
@@ -1270,7 +1283,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
-        , Tools.StravaTools.oauthResponses OAuthMsg
+        , Tools.StravaTools.oauthResponses OAuthCodeReceived
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge

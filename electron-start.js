@@ -46,8 +46,8 @@ app.on('ready', function() {
 
     ipcMain.on('requestAuth', (event, config) => {
 
-        console.log(config);
-        console.log("Trying Oauth...")
+//        console.log(config);
+//        console.log("Trying Oauth...")
         const stravaOAuth = OAuth(config, windowParams);
 
         const options = config.scope;
@@ -104,7 +104,7 @@ function OAuth (config, windowParams) {
     }
 
     var url = config.authorizationUrl + '?' + queryString.stringify(urlParams);
-    console.log(url);
+//    console.log(url);
 
     return new Promise(function (resolve, reject) {
       const authWindow = new BrowserWindow(windowParams || {'use-content-size': true});
@@ -122,7 +122,7 @@ function OAuth (config, windowParams) {
             authWindow.removeAllListeners('closed');
             if (url.indexOf('http://localhost') === 0) {
                 // Stop when we get the auth code, Elm will get the token.
-                console.log("GOT CODE: " + code);
+//                console.log("GOT CODE: " + code);
                 resolve(code);
                 setImmediate(function () {
                   authWindow.close();
@@ -136,7 +136,7 @@ function OAuth (config, windowParams) {
       });
 
       authWindow.webContents.on('will-redirect', (event, url) => {
-        console.log("REDIRECT" + url );
+//        console.log("REDIRECT" + url );
         if (url.indexOf('http://localhost') === 0)
             event.preventDefault();
         onCallback(url);
@@ -169,7 +169,7 @@ function OAuth (config, windowParams) {
       headers: header,
       body: queryString.stringify(data)
     }).then(res => {
-        console.log("FETCH TOKEN: " + res.json());
+//        console.log("FETCH TOKEN: " + res.json());
       return res.json();
     });
   }
