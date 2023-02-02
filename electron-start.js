@@ -57,8 +57,6 @@ app.on('ready', function() {
 
     ipcMain.on('requestAuth', (event, config) => {
 
-//        console.log(config);
-//        console.log("Trying Oauth...")
         const stravaOAuth = OAuth(config, windowParams);
 
         const options = config.scope;
@@ -82,8 +80,8 @@ const windowParams = {
     webPreferences: { nodeIntegration: false }
 };
 
-// Put OAuth stuff in here instead of as a module, so I can adjust.
 
+// Put OAuth stuff in here instead of as a module, so I can adjust.
 
 const Promise = require('pinkie-promise');
 const queryString = require('querystring');
