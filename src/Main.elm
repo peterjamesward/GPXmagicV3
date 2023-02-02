@@ -338,12 +338,24 @@ update msg model =
                     )
     in
     case msg of
-        OAuthMsg encodedToken ->
+        OAuthMsg jsonToken ->
             let
                 _ =
-                    Debug.log "TOKEN" encodedToken
+                    Debug.log "TOKEN" jsonToken
+
+                token =
+                    D.decodeValue D.string jsonToken
             in
-            ( model, Cmd.none )
+            case token of
+                Ok string ->
+                    let
+                        _ =
+                            Debug.log "DECODED" string
+                    in
+                    ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         DisplayWelcome ->
             ( { model | infoText = Just ( "main", "welcome" ) }

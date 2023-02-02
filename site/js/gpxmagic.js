@@ -126,11 +126,11 @@ function oauthMessageHandler(msg) {
 
         case 'Token':
             //console.log("Back in GPXmagic");
-            app.ports.oauthResponses.send(
-              { 'msg' : 'Token'
-              , 'token' : msg.token
-              }
-            );
+            app.ports.oauthResponses.send( JSON.stringify(msg.token) );
+       //       { 'msg' : 'Token'
+       //       , 'token' : msg.token
+       //       }
+       //     );
             break;
     };
 };
