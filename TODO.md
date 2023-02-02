@@ -29,10 +29,8 @@ Is OAuth possible?
 > https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
 > ^deprecated, better?: https://github.com/googlesamples/appauth-js-electron-sample
 > 
-> Tempted to hand-craft it: https://developers.strava.com/docs/getting-started/#oauth
 
-I think we have to just make sure we route a ConnectionInfo msg to StravaTools.update with
-the token that we will get from the Auth library.
+OAuth is a PITA. Shall we take the CODE and do our own TOKEN request?
 
 Multiple windows sharing views on common model?
 > Need to understand the Electron process model and how stuff can be shared.

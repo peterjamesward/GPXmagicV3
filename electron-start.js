@@ -122,10 +122,10 @@ function OAuth (config, windowParams) {
             authWindow.removeAllListeners('closed');
             if (url.indexOf('http://localhost') === 0) {
                 console.log("GOT CODE: " + code);
-                resolve(code);
-                setImmediate(function () {
-                            authWindow.close();
-                          });
+//                resolve(code);
+//                setImmediate(function () {
+//                            authWindow.close();
+//                          });
           }
         }
       }
@@ -168,6 +168,7 @@ function OAuth (config, windowParams) {
       headers: header,
       body: queryString.stringify(data)
     }).then(res => {
+        console.log("FETCH TOKEN: " + res.json());
       return res.json();
     });
   }
