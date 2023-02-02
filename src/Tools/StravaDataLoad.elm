@@ -66,26 +66,18 @@ exchangeCodeForToken msg code =
     -}
     let
         queryBody =
-            String.dropLeft 1 <|
-            Builder.relative []
-                [ Builder.string "client_id" StravaAuth.configuration.clientId
-                , Builder.string "client_secret" StravaAuth.configuration.clientSecret
-                , Builder.string "code" code
-                , Builder.string "grant_type" "authorization_code"
+            Http.multipartBody
+                [ Http.stringPart "client_id" StravaAuth.configuration.clientId
+                , Http.stringPart "client_secret" StravaAuth.configuration.clientSecret
+                , Http.stringPart "code" code
+                , Http.stringPart "grant_type" "authorization_code"
                 ]
-            --String.Interpolate.interpolate
-            --    """client_id={0}&client_secret={1}&code={2}&grant_type={3}"""
-            --    [ StravaAuth.configuration.clientId
-            --    , StravaAuth.configuration.clientSecret
-            --    , code
-            --    , "authorization_code"
-            --    ]
     in
     Http.request
         { method = "POST"
         , headers = []
         , url = Builder.crossOrigin stravaApiRoot [ "api", "v3", "oauth", "token" ] []
-        , body = Http.stringBody "" queryBody
+        , body = queryBody
         , expect = Http.expectJson msg stravaTokenDecoder
         , timeout = Nothing
         , tracker = Nothing
