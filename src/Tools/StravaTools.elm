@@ -141,10 +141,6 @@ toolStateChange opened colour options track =
 
 haveReceivedToken : String -> Options -> Options
 haveReceivedToken token settings =
-    let
-        _ =
-            Debug.log "TOKEN" token
-    in
     { settings | stravaStatus = StravaConnected <| OAuth.Bearer token }
 
 

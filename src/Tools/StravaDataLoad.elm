@@ -159,16 +159,33 @@ stravaSegmentDecoder =
 stravaTokenDecoder : D.Decoder String
 stravaTokenDecoder =
     {-
-       {
-         "token_type": "Bearer",
-         "expires_at": 1568775134,
-         "expires_in": 21600,
-         "refresh_token": "e5n567567...",
-         "access_token": "a4b945687g...",
-         "athlete": {
-           #{summary athlete representation}
-         }
-       }
+       {"token_type":"Bearer",
+       "expires_at":1675367434,
+       "expires_in":21123,
+       "refresh_token":"8909404d54cdd299a40df4bb0da89bcdad1bd70a",
+       "access_token":"59844fabc421a229e5e492c8cdf30ff16c2b56d1",
+       "athlete":
+           {"id":185835,
+           "username":"peter_ward",
+           "resource_state":2,
+           "firstname":"Peter",
+           "lastname":"Ward (Gregarios)",
+           "bio":"Gregarios Superclub Ciclista",
+           "city":"",
+           "state":"Greater London",
+           "country":"United Kingdom",
+           "sex":"M",
+           "premium":false,
+           "summit":false,
+           "created_at":"2011-12-19T17:17:54Z",
+           "updated_at":"2022-08-22T14:47:43Z",
+           "badge_type_id":0,
+           "weight":76.0,
+           "profile_medium":"https://dgalywyr863hv.cloudfront.net/pictures/athletes/185835/45858/9/medium.jpg",
+           "profile":"https://dgalywyr863hv.cloudfront.net/pictures/athletes/185835/45858/9/large.jpg",
+           "friend":null,
+           "follower":null}
+           }
     -}
     D.field "access_token" D.string
 

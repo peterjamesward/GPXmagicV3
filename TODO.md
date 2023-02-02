@@ -13,36 +13,22 @@ No preview for single point nudge without fade.
 
 # WIP
 
+---
+
+# BACKLOG
+
 ## Electron
 
-Works!
-
-Can I use same Elm code base for both -- pass in a flag perhaps?
-
-How to make installers.
-> electron-forge works now I have the latest Node.js.
-> Just need to make it work on Windows.
-Looked at https://www.npmjs.com/package/elm-desktop-app, unconvinced of benefits.
-
-Is OAuth possible?
-> https://github.com/chamerling/electron-oauth2
-> https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
-> ^deprecated, better?: https://github.com/googlesamples/appauth-js-electron-sample
-> 
-
-OAuth is a PITA. Shall we take the CODE and do our own TOKEN request?
+Display logged in athlete details from Strava.
 
 Multiple windows sharing views on common model?
 > Need to understand the Electron process model and how stuff can be shared.
 > Not a priority.
 
----
-
-# BACKLOG
-
 ## Picture button
 
-Add button to images to allow screen capture. Because easy.
+Add button to images to allow screen capture. Because easy?
+But need to make sure ALL canvases are named; currently only Map and Profiles.
 
 ## Refactor Main -> Tools
 

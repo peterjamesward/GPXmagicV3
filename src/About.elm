@@ -3,11 +3,12 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.4 (5432cf5a)
+# GPXmagic App v3.10.0 (5432cf5a)
 
-**GPXmagic V3 works best with Chrome (and some derivatives)**
+## 3.10.0
 
-**N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+This is an installable application. For now, it's basically the same as the web version
+but the Strava login is moved to the Strava tool (and logging in won't destroy a loaded route).
 
 ## 3.9.4
 
