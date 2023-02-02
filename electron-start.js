@@ -4,6 +4,7 @@ var electron = require('electron')
 var app = electron.app;  // Module to control application life.
 var BrowserWindow = electron.BrowserWindow;  // Module to create native browser window.
 
+// Need this for talking to the main process, which handles the OAuth (partly).
 const ipcMain = electron.ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -19,6 +20,16 @@ app.on('window-all-closed', function() {
     app.quit();
   }
 });
+
+app.setAboutPanelOptions(
+    {
+        applicationName : "GPXmagic",
+        applicationVersion : "3.10.0",
+        copyright : "Peter Ward",
+        version : "9bb2df0a",
+        authors : "Peter Ward"
+    }
+);
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
