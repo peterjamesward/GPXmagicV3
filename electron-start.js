@@ -57,7 +57,8 @@ app.on('ready', function() {
                 //console.log("Got token" + token)
                 event.sender.send('token', token);
             }, err => {
-                console.log('Error while getting token', err);
+                //console.log('Error while getting token', err);
+                event.sender.send('token', null);
         });
     });
 

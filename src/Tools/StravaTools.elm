@@ -10,6 +10,7 @@ port module Tools.StravaTools exposing
     , trackFromActivity
     , update
     , viewStravaTab
+    , oauthResponses
     )
 
 import Actions exposing (ToolAction(..))

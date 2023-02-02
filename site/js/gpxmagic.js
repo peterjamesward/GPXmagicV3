@@ -120,7 +120,17 @@ function oauthMessageHandler(msg) {
     switch (msg.Cmd) {
         case 'RequestAuth':
             //console.log(msg);
+            electronAPI.setResponseFn(oauthMessageHandler);
             electronAPI.requestAuth(msg.config);
+            break;
+
+        case 'Token':
+            //console.log("Back in GPXmagic");
+            app.ports.oauthResponses.send(
+              { 'msg' : 'Token'
+              , 'token' : msg.token
+              }
+            );
             break;
     };
 };

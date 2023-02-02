@@ -36,6 +36,7 @@ import LocalStorage
 import MapPortController
 import Markdown
 import MyIP
+import OAuth as O
 import PaneContext
 import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
@@ -120,6 +121,7 @@ type Msg
     | DisplayWelcome
     | RGTOptions Tools.RGTOptions.Msg
     | ProfilePaint
+    | OAuthMsg E.Value
     | NoOp
 
 
@@ -336,6 +338,13 @@ update msg model =
                     )
     in
     case msg of
+        OAuthMsg encodedToken ->
+            let
+                _ =
+                    Debug.log "TOKEN" encodedToken
+            in
+            ( model, Cmd.none )
+
         DisplayWelcome ->
             ( { model | infoText = Just ( "main", "welcome" ) }
             , Cmd.batch
@@ -1249,6 +1258,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
+        , Tools.StravaTools.oauthResponses OAuthMsg
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
