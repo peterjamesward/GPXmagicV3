@@ -10,6 +10,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 });
 
 
-ipcRenderer.on('token', (_event, token) => {
-    responseFn({ Cmd : 'Token', token : token});
+ipcRenderer.on('code', (_event, code) => {
+    responseFn({ Cmd : 'Code', code : code});
 })

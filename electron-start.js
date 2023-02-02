@@ -52,13 +52,13 @@ app.on('ready', function() {
 
         const options = config.scope;
 
-        stravaOAuth.getAccessToken(options)
-            .then(token => {
+        stravaOAuth.getAuthorizationCode(options)
+            .then(code => {
                 //console.log("Got token" + token)
-                event.sender.send('token', token);
+                event.sender.send('code', code);
             }, err => {
                 //console.log('Error while getting token', err);
-                event.sender.send('token', null);
+                event.sender.send('code', null);
         });
     });
 
@@ -121,12 +121,13 @@ function OAuth (config, windowParams) {
         if (code) {
             authWindow.removeAllListeners('closed');
             if (url.indexOf('http://localhost') === 0) {
+                // Stop when we get the auth code, Elm will get the token.
                 console.log("GOT CODE: " + code);
-//                resolve(code);
-//                setImmediate(function () {
-//                            authWindow.close();
-//                          });
-          }
+                resolve(code);
+                setImmediate(function () {
+                  authWindow.close();
+                });
+            }
         }
       }
 

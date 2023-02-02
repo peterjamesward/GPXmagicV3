@@ -124,9 +124,9 @@ function oauthMessageHandler(msg) {
             electronAPI.requestAuth(msg.config);
             break;
 
-        case 'Token':
+        case 'Code':
             //console.log("Back in GPXmagic");
-            app.ports.oauthResponses.send( JSON.stringify(msg.token) );
+            app.ports.oauthResponses.send( msg.code );
        //       { 'msg' : 'Token'
        //       , 'token' : msg.token
        //       }
