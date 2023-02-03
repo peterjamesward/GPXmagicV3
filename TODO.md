@@ -19,6 +19,9 @@ No preview for single point nudge without fade.
 
 ## Electron
 
+Windows executable needed.
+Need code signing to be entered in Windows store.
+
 Display logged in athlete details from Strava.
 
 Multiple windows sharing views on common model?
