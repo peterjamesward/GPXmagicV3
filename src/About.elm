@@ -3,11 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.5 (16232c55)
+# GPXmagic v3.9.6 (16232c55)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.6
+
+Strava tool will display error messages from Strava, which may or may not help.
 
 ## 3.9.5
 
