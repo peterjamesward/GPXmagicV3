@@ -13,17 +13,13 @@ No preview for single point nudge without fade.
 
 # WIP
 
-## Electron
+## Picture button
 
-See branch. Installable, possibly multiple windows. App stores for £.
+Add button to images to allow screen capture. Because "easy".
 
 ---
 
 # BACKLOG
-
-## Picture button
-
-Add button to images to allow screen capture. Because easy.
 
 ## Refactor Main -> Tools
 

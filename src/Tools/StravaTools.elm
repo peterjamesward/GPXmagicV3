@@ -178,7 +178,7 @@ update msg settings wrap track =
             -- must send instruction by way of Action back to Main.
             case settings.stravaStatus of
                 StravaConnected token ->
-                    ( settings
+                    ( { settings | lastHttpError = Nothing }
                     , [ Actions.RequestStravaActivity
                             (wrap << ActivityDownloaded)
                             settings.externalRouteId
@@ -196,7 +196,7 @@ update msg settings wrap track =
                         result =
                             stravaProcessRoute response
                     in
-                    ( { settings | stravaRoute = result }
+                    ( { settings | stravaRoute = result, lastHttpError = Nothing }
                     , case result of
                         StravaRouteOk _ ->
                             [ Actions.RequestStravaRoute
@@ -215,7 +215,9 @@ update msg settings wrap track =
         GpxDownloaded response ->
             case response of
                 Ok content ->
-                    ( settings, [ Actions.LoadGpxFromStrava content ] )
+                    ( { settings | lastHttpError = Nothing }
+                    , [ Actions.LoadGpxFromStrava content ]
+                    )
 
                 Err _ ->
                     ( settings, [] )
@@ -223,7 +225,7 @@ update msg settings wrap track =
         LoadExternalSegment ->
             case settings.stravaStatus of
                 StravaConnected token ->
-                    ( { settings | externalSegment = SegmentRequested }
+                    ( { settings | externalSegment = SegmentRequested, lastHttpError = Nothing }
                     , [ Actions.RequestStravaSegment
                             (wrap << HandleSegmentData)
                             settings.externalSegmentId
@@ -242,6 +244,7 @@ update msg settings wrap track =
                             stravaProcessSegment
                                 response
                                 isTrack
+                        , lastHttpError = Nothing
                       }
                     , []
                     )
@@ -252,7 +255,7 @@ update msg settings wrap track =
         LoadSegmentStreams ->
             case settings.stravaStatus of
                 StravaConnected token ->
-                    ( settings
+                    ( { settings | lastHttpError = Nothing }
                     , [ Actions.RequestStravaSegmentStreams
                             (wrap << HandleSegmentStreams)
                             settings.externalSegmentId
@@ -277,6 +280,7 @@ update msg settings wrap track =
                                         settings
                                         segment
                                         streams
+                                , lastHttpError = Nothing
                             }
                     in
                     ( newSettings, previewActions newSettings stravaOrange isTrack )
@@ -294,6 +298,7 @@ update msg settings wrap track =
                         newSettings =
                             { settings
                                 | activity = StravaActivityGotHeader header
+                                , lastHttpError = Nothing
                             }
                     in
                     ( newSettings
@@ -319,6 +324,7 @@ update msg settings wrap track =
                             --Don't need it in setting anymore once working.
                             ( { settings
                                 | activity = StravaActivityNone
+                                , lastHttpError = Nothing
                               }
                             , [ Actions.TrackFromStravaActivity header streams ]
                             )
@@ -409,6 +415,7 @@ clearSegmentData settings =
         | stravaStreams = Nothing
         , externalSegment = SegmentNone
         , preview = []
+        , lastHttpError = Nothing
     }
 
 
@@ -703,6 +710,28 @@ viewStravaTab location options wrap track =
                 { onPress = Just <| wrap LoadActivity
                 , label = i18n "activity"
                 }
+
+        errorMessage =
+            case options.lastHttpError of
+                Just error ->
+                    case error of
+                        Http.BadUrl string ->
+                            text <| "Bad URL: " ++ string
+
+                        Http.Timeout ->
+                            text <| "Timeout"
+
+                        Http.NetworkError ->
+                            text <| "Network error"
+
+                        Http.BadStatus int ->
+                            text <| "Bad status: " ++ String.fromInt int
+
+                        Http.BadBody string ->
+                            text <| "Bad body: " ++ string
+
+                Nothing ->
+                    none
     in
     column
         [ spacing 10
@@ -794,6 +823,7 @@ viewStravaTab location options wrap track =
                     ]
                 , clearButton
                 , segmentInfo
+                , errorMessage
                 ]
 
             ( StravaConnected _, Nothing ) ->
@@ -804,6 +834,7 @@ viewStravaTab location options wrap track =
                     , activityButton
                     ]
                 , paragraph [] [ i18n "about" ]
+                , errorMessage
                 ]
 
             ( StravaDisconnected, _ ) ->

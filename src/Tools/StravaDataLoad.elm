@@ -5,6 +5,7 @@ import Direction2d
 import DomainModel
 import Http
 import Json.Decode as D exposing (field)
+import Json.Print
 import Length
 import OAuth exposing (Token, useToken)
 import Spherical
@@ -37,7 +38,7 @@ requestStravaSegment msg segmentId token =
         , headers = useToken token []
         , url = Builder.crossOrigin stravaApiRoot [ "api", "v3", "segments", segmentId ] []
         , body = Http.emptyBody
-        , expect = Http.expectJson msg stravaSegmentDecoder
+        , expect = expectJson msg stravaSegmentDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -123,10 +124,45 @@ requestStravaSegmentStreams msg segmentId token =
         , headers = useToken token []
         , url = Builder.crossOrigin stravaApiRoot [ "api", "v3", "segments", segmentId, "streams" ] []
         , body = Http.emptyBody
-        , expect = Http.expectJson msg decodeStravaSegmentStreams
+        , expect = expectJson msg decodeStravaSegmentStreams
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+expectJson : (Result Http.Error a -> msg) -> D.Decoder a -> Http.Expect msg
+expectJson toMsg decoder =
+    Http.expectStringResponse toMsg <|
+        \response ->
+            case response of
+                Http.BadUrl_ url ->
+                    Err (Http.BadUrl url)
+
+                Http.Timeout_ ->
+                    Err Http.Timeout
+
+                Http.NetworkError_ ->
+                    Err Http.NetworkError
+
+                Http.BadStatus_ metadata body ->
+                    let
+                        output =
+                            case Json.Print.prettyString { indent = 4, columns = 50 } body of
+                                Ok worked ->
+                                    worked
+
+                                Err didnt ->
+                                    didnt
+                    in
+                    Err (Http.BadBody <| String.fromInt metadata.statusCode ++ output)
+
+                Http.GoodStatus_ metadata body ->
+                    case D.decodeString decoder body of
+                        Ok value ->
+                            Ok value
+
+                        Err err ->
+                            Err (Http.BadBody (D.errorToString err))
 
 
 requestStravaActivity : (Result Http.Error StravaActivity -> msg) -> String -> Token -> Cmd msg
@@ -143,7 +179,7 @@ requestStravaActivity msg activityId token =
                 ]
                 []
         , body = Http.emptyBody
-        , expect = Http.expectJson msg decodeStravaActivity
+        , expect = expectJson msg decodeStravaActivity
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -166,7 +202,7 @@ requestStravaActivityStreams msg activityId token =
                 , string "key_by_type" "true"
                 ]
         , body = Http.emptyBody
-        , expect = Http.expectJson msg decodeStravaActivityStreams
+        , expect = expectJson msg decodeStravaActivityStreams
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -192,7 +228,7 @@ requestStravaRouteHeader msg routeId token =
         , headers = useToken token []
         , url = Builder.crossOrigin stravaApiRoot [ "api", "v3", "routes", routeId ] []
         , body = Http.emptyBody
-        , expect = Http.expectJson msg stravaRouteDecoder
+        , expect = expectJson msg stravaRouteDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
