@@ -3,11 +3,17 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.6 (0fd95195)
+# GPXmagic v3.9.7 (0fd95195)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.7
+
+Nudge tool provides a preview for a single-point nudge without fade.
+
+Minor tidy up of Strava error message displays.
 
 ## 3.9.6
 

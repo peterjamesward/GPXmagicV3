@@ -171,11 +171,20 @@ toolStateChange opened colour options track =
 
 
 previewActions newOptions colour track =
+    let
+        nudged =
+            Tuple.second <| computeNudgedPoints newOptions track
+    in
     [ ShowPreview
         { tag = "nudge"
-        , shape = PreviewLine
+        , shape =
+            if List.length nudged == 1 then
+                PreviewCircle
+
+            else
+                PreviewLine
         , colour = colour
-        , points = Tuple.second <| computeNudgedPoints newOptions track
+        , points = nudged
         }
     ]
 
