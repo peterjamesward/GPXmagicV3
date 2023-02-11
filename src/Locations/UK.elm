@@ -844,6 +844,7 @@ keeping the altitudes and squishing the points up increases gradients.
                 , ( "about", """To load a segment from Strava, you need a route
 that contains the segment geographicaly.""" )
                 , ( "connect", """Please connect to Strava""" )
+                , ( "routeError", """Could not load route""")
                 , ( "info", """
 The Strava tool has two functions:
 

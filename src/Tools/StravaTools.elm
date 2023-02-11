@@ -162,7 +162,10 @@ update msg settings wrap track =
             -- must send instruction by way of Action back to Main.
             case settings.stravaStatus of
                 StravaConnected token ->
-                    ( { settings | stravaRoute = StravaRouteRequested }
+                    ( { settings
+                        | stravaRoute = StravaRouteRequested
+                        , lastHttpError = Nothing
+                      }
                     , [ Actions.RequestStravaRouteHeader
                             (wrap << HandleRouteData)
                             settings.externalRouteId
@@ -692,7 +695,7 @@ viewStravaTab location options wrap track =
                         ]
 
                 StravaRouteError err ->
-                    paragraph [] [ text err ]
+                    paragraph [] [ i18n "routeError" ]
 
                 _ ->
                     none
