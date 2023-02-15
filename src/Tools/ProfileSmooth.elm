@@ -233,6 +233,89 @@ computeNewPoints options track =
         MethodUniform ->
             useUniformGradient options.bumpiness track
 
+        MethodFlatten ->
+            flatten track
+
+
+flatten : TrackLoaded msg -> List ( EarthPoint, GPXSource )
+flatten track =
+    -- Points within range take on the arithmetic mean altitude.
+    -- One fold to find the mean, one to apply it.
+    let
+        ( startIndex, fromEnd ) =
+            -- Note that this option is permitted only when there's a range.
+            TrackLoaded.getRangeFromMarkers track
+
+        startAltitude =
+            DomainModel.gpxPointFromIndex startIndex track.trackTree
+                |> .altitude
+
+        endIndex =
+            skipCount track.trackTree - fromEnd
+
+        findMeanAltitude : RoadSection -> ( Int, Length.Length ) -> ( Int, Length.Length )
+        findMeanAltitude road ( count, total ) =
+            ( count + 1
+            , Quantity.plus total (road.sourceData |> Tuple.second |> .altitude)
+            )
+
+        ( pointCount, totalAltitude ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                startIndex
+                endIndex
+                (always Nothing)
+                0
+                track.trackTree
+                findMeanAltitude
+                ( 1, startAltitude )
+
+        meanAltitude =
+            totalAltitude |> Quantity.divideBy (toFloat pointCount)
+
+        flattener : RoadSection -> ( Int, List ( EarthPoint, GPXSource ) ) -> ( Int, List ( EarthPoint, GPXSource ) )
+        flattener road ( index, outputs ) =
+            -- Yes, processes the whole tree. Yes, stupid.
+            let
+                newPoint =
+                    if index >= startIndex && index <= endIndex then
+                        let
+                            oldGPX =
+                                Tuple.second road.sourceData
+                        in
+                        ( { space =
+                                Point3d.xyz
+                                    (Point3d.xCoordinate road.endPoint.space)
+                                    (Point3d.yCoordinate road.endPoint.space)
+                                    meanAltitude
+                          , time = road.endPoint.time
+                          }
+                        , { oldGPX | altitude = meanAltitude }
+                        )
+
+                    else
+                        ( { space = road.endPoint.space
+                          , time = road.endPoint.time
+                          }
+                        , Tuple.second road.sourceData
+                        )
+            in
+            ( index + 1, newPoint :: outputs )
+    in
+    if track.markerPosition == Nothing then
+        []
+
+    else
+        List.reverse <|
+            Tuple.second <|
+                DomainModel.traverseTreeBetweenLimitsToDepth
+                    0
+                    (skipCount track.trackTree)
+                    (always Nothing)
+                    0
+                    track.trackTree
+                    flattener
+                    ( 1, [ getDualCoords track.trackTree 0 ] )
+
 
 useUniformGradient : Float -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 useUniformGradient bumpiness track =
@@ -931,6 +1014,7 @@ view location options wrapper track =
                     , Input.option MethodAltitudes (i18n "usealts")
                     , Input.option MethodGradients (i18n "usegrad")
                     , Input.option MethodUniform (i18n "useuniform")
+                    , Input.option MethodFlatten (i18n "flatten")
                     ]
                 }
 
@@ -1037,12 +1121,19 @@ view location options wrapper track =
                 in
                 column [ spacing 10, centerX ]
                     [ el [ centerX ] <| bumpinessSlider
-                    , paragraph [] <|
-                        if track.markerPosition == Nothing then
-                            [ i18n "needpart" ]
+                    , if track.markerPosition == Nothing then
+                        paragraph [] <| [ i18n "needpart" ]
 
-                        else
-                            [ i18n "part" ]
-                    , applyButton "uniform"
+                      else
+                        applyButton "uniform"
+                    ]
+
+            MethodFlatten ->
+                column [ spacing 10, centerX ]
+                    [ if track.markerPosition == Nothing then
+                        paragraph [] <| [ i18n "needpart" ]
+
+                      else
+                        applyButton "flat"
                     ]
         ]

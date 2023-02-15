@@ -20,6 +20,7 @@ type SmoothMethod
     | MethodGradients
     | MethodAltitudes
     | MethodUniform -- v1, v2 gradient smoother
+    | MethodFlatten
 
 
 type ExtentOption

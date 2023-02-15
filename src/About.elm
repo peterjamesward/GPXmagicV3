@@ -3,11 +3,18 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.7 (880efbcd)
+# GPXmagic v3.9.8 (880efbcd)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.8
+
+New "flatten" option in Profile Smoother. Needs Orange and Purple markers. Will replace
+those and intervening points with points whose altitude is the mean altitude of the affected points.
+
+If you want just the average of the start and end points, use "Uniform gradient" and then Flatten.
 
 ## 3.9.7
 
