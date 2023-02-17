@@ -90,7 +90,7 @@ update msg settings previewColour hasTrack =
         makeActions actionCode track =
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack actionCode track
+                    TrackLoaded.undoInfo actionCode track
             in
             [ WithUndo undoInfo
             , undoInfo.action

@@ -108,7 +108,7 @@ update msg hasTrack =
                     DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack Actions.OneClickQuickFix track
+                    TrackLoaded.undoInfo Actions.OneClickQuickFix track
             in
             [ Actions.WithUndo undoInfo
             , undoInfo.action

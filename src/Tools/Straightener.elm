@@ -44,7 +44,7 @@ update msg options track =
         StraightenStraight ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWithSinglePointDefault Actions.Straighten track
+                    TrackLoaded.undoInfo Actions.Straighten track
             in
             ( options
             , [ Actions.WithUndo undoInfo

@@ -252,7 +252,7 @@ update :
 update msg options previewColour track =
     let
         undoInfo action =
-            TrackLoaded.undoInfoWholeTrack action track
+            TrackLoaded.undoInfo action track
     in
     case msg of
         SetMode mode ->

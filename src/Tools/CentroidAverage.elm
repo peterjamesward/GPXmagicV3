@@ -172,7 +172,7 @@ update msg options previewColour hasTrack =
         ( Just track, ApplyWithOptions ) ->
             let
                 undoInfo =
-                        TrackLoaded.undoInfoWithWholeTrackDefault
+                        TrackLoaded.undoInfo
                             (Actions.CentroidAverageApplyWithOptions options)
                             track
             in

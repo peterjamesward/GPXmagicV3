@@ -74,7 +74,7 @@ update msg settings mTrack wrap =
         FileLoaded content ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack (Actions.ParseAndAppend content) mTrack
+                    TrackLoaded.undoInfo (Actions.ParseAndAppend content) mTrack
             in
             ( settings
             , [ Actions.WithUndo undoInfo

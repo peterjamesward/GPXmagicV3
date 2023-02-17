@@ -306,7 +306,7 @@ update msg options previewColour hasTrack =
                 Just track ->
                     let
                         undoInfo =
-                            TrackLoaded.undoInfoWholeTrack
+                            TrackLoaded.undoInfo
                                 (Actions.Autofix <| List.map Tuple.first options.breaches)
                                 track
                     in

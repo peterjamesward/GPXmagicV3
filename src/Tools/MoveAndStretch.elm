@@ -308,7 +308,7 @@ update message options wrapper previewColour track =
                             track.trackTree
 
                 undoInfo =
-                    TrackLoaded.undoInfoWithSinglePointDefault
+                    TrackLoaded.undoInfo
                         (MoveAndStretchWithOptions options)
                         track
             in

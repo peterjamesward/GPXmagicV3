@@ -1499,7 +1499,7 @@ update :
 update msg options track wrapper =
     let
         undoInfo =
-            TrackLoaded.undoInfoWholeTrack Actions.CombineNearbyPoints track
+            TrackLoaded.undoInfo Actions.CombineNearbyPoints track
     in
     case msg of
         AdoptNewTrack ->
@@ -2322,12 +2322,7 @@ makeNewRoute options =
             -- All has worked.
             let
                 trackWithUndo =
-                    track
-                        |> TrackLoaded.addToUndoStack
-                            Actions.MakeRouteFromGraph
-                            0
-                            0
-                            (DomainModel.getAllGPXPointsInNaturalOrder oldTrack.trackTree)
+                    TrackLoaded.addToUndoStack Actions.MakeRouteFromGraph track
             in
             { options
                 | graph = trivialGraph trackWithUndo

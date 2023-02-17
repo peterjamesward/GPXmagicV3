@@ -201,7 +201,7 @@ update msg options previewColour track =
                     DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack
+                    TrackLoaded.undoInfo
                         Actions.ApplySimplify
                         track
             in

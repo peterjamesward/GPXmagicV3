@@ -12,9 +12,7 @@ module TrackLoaded exposing
     , removeAdjacentDuplicates
     , trackFromPoints
     , trackFromSegments
-    , undoInfoWholeTrack
-    , undoInfoWithSinglePointDefault
-    , undoInfoWithWholeTrackDefault
+    , undoInfo
     , undoLastAction
     , useTreeWithRepositionedMarkers
     )
@@ -225,19 +223,14 @@ type MarkerColour
 
 addToUndoStack :
     ToolAction msg
-    -> Int
-    -> Int
-    -> List GPXSource
     -> TrackLoaded msg
     -> TrackLoaded msg
-addToUndoStack action fromStart fromEnd oldPoints oldTrack =
+addToUndoStack action  oldTrack =
     let
         undoEntry : UndoEntry msg
         undoEntry =
             { action = action
-            , originalPoints = oldPoints
-            , fromStart = fromStart
-            , fromEnd = fromEnd
+            , previousTree = oldTrack.trackTree
             , currentPosition = oldTrack.currentPosition
             , markerPosition = oldTrack.markerPosition
             }
@@ -248,64 +241,10 @@ addToUndoStack action fromStart fromEnd oldPoints oldTrack =
     }
 
 
-undoInfoWithSinglePointDefault : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
-undoInfoWithSinglePointDefault action track =
-    let
-        ( fromStart, fromEnd ) =
-            getRangeFromMarkers track
-
-        oldPoints =
-            List.map Tuple.second <|
-                DomainModel.extractPointsInRange
-                    fromStart
-                    fromEnd
-                    track.trackTree
-    in
+undoInfo : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
+undoInfo action track =
     { action = action
-    , originalPoints = oldPoints
-    , fromStart = fromStart
-    , fromEnd = fromEnd
-    , currentPosition = track.currentPosition
-    , markerPosition = track.markerPosition
-    }
-
-
-undoInfoWithWholeTrackDefault : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
-undoInfoWithWholeTrackDefault action track =
-    let
-        ( fromStart, fromEnd ) =
-            if track.markerPosition == Nothing then
-                ( 0, 0 )
-
-            else
-                getRangeFromMarkers track
-
-        oldPoints =
-            List.map Tuple.second <|
-                DomainModel.extractPointsInRange
-                    fromStart
-                    fromEnd
-                    track.trackTree
-    in
-    { action = action
-    , originalPoints = oldPoints
-    , fromStart = fromStart
-    , fromEnd = fromEnd
-    , currentPosition = track.currentPosition
-    , markerPosition = track.markerPosition
-    }
-
-
-undoInfoWholeTrack : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
-undoInfoWholeTrack action track =
-    let
-        oldPoints =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-    in
-    { action = action
-    , originalPoints = oldPoints
-    , fromStart = 0
-    , fromEnd = 0
+    , previousTree = track.trackTree
     , currentPosition = track.currentPosition
     , markerPosition = track.markerPosition
     }
@@ -315,28 +254,14 @@ undoLastAction : TrackLoaded msg -> TrackLoaded msg
 undoLastAction track =
     case track.undos of
         undo :: moreUndos ->
-            let
-                newTree =
-                    DomainModel.replaceRange
-                        undo.fromStart
-                        undo.fromEnd
-                        track.referenceLonLat
-                        undo.originalPoints
-                        track.trackTree
-            in
-            case newTree of
-                Just isTree ->
-                    { track
-                        | undos = moreUndos
-                        , redos = undo :: track.redos
-                        , trackTree = isTree
-                        , currentPosition = undo.currentPosition
-                        , markerPosition = undo.markerPosition
-                        , leafIndex = indexLeaves isTree
-                    }
-
-                Nothing ->
-                    track
+            { track
+                | undos = moreUndos
+                , redos = undo :: track.redos
+                , trackTree = undo.previousTree
+                , currentPosition = undo.currentPosition
+                , markerPosition = undo.markerPosition
+                , leafIndex = indexLeaves undo.previousTree
+            }
 
         _ ->
             track

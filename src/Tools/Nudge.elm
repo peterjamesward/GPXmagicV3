@@ -444,24 +444,8 @@ update msg options previewColour track =
 
         ApplyWithOptions ->
             let
-                ( ( actualStart, actualEnd ), _ ) =
-                    --TODO: Avoid calling this twice.
-                    computeNudgedPoints options track
-
-                oldPoints =
-                    DomainModel.extractPointsInRange
-                        actualStart
-                        (skipCount track.trackTree - actualEnd)
-                        track.trackTree
-
                 undoInfo =
-                    { action = Actions.NudgeApplyWithOptions options
-                    , originalPoints = List.map Tuple.second oldPoints
-                    , fromStart = actualStart
-                    , fromEnd = skipCount track.trackTree - actualEnd
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                    TrackLoaded.undoInfo (Actions.NudgeApplyWithOptions options) track
             in
             ( options
             , [ WithUndo undoInfo

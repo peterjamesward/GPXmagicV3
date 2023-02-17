@@ -297,24 +297,7 @@ previewActions options colour track =
 
 undoEntryFrom : Options -> TrackLoaded msg -> Actions.UndoEntry msg
 undoEntryFrom options track =
-    -- Note does not use default undo because of start and end.
-    let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                (fromStart + 1)
-                (fromEnd + 1)
-                track.trackTree
-    in
-    { action = Actions.BendSmootherApplyWithOptions options
-    , originalPoints = List.map Tuple.second oldPoints
-    , fromStart = fromStart
-    , fromEnd = fromEnd
-    , currentPosition = track.currentPosition
-    , markerPosition = track.markerPosition
-    }
+    TrackLoaded.undoInfo (Actions.BendSmootherApplyWithOptions options) track
 
 
 update :

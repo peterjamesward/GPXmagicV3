@@ -583,7 +583,7 @@ update msg options previewColour track =
         Apply ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWithWholeTrackDefault
+                    TrackLoaded.undoInfo
                         (Actions.SmartSmootherApplyWithOptions options)
                         track
             in

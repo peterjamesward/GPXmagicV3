@@ -90,7 +90,7 @@ type Msg
     | ApplyWithOptions
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> Maybe PeteTree
+applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
 applyUsingOptions options track =
     case options.fixedAttachmentPoints of
         Just ( entryPoint, exitPoint ) ->
@@ -106,16 +106,28 @@ applyUsingOptions options track =
                         (List.map .gpx <| options.newTrackPoints)
                         track.trackTree
 
-                oldPoints =
-                    DomainModel.extractPointsInRange
-                        fromStart
-                        fromEnd
-                        track.trackTree
+                pointerReposition =
+                    --Let's reposition by distance, not uncommon.
+                    case newTree of
+                        Just isNewTree ->
+                            DomainModel.preserveDistance track.trackTree isNewTree
+
+                        Nothing ->
+                            identity
+
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
             in
-            newTree
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+            }
 
         Nothing ->
-            Just track.trackTree
+            track
 
 
 toolStateChange :
@@ -260,16 +272,17 @@ update msg options previewColour hasTrack =
             ( newOptions, previewActions newOptions previewColour track )
 
         ( Just track, ApplyWithOptions ) ->
+            -- TODO: Undo info is clearly wrong.
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWithWholeTrackDefault
+                    TrackLoaded.undoInfo
                         (Actions.CurveFormerApplyWithOptions options)
                         track
             in
             ( options
-            , [ undoInfo.action
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
-              , WithUndo undoInfo
               ]
             )
 

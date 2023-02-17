@@ -142,7 +142,7 @@ update msg options track =
         makeActions actionCode =
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack actionCode track
+                    TrackLoaded.undoInfo actionCode track
             in
             [ WithUndo undoInfo
             , undoInfo.action

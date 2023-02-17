@@ -397,7 +397,7 @@ updateWithTrack msg options previewColour track =
         ApplyNewTimes ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack
+                    TrackLoaded.undoInfo
                         (Actions.AdjustTimes options)
                         track
             in
@@ -411,7 +411,7 @@ updateWithTrack msg options previewColour track =
         ApplyTickInterval tick ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack
+                    TrackLoaded.undoInfo
                         (Actions.SetTimeTicks tick)
                         track
             in
@@ -425,7 +425,7 @@ updateWithTrack msg options previewColour track =
         DoubleRelativeTimes ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack
+                    TrackLoaded.undoInfo
                         (Actions.TimeDoubling)
                         track
             in
@@ -439,7 +439,7 @@ updateWithTrack msg options previewColour track =
         ComputeTimes ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack
+                    TrackLoaded.undoInfo
                         (Actions.UsePhysicsModel)
                         track
             in

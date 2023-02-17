@@ -1461,17 +1461,8 @@ performActionsOnModel actions model =
 
                 ( WithUndo undoInfo, Just track ) ->
                     -- Finally, we can do this only once.
-                    let
-                        newTrack =
-                            TrackLoaded.addToUndoStack
-                                undoInfo.action
-                                undoInfo.fromStart
-                                undoInfo.fromEnd
-                                undoInfo.originalPoints
-                                track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| TrackLoaded.addToUndoStack undoInfo.action track
                         , needsRendering = True
                     }
 
@@ -1586,15 +1577,8 @@ performActionsOnModel actions model =
                     }
 
                 ( CurveFormerApplyWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.CurveFormer.applyUsingOptions options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.CurveFormer.applyUsingOptions options track
                         , needsRendering = True
                     }
 
@@ -2032,47 +2016,8 @@ performActionsOnModel actions model =
 
                 ( PointMovedOnMap startLon startLat endLon endLat, Just track ) ->
                     let
-                        startGpx =
-                            { longitude = Direction2d.fromAngle <| Angle.degrees startLon
-                            , latitude = Angle.degrees startLat
-                            , altitude = Quantity.zero
-                            , timestamp = Nothing
-                            }
-
-                        index =
-                            DomainModel.nearestToLonLat
-                                startGpx
-                                track.currentPosition
-                                track.trackTree
-                                track.referenceLonLat
-                                track.leafIndex
-
-                        positionBeforeDrag =
-                            gpxPointFromIndex index track.trackTree
-
-                        endGpx =
-                            { longitude = Direction2d.fromAngle <| Angle.degrees endLon
-                            , latitude = Angle.degrees endLat
-                            , altitude = positionBeforeDrag.altitude
-                            , timestamp = Nothing
-                            }
-
-                        newTree =
-                            DomainModel.updatePointByIndexInSitu
-                                index
-                                endGpx
-                                track.referenceLonLat
-                                track.trackTree
-
-                        ( fromStart, fromEnd ) =
-                            ( index, skipCount track.trackTree - index )
-
                         newTrack =
-                            { track | trackTree = newTree }
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    [ positionBeforeDrag ]
+                            TrackLoaded.addToUndoStack action track
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -2243,9 +2188,8 @@ performActionsOnModel actions model =
                         newTrack =
                             case Tools.Graph.getTrack 0 newGraphOptions of
                                 Just foundNewTrack ->
-                                    foundNewTrack
-                                        |> TrackLoaded.addToUndoStack action 0 0 []
-                                        |> Just
+                                    Just <|
+                                        TrackLoaded.addToUndoStack action foundNewTrack
 
                                 Nothing ->
                                     foldedModel.track
@@ -2520,8 +2464,8 @@ performActionsOnModel actions model =
                             let
                                 modelAfterRedo =
                                     performActionsOnModel
-                                        [ redo.action
-                                        , WithUndo redo
+                                        [ WithUndo redo
+                                        , redo.action
                                         ]
                                         model
                             in

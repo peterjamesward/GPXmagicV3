@@ -346,53 +346,9 @@ update msg settings wrap track =
             case ( track, settings.externalSegment ) of
                 ( Just isTrack, SegmentPreviewed segment ) ->
                     let
-                        ( segmentStartGpx, segmentEndGpx ) =
-                            ( extractFromLngLat segment.start_latlng
-                            , extractFromLngLat segment.end_latlng
-                            )
-
-                        pStartingTrackPoint =
-                            -- Our first track point will be replaced with the first stream point
-                            DomainModel.nearestToLonLat
-                                segmentStartGpx
-                                0
-                                isTrack.trackTree
-                                isTrack.referenceLonLat
-                                isTrack.leafIndex
-
-                        pEndingTrackPoint =
-                            -- Our last track point will be replaced with the last stream point
-                            DomainModel.nearestToLonLat
-                                segmentEndGpx
-                                0
-                                isTrack.trackTree
-                                isTrack.referenceLonLat
-                                isTrack.leafIndex
-
-                        ( useStart, useEnd ) =
-                            if pEndingTrackPoint < pStartingTrackPoint then
-                                ( pEndingTrackPoint
-                                , pStartingTrackPoint
-                                )
-
-                            else
-                                ( pStartingTrackPoint, pEndingTrackPoint )
-
-                        oldPoints =
-                            DomainModel.extractPointsInRange
-                                useStart
-                                (skipCount isTrack.trackTree - useEnd)
-                                isTrack.trackTree
-
                         undoInfo =
                             -- Note that we pass the CURRENT settings to the paste action.
-                            { action = Actions.PasteStravaSegment settings
-                            , originalPoints = List.map Tuple.second oldPoints
-                            , fromStart = useStart
-                            , fromEnd = skipCount isTrack.trackTree - useEnd
-                            , currentPosition = isTrack.currentPosition
-                            , markerPosition = isTrack.markerPosition
-                            }
+                            TrackLoaded.undoInfo (Actions.PasteStravaSegment settings) isTrack
                     in
                     ( settings
                     , [ WithUndo undoInfo

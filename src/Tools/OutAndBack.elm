@@ -198,7 +198,7 @@ update msg options hasTrack =
         ( Just track, ApplyOutAndBack ) ->
             let
                 undoInfo =
-                    TrackLoaded.undoInfoWholeTrack
+                    TrackLoaded.undoInfo
                         (Actions.OutAndBackApplyWithOptions options)
                         track
             in

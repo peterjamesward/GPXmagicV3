@@ -180,24 +180,12 @@ update msg options previewColour hasTrack =
         ( Just track, BezierApplyWithOptions ) ->
             let
                 undoInfo =
-                    if track.markerPosition /= Nothing then
-                        TrackLoaded.undoInfoWithSinglePointDefault
-                            (Actions.BezierApplyWithOptions options)
-                            track
-
-                    else
-                        { action = Actions.BezierApplyWithOptions options
-                        , originalPoints = DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-                        , fromStart = 0
-                        , fromEnd = 0
-                        , currentPosition = track.currentPosition
-                        , markerPosition = track.markerPosition
-                        }
+                    TrackLoaded.undoInfo (Actions.BezierApplyWithOptions options) track
             in
             ( options
-            , [ Actions.BezierApplyWithOptions options
+            , [ WithUndo undoInfo
+              , Actions.BezierApplyWithOptions options
               , TrackHasChanged
-              , WithUndo undoInfo
               ]
             )
 

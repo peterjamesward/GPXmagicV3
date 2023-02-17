@@ -137,7 +137,7 @@ update msg options previewColour hasTrack =
                     -- but with marker, more sensible if the markers themselves are not deleted (hence, exclusive).
                     -- This attempts to be explicit.
                     --if track.markerPosition == Nothing then
-                    TrackLoaded.undoInfoWithSinglePointDefault
+                    TrackLoaded.undoInfo
                         (Actions.DeletePointOrPoints fromStart fromEnd)
                         track
             in

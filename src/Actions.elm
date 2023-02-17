@@ -3,7 +3,7 @@ module Actions exposing (ToolAction(..), UndoEntry, actionTextForUndo)
 -- This wee DSL allows any tool to ask Main to update the model and display stuff
 -- (including on the Map) without the tools needing knowledge of the model or ports.
 
-import DomainModel exposing (GPXSource)
+import DomainModel exposing (GPXSource, PeteTree)
 import File exposing (File)
 import Http
 import Json.Decode as E
@@ -34,9 +34,7 @@ import ViewProfileChartContext
 
 type alias UndoEntry msg =
     { action : ToolAction msg
-    , originalPoints : List GPXSource -- for reconstructing the original tree
-    , fromStart : Int -- so we do not need to decode the action.
-    , fromEnd : Int
+    , previousTree : PeteTree
     , currentPosition : Int
     , markerPosition : Maybe Int
     }
