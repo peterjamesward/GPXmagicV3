@@ -345,14 +345,9 @@ update msg settings wrap track =
         PasteSegment ->
             case ( track, settings.externalSegment ) of
                 ( Just isTrack, SegmentPreviewed segment ) ->
-                    let
-                        undoInfo =
-                            -- Note that we pass the CURRENT settings to the paste action.
-                            TrackLoaded.undoInfo (Actions.PasteStravaSegment settings) isTrack
-                    in
                     ( settings
-                    , [ WithUndo undoInfo
-                      , undoInfo.action
+                    , [ WithUndo (Actions.PasteStravaSegment settings)
+                      , (Actions.PasteStravaSegment settings)
                       , TrackHasChanged
                       , HidePreview "strava"
                       , ClearStravaSegmentData

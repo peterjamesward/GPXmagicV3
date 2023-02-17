@@ -588,9 +588,9 @@ update msg options previewColour track =
                         track
             in
             ( options
-            , [ undoInfo.action
+            , [ WithUndo (Actions.SmartSmootherApplyWithOptions options)
+              , Actions.SmartSmootherApplyWithOptions options
               , TrackHasChanged
-              , WithUndo undoInfo
               ]
             )
 

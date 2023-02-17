@@ -76,14 +76,37 @@ tryBendSmoother track options =
     }
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> Maybe PeteTree
+applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
 applyUsingOptions options track =
-    case options.mode of
-        SmoothPoint ->
-            softenSinglePoint options.segments track.currentPosition track
+    let
+        newTree =
+            case options.mode of
+                SmoothPoint ->
+                    softenSinglePoint options.segments track.currentPosition track
 
-        SmoothBend ->
-            applyClassicBendSmoother options track
+                SmoothBend ->
+                    applyClassicBendSmoother options track
+    in
+    case newTree of
+        Just isTree ->
+            let
+                pointerReposition =
+                    --Let's reposition by distance, not uncommon.
+                    DomainModel.preserveDistance track.trackTree isTree
+
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+            }
+
+        Nothing ->
+            track
 
 
 applyClassicBendSmoother : Options -> TrackLoaded msg -> Maybe PeteTree
@@ -295,11 +318,6 @@ previewActions options colour track =
             [ HidePreview "bend" ]
 
 
-undoEntryFrom : Options -> TrackLoaded msg -> Actions.UndoEntry msg
-undoEntryFrom options track =
-    TrackLoaded.undoInfo (Actions.BendSmootherApplyWithOptions options) track
-
-
 update :
     Msg
     -> Options
@@ -318,8 +336,8 @@ update msg options previewColour track =
 
         ApplySmoothBend ->
             ( options
-            , [ Actions.BendSmootherApplyWithOptions options
-              , Actions.WithUndo (undoEntryFrom options track)
+            , [ Actions.WithUndo (Actions.BendSmootherApplyWithOptions options)
+              , Actions.BendSmootherApplyWithOptions options
               , Actions.TrackHasChanged
               ]
             )

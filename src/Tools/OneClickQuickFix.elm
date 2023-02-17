@@ -103,15 +103,8 @@ update :
 update msg hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, Apply ) ->
-            let
-                oldPoints =
-                    DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-
-                undoInfo =
-                    TrackLoaded.undoInfo Actions.OneClickQuickFix track
-            in
-            [ Actions.WithUndo undoInfo
-            , undoInfo.action
+            [ Actions.WithUndo Actions.OneClickQuickFix
+            , Actions.OneClickQuickFix
             , Actions.TrackHasChanged
             ]
 

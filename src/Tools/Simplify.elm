@@ -196,18 +196,9 @@ update msg options previewColour track =
             ( newOptions, actions previewColour newOptions track )
 
         Apply ->
-            let
-                oldPoints =
-                    DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        Actions.ApplySimplify
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo Actions.ApplySimplify
+              , Actions.ApplySimplify
               , TrackHasChanged
               ]
             )

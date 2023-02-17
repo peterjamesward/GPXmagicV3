@@ -1504,7 +1504,7 @@ update msg options track wrapper =
     case msg of
         AdoptNewTrack ->
             ( options
-            , [ Actions.WithUndo undoInfo
+            , [ Actions.WithUndo Actions.CombineNearbyPoints
               , Actions.CombineNearbyPoints
               , Actions.TrackHasChanged
               ]

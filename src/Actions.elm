@@ -43,7 +43,7 @@ type alias UndoEntry msg =
 type ToolAction msg
     = NoAction
     | ReRender
-    | WithUndo (UndoEntry msg)
+    | WithUndo (ToolAction msg)
     | SetCurrent Int -- move the orange pointer
     | SetCurrentFromMapClick Int -- to avoid re-centering the map!
     | SaveLastMapClick Float Float

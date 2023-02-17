@@ -272,16 +272,9 @@ update msg options previewColour hasTrack =
             ( newOptions, previewActions newOptions previewColour track )
 
         ( Just track, ApplyWithOptions ) ->
-            -- TODO: Undo info is clearly wrong.
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.CurveFormerApplyWithOptions options)
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.CurveFormerApplyWithOptions options)
+              , Actions.CurveFormerApplyWithOptions options
               , TrackHasChanged
               ]
             )

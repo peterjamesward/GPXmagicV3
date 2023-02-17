@@ -379,13 +379,9 @@ update msg options previewColour track =
             )
 
         Autofix ->
-            let
-                action =
-                    Actions.Autofix <| List.map Tuple.first options.singlePointBreaches
-            in
             ( options
-            , [ Actions.WithUndo (undoInfo action)
-              , action
+            , [ Actions.WithUndo (Actions.Autofix <| List.map Tuple.first options.singlePointBreaches)
+              , Actions.Autofix <| List.map Tuple.first options.singlePointBreaches
               , TrackHasChanged
               ]
             )
@@ -402,13 +398,10 @@ update msg options previewColour track =
 
                     else
                         Quantity.negate options.radius
-
-                action =
-                    Actions.WidenBend points (Quantity.minus desired estimatedRadius)
             in
             ( options
-            , [ Actions.WithUndo (undoInfo action)
-              , action
+            , [ Actions.WithUndo <| Actions.WidenBend points (Quantity.minus desired estimatedRadius)
+              , Actions.WidenBend points (Quantity.minus desired estimatedRadius)
               , TrackHasChanged
               ]
             )

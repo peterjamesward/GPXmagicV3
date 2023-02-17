@@ -137,15 +137,9 @@ update msg options previewColour track =
             )
 
         ApplyPreview ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.ApplySmoothProfile options)
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.ApplySmoothProfile options)
+              , (Actions.ApplySmoothProfile options)
               , TrackHasChanged
               ]
             )

@@ -1459,43 +1459,27 @@ performActionsOnModel actions model =
                 ( DelayMessage _ _, Just _ ) ->
                     foldedModel
 
-                ( WithUndo undoInfo, Just track ) ->
+                ( WithUndo undoAction, Just track ) ->
                     -- Finally, we can do this only once.
                     { foldedModel
-                        | track = Just <| TrackLoaded.addToUndoStack undoInfo.action track
+                        | track = Just <| TrackLoaded.addToUndoStack undoAction track
                         , needsRendering = True
                     }
 
                 ( BendSmootherApplyWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.BendSmoother.applyUsingOptions options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers
-                                newTree
-                                track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.BendSmoother.applyUsingOptions options track
                         , needsRendering = True
                     }
 
                 ( DeletePointOrPoints fromStart fromEnd, Just track ) ->
-                    let
-                        newTree =
-                            DeletePoints.deleteSinglePoint
-                                fromStart
-                                fromEnd
-                                track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers
-                                newTree
-                                track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track =
+                            Just <|
+                                DeletePoints.delete
+                                    fromStart
+                                    fromEnd
+                                    track
                         , needsRendering = True
                     }
 
@@ -2464,7 +2448,7 @@ performActionsOnModel actions model =
                             let
                                 modelAfterRedo =
                                     performActionsOnModel
-                                        [ WithUndo redo
+                                        [ WithUndo redo.action
                                         , redo.action
                                         ]
                                         model

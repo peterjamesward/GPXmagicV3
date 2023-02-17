@@ -395,57 +395,33 @@ updateWithTrack msg options previewColour track =
             ( newOptions, actions newOptions previewColour track )
 
         ApplyNewTimes ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.AdjustTimes options)
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.AdjustTimes options)
+              , (Actions.AdjustTimes options)
               , TrackHasChanged
               ]
             )
 
         ApplyTickInterval tick ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.SetTimeTicks tick)
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.SetTimeTicks tick)
+              , (Actions.SetTimeTicks tick)
               , TrackHasChanged
               ]
             )
 
         DoubleRelativeTimes ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.TimeDoubling)
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.TimeDoubling)
+              , (Actions.TimeDoubling)
               , TrackHasChanged
               ]
             )
 
         ComputeTimes ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.UsePhysicsModel)
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.UsePhysicsModel)
+              , (Actions.UsePhysicsModel)
               , TrackHasChanged
               ]
             )

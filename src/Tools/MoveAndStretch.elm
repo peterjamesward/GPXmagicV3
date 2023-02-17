@@ -296,25 +296,9 @@ update message options wrapper previewColour track =
             )
 
         DraggerApply ->
-            let
-                ( fromStart, fromEnd ) =
-                    TrackLoaded.getRangeFromMarkers track
-
-                oldPoints =
-                    List.map Tuple.second <|
-                        DomainModel.extractPointsInRange
-                            fromStart
-                            fromEnd
-                            track.trackTree
-
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (MoveAndStretchWithOptions options)
-                        track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (MoveAndStretchWithOptions options)
+              , (MoveAndStretchWithOptions options)
               , TrackHasChanged
               , HidePreview "stretch"
               , HidePreview "stretchMark"

@@ -203,9 +203,9 @@ update msg options hasTrack =
                         track
             in
             ( options
-            , [ undoInfo.action
+            , [ WithUndo (Actions.OutAndBackApplyWithOptions options)
+              , Actions.OutAndBackApplyWithOptions options
               , TrackHasChanged
-              , WithUndo undoInfo
               ]
             )
 

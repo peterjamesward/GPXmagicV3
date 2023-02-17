@@ -4,7 +4,7 @@ module Tools.DeletePoints exposing
     ,  defaultOptions
        --, deletePointsBetween
 
-    , deleteSinglePoint
+    , delete
     , toolId
     , toolStateChange
     , update
@@ -131,19 +131,10 @@ update msg options previewColour hasTrack =
             let
                 ( fromStart, fromEnd ) =
                     TrackLoaded.getRangeFromMarkers track
-
-                undoInfo =
-                    -- Curious semantics here. If no marker, delete single point (hence inclusive, explicitly).
-                    -- but with marker, more sensible if the markers themselves are not deleted (hence, exclusive).
-                    -- This attempts to be explicit.
-                    --if track.markerPosition == Nothing then
-                    TrackLoaded.undoInfo
-                        (Actions.DeletePointOrPoints fromStart fromEnd)
-                        track
             in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.DeletePointOrPoints fromStart fromEnd)
+              , Actions.DeletePointOrPoints fromStart fromEnd
               , TrackHasChanged
               ]
             )
@@ -186,10 +177,8 @@ view location msgWrapper options track =
 -- This function finally does the deed, driven by the Action interpreter in Main.
 
 
-deleteSinglePoint : Int -> Int -> TrackLoaded msg -> Maybe PeteTree
-deleteSinglePoint fromStart fromEnd track =
-    -- Clearer to deal with this case separately.
-    -- If they are combined later, I'd be happy with that also.
+delete : Int -> Int -> TrackLoaded msg -> TrackLoaded msg
+delete fromStart fromEnd track =
     let
         newTree =
             DomainModel.replaceRange
@@ -199,23 +188,9 @@ deleteSinglePoint fromStart fromEnd track =
                 []
                 track.trackTree
     in
-    newTree
+    case newTree of
+        Just isNewTree ->
+            { track | trackTree = isNewTree }
 
-
-
---deletePointsBetween :
---    Int
---    -> Int
---    -> TrackLoaded msg
---    -> Maybe PeteTree
---deletePointsBetween fromStart fromEnd track =
---    let
---        newTree =
---            DomainModel.replaceRange
---                fromStart
---                fromEnd
---                track.referenceLonLat
---                []
---                track.trackTree
---    in
---    newTree
+        Nothing ->
+            track

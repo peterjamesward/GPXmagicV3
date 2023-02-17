@@ -178,12 +178,8 @@ update msg options previewColour hasTrack =
             ( newOptions, actions newOptions previewColour track )
 
         ( Just track, BezierApplyWithOptions ) ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo (Actions.BezierApplyWithOptions options) track
-            in
             ( options
-            , [ WithUndo undoInfo
+            , [ WithUndo (Actions.BezierApplyWithOptions options)
               , Actions.BezierApplyWithOptions options
               , TrackHasChanged
               ]

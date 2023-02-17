@@ -207,15 +207,10 @@ update msg options previewColour hasTrack =
                                 Nothing ->
                                     ExtentIsTrack
                     }
-
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
-                        track
             in
             ( ensureCorrectExtent
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
+              , (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
               , TrackHasChanged
               ]
             )

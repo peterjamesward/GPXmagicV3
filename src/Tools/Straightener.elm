@@ -42,13 +42,9 @@ update :
 update msg options track =
     case msg of
         StraightenStraight ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo Actions.Straighten track
-            in
             ( options
-            , [ Actions.WithUndo undoInfo
-              , undoInfo.action
+            , [ Actions.WithUndo Actions.Straighten
+              , Actions.Straighten
               , Actions.TrackHasChanged
               ]
             )

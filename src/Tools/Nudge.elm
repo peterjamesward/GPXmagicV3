@@ -443,13 +443,9 @@ update msg options previewColour track =
             ( defaultOptions, [ HidePreview "nudge" ] )
 
         ApplyWithOptions ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo (Actions.NudgeApplyWithOptions options) track
-            in
             ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
+            , [ WithUndo (Actions.NudgeApplyWithOptions options)
+              , (Actions.NudgeApplyWithOptions options)
               , TrackHasChanged
               ]
             )

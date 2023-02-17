@@ -170,16 +170,10 @@ update msg options previewColour hasTrack =
             ( newOptions, actions newOptions previewColour track )
 
         ( Just track, ApplyWithOptions ) ->
-            let
-                undoInfo =
-                        TrackLoaded.undoInfo
-                            (Actions.CentroidAverageApplyWithOptions options)
-                            track
-            in
             ( options
-            , [ Actions.CentroidAverageApplyWithOptions options
+            , [ WithUndo (Actions.CentroidAverageApplyWithOptions options)
+              , Actions.CentroidAverageApplyWithOptions options
               , TrackHasChanged
-              , WithUndo undoInfo
               ]
             )
 

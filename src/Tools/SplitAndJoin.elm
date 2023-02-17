@@ -72,12 +72,8 @@ update msg settings mTrack wrap =
 
         --, ActionCommand <| Task.perform (msgWrapper << FileLoaded) (File.toString file)
         FileLoaded content ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo (Actions.ParseAndAppend content) mTrack
-            in
             ( settings
-            , [ Actions.WithUndo undoInfo
+            , [ Actions.WithUndo (Actions.ParseAndAppend content)
               , Actions.ParseAndAppend content
               , Actions.TrackHasChanged
               ]

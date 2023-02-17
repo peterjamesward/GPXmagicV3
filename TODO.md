@@ -15,14 +15,13 @@ No preview for single point nudge without fade.
 
 ## Refactor Main -> Tools
 
-Follow the Nudge example of the Tool providing the new Orange & Purple locations.
-(Further tidies up repetitive code in Main.)
+* Follow the Nudge example of the Tool providing the new Orange & Purple locations.
 
-> I now think that Undo (& Redo) stack should just hold previous tree (not points), since for most edits
-> we splice the tree and most of the structure is preserved. Hence by the magic of immutable
-> structures, we're not really duplicating the tree (in most cases).
+DONE: I now think that Undo (& Redo) stack should just hold previous tree (not points), since for most edits
+we splice the tree and most of the structure is preserved. Hence by the magic of immutable
+structures, we're not really duplicating the tree (in most cases).
 
-I genuinely think this will open the door to a much cleaner control flow, perhaps deprecating
+I hope this will open the door to a much cleaner control flow, perhaps deprecating
 actions (yes, after all that) and using the track/newTrack diff to drive command generation.
 
 ---
