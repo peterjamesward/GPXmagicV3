@@ -175,6 +175,8 @@ view location msgWrapper options track =
 
 
 -- This function finally does the deed, driven by the Action interpreter in Main.
+-- Markers should preserve their offset from the track ends, according to their disposition
+-- relative to the deleted part.
 
 
 delete : Int -> Int -> TrackLoaded msg -> TrackLoaded msg
@@ -190,7 +192,31 @@ delete fromStart fromEnd track =
     in
     case newTree of
         Just isNewTree ->
-            { track | trackTree = isNewTree }
+            let
+                ( newOrange, newPurple ) =
+                    case track.markerPosition of
+                        Nothing ->
+                            -- Only orange, single point, just check for track end.
+                            ( min track.currentPosition (DomainModel.skipCount track.trackTree)
+                            , Nothing
+                            )
+
+                        Just purple ->
+                            if track.currentPosition <= purple then
+                                ( track.currentPosition
+                                , Just <| DomainModel.skipCount isNewTree - fromEnd
+                                )
+
+                            else
+                                ( DomainModel.skipCount isNewTree - fromEnd
+                                , Just purple
+                                )
+            in
+            { track
+                | trackTree = isNewTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+            }
 
         Nothing ->
             track
