@@ -37,7 +37,7 @@ type Msg
     | SetOffset Float
 
 
-apply : Options -> TrackLoaded msg -> Maybe PeteTree
+apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
         noNudge =
@@ -174,11 +174,16 @@ apply options track =
 
         newCourse =
             outwardInGpx ++ awayTurnInGpx ++ returnInGpx ++ homeTurnInGpx
-
-        newTree =
-            DomainModel.treeFromSourcePoints newCourse
     in
-    newTree
+    case DomainModel.treeFromSourcePoints newCourse of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
 update :

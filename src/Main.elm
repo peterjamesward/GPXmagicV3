@@ -1592,15 +1592,8 @@ performActionsOnModel actions model =
                     }
 
                 ( OutAndBackApplyWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.OutAndBack.apply options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.OutAndBack.apply options track
                         , needsRendering = True
                     }
 
