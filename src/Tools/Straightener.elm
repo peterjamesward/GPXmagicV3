@@ -159,7 +159,7 @@ computeNewPoints options track =
             )
 
 
-apply : Options -> TrackLoaded msg -> Maybe PeteTree
+apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
         ( fromStart, fromEnd ) =
@@ -176,4 +176,26 @@ apply options track =
                 (List.map Tuple.second newPoints)
                 track.trackTree
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            let
+                pointerReposition =
+                    -- No points are added or removed here.
+                    --Let's reposition by distance, not uncommon.
+                    --TODO: Arguably, position from the relevant track end would be better.
+                    identity
+
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track

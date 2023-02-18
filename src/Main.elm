@@ -1629,15 +1629,8 @@ performActionsOnModel actions model =
                     }
 
                 ( Straighten, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Straightener.apply model.toolOptions.straightenOptions track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.Straightener.apply model.toolOptions.straightenOptions track
                         , needsRendering = True
                     }
 
