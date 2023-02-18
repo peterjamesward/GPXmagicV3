@@ -48,7 +48,6 @@ import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
-import String.Interpolate
 import SvgPathExtractor
 import Task
 import Time
@@ -64,7 +63,6 @@ import Tools.Graph
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
-import Tools.InterpolateOptions
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.NamedSegment
@@ -86,7 +84,6 @@ import Tools.TrackInfoBox
 import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Url)
-import Url.Parser exposing (..)
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
 import ViewPureStyles exposing (..)
@@ -636,8 +633,10 @@ update msg model =
 
         ToolsMsg toolMsg ->
             let
-                ( newToolOptions, actions ) =
+                ( newToolOptions, command ) =
                     -- Some of the actions update the model, some issue commands.
+                    --TODO: Deprecate the Actions concept, JFDI.
+                    --This may introduce some unwieldy function type signatures.
                     ToolsController.update toolMsg
                         model.track
                         ToolsMsg
@@ -2176,6 +2175,7 @@ performActionsOnModel actions model =
                         redo :: moreRedos ->
                             -- More care needed or the repeated edit will flush the Redo stack.
                             --TODO: Suspect this needs rework to match Undo.
+                            --Note: we must always repaint everything. Don't be clever.
                             let
                                 modelAfterRedo =
                                     performActionsOnModel

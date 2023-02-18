@@ -2,6 +2,7 @@ module Actions exposing (ToolAction(..), UndoEntry, actionTextForUndo)
 
 -- This wee DSL allows any tool to ask Main to update the model and display stuff
 -- (including on the Map) without the tools needing knowledge of the model or ports.
+--TODO: See if life is just easier without this kerfuffle.
 
 import DomainModel exposing (GPXSource, PeteTree)
 import File exposing (File)
@@ -42,6 +43,8 @@ type alias UndoEntry msg =
 
 
 type ToolAction msg
+    --TODO: Untangled this tangled web I wove. Or at least try.
+    --Perhaps by just doing one at a time.
     = NoAction
     | ReRender
     | WithUndo (ToolAction msg)
@@ -55,7 +58,6 @@ type ToolAction msg
     | MapRefresh -- generally because layout has changed.
     | StoreLocally String E.Value -- save something in local storage
     | StoredValueRetrieved String E.Value -- retrieve from local storage
-      --| DeletePointsBetween Int Int -- fromStart, fromEnd
     | DeletePointOrPoints Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Tools need to update to reflect any change in track
     | PointerChange -- Need to refresh views, but not replace the track on map
