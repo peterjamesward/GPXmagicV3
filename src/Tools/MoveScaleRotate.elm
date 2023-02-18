@@ -143,7 +143,7 @@ update msg settings previewColour hasTrack =
             ( settings, [] )
 
 
-applyMapElevations : List (Maybe Float) -> TrackLoaded msg -> Maybe PeteTree
+applyMapElevations : List (Maybe Float) -> TrackLoaded msg -> TrackLoaded msg
 applyMapElevations elevations track =
     -- We have previously forced a full load into the map (caveat user).
     -- So these should be in order to match up with the domain model.
@@ -162,9 +162,19 @@ applyMapElevations elevations track =
         adjustedPoints =
             List.map2 useNewElevation currentPoints elevations
     in
-    DomainModel.treeFromSourcesWithExistingReference
-        track.referenceLonLat
-        adjustedPoints
+    case
+        DomainModel.treeFromSourcesWithExistingReference
+            track.referenceLonLat
+            adjustedPoints
+    of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , referenceLonLat = DomainModel.gpxPointFromIndex 0 isTree
+            }
+
+        Nothing ->
+            track
 
 
 computeRecentredPoints : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -267,22 +277,54 @@ rotateAndScale settings track =
         (transformedStartPoint :: transformedEndPoints)
 
 
-applyRotateAndScale : Options -> TrackLoaded msg -> Maybe PeteTree
+applyRotateAndScale : Options -> TrackLoaded msg -> TrackLoaded msg
 applyRotateAndScale options track =
     let
         newPoints =
-            rotateAndScale options track
+            List.map .gpx <|
+                rotateAndScale options track
     in
-    DomainModel.treeFromSourcePoints <| List.map .gpx newPoints
+    case DomainModel.treeFromSourcePoints newPoints of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+                , referenceLonLat = DomainModel.gpxPointFromIndex 0 isTree
+            }
+
+        Nothing ->
+            track
 
 
-applyRecentre : ( Float, Float ) -> TrackLoaded msg -> Maybe PeteTree
-applyRecentre newReference track =
+applyRecentre : ( Float, Float ) -> TrackLoaded msg -> TrackLoaded msg
+applyRecentre newReferenceCoords track =
     let
         newPoints =
-            computeRecentredPoints newReference track
+            List.map Tuple.second <|
+                computeRecentredPoints newReferenceCoords track
+
+        ( lon, lat ) =
+            track.lastMapClick
+
+        newReferenceGPX =
+            { longitude = Direction2d.fromAngle <| Angle.degrees lon
+            , latitude = Angle.degrees lat
+            , altitude = Quantity.zero
+            , timestamp = Nothing
+            }
     in
-    DomainModel.treeFromSourcePoints <| List.map Tuple.second newPoints
+    case DomainModel.treeFromSourcePoints newPoints of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+                , currentPosition = 0
+                , markerPosition = Nothing
+                , referenceLonLat = newReferenceGPX
+            }
+
+        Nothing ->
+            track
 
 
 view :

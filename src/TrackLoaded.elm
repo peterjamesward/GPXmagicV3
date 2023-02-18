@@ -225,12 +225,13 @@ addToUndoStack :
     ToolAction msg
     -> TrackLoaded msg
     -> TrackLoaded msg
-addToUndoStack action  oldTrack =
+addToUndoStack action oldTrack =
     let
         undoEntry : UndoEntry msg
         undoEntry =
             { action = action
             , previousTree = oldTrack.trackTree
+            , previousReference = oldTrack.referenceLonLat
             , currentPosition = oldTrack.currentPosition
             , markerPosition = oldTrack.markerPosition
             }
@@ -245,6 +246,7 @@ undoInfo : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
 undoInfo action track =
     { action = action
     , previousTree = track.trackTree
+    , previousReference = track.referenceLonLat
     , currentPosition = track.currentPosition
     , markerPosition = track.markerPosition
     }
@@ -258,6 +260,7 @@ undoLastAction track =
                 | undos = moreUndos
                 , redos = undo :: track.redos
                 , trackTree = undo.previousTree
+                , referenceLonLat = undo.previousReference
                 , currentPosition = undo.currentPosition
                 , markerPosition = undo.markerPosition
                 , leafIndex = indexLeaves undo.previousTree

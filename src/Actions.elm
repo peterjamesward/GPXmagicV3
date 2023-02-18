@@ -37,6 +37,7 @@ type alias UndoEntry msg =
     , previousTree : PeteTree
     , currentPosition : Int
     , markerPosition : Maybe Int
+    , previousReference : GPXSource
     }
 
 

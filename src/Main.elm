@@ -1683,63 +1683,20 @@ performActionsOnModel actions model =
                     }
 
                 ( ApplyRotateAndScale options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.MoveScaleRotate.applyRotateAndScale options track
-
-                        newTrack =
-                            { track
-                                | referenceLonLat =
-                                    case newTree of
-                                        Just aTree ->
-                                            gpxPointFromIndex 0 aTree
-
-                                        Nothing ->
-                                            track.referenceLonLat
-                            }
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.MoveScaleRotate.applyRotateAndScale options track
                         , needsRendering = True
                     }
 
                 ( ApplyRecentre coords, Just track ) ->
-                    let
-                        newTree =
-                            Tools.MoveScaleRotate.applyRecentre coords track
-
-                        newTrack =
-                            let
-                                ( lon, lat ) =
-                                    track.lastMapClick
-
-                                newReference =
-                                    { longitude = Direction2d.fromAngle <| Angle.degrees lon
-                                    , latitude = Angle.degrees lat
-                                    , altitude = Quantity.zero
-                                    , timestamp = Nothing
-                                    }
-                            in
-                            { track | referenceLonLat = newReference }
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.MoveScaleRotate.applyRecentre coords track
                         , needsRendering = True
                     }
 
                 ( ApplyMapElevations elevations, Just track ) ->
-                    let
-                        newTree =
-                            Tools.MoveScaleRotate.applyMapElevations elevations track
-
-                        newTrack =
-                            track
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.MoveScaleRotate.applyMapElevations elevations track
                         , needsRendering = True
                     }
 
