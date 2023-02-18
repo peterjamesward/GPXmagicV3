@@ -1581,20 +1581,13 @@ performActionsOnModel actions model =
                     }
 
                 ( Autofix indices, Just track ) ->
-                    let
-                        newTree =
-                            Tools.BendSmoother.softenMultiplePoints
-                                model.toolOptions.bendSmootherOptions
-                                indices
-                                track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers
-                                newTree
-                                track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track =
+                            Just <|
+                                Tools.BendSmoother.applyAutofix
+                                    model.toolOptions.bendSmootherOptions
+                                    indices
+                                    track
                         , needsRendering = True
                     }
 

@@ -1,4 +1,15 @@
-module Tools.BendSmoother exposing (Msg(..), Point, applyUsingOptions, defaultOptions, softenMultiplePoints, toolId, toolStateChange, update, view)
+module Tools.BendSmoother exposing
+    ( Msg(..)
+    , Point
+    , applyAutofix
+    , applyUsingOptions
+    , defaultOptions
+    , softenMultiplePoints
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -134,6 +145,32 @@ applyClassicBendSmoother options track =
                 track.trackTree
     in
     newTree
+
+
+applyAutofix : Options -> List Int -> TrackLoaded msg -> TrackLoaded msg
+applyAutofix options indices track =
+    case softenMultiplePoints options indices track of
+        Just isTree ->
+            let
+                pointerReposition =
+                    --Let's reposition by distance, not uncommon.
+                    --TODO: Arguably, position from the relevant track end would be better.
+                    DomainModel.preserveDistanceFromStart track.trackTree isTree
+
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = isTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
 softenMultiplePoints : Options -> List Int -> TrackLoaded msg -> Maybe PeteTree
