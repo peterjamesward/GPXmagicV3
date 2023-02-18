@@ -1709,11 +1709,43 @@ performActionsOnModel actions model =
 
                 ( PointMovedOnMap startLon startLat endLon endLat, Just track ) ->
                     let
-                        newTrack =
+                        startGpx =
+                            { longitude = Direction2d.fromAngle <| Angle.degrees startLon
+                            , latitude = Angle.degrees startLat
+                            , altitude = Quantity.zero
+                            , timestamp = Nothing
+                            }
+
+                        index =
+                            DomainModel.nearestToLonLat
+                                startGpx
+                                track.currentPosition
+                                track.trackTree
+                                track.referenceLonLat
+                                track.leafIndex
+
+                        positionBeforeDrag =
+                            gpxPointFromIndex index track.trackTree
+
+                        endGpx =
+                            { longitude = Direction2d.fromAngle <| Angle.degrees endLon
+                            , latitude = Angle.degrees endLat
+                            , altitude = positionBeforeDrag.altitude
+                            , timestamp = Nothing
+                            }
+
+                        newTree =
+                            DomainModel.updatePointByIndexInSitu
+                                index
+                                endGpx
+                                track.referenceLonLat
+                                track.trackTree
+
+                        withUndo =
                             TrackLoaded.addToUndoStack action track
                     in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just { withUndo | trackTree = newTree }
                         , needsRendering = True
                     }
 
@@ -1881,8 +1913,9 @@ performActionsOnModel actions model =
                         newTrack =
                             case Tools.Graph.getTrack 0 newGraphOptions of
                                 Just foundNewTrack ->
-                                    Just <|
-                                        TrackLoaded.addToUndoStack action foundNewTrack
+                                    foundNewTrack
+                                        |> TrackLoaded.addToUndoStack action
+                                        |> Just
 
                                 Nothing ->
                                     foldedModel.track
