@@ -1604,15 +1604,8 @@ performActionsOnModel actions model =
                     }
 
                 ( MoveAndStretchWithOptions settings, Just track ) ->
-                    let
-                        newTree =
-                            Tools.MoveAndStretch.apply settings track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.MoveAndStretch.apply settings track
                         , needsRendering = True
                     }
 

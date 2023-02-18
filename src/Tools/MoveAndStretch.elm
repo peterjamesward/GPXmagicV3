@@ -178,7 +178,7 @@ computeNewPoints options track =
         newPoints
 
 
-apply : Options -> TrackLoaded msg -> Maybe PeteTree
+apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
         ( fromStart, fromEnd ) =
@@ -195,7 +195,28 @@ apply options track =
                 gpxPoints
                 track.trackTree
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            let
+                pointerReposition =
+                    --Let's reposition by distance, not uncommon.
+                    --TODO: Arguably, position from the relevant track end would be better.
+                    DomainModel.preserveDistanceFromStart track.trackTree isTree
+
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
 update :

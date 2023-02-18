@@ -18,6 +18,8 @@ No preview for single point nudge without fade.
 --TODO: Check if leaf index is rebuilt after Redo. I think not.
 
 > Follow the Nudge example of the Tool providing the new Orange & Purple locations.
+> We see that the pattern is Main is repetitive now, but clearer.
+> We see there's now more repetition in `apply` methods that could be factored out.
 
 I hope this will open the door to a much cleaner control flow, perhaps deprecating
 actions (yes, after all that) and using the track/newTrack diff to drive command generation.
