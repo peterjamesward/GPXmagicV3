@@ -489,7 +489,7 @@ computeNewPoints options track =
         |> TrackLoaded.asPreviewPoints track distanceAtStart
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
@@ -510,16 +510,29 @@ applyUsingOptions options track =
                 track.referenceLonLat
                 (List.map .gpx <| newPoints)
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+    case newTree of
+        Just isTree ->
+            let
+                pointerReposition =
+                    --Let's reposition by distance, not uncommon.
+                    --TODO: Arguably, position from the relevant track end would be better.
+                    DomainModel.preserveDistanceFromStart track.trackTree isTree
+
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
 toolStateChange :
@@ -544,8 +557,9 @@ toolStateChange opened colour options track =
 previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)
 previewActions options colour track =
     let
-        ( previewTree, _ ) =
-            applyUsingOptions options track
+        previewTree =
+            .trackTree <|
+                applyUsingOptions options track
 
         profilePreview tree =
             ShowPreview
@@ -554,22 +568,16 @@ previewActions options colour track =
                 , colour = colour
                 , points = []
                 }
-    in
-    case previewTree of
-        Just pTree ->
-            let
-                normalPreview =
-                    ShowPreview
-                        { tag = "smart"
-                        , shape = PreviewCircle
-                        , colour = colour
-                        , points = computeNewPoints options track
-                        }
-            in
-            [ normalPreview, profilePreview pTree ]
 
-        _ ->
-            [ HidePreview "smart", HidePreview "smartprofile" ]
+        normalPreview =
+            ShowPreview
+                { tag = "smart"
+                , shape = PreviewCircle
+                , colour = colour
+                , points = computeNewPoints options track
+                }
+    in
+    [ normalPreview, profilePreview previewTree ]
 
 
 update :

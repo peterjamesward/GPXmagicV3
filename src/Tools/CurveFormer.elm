@@ -120,12 +120,17 @@ applyUsingOptions options track =
                     , Maybe.map pointerReposition track.markerPosition
                     )
             in
-            { track
-                | trackTree = Maybe.withDefault track.trackTree newTree
-                , currentPosition = newOrange
-                , markerPosition = newPurple
-                , leafIndex = TrackLoaded.indexLeaves isTree
-            }
+            case newTree of
+                Just isTree ->
+                    { track
+                        | trackTree = Maybe.withDefault track.trackTree newTree
+                        , currentPosition = newOrange
+                        , markerPosition = newPurple
+                        , leafIndex = TrackLoaded.indexLeaves isTree
+                    }
+
+                Nothing ->
+                    track
 
         Nothing ->
             track

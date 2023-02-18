@@ -1500,51 +1500,8 @@ performActionsOnModel actions model =
                     }
 
                 ( SmartSmootherApplyWithOptions options, Just track ) ->
-                    let
-                        ( newTree, oldPoints ) =
-                            Tools.SmartSmoother.applyUsingOptions options track
-
-                        ( orangeDistance, purpleDistance ) =
-                            ( DomainModel.distanceFromIndex track.currentPosition track.trackTree
-                            , case track.markerPosition of
-                                Just purple ->
-                                    Just <| DomainModel.distanceFromIndex purple track.trackTree
-
-                                Nothing ->
-                                    Nothing
-                            )
-
-                        ( newOrange, newPurple ) =
-                            case newTree of
-                                Just gotNewTree ->
-                                    ( DomainModel.indexFromDistance orangeDistance gotNewTree
-                                    , case purpleDistance of
-                                        Just purple ->
-                                            Just <| DomainModel.indexFromDistance purple gotNewTree
-
-                                        Nothing ->
-                                            Nothing
-                                    )
-
-                                Nothing ->
-                                    ( track.currentPosition, track.markerPosition )
-
-                        trackWithMarkers =
-                            case newTree of
-                                Just gotNewTree ->
-                                    { track
-                                        | trackTree = gotNewTree
-                                        , currentPosition = newOrange
-                                        , markerPosition = newPurple
-                                        , leafIndex = indexLeaves gotNewTree
-                                    }
-
-                                Nothing ->
-                                    --- Oops.
-                                    track
-                    in
                     { foldedModel
-                        | track = Just trackWithMarkers
+                        | track = Just <| Tools.SmartSmoother.applyUsingOptions options track
                         , needsRendering = True
                     }
 

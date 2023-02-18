@@ -113,7 +113,7 @@ applyUsingOptions options track =
                 | trackTree = newTree
                 , currentPosition = newOrange
                 , markerPosition = newPurple
-                , leafIndex = TrackLoaded.indexLeaves isTree
+                , leafIndex = TrackLoaded.indexLeaves newTree
             }
 
         Nothing ->

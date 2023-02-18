@@ -216,7 +216,7 @@ delete fromStart fromEnd track =
                 | trackTree = isNewTree
                 , currentPosition = newOrange
                 , markerPosition = newPurple
-                , leafIndex = TrackLoaded.indexLeaves isTree
+                , leafIndex = TrackLoaded.indexLeaves isNewTree
             }
 
         Nothing ->
