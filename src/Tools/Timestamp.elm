@@ -57,7 +57,7 @@ type Msg
     | SetMode TimestampMode
 
 
-applyTimeShift : Options -> TrackLoaded msg -> Maybe PeteTree
+applyTimeShift : Options -> TrackLoaded msg -> TrackLoaded msg
 applyTimeShift options track =
     let
         orangeOffsetMillis =
@@ -87,10 +87,18 @@ applyTimeShift options track =
                     0
                     track.trackTree
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
-applyDoubling : TrackLoaded msg -> Maybe PeteTree
+applyDoubling : TrackLoaded msg -> TrackLoaded msg
 applyDoubling track =
     let
         startTimeAbsolute =
@@ -116,13 +124,21 @@ applyDoubling track =
                 newTree =
                     DomainModel.treeFromSourcePoints newCourse
             in
-            newTree
+            case newTree of
+                Just isTree ->
+                    { track
+                        | trackTree = Maybe.withDefault track.trackTree newTree
+                        , leafIndex = TrackLoaded.indexLeaves isTree
+                    }
+
+                Nothing ->
+                    track
 
         Nothing ->
-            Nothing
+            track
 
 
-applyTicks : Int -> TrackLoaded msg -> Maybe PeteTree
+applyTicks : Int -> TrackLoaded msg -> TrackLoaded msg
 applyTicks tickSpacing track =
     let
         routeStartTime =
@@ -188,10 +204,18 @@ applyTicks tickSpacing track =
         newTree =
             DomainModel.treeFromSourcePoints <| List.reverse newCourse
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
-applyPhysics : Options -> TrackLoaded msg -> Maybe PeteTree
+applyPhysics : Options -> TrackLoaded msg -> TrackLoaded msg
 applyPhysics options track =
     -- Returns a track with new timestamps.
     let
@@ -235,7 +259,15 @@ applyPhysics options track =
         newTree =
             DomainModel.treeFromSourcePoints <| List.reverse newCourse
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
 durationForSection : Power -> RoadSection -> Duration
@@ -397,7 +429,7 @@ updateWithTrack msg options previewColour track =
         ApplyNewTimes ->
             ( options
             , [ WithUndo (Actions.AdjustTimes options)
-              , (Actions.AdjustTimes options)
+              , Actions.AdjustTimes options
               , TrackHasChanged
               ]
             )
@@ -405,23 +437,23 @@ updateWithTrack msg options previewColour track =
         ApplyTickInterval tick ->
             ( options
             , [ WithUndo (Actions.SetTimeTicks tick)
-              , (Actions.SetTimeTicks tick)
+              , Actions.SetTimeTicks tick
               , TrackHasChanged
               ]
             )
 
         DoubleRelativeTimes ->
             ( options
-            , [ WithUndo (Actions.TimeDoubling)
-              , (Actions.TimeDoubling)
+            , [ WithUndo Actions.TimeDoubling
+              , Actions.TimeDoubling
               , TrackHasChanged
               ]
             )
 
         ComputeTimes ->
             ( options
-            , [ WithUndo (Actions.UsePhysicsModel)
-              , (Actions.UsePhysicsModel)
+            , [ WithUndo Actions.UsePhysicsModel
+              , Actions.UsePhysicsModel
               , TrackHasChanged
               ]
             )

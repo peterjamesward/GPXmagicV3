@@ -1641,46 +1641,22 @@ performActionsOnModel actions model =
                     }
 
                 ( AdjustTimes options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Timestamp.applyTimeShift options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel | track = Just <| Tools.Timestamp.applyTimeShift options track }
 
                 ( TimeDoubling, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Timestamp.applyDoubling track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel | track = Just <| Tools.Timestamp.applyDoubling track }
 
                 ( UsePhysicsModel, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Timestamp.applyPhysics
-                                model.toolOptions.timestampOptions
-                                track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track =
+                            Just <|
+                                Tools.Timestamp.applyPhysics
+                                    model.toolOptions.timestampOptions
+                                    track
+                    }
 
                 ( SetTimeTicks ticks, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Timestamp.applyTicks ticks track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel | track = Just <| Tools.Timestamp.applyTicks ticks track }
 
                 ( CloseLoopWithOptions options, Just track ) ->
                     let
