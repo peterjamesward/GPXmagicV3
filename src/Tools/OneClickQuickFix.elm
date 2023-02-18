@@ -35,7 +35,7 @@ type Msg
     = Apply
 
 
-apply : TrackLoaded msg -> Maybe PeteTree
+apply : TrackLoaded msg -> TrackLoaded msg
 apply originalTrack =
     let
         trackWithNoMarkers =
@@ -82,8 +82,21 @@ apply originalTrack =
                 |> simplifyTrack
                 |> bezierApprox
                 |> Loop.for 3 smoothTrack
+
+        pointerReposition =
+            --Let's reposition by distance, not uncommon.
+            DomainModel.preserveDistanceFromStart originalTrack.trackTree finalTrack.trackTree
+
+        ( newOrange, newPurple ) =
+            ( pointerReposition originalTrack.currentPosition
+            , Maybe.map pointerReposition originalTrack.markerPosition
+            )
     in
-    Just finalTrack.trackTree
+    { finalTrack
+        | currentPosition = newOrange
+        , markerPosition = newPurple
+        , leafIndex = TrackLoaded.indexLeaves finalTrack.trackTree
+    }
 
 
 oneClickQuickFixButton : I18NOptions.Location -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg

@@ -1610,42 +1610,8 @@ performActionsOnModel actions model =
                     }
 
                 ( OneClickQuickFix, Just track ) ->
-                    let
-                        newTree =
-                            Tools.OneClickQuickFix.apply track
-
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
-
-                        ( newOrange, newPurple ) =
-                            ( indexFromDistance
-                                (distanceFromIndex track.currentPosition track.trackTree)
-                                (newTree |> Maybe.withDefault track.trackTree)
-                            , case track.markerPosition of
-                                Just purple ->
-                                    Just <|
-                                        indexFromDistance
-                                            (distanceFromIndex purple track.trackTree)
-                                            (newTree |> Maybe.withDefault track.trackTree)
-
-                                Nothing ->
-                                    Nothing
-                            )
-
-                        newTrack =
-                            { track
-                                | trackTree = Maybe.withDefault track.trackTree newTree
-                                , currentPosition = newOrange
-                                , markerPosition = newPurple
-                                , leafIndex =
-                                    indexLeaves <|
-                                        Maybe.withDefault track.trackTree newTree
-                            }
-
-                        --|> TrackLoaded.useTreeWithRepositionedMarkers newTree
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.OneClickQuickFix.apply track
                         , needsRendering = True
                     }
 

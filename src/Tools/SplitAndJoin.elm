@@ -182,16 +182,7 @@ writeOneSection sections options track rgtOptions =
 
                 processingFunction =
                     if options.applyAutofix then
-                        \atrack ->
-                            let
-                                fixedTree =
-                                    OneClickQuickFix.apply atrack
-                            in
-                            { atrack
-                                | trackTree =
-                                    -- If fix fails, use original tree.
-                                    Maybe.withDefault atrack.trackTree fixedTree
-                            }
+                        OneClickQuickFix.apply
 
                     else
                         identity
