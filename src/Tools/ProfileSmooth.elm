@@ -165,7 +165,7 @@ update msg options previewColour track =
             )
 
 
-apply : Options -> TrackLoaded msg -> Maybe PeteTree
+apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
         ( fromStart, fromEnd ) =
@@ -188,7 +188,15 @@ apply options track =
                 newCourse
                 track.trackTree
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
 type SlopeStatus

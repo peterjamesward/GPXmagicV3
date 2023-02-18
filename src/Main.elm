@@ -1635,17 +1635,8 @@ performActionsOnModel actions model =
                     }
 
                 ( ApplySmoothProfile options, Just track ) ->
-                    let
-                        newTrack =
-                            case Tools.ProfileSmooth.apply options track of
-                                Just newTree ->
-                                    TrackLoaded.useTreeWithRepositionedMarkers (Just newTree) track
-
-                                Nothing ->
-                                    track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.ProfileSmooth.apply options track
                         , needsRendering = True
                     }
 
