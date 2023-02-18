@@ -1701,17 +1701,9 @@ performActionsOnModel actions model =
                     }
 
                 ( ApplyLandUseAltitudes altitudes, Just track ) ->
-                    let
-                        newTrack =
-                            { track
-                                | landUseData =
-                                    LandUseDataOSM.applyAltitudes
-                                        altitudes
-                                        track
-                            }
-                    in
+                    -- Using mapbox elevations to set altitude of OSM places.
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| LandUseDataOSM.applyAltitudes altitudes track
                         , needsRendering = True
                     }
 

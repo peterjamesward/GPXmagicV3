@@ -83,7 +83,7 @@ fetchAltitudesFromMap raw =
     MapPortController.fetchElevationsForPoints gpxLike
 
 
-applyAltitudes : List (Maybe Float) -> TrackLoaded msg -> LandUseData
+applyAltitudes : List (Maybe Float) -> TrackLoaded msg -> TrackLoaded msg
 applyAltitudes altitudes track =
     let
         justRaw =
@@ -208,13 +208,16 @@ applyAltitudes altitudes track =
 
                 Nothing ->
                     names
+
+        landUseWithAltitudes =
+            { nodes = nodes
+            , ways = ways
+            , places = places
+            , rawData = { elements = [] } -- discard raw data
+            , status = LandUseOK
+            }
     in
-    { nodes = nodes
-    , ways = ways
-    , places = places
-    , rawData = { elements = [] } -- discard raw data
-    , status = LandUseOK
-    }
+    { track | landUseData = landUseWithAltitudes }
 
 
 landUseDecoder : D.Decoder OSMLandUseData
