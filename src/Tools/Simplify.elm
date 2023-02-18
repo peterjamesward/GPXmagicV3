@@ -1,4 +1,13 @@
-module Tools.Simplify exposing (Msg(..), Options, apply, defaultOptions, simplifyFor1CQF, toolId, toolStateChange, update, view)
+module Tools.Simplify exposing
+    ( Msg(..)
+    , Options
+    , apply
+    , defaultOptions
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Dict exposing (Dict)
@@ -106,7 +115,7 @@ findSimplifications options tree =
     { options | pointsToRemove = nonAdjacentEntries }
 
 
-apply : Options -> TrackLoaded msg -> Maybe PeteTree
+apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     -- Deleting arbitrary collection of non-adjacent points implies rebuild.
     let
@@ -126,19 +135,28 @@ apply options track =
             DomainModel.treeFromSourcesWithExistingReference track.referenceLonLat <|
                 Dict.values newCourse
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            let
+                pointerReposition =
+                    --Let's reposition by distance, not uncommon.
+                    --TODO: Arguably, position from the relevant track end would be better.
+                    DomainModel.preserveDistanceFromStart track.trackTree isTree
 
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = Maybe.withDefault track.trackTree newTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
 
-simplifyFor1CQF : TrackLoaded msg -> PeteTree
-simplifyFor1CQF track =
-    let
-        options =
-            findSimplifications defaultOptions track.trackTree
-
-        outputTree =
-            apply options track
-    in
-    outputTree |> Maybe.withDefault track.trackTree
+        Nothing ->
+            track
 
 
 toolStateChange :

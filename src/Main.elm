@@ -1598,50 +1598,8 @@ performActionsOnModel actions model =
                     }
 
                 ( ApplySimplify, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
-
-                        ( orangeDistance, purpleDistance ) =
-                            ( DomainModel.distanceFromIndex track.currentPosition track.trackTree
-                            , case track.markerPosition of
-                                Just purple ->
-                                    Just <| DomainModel.distanceFromIndex purple track.trackTree
-
-                                Nothing ->
-                                    Nothing
-                            )
-
-                        ( newOrange, newPurple ) =
-                            case newTree of
-                                Just gotNewTree ->
-                                    ( DomainModel.indexFromDistance orangeDistance gotNewTree
-                                    , case purpleDistance of
-                                        Just purple ->
-                                            Just <| DomainModel.indexFromDistance purple gotNewTree
-
-                                        Nothing ->
-                                            Nothing
-                                    )
-
-                                Nothing ->
-                                    ( track.currentPosition, track.markerPosition )
-
-                        trackWithMarkers =
-                            case newTree of
-                                Just gotNewTree ->
-                                    { track
-                                        | trackTree = gotNewTree
-                                        , currentPosition = newOrange
-                                        , markerPosition = newPurple
-                                    }
-
-                                Nothing ->
-                                    --- Oops.
-                                    track
-                    in
                     { foldedModel
-                        | track = Just trackWithMarkers
+                        | track = Just <| Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
                         , needsRendering = True
                     }
 

@@ -48,22 +48,22 @@ apply originalTrack =
                     DomainModel.trueLength anyTrack.trackTree
                         |> Quantity.divideBy (toFloat <| DomainModel.skipCount anyTrack.trackTree)
 
-                treeWithOneRoundOfPointsRemoved =
-                    Tools.Simplify.simplifyFor1CQF anyTrack
+                trackWithOneRoundOfPointsRemoved =
+                    Tools.Simplify.apply Tools.Simplify.defaultOptions anyTrack
 
-                mnumberOfPointsRemoved =
-                    DomainModel.skipCount treeWithOneRoundOfPointsRemoved
+                numberOfPointsRemoved =
+                    DomainModel.skipCount trackWithOneRoundOfPointsRemoved.trackTree
                         - DomainModel.skipCount anyTrack.trackTree
             in
             if
                 (meanSpacing |> Quantity.lessThanOrEqualTo (Length.meters 25))
-                    && mnumberOfPointsRemoved
+                    && numberOfPointsRemoved
                     > 0
             then
-                simplifyTrack { anyTrack | trackTree = treeWithOneRoundOfPointsRemoved }
+                simplifyTrack trackWithOneRoundOfPointsRemoved
 
             else
-                { anyTrack | trackTree = treeWithOneRoundOfPointsRemoved }
+                trackWithOneRoundOfPointsRemoved
 
         smoothTrack : TrackLoaded msg -> TrackLoaded msg
         smoothTrack track =
