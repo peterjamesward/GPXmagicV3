@@ -67,7 +67,9 @@ apply originalTrack =
 
         smoothTrack : TrackLoaded msg -> TrackLoaded msg
         smoothTrack track =
-            { track | trackTree = Tools.CentroidAverage.centroidAverageFor1CQF track }
+            Tools.CentroidAverage.applyUsingOptions
+                Tools.CentroidAverage.defaultOptions
+                track
 
         bezierApprox : TrackLoaded msg -> TrackLoaded msg
         bezierApprox track =

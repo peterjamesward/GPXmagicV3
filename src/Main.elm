@@ -1484,8 +1484,6 @@ performActionsOnModel actions model =
                     }
 
                 ( BezierApplyWithOptions options, Just track ) ->
-                    --TODO: Fix marker positioning
-                    --TODO: Fix Undo/Redo
                     { foldedModel
                         | track =
                             Just <|
@@ -1496,15 +1494,8 @@ performActionsOnModel actions model =
                     }
 
                 ( CentroidAverageApplyWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.CentroidAverage.applyUsingOptions options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.CentroidAverage.applyUsingOptions options track
                         , needsRendering = True
                     }
 

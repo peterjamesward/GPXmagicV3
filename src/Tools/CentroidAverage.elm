@@ -1,4 +1,12 @@
-module Tools.CentroidAverage exposing (Msg(..), applyUsingOptions, centroidAverageFor1CQF, defaultOptions, toolId, toolStateChange, update, view)
+module Tools.CentroidAverage exposing
+    ( Msg(..)
+    , applyUsingOptions
+    , defaultOptions
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, skipCount)
@@ -60,38 +68,46 @@ computeNewPoints options track =
     TrackLoaded.asPreviewPoints track distanceToPreview earthPoints
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> Maybe PeteTree
+applyUsingOptions :
+    Options
+    -> TrackLoaded msg
+    -> TrackLoaded msg
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
-            case track.markerPosition of
-                Just _ ->
-                    TrackLoaded.getRangeFromMarkers track
+            if track.markerPosition /= Nothing then
+                TrackLoaded.getRangeFromMarkers track
 
-                Nothing ->
-                    ( 0, 0 )
-
-        newPoints =
-            computeNewPoints options track
+            else
+                ( 0, 0 )
 
         newTree =
             DomainModel.replaceRange
                 (fromStart + 1)
                 (fromEnd + 1)
                 track.referenceLonLat
-                (List.map .gpx <| newPoints)
+                (List.map .gpx <| computeNewPoints options track)
                 track.trackTree
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            let
+                pointerReposition =
+                    identity
 
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = isTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+            }
 
-centroidAverageFor1CQF : TrackLoaded msg -> PeteTree
-centroidAverageFor1CQF track =
-    let
-        outputTree =
-            applyUsingOptions defaultOptions track
-    in
-    outputTree |> Maybe.withDefault track.trackTree
+        Nothing ->
+            track
 
 
 toolStateChange :
@@ -113,31 +129,26 @@ toolStateChange opened colour options track =
 actions newOptions previewColour track =
     let
         previewTree =
-            applyUsingOptions newOptions track
+            .trackTree <|
+                applyUsingOptions newOptions track
 
-        profilePreview tree =
+        profilePreview =
             ShowPreview
                 { tag = "centroidprofile"
-                , shape = PreviewProfile tree
+                , shape = PreviewProfile previewTree
                 , colour = previewColour
                 , points = []
                 }
-    in
-    case previewTree of
-        Just tree ->
-            let
-                normalPreview =
-                    ShowPreview
-                        { tag = "centroid"
-                        , shape = PreviewCircle
-                        , colour = previewColour
-                        , points = computeNewPoints newOptions track
-                        }
-            in
-            [ normalPreview, profilePreview tree ]
 
-        _ ->
-            [ HidePreview "centroid", HidePreview "centroidprofile" ]
+        normalPreview =
+            ShowPreview
+                { tag = "centroid"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = computeNewPoints newOptions track
+                }
+    in
+    [ normalPreview, profilePreview ]
 
 
 update :
