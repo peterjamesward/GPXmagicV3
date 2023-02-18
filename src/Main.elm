@@ -1659,74 +1659,26 @@ performActionsOnModel actions model =
                     { foldedModel | track = Just <| Tools.Timestamp.applyTicks ticks track }
 
                 ( CloseLoopWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.StartFinish.applyCloseLoop options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.StartFinish.applyCloseLoop options track
                         , needsRendering = True
                     }
 
                 ( ReverseTrack, Just track ) ->
-                    let
-                        newTree =
-                            Tools.StartFinish.applyReverse track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.StartFinish.applyReverse track
                         , needsRendering = True
                     }
 
                 ( MoveStartPoint newStart, Just track ) ->
-                    let
-                        newTree =
-                            Tools.StartFinish.applyMoveStart newStart track
-
-                        newTrack =
-                            case newTree of
-                                Just aNewTree ->
-                                    { track
-                                        | trackTree = aNewTree
-                                        , currentPosition = 0
-                                        , markerPosition = Nothing
-                                        , referenceLonLat = gpxPointFromIndex 0 aNewTree
-                                    }
-
-                                Nothing ->
-                                    track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.StartFinish.applyMoveStart newStart track
                         , needsRendering = True
                     }
 
                 ( AddRiderPens, Just track ) ->
-                    let
-                        ( newTree, oldPoints ) =
-                            Tools.StartFinish.addPens track
-
-                        newTrack =
-                            case newTree of
-                                Just aNewTree ->
-                                    { track
-                                        | trackTree = aNewTree
-                                        , currentPosition = 0
-                                        , markerPosition = Nothing
-                                        , referenceLonLat = gpxPointFromIndex 0 aNewTree
-                                    }
-
-                                Nothing ->
-                                    track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.StartFinish.addPens track
                         , needsRendering = True
                     }
 

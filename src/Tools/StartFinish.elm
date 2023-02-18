@@ -263,7 +263,7 @@ closeTheLoop track =
     TrackLoaded.asPreviewPoints track (trueLength track.trackTree) vertices
 
 
-applyCloseLoop : Options -> TrackLoaded msg -> Maybe PeteTree
+applyCloseLoop : Options -> TrackLoaded msg -> TrackLoaded msg
 applyCloseLoop options track =
     -- Let's deem the new start to be the spline point nearest the origin.
     let
@@ -296,11 +296,6 @@ applyCloseLoop options track =
                     -- Hmm. Put them at the end.
                     ( newGpxPoints, [] )
 
-        collecEndPointsInReverse : RoadSection -> List GPXSource -> List GPXSource
-        collecEndPointsInReverse road outputs =
-            -- We don't want the very start or the very end.
-            Tuple.second road.sourceData :: outputs
-
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
@@ -309,19 +304,35 @@ applyCloseLoop options track =
                 ++ (List.drop 1 <| List.take (skipCount track.trackTree - 1) oldPoints)
                 ++ newEndPoints
     in
-    DomainModel.treeFromSourcePoints newPoints
+    case DomainModel.treeFromSourcePoints newPoints of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
-applyReverse : TrackLoaded msg -> Maybe PeteTree
+applyReverse : TrackLoaded msg -> TrackLoaded msg
 applyReverse track =
     let
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     in
-    DomainModel.treeFromSourcePoints <| List.reverse oldPoints
+    case DomainModel.treeFromSourcePoints <| List.reverse oldPoints of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track
 
 
-applyMoveStart : Int -> TrackLoaded msg -> Maybe PeteTree
+applyMoveStart : Int -> TrackLoaded msg -> TrackLoaded msg
 applyMoveStart index track =
     -- A littel more care needed.
     -- Where the S/F join we have two points; one must be removed.
@@ -336,10 +347,20 @@ applyMoveStart index track =
         newPoints =
             afterNewStart ++ List.drop 1 beforeNewStart ++ List.take 1 afterNewStart
     in
-    DomainModel.treeFromSourcePoints newPoints
+    case DomainModel.treeFromSourcePoints newPoints of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+                , currentPosition = 0
+                , markerPosition = Nothing
+            }
+
+        Nothing ->
+            track
 
 
-addPens : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+addPens : TrackLoaded msg -> TrackLoaded msg
 addPens track =
     let
         oldPoints =
@@ -370,6 +391,14 @@ addPens track =
         newPoints =
             newStart :: oldPoints ++ [ newEnd ]
     in
-    ( DomainModel.treeFromSourcePoints newPoints
-    , oldPoints
-    )
+    case DomainModel.treeFromSourcePoints newPoints of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+                , currentPosition = track.currentPosition + 1
+                , markerPosition = Maybe.map ((+) 1) track.markerPosition
+            }
+
+        Nothing ->
+            track
