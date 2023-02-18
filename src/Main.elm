@@ -37,6 +37,7 @@ import List.Extra
 import LocalStorage
 import MapPortController
 import Markdown
+import Model exposing (Model, Msg(..))
 import MyIP
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
@@ -89,90 +90,6 @@ import ViewMap
 import ViewPureStyles exposing (..)
 import WriteGPX
 
-
-type Msg
-    = GpxRequested
-    | GpxSelected File
-    | GpxLoaded String
-    | TryRemoteLoad
-    | GpxFromUrl (Result Http.Error String)
-    | ToggleLoadOptionMenu
-    | ToggleRGTOptions
-    | OAuthMessage OAuthMsg
-    | AdjustTimeZone Time.Zone
-    | ReceivedIpDetails (Result Http.Error IpInfo)
-    | StorageMessage E.Value
-    | SplitLeftDockRightEdge SplitPane.Msg
-    | SplitRightDockLeftEdge SplitPane.Msg
-    | Resize Int Int
-    | GotWindowSize (Result Dom.Error Dom.Viewport)
-    | ToolsMsg ToolsController.ToolMsg
-    | DismissModalMessage
-    | PaneMsg PaneLayoutManager.Msg
-    | ToggleToolPopup
-    | BackgroundColour Element.Color
-    | Language I18NOptions.Location
-    | ToggleLanguageEditor
-    | RestoreDefaultToolLayout
-    | WriteGpxFile
-    | FilenameChange String
-    | TimeToUpdateMemory
-    | OneClickMsg Tools.OneClickQuickFix.Msg
-    | FetchElevationsFromMap
-    | ReplaceTrackOnMapAfterStyleChange
-    | SvgMsg SvgPathExtractor.Msg
-    | FlythroughTick Time.Posix
-    | HideInfoPopup
-    | ReceivedLandUseData (Result Http.Error LandUseDataTypes.OSMLandUseData)
-    | I18NMsg I18N.Msg
-    | BackgroundClick Mouse.Event
-    | DisplayWelcome
-    | RGTOptions Tools.RGTOptions.Msg
-    | ProfilePaint
-    | NoOp
-
-
-type alias Model =
-    { filename : Maybe String
-    , time : Time.Posix
-    , zone : Time.Zone
-    , ipInfo : Maybe IpInfo
-    , stravaAuthentication : O.Model
-    , loadOptionsMenuOpen : Bool
-    , svgFileOptions : SvgPathExtractor.Options
-    , location : I18NOptions.Location
-    , rgtOptionsVisible : Bool
-    , loadFromUrl : Maybe Url
-
-    -- Track stuff
-    , track : Maybe (TrackLoaded Msg)
-
-    -- Visuals (scenes now in PaneLayoutManager)
-    , previews : Dict String PreviewData
-    , flythroughRunning : Bool
-    , needsRendering : Bool
-    , mapPointsDraggable : Bool
-
-    -- Layout stuff
-    , windowSize : ( Float, Float )
-    , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-    , modalMessage : Maybe String
-    , paneLayoutOptions : PaneContext.PaneLayoutOptions
-    , infoText : Maybe ( String, String )
-    , welcomeDisplayed : Bool
-
-    -- Splitters
-    , leftDockRightEdge : SplitPane.State
-    , rightDockLeftEdge : SplitPane.State
-
-    -- Tools
-    , toolOptions : ToolsController.Options Msg
-    , isPopupOpen : Bool
-    , backgroundColour : Element.Color
-    , languageEditorOpen : Bool
-    , languageEditor : I18NOptions.Options
-    , rgtOptions : Tools.RGTOptions.Options
-    }
 
 
 encodeSplitValues : Model -> E.Value
@@ -1407,21 +1324,6 @@ performActionsOnModel actions model =
 
                 ( ReRender, Just _ ) ->
                     { foldedModel | needsRendering = True }
-
-                ( DisplayInfo tool text, _ ) ->
-                    { foldedModel
-                        | infoText =
-                            case foldedModel.infoText of
-                                Just ( isTool, isText ) ->
-                                    if tool == isTool && text == isText then
-                                        Nothing
-
-                                    else
-                                        Just ( tool, text )
-
-                                Nothing ->
-                                    Just ( tool, text )
-                    }
 
                 ( SetCurrent position, Just track ) ->
                     { foldedModel

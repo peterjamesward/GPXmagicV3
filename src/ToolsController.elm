@@ -18,6 +18,10 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
+import LocalStorage
+import ModalMessage
+import Model
+import Task
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
@@ -762,28 +766,30 @@ isToolOpen toolType entries =
         /= Nothing
 
 
-update :
-    ToolMsg
-    -> Maybe (TrackLoaded msg)
-    -> (ToolMsg -> msg)
-    -> Options msg
-    -> ( Options msg, List (ToolAction msg) )
-update toolMsg isTrack msgWrapper options =
+update : ToolMsg -> (ToolMsg -> msg) -> Model.Model -> (Model.Model, Cmd msg)
+update toolMsg msgWrapper outerModel =
+    let
+        options =
+            outerModel.toolOptions
+    in
     case toolMsg of
         ToolNoOp ->
-            ( options, [] )
+            ( outerModel, Cmd.none )
 
         ToolPopupToggle toolType ->
             let
                 newOptions =
                     { options | tools = List.map (toggleToolPopup toolType) options.tools }
             in
-            ( newOptions
-            , [ StoreLocally "tools" <| encodeToolState newOptions ]
+            ( { outerModel | toolOptions = newOptions }
+            , LocalStorage.storageSetItem "tools" <| encodeToolState newOptions
             )
 
         DisplayInfo id tag ->
-            ( options, [ Actions.DisplayInfo id tag ] )
+            -- Can we use a task to kick this upstairs to Main?
+            ( ModalMessage.displayInfo id tag outerModel
+            , Cmd.none
+            )
 
         ToolDockSelect toolType toolDock ->
             let
@@ -791,7 +797,7 @@ update toolMsg isTrack msgWrapper options =
                     { options | tools = List.map (setDock toolType toolDock) options.tools }
             in
             ( newOptions
-            , [ StoreLocally "tools" <| encodeToolState newOptions ]
+            , LocalStorage.storageSetItem "tools" <| encodeToolState newOptions
             )
 
         ToolColourSelect toolType color ->
@@ -804,7 +810,9 @@ update toolMsg isTrack msgWrapper options =
                 toolStateHasChanged toolType Expanded isTrack newOptions
 
             else
-                ( newOptions, [ StoreLocally "tools" <| encodeToolState newOptions ] )
+                ( newOptions
+                , LocalStorage.storageSetItem "tools" <| encodeToolState newOptions
+                )
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
@@ -1174,6 +1182,7 @@ update toolMsg isTrack msgWrapper options =
                     ( { options | straightenOptions = newOptions }
                     , actions
                     )
+
                 Nothing ->
                     ( options, [] )
 
