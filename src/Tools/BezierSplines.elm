@@ -1,4 +1,12 @@
-module Tools.BezierSplines exposing (Msg(..), applyUsingOptions, bezierApproximationFor1CQF, defaultOptions, toolId, toolStateChange, update, view)
+module Tools.BezierSplines exposing
+    ( Msg(..)
+    , applyUsingOptions
+    , defaultOptions
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import BezierSplines
@@ -70,10 +78,14 @@ computeNewPoints options track =
     TrackLoaded.asPreviewPoints track distanceToPreview splineEarthPoints
 
 
+
+--TODO: Refactor and whilst at it, stop redundant calculations.
+
+
 applyUsingOptions :
     Options
     -> TrackLoaded msg
-    -> Maybe PeteTree
+    -> TrackLoaded msg
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
@@ -91,16 +103,27 @@ applyUsingOptions options track =
                 (List.map .gpx <| computeNewPoints options track)
                 track.trackTree
     in
-    newTree
+    case newTree of
+        Just isTree ->
+            let
+                pointerReposition =
+                    --Let's reposition by distance, not uncommon.
+                    --TODO: Arguably, position from the relevant track end would be better.
+                    DomainModel.preserveDistanceFromStart track.trackTree isTree
 
+                ( newOrange, newPurple ) =
+                    ( pointerReposition track.currentPosition
+                    , Maybe.map pointerReposition track.markerPosition
+                    )
+            in
+            { track
+                | trackTree = isTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+            }
 
-bezierApproximationFor1CQF : TrackLoaded msg -> PeteTree
-bezierApproximationFor1CQF track =
-    let
-        outputTree =
-            applyUsingOptions defaultOptions track
-    in
-    outputTree |> Maybe.withDefault track.trackTree
+        Nothing ->
+            track
 
 
 toolStateChange :
@@ -125,7 +148,7 @@ actions options previewColour track =
     let
         previewTree =
             -- What would the track become if applied?
-            applyUsingOptions options track
+            .trackTree <| applyUsingOptions options track
 
         profilePreview ptree =
             ShowPreview
@@ -135,8 +158,8 @@ actions options previewColour track =
                 , points = []
                 }
     in
-    case ( options.extent, previewTree ) of
-        ( ExtentIsRange, Just ptree ) ->
+    case options.extent of
+        ExtentIsRange ->
             let
                 normalPreview =
                     ShowPreview
@@ -146,13 +169,10 @@ actions options previewColour track =
                         , points = computeNewPoints options track
                         }
             in
-            [ normalPreview, profilePreview ptree ]
+            [ normalPreview, profilePreview previewTree ]
 
-        ( ExtentIsTrack, Just ptree ) ->
-            [ profilePreview ptree ]
-
-        _ ->
-            [ HidePreview "bezier", HidePreview "bezierprofile" ]
+        ExtentIsTrack ->
+            [ profilePreview previewTree ]
 
 
 update :

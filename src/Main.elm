@@ -1484,17 +1484,14 @@ performActionsOnModel actions model =
                     }
 
                 ( BezierApplyWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.BezierSplines.applyUsingOptions
-                                options
-                                track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
+                    --TODO: Fix marker positioning
+                    --TODO: Fix Undo/Redo
                     { foldedModel
-                        | track = Just newTrack
+                        | track =
+                            Just <|
+                                Tools.BezierSplines.applyUsingOptions
+                                    options
+                                    track
                         , needsRendering = True
                     }
 

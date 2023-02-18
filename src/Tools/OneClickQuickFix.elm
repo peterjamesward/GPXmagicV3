@@ -71,7 +71,9 @@ apply originalTrack =
 
         bezierApprox : TrackLoaded msg -> TrackLoaded msg
         bezierApprox track =
-            { track | trackTree = Tools.BezierSplines.bezierApproximationFor1CQF track }
+            Tools.BezierSplines.applyUsingOptions
+                Tools.BezierSplines.defaultOptions
+                track
 
         finalTrack =
             trackWithNoMarkers

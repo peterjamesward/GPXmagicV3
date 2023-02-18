@@ -33,7 +33,7 @@ module DomainModel exposing
     , nearestToLonLat
     , nearestToRay
     , pointFromGpxWithReference
-    , preserveDistance
+    , preserveDistanceFromStart
     , queryRoadsUsingFilter
     , replaceRange
     , skipCount
@@ -369,8 +369,8 @@ combineInfo info1 info2 =
     }
 
 
-preserveDistance : PeteTree -> PeteTree -> Int -> Int
-preserveDistance oldTree newTree oldIndex =
+preserveDistanceFromStart : PeteTree -> PeteTree -> Int -> Int
+preserveDistanceFromStart oldTree newTree oldIndex =
     let
         oldDistance =
             distanceFromIndex oldIndex oldTree

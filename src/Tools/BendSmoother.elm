@@ -93,7 +93,7 @@ applyUsingOptions options track =
                 pointerReposition =
                     --Let's reposition by distance, not uncommon.
                     --TODO: Arguably, position from the relevant track end would be better.
-                    DomainModel.preserveDistance track.trackTree isTree
+                    DomainModel.preserveDistanceFromStart track.trackTree isTree
 
                 ( newOrange, newPurple ) =
                     ( pointerReposition track.currentPosition

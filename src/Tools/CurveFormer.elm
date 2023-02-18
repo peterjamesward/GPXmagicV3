@@ -110,7 +110,7 @@ applyUsingOptions options track =
                     --Let's reposition by distance, not uncommon.
                     case newTree of
                         Just isNewTree ->
-                            DomainModel.preserveDistance track.trackTree isNewTree
+                            DomainModel.preserveDistanceFromStart track.trackTree isNewTree
 
                         Nothing ->
                             identity
