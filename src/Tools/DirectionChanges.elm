@@ -662,6 +662,14 @@ widenBend :
     List Int
     -> Quantity Float Meters
     -> TrackLoaded msg
-    -> Maybe PeteTree
+    -> TrackLoaded msg
 widenBend points adjustment track =
-    Tools.Nudge.widenBendHelper points adjustment track
+    case Tools.Nudge.widenBendHelper points adjustment track of
+        Just isTree ->
+            { track
+                | trackTree = isTree
+                , leafIndex = TrackLoaded.indexLeaves isTree
+            }
+
+        Nothing ->
+            track

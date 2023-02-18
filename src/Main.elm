@@ -1927,6 +1927,7 @@ performActionsOnModel actions model =
                     }
 
                 ( CombineNearbyPoints, Just track ) ->
+                    -- Trickier refactor because of extra graph option state.
                     let
                         oldToolOptions =
                             model.toolOptions
@@ -1942,19 +1943,13 @@ performActionsOnModel actions model =
                         newToolOptions =
                             { oldToolOptions | graphOptions = newGraphOptions }
 
-                        ( newOrange, newPurple ) =
-                            ( indexFromDistance
-                                (distanceFromIndex track.currentPosition track.trackTree)
-                                newTree
-                            , case track.markerPosition of
-                                Just purple ->
-                                    Just <|
-                                        indexFromDistance
-                                            (distanceFromIndex purple track.trackTree)
-                                            newTree
+                        pointerReposition =
+                            --Let's reposition by distance, not uncommon.
+                            DomainModel.preserveDistanceFromStart track.trackTree newTree
 
-                                Nothing ->
-                                    Nothing
+                        ( newOrange, newPurple ) =
+                            ( pointerReposition track.currentPosition
+                            , Maybe.map pointerReposition track.markerPosition
                             )
 
                         newTrack =
@@ -1991,15 +1986,8 @@ performActionsOnModel actions model =
 
                 ( Actions.WidenBend points adjustment, Just track ) ->
                     -- This for one contiguous set of points, i.e. one bend.
-                    let
-                        newTree =
-                            Tools.DirectionChanges.widenBend points adjustment track
-
-                        newTrack =
-                            track |> TrackLoaded.useTreeWithRepositionedMarkers newTree
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.DirectionChanges.widenBend points adjustment track
                         , needsRendering = True
                     }
 
@@ -2187,6 +2175,7 @@ performActionsOnModel actions model =
                     case track.redos of
                         redo :: moreRedos ->
                             -- More care needed or the repeated edit will flush the Redo stack.
+                            --TODO: Suspect this needs rework to match Undo.
                             let
                                 modelAfterRedo =
                                     performActionsOnModel
