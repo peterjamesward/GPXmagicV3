@@ -1,4 +1,8 @@
-module LandUseDataOSM exposing (applyAltitudes, processLandUseData, requestLandUseData)
+module LandUseDataOSM exposing
+    ( applyAltitudes
+    , processLandUseData
+    , requestLandUseData
+    )
 
 import Angle
 import BoundingBox3d

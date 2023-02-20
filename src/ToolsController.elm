@@ -767,27 +767,27 @@ isToolOpen toolType entries =
 
 
 update : ToolMsg -> (ToolMsg -> msg) -> Model.Model -> (Model.Model, Cmd msg)
-update toolMsg msgWrapper outerModel =
+update toolMsg msgWrapper model =
     let
         options =
-            outerModel.toolOptions
+            model.toolOptions
     in
     case toolMsg of
         ToolNoOp ->
-            ( outerModel, Cmd.none )
+            ( model, Cmd.none )
 
         ToolPopupToggle toolType ->
             let
                 newOptions =
                     { options | tools = List.map (toggleToolPopup toolType) options.tools }
             in
-            ( { outerModel | toolOptions = newOptions }
+            ( { model | toolOptions = newOptions }
             , LocalStorage.storageSetItem "tools" <| encodeToolState newOptions
             )
 
         DisplayInfo id tag ->
             -- Can we use a task to kick this upstairs to Main?
-            ( ModalMessage.displayInfo id tag outerModel
+            ( ModalMessage.displayInfo id tag model
             , Cmd.none
             )
 
@@ -796,7 +796,7 @@ update toolMsg msgWrapper outerModel =
                 newOptions =
                     { options | tools = List.map (setDock toolType toolDock) options.tools }
             in
-            ( newOptions
+            ( { model | toolOptions = newOptions }
             , LocalStorage.storageSetItem "tools" <| encodeToolState newOptions
             )
 
@@ -810,7 +810,7 @@ update toolMsg msgWrapper outerModel =
                 toolStateHasChanged toolType Expanded isTrack newOptions
 
             else
-                ( newOptions
+                ( { model | toolOptions = newOptions }
                 , LocalStorage.storageSetItem "tools" <| encodeToolState newOptions
                 )
 
