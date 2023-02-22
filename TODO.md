@@ -26,7 +26,10 @@ actions (yes, after all that) and using the track/newTrack diff to drive command
 
 https://github.com/klaftertief/slippery-slope
 
-Motivation is to be free of some dodgy JavaScript. Free. Forever. Or Haskell, I suppose.
+Motivation is to be free of some dodgy JavaScript. 
+Free. Forever. Or Haskell, I suppose.
+Bloody good though, pure Elm.
+Not sure how to build it, but I cloned it anyway.
 
 ## Picture button
 
