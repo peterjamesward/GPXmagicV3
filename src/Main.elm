@@ -633,7 +633,7 @@ update msg model =
 
         ToolsMsg toolMsg ->
             let
-                ( newToolOptions, command ) =
+                ( newToolOptions, actions ) =
                     -- Some of the actions update the model, some issue commands.
                     --TODO: Deprecate the Actions concept, JFDI.
                     --This may introduce some unwieldy function type signatures.

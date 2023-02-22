@@ -22,6 +22,12 @@ actions (yes, after all that) and using the track/newTrack diff to drive command
 
 # BACKLOG
 
+## Replace MapBox?
+
+https://github.com/klaftertief/slippery-slope
+
+Motivation is to be free of some dodgy JavaScript. Free. Forever. Or Haskell, I suppose.
+
 ## Picture button
 
 Add button to images to allow screen capture. Because "easy".
