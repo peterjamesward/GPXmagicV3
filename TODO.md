@@ -31,6 +31,9 @@ Free. Forever. Or Haskell, I suppose.
 Bloody good though, pure Elm.
 Not sure how to build it, but I cloned it anyway.
 
+https://github.com/lucamug/elm-map
+Might make more sense - more recently updated.
+
 ## Picture button
 
 Add button to images to allow screen capture. Because "easy".
@@ -108,5 +111,12 @@ Provide info text capability on top bar and on view panes.
 - Centroid average to work over S/F on loop
 - Bezier smoothing to work over S/F on loop
 
- 
 ---
+
+# The cellar
+
+## Redo Profile (again)?
+
+https://package.elm-lang.org/packages/gampleman/elm-visualization/latest/
+No: renders to SVG not Canvas, so disappointing really.
+
