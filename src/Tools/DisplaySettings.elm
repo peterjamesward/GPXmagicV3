@@ -1,12 +1,14 @@
 module Tools.DisplaySettings exposing (Msg(..), defaultOptions, restoreSettings, toolId, update, view)
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import Json.Decode as D
 import LandUseDataTypes
+import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions exposing (..)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -111,11 +113,11 @@ update msg options =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Options -> Element msg
-view location wrap options =
+view : SystemSettings -> (Msg -> msg) -> Options -> Element msg
+view settings wrap options =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         curtainChoice =
             Input.radio
@@ -153,12 +155,7 @@ view location wrap options =
                 }
     in
     wrappedRow
-        [ spacing 5
-        , padding 5
-        , centerX
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ curtainChoice
         , column []
             [ Input.checkbox

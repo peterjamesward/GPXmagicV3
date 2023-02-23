@@ -11,6 +11,7 @@ module Tools.Nudge exposing
     )
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (..)
@@ -24,6 +25,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N exposing (localisedString)
 import Tools.I18NOptions as I18NOptions
 import Tools.NudgeOptions exposing (..)
@@ -446,7 +448,7 @@ update msg options previewColour track =
         ApplyWithOptions ->
             ( options
             , [ WithUndo (Actions.NudgeApplyWithOptions options)
-              , (Actions.NudgeApplyWithOptions options)
+              , Actions.NudgeApplyWithOptions options
               , TrackHasChanged
               ]
             )
@@ -459,11 +461,11 @@ update msg options previewColour track =
             ( newOptions, previewActions newOptions previewColour track )
 
 
-view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial options msgWrapper track =
+view : SystemSettings -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+view settings options msgWrapper track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         vertical label increment =
             button
@@ -474,7 +476,7 @@ view location imperial options msgWrapper track =
     in
     case track of
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location
 
         Just _ ->
             let
@@ -482,17 +484,20 @@ view location imperial options msgWrapper track =
                     Input.slider
                         commonShortHorizontalSliderStyles
                         { onChange = Length.meters >> SetHorizontalNudgeFactor >> msgWrapper
-                        , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.horizontal
+                        , label =
+                            Input.labelBelow [ centerX ] <|
+                                text <|
+                                    showShortMeasure settings.imperial options.horizontal
                         , min =
                             Length.inMeters <|
-                                if imperial then
+                                if settings.imperial then
                                     Length.feet -21.0
 
                                 else
                                     Length.meters -7.0
                         , max =
                             Length.inMeters <|
-                                if imperial then
+                                if settings.imperial then
                                     Length.feet 21.0
 
                                 else
@@ -500,7 +505,7 @@ view location imperial options msgWrapper track =
                         , step =
                             Just <|
                                 Length.inMeters <|
-                                    if imperial then
+                                    if settings.imperial then
                                         Length.inches 2
 
                                     else
@@ -516,13 +521,13 @@ view location imperial options msgWrapper track =
                         , label =
                             Input.labelBelow [ centerX ] <|
                                 text <|
-                                    (localisedString location toolId "fade"
-                                        ++ showShortMeasure imperial options.fadeExtent
+                                    (localisedString settings.location toolId "fade"
+                                        ++ showShortMeasure settings.imperial options.fadeExtent
                                     )
                         , min = 0.0
                         , max =
                             Length.inMeters <|
-                                if imperial then
+                                if settings.imperial then
                                     Length.feet 330.0
 
                                 else
@@ -540,8 +545,8 @@ view location imperial options msgWrapper track =
                             , label =
                                 Input.labelBelow [ centerX ] <|
                                     text
-                                        (localisedString location toolId "spacing"
-                                            ++ showShortMeasure imperial options.easingSpacing
+                                        (localisedString settings.location toolId "spacing"
+                                            ++ showShortMeasure settings.imperial options.easingSpacing
                                         )
                             , min = 1 -- metres
                             , max = 10 -- metres
@@ -562,17 +567,20 @@ view location imperial options msgWrapper track =
                         Input.slider
                             commonShortVerticalSliderStyles
                             { onChange = Length.meters >> SetVerticalNudgeFactor >> msgWrapper
-                            , label = Input.labelBelow [ centerY ] <| text <| showShortMeasure imperial options.vertical
+                            , label =
+                                Input.labelBelow [ centerY ] <|
+                                    text <|
+                                        showShortMeasure settings.imperial options.vertical
                             , min =
                                 Length.inMeters <|
-                                    if imperial then
+                                    if settings.imperial then
                                         Length.feet -21.0
 
                                     else
                                         Length.meters -7.0
                             , max =
                                 Length.inMeters <|
-                                    if imperial then
+                                    if settings.imperial then
                                         Length.feet 21.0
 
                                     else
@@ -580,7 +588,7 @@ view location imperial options msgWrapper track =
                             , step =
                                 Just <|
                                     Length.inMeters <|
-                                        if imperial then
+                                        if settings.imperial then
                                             Length.inches 2
 
                                         else
@@ -605,7 +613,7 @@ view location imperial options msgWrapper track =
 
                 verticalNudgeButtons =
                     column [ alignRight ] <|
-                        if imperial then
+                        if settings.imperial then
                             [ vertical "+1yd" <| Length.yard
                             , vertical "+1ft" <| Length.foot
                             , vertical "+1in" <| Length.inch
@@ -624,11 +632,7 @@ view location imperial options msgWrapper track =
                             ]
             in
             row
-                [ width fill
-                , padding 5
-                , spacing 5
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                ]
+                (CommonToolStyles.toolContentBoxStyle settings)
                 [ verticalNudgeButtons
                 , verticalNudgeSlider
                 , column [ width fill, centerX, padding 5, spacing 5 ]

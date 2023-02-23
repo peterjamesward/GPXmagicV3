@@ -14,6 +14,7 @@ module Tools.StravaTools exposing
 import Actions exposing (ToolAction(..))
 import Angle
 import ColourPalette exposing (stravaOrange)
+import CommonToolStyles
 import Direction2d
 import DomainModel exposing (GPXSource, PeteTree, skipCount)
 import Element exposing (..)
@@ -28,6 +29,7 @@ import List.Extra
 import OAuth as O
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import SystemSettings exposing (SystemSettings)
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -347,7 +349,7 @@ update msg settings wrap track =
                 ( Just isTrack, SegmentPreviewed segment ) ->
                     ( settings
                     , [ WithUndo (Actions.PasteStravaSegment settings)
-                      , (Actions.PasteStravaSegment settings)
+                      , Actions.PasteStravaSegment settings
                       , TrackHasChanged
                       , HidePreview "strava"
                       , ClearStravaSegmentData
@@ -595,11 +597,11 @@ paste options track =
             ( Nothing, [], ( 0, 0 ) )
 
 
-viewStravaTab : I18NOptions.Location -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
-viewStravaTab location options wrap track =
+viewStravaTab : SystemSettings -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+viewStravaTab settings options wrap track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         routeIdField =
             Input.text
@@ -688,11 +690,7 @@ viewStravaTab location options wrap track =
                     none
     in
     column
-        [ spacing 10
-        , padding 10
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
     <|
         case ( options.stravaStatus, track ) of
             ( StravaConnected _, Just _ ) ->

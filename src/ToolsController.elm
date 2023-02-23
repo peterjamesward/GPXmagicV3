@@ -1994,7 +1994,6 @@ viewToolByType settings msgWrapper entry isTrack options =
             ToolEssentials ->
                 Tools.Essentials.view
                     settings
-                    options.imperial
                     (msgWrapper << ToolEssentialsMsg)
                     options.essentialOptions
                     isTrack
@@ -2099,6 +2098,7 @@ viewToolByType settings msgWrapper entry isTrack options =
             ToolStrava ->
                 Tools.StravaTools.viewStravaTab
                     settings
+                    options.stravaSettings
                     (msgWrapper << ToolStravaMsg)
                     isTrack
 
@@ -2528,8 +2528,8 @@ restoreDockSettings options values =
             options
 
 
-restoreMeasure : Options msg -> D.Value -> Options msg
-restoreMeasure options value =
+restoreMeasure : SystemSettings -> D.Value -> SystemSettings
+restoreMeasure settings value =
     -- Care! Need to overlay restored values on to the current tools.
     let
         decoded =
@@ -2537,10 +2537,10 @@ restoreMeasure options value =
     in
     case decoded of
         Ok setting ->
-            { options | imperial = setting }
+            { settings | imperial = setting }
 
         Err _ ->
-            options
+            settings
 
 
 

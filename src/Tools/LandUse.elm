@@ -8,6 +8,7 @@ import Element.Background as Background
 import Element.Font as Font
 import FlatColors.ChinesePalette
 import LandUseDataTypes
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOPtions
 import Tools.LandUseColours exposing (landUseColours)
@@ -49,11 +50,11 @@ update msg wrapper options =
             ( { options | mode = mode }, [] )
 
 
-view : I18NOPtions.Location -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location wrap options maybeTrack =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings wrap options maybeTrack =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         status =
             case maybeTrack of

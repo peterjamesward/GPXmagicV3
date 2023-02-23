@@ -1,6 +1,7 @@
 module Tools.Flythrough exposing (Flythrough, Msg(..), Options, RunState(..), advanceFlythrough, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction)
+import CommonToolStyles
 import DomainModel exposing (asRecord)
 import Element exposing (..)
 import Element.Background as Background
@@ -13,6 +14,7 @@ import Point3d exposing (Point3d)
 import Quantity
 import Speed
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -168,8 +170,8 @@ advanceInternal newTime status speed track =
                     }
 
 
-view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Element msg
-view location imperial options wrapper =
+view : SystemSettings -> Options -> (Msg -> msg) -> Element msg
+view settings options wrapper =
     let
         speed =
             Speed.metersPerSecond (10.0 ^ options.flythroughSpeed)
@@ -182,8 +184,8 @@ view location imperial options wrapper =
                     Input.labelBelow [] <|
                         text <|
                             String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "speed")
-                                [ showSpeed imperial speed ]
+                                (I18N.localisedString settings.location toolId "speed")
+                                [ showSpeed settings.imperial speed ]
                 , min = 1.0 -- i.e. 1
                 , max = 3.0 -- i.e. 1000
                 , step = Nothing
@@ -226,12 +228,7 @@ view location imperial options wrapper =
                     pauseButton flying.running
     in
     column
-        [ padding 10
-        , spacing 10
-        , centerX
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ el [ centerX ] <|
             row [ padding 10, spacing 10, centerX ]
                 [ resetButton
@@ -243,8 +240,8 @@ view location imperial options wrapper =
                 Just flying ->
                     text <|
                         String.Interpolate.interpolate
-                            (I18N.localisedString location toolId "where")
-                            [ showLongMeasure imperial flying.metresFromRouteStart ]
+                            (I18N.localisedString settings.location toolId "where")
+                            [ showLongMeasure settings.imperial flying.metresFromRouteStart ]
 
                 Nothing ->
                     none

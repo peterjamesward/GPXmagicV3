@@ -2,6 +2,7 @@ module Tools.SmartSmoother exposing (Msg(..), applyUsingOptions, defaultOptions,
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import CommonToolStyles
 import Direction2d exposing (Direction2d)
 import Direction3d exposing (Direction3d)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, skipCount)
@@ -16,6 +17,7 @@ import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.SmartSmootherOptions exposing (..)
@@ -634,11 +636,11 @@ update msg options previewColour track =
             ( newOptions, previewActions newOptions previewColour track )
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view location imperial wrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view settings wrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         applyButton =
             button
@@ -661,8 +663,8 @@ view location imperial wrapper options track =
                 , infoButton <| wrapper <| DisplayInfo "smart" "radius"
                 , text <|
                     String.Interpolate.interpolate
-                        (I18N.localisedString location toolId "viewminimum")
-                        [ showShortMeasure imperial options.minRadius ]
+                        (I18N.localisedString settings.location toolId "viewminimum")
+                        [ showShortMeasure settings.imperial options.minRadius ]
                 ]
 
         transitionSlider =
@@ -679,8 +681,8 @@ view location imperial wrapper options track =
                 , infoButton <| wrapper <| DisplayInfo "smart" "transition"
                 , text <|
                     String.Interpolate.interpolate
-                        (I18N.localisedString location toolId "viewtransition")
-                        [ showShortMeasure imperial options.minTransition ]
+                        (I18N.localisedString settings.location toolId "viewtransition")
+                        [ showShortMeasure settings.imperial options.minTransition ]
                 ]
 
         gradientSlider =
@@ -697,7 +699,7 @@ view location imperial wrapper options track =
                 , infoButton <| wrapper <| DisplayInfo "smart" "gradient"
                 , text <|
                     String.Interpolate.interpolate
-                        (I18N.localisedString location toolId "viewgradient")
+                        (I18N.localisedString settings.location toolId "viewgradient")
                         [ showDecimal2 options.maxGradient ]
                 ]
 
@@ -715,17 +717,12 @@ view location imperial wrapper options track =
                 , infoButton <| wrapper <| DisplayInfo "smart" "blend"
                 , text <|
                     String.Interpolate.interpolate
-                        (I18N.localisedString location toolId "viewblend")
+                        (I18N.localisedString settings.location toolId "viewblend")
                         [ showDecimal2 options.blend ]
                 ]
     in
     column
-        [ padding 10
-        , spacing 5
-        , width fill
-        , centerX
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ none
         , minRadiusSlider
         , transitionSlider

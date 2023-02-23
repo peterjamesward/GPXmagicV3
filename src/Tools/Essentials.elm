@@ -1,6 +1,7 @@
 module Tools.Essentials exposing (Msg(..), Options, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import DomainModel exposing (PeteTree, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -11,6 +12,7 @@ import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -178,38 +180,34 @@ update msg options previewColour hasTrack =
                     )
 
 
-positionDescription : I18NOptions.Location -> Bool -> Int -> PeteTree -> String
-positionDescription location imperial pos track =
+positionDescription : SystemSettings -> Int -> PeteTree -> String
+positionDescription settings pos track =
     let
         localString =
-            I18N.localisedString location toolId "point"
+            I18N.localisedString settings.location toolId "point"
     in
     String.Interpolate.interpolate
         localString
         [ String.fromInt pos
-        , showLongMeasure imperial <| DomainModel.distanceFromIndex pos track
+        , showLongMeasure settings.imperial <| DomainModel.distanceFromIndex pos track
         ]
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial msgWrapper options isTrack =
-    column
-        [ width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
-    <|
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings msgWrapper options isTrack =
+    column (CommonToolStyles.toolContentBoxStyle settings) <|
         case isTrack of
             Just track ->
-                [ viewPointers location imperial msgWrapper options track
-                , viewUndoRedo location msgWrapper track
+                [ viewPointers settings msgWrapper options track
+                , viewUndoRedo settings msgWrapper track
                 ]
 
             Nothing ->
-                [ noTrackMessage location ]
+                [ noTrackMessage settings.location ]
 
 
-viewPointers : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-viewPointers location imperial msgWrapper options track =
+viewPointers : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+viewPointers settings msgWrapper options track =
     let
         purpleStyle =
             [ Border.color FlatColors.AussiePalette.blurple
@@ -230,16 +228,10 @@ viewPointers location imperial msgWrapper options track =
             ]
     in
     column
-        [ centerX
-        , padding 4
-        , spacing 6
-        , width fill
-
-        --, height <| px 150
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ el [ centerX ] <|
             text <|
-                positionDescription location imperial options.orange track.trackTree
+                positionDescription settings options.orange track.trackTree
         , row
             [ centerX
             , spacing 10
@@ -283,7 +275,7 @@ viewPointers location imperial msgWrapper options track =
                             , centerY
                             , centerX
                             ]
-                            { label = I18N.text location toolId "lift"
+                            { label = I18N.text settings.location toolId "lift"
                             , onPress = Just <| msgWrapper <| LiftMarker
                             }
 
@@ -297,7 +289,7 @@ viewPointers location imperial msgWrapper options track =
                     <|
                         Input.button
                             purpleStyle
-                            { label = I18N.text location toolId "drop"
+                            { label = I18N.text settings.location toolId "drop"
                             , onPress = Just <| msgWrapper <| DropMarker
                             }
         , case options.purple of
@@ -335,15 +327,15 @@ viewPointers location imperial msgWrapper options track =
         , el [ centerX ] <|
             case options.purple of
                 Just something ->
-                    text <| positionDescription location imperial something track.trackTree
+                    text <| positionDescription settings something track.trackTree
 
                 Nothing ->
-                    I18N.text location toolId "note"
+                    I18N.text settings.location toolId "note"
         ]
 
 
-viewUndoRedo : I18NOptions.Location -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-viewUndoRedo location msgWrapper track =
+viewUndoRedo : SystemSettings -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+viewUndoRedo settings msgWrapper track =
     el [ centerX ] <|
         wrappedRow
             [ width fill, padding 20, spacing 10, centerX ]
@@ -351,7 +343,7 @@ viewUndoRedo location msgWrapper track =
                 [] ->
                     Input.button neatToolsBorder
                         { onPress = Nothing
-                        , label = I18N.text location toolId "noundo"
+                        , label = I18N.text settings.location toolId "noundo"
                         }
 
                 undo :: _ ->
@@ -360,14 +352,14 @@ viewUndoRedo location msgWrapper track =
                         , label =
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "undo")
-                                    [ Actions.actionTextForUndo location undo.action ]
+                                    (I18N.localisedString settings.location toolId "undo")
+                                    [ Actions.actionTextForUndo settings.location undo.action ]
                         }
             , case track.redos of
                 [] ->
                     Input.button neatToolsBorder
                         { onPress = Nothing
-                        , label = I18N.text location toolId "noredo"
+                        , label = I18N.text settings.location toolId "noredo"
                         }
 
                 redo :: _ ->
@@ -376,7 +368,7 @@ viewUndoRedo location msgWrapper track =
                         , label =
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "redo")
-                                    [ Actions.actionTextForUndo location redo.action ]
+                                    (I18N.localisedString settings.location toolId "redo")
+                                    [ Actions.actionTextForUndo settings.location redo.action ]
                         }
             ]

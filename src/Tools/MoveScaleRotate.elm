@@ -4,6 +4,7 @@ import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
+import CommonToolStyles
 import Direction2d
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
@@ -17,6 +18,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -328,13 +330,12 @@ applyRecentre newReferenceCoords track =
 
 
 view :
-    I18NOptions.Location
-    -> Bool
+    SystemSettings
     -> Options
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Element msg
-view location imperial options wrapper maybeTrack =
+view settings options wrapper maybeTrack =
     let
         recentreButton =
             case maybeTrack of
@@ -349,7 +350,7 @@ view location imperial options wrapper maybeTrack =
                         , label =
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "move")
+                                    (I18N.localisedString settings.location toolId "move")
                                     [ UtilsForViews.longitudeString <| Angle.degrees lon
                                     , UtilsForViews.latitudeString <| Angle.degrees lat
                                     ]
@@ -362,7 +363,7 @@ view location imperial options wrapper maybeTrack =
         Just _ ->
             let
                 i18n =
-                    I18N.text location toolId
+                    I18N.text settings.location toolId
 
                 rotationSlider =
                     Input.slider
@@ -372,7 +373,7 @@ view location imperial options wrapper maybeTrack =
                             Input.labelBelow [] <|
                                 text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "rotation")
+                                        (I18N.localisedString settings.location toolId "rotation")
                                         [ showDecimal0 <| Angle.inDegrees options.rotateAngle ]
                         , min = -30.0
                         , max = 30.0
@@ -388,20 +389,20 @@ view location imperial options wrapper maybeTrack =
                         , label =
                             Input.labelBelow [] <|
                                 text <|
-                                    if imperial then
+                                    if settings.imperial then
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "imperial")
+                                            (I18N.localisedString settings.location toolId "imperial")
                                             [ showDecimal2 <| Length.inMiles options.desiredTrackLength ]
 
                                     else
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "metric")
+                                            (I18N.localisedString settings.location toolId "metric")
                                             [ showDecimal2 <| Length.inKilometers options.desiredTrackLength ]
                         , min = 1.0
                         , max = 100.0
                         , step =
                             Just <|
-                                if imperial then
+                                if settings.imperial then
                                     Length.inKilometers <| Length.yards 17.6
 
                                 else
@@ -432,11 +433,7 @@ view location imperial options wrapper maybeTrack =
                         }
             in
             column
-                [ spacing 6
-                , padding 6
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                , width fill
-                ]
+                (CommonToolStyles.toolContentBoxStyle settings)
                 [ el [ centerX ] rotationSlider
                 , el [ centerX ] scaleSlider
                 , wrappedRow
@@ -451,4 +448,4 @@ view location imperial options wrapper maybeTrack =
                 ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location

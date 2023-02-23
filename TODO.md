@@ -13,6 +13,10 @@ No preview for single point nudge without fade.
 
 # WIP
 
+## Dark mode
+
+Apply background to all tools.
+
 ## Refactor Main -> Tools
 
 I hope this will open the door to a much cleaner control flow, perhaps deprecating
@@ -22,9 +26,13 @@ actions (yes, after all that) and using the track/newTrack diff to drive command
 
 # BACKLOG
 
-## Dark mode
+## Video playback window
 
-Apply background to all tools.
+Sync'd to Orange?
+
+## Detect "flat bits"
+
+Like Gradient Problems but **exactly zero** gradient.
 
 ## Route algebra
 

@@ -20,6 +20,7 @@ import Length exposing (Meters)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, Squared)
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -225,13 +226,13 @@ update msg options previewColour track =
             ( options, [ Actions.FlushUndo ] )
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location msgWrapper options isTrack =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings msgWrapper options isTrack =
     case isTrack of
         Just _ ->
             let
                 i18n =
-                    I18N.text location toolId
+                    I18N.text settings.location toolId
             in
             column
                 [ width fill
@@ -253,7 +254,7 @@ view location msgWrapper options isTrack =
                                     paragraph [] <|
                                         [ text <|
                                             String.Interpolate.interpolate
-                                                (I18N.localisedString location toolId "remove")
+                                                (I18N.localisedString settings.location toolId "remove")
                                                 [ String.fromInt quantity ]
                                         ]
                                 }
@@ -267,4 +268,4 @@ view location msgWrapper options isTrack =
                 ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location

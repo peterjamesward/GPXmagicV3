@@ -17,6 +17,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.BezierOptions as BezierOptions exposing (..)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -217,11 +218,11 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view location wrap options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view settings wrap options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         sliders =
             column [ centerX, width fill, spacing 5 ]
@@ -231,7 +232,7 @@ view location wrap options track =
                         Input.labelBelow [] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "tension")
+                                    (I18N.localisedString settings.location toolId "tension")
                                     [ showDecimal2 options.bezierTension ]
                     , min = 0.0
                     , max = 1.0
@@ -245,7 +246,7 @@ view location wrap options track =
                         Input.labelBelow [] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "tolerance")
+                                    (I18N.localisedString settings.location toolId "tolerance")
                                     [ showDecimal2 options.bezierTolerance ]
                     , min = 1.0
                     , max = 10.0

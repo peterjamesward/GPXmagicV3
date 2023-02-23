@@ -4,7 +4,9 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import FlatColors.ChinesePalette
-import SystemSettings exposing (SystemSettings)
+import FlatColors.FlatUIPalette
+import SystemSettings exposing (ColourTheme(..), SystemSettings)
+import ViewPureStyles exposing (rgtDark)
 
 
 toolContentBoxStyle : SystemSettings -> List (Attribute msg)
@@ -27,3 +29,13 @@ toolContentBoxStyle settings =
             , Font.color FlatColors.ChinesePalette.antiFlashWhite
             , Background.color FlatColors.ChinesePalette.prestigeBlue
             ]
+
+
+themeBackground : ColourTheme -> Element.Color
+themeBackground theme =
+    case theme of
+        LightTheme ->
+            FlatColors.FlatUIPalette.asbestos
+
+        DarkTheme ->
+            rgtDark

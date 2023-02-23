@@ -3,6 +3,7 @@ module Tools.OutAndBack exposing (Msg(..), apply, defaultOptions, toolId, update
 import Actions exposing (ToolAction(..))
 import Arc3d
 import Axis3d
+import CommonToolStyles
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -14,6 +15,7 @@ import Point3d
 import Polyline3d
 import Quantity
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
@@ -218,13 +220,13 @@ update msg options hasTrack =
             ( options, [] )
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial wrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings wrapper options track =
     case track of
         Just _ ->
             let
                 i18n =
-                    I18N.text location toolId
+                    I18N.text settings.location toolId
 
                 offsetSlider =
                     Input.slider
@@ -234,18 +236,18 @@ view location imperial wrapper options track =
                             Input.labelBelow [] <|
                                 text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "offset")
-                                        [ showShortMeasure imperial (Length.meters options.offset) ]
+                                        (I18N.localisedString settings.location toolId "offset")
+                                        [ showShortMeasure settings.imperial (Length.meters options.offset) ]
                         , min =
                             Length.inMeters <|
-                                if imperial then
+                                if settings.imperial then
                                     Length.feet -16.0
 
                                 else
                                     Length.meters -5.0
                         , max =
                             Length.inMeters <|
-                                if imperial then
+                                if settings.imperial then
                                     Length.feet 16.0
 
                                 else
@@ -263,15 +265,10 @@ view location imperial wrapper options track =
                         }
             in
             column
-                [ padding 5
-                , spacing 5
-                , width fill
-                , centerX
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                ]
+                (CommonToolStyles.toolContentBoxStyle settings)
                 [ el [ centerX ] <| offsetSlider
                 , el [ centerX ] <| fixButton
                 ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location

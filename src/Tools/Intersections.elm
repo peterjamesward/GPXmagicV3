@@ -11,6 +11,7 @@ import List.Extra
 import PreviewData exposing (PreviewShape(..))
 import RoadIndex exposing (Intersection)
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -138,11 +139,11 @@ update msg options wrap =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view location imperial msgWrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view settings msgWrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         resultModeSelection =
             Input.radioRow [ centerX, spacing 5 ]
@@ -170,17 +171,17 @@ view location imperial msgWrapper options track =
                         , row [ centerX, spacing 10 ]
                             [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
                             , Input.button
-                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "prev")
+                                (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "prev")
                                 { label = useIcon FeatherIcons.chevronLeft
                                 , onPress = Just <| msgWrapper <| ViewPrevious
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "this")
+                                (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "this")
                                 { label = useIcon FeatherIcons.mousePointer
                                 , onPress = Just <| msgWrapper <| SetCurrentPosition a.thisSegment
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "next")
+                                (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "next")
                                 { label = useIcon FeatherIcons.chevronRight
                                 , onPress = Just <| msgWrapper <| ViewNext
                                 }
@@ -191,7 +192,7 @@ view location imperial msgWrapper options track =
         linkButton { thisSegment, otherSegment, category } =
             let
                 distanceText =
-                    showLongMeasure imperial <| DomainModel.distanceFromIndex thisSegment track.trackTree
+                    showLongMeasure settings.imperial <| DomainModel.distanceFromIndex thisSegment track.trackTree
 
                 categoryText =
                     case category of
@@ -215,7 +216,7 @@ view location imperial msgWrapper options track =
                 , label =
                     text <|
                         String.Interpolate.interpolate
-                            (I18N.localisedString location toolId "detail")
+                            (I18N.localisedString settings.location toolId "detail")
                             [ thisText, categoryText, otherText, distanceText ]
                 }
     in

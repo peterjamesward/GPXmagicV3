@@ -1,6 +1,7 @@
 module Tools.ProfileSmooth exposing (Msg(..), SlopeStatus(..), SlopeStuff, apply, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -11,6 +12,7 @@ import Point3d exposing (zCoordinate)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (multiplyBy, zero)
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.ProfileSmoothOptions exposing (..)
@@ -139,7 +141,7 @@ update msg options previewColour track =
         ApplyPreview ->
             ( options
             , [ WithUndo (Actions.ApplySmoothProfile options)
-              , (Actions.ApplySmoothProfile options)
+              , Actions.ApplySmoothProfile options
               , TrackHasChanged
               ]
             )
@@ -980,11 +982,11 @@ toolStateChange opened colour options track =
             ( options, [ HidePreview "limit", HidePreview "limitProfile" ] )
 
 
-view : I18NOptions.Location -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view location options wrapper track =
+view : SystemSettings -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view settings options wrapper track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         windowSizeSlider =
             Input.slider
@@ -994,7 +996,7 @@ view location options wrapper track =
                     Input.labelBelow [] <|
                         text <|
                             String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "window")
+                                (I18N.localisedString settings.location toolId "window")
                                 [ String.fromInt options.windowSize ]
                 , min = 1.0
                 , max = 8.0
@@ -1036,11 +1038,7 @@ view location options wrapper track =
                 }
     in
     wrappedRow
-        [ spacing 6
-        , padding 6
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , width fill
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ modeChoice
         , case options.smoothMethod of
             MethodLimit ->
@@ -1053,7 +1051,7 @@ view location options wrapper track =
                                 Input.labelBelow [] <|
                                     text <|
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "uphill")
+                                            (I18N.localisedString settings.location toolId "uphill")
                                             [ showDecimal0 options.maximumAscent ]
                             , min = 10.0
                             , max = 25.0
@@ -1070,7 +1068,7 @@ view location options wrapper track =
                                 Input.labelBelow [] <|
                                     text <|
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "downhill")
+                                            (I18N.localisedString settings.location toolId "downhill")
                                             [ showDecimal0 options.maximumDescent ]
                             , min = 10.0
                             , max = 25.0
@@ -1112,7 +1110,7 @@ view location options wrapper track =
                                 Input.labelBelow [] <|
                                     text <|
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "bumpiness")
+                                            (I18N.localisedString settings.location toolId "bumpiness")
                                             [ showDecimal0 <| 100.0 * options.bumpiness ]
                             , min = 0.0
                             , max = 1.0

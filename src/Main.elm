@@ -6,6 +6,7 @@ import Browser exposing (application)
 import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation exposing (Key)
+import CommonToolStyles
 import Delay
 import Dict exposing (Dict)
 import Direction2d
@@ -49,7 +50,7 @@ import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import SvgPathExtractor
-import SystemSettings
+import SystemSettings exposing (SystemSettings)
 import Task
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
@@ -111,7 +112,7 @@ type Msg
     | DismissModalMessage
     | PaneMsg PaneLayoutManager.Msg
     | ToggleToolPopup
-    | BackgroundColour Element.Color
+    | SetColourTheme SystemSettings.ColourTheme
     | Language I18NOptions.Location
     | ToggleLanguageEditor
     | RestoreDefaultToolLayout
@@ -278,7 +279,7 @@ init mflags origin navigationKey =
                 |> configureSplitter (SplitPane.px (800 - 200) <| Just ( 600, 990 ))
       , toolOptions = ToolsController.defaultOptions
       , isPopupOpen = False
-      , backgroundColour = FlatColors.FlatUIPalette.silver
+      , systemSettings = SystemSettings.default
       , languageEditorOpen = False
       , languageEditor = I18N.defaultOptions
       , rgtOptions = Tools.RGTOptions.defaults
@@ -352,7 +353,7 @@ update msg model =
                     , Cmd.batch
                         [ showTrackOnMapCentered
                             modelWithTrack.paneLayoutOptions
-                            modelWithTrack.toolOptions.imperial
+                            modelWithTrack.systemSettings.imperial
                             track
                         , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
                         , LocalStorage.sessionClear
@@ -368,10 +369,15 @@ update msg model =
     case msg of
         ToggleImperial ->
             let
-                newOptions =
-                    { options | imperial = not options.imperial }
+                settings =
+                    model.systemSettings
+
+                newSettings =
+                    { settings | imperial = not settings.imperial }
             in
-            ( newOptions, [ StoreLocally "measure" <| E.bool newOptions.imperial ] )
+            ( { model | systemSettings = newSettings }
+            , LocalStorage.storageSetItem "measure" <| E.bool newSettings.imperial
+            )
 
         DisplayWelcome ->
             let
@@ -403,7 +409,7 @@ update msg model =
                     ( model
                     , PaneLayoutManager.paintProfileCharts
                         model.paneLayoutOptions
-                        model.toolOptions.imperial
+                        model.systemSettings.imperial
                         track
                         model.toolOptions.namedSegmentOptions.namedSegments
                         model.previews
@@ -431,7 +437,14 @@ update msg model =
             )
 
         Language location ->
-            ( { model | location = location }
+            let
+                settings =
+                    model.systemSettings
+
+                newSettings =
+                    { settings | location = location }
+            in
+            ( { model | systemSettings = newSettings }
             , Cmd.batch
                 [ LocalStorage.storageSetItem "location" <| E.string location.country.code
                 , if Dict.isEmpty location.textDictionary then
@@ -455,9 +468,18 @@ update msg model =
         I18NMsg i18n ->
             let
                 ( newLocation, newOptions, cmds ) =
-                    I18N.update i18n I18NMsg ( model.location, model.languageEditor )
+                    I18N.update i18n I18NMsg ( model.systemSettings.location, model.languageEditor )
+
+                settings =
+                    model.systemSettings
+
+                newSettings =
+                    { settings | location = newLocation }
             in
-            ( { model | location = newLocation, languageEditor = newOptions }
+            ( { model
+                | systemSettings = newSettings
+                , languageEditor = newOptions
+              }
             , cmds
             )
 
@@ -682,13 +704,20 @@ update msg model =
         ToggleToolPopup ->
             ( { model | isPopupOpen = not model.isPopupOpen }, Cmd.none )
 
-        BackgroundColour colour ->
+        SetColourTheme theme ->
             let
+                settings =
+                    model.systemSettings
+
+                newSettings =
+                    { settings | colourTheme = theme }
+
                 newModel =
-                    { model | backgroundColour = colour }
+                    { model | systemSettings = newSettings }
 
                 actions =
-                    [ StoreLocally "background" <| encodeColour colour ]
+                    --TODO: Store the theme not the colour.
+                    [ StoreLocally "background" <| encodeColour <| CommonToolStyles.themeBackground theme ]
             in
             ( newModel
             , performActionCommands actions newModel
@@ -945,7 +974,7 @@ composeTitle model =
 bestTrackName model =
     case model.track of
         Nothing ->
-            I18N.localisedString model.location "main" "notrack"
+            I18N.localisedString model.systemSettings.location "main" "notrack"
 
         Just track ->
             case track.trackName of
@@ -955,7 +984,7 @@ bestTrackName model =
                 Nothing ->
                     model.filename
                         |> Maybe.withDefault
-                            (I18N.localisedString model.location "main" "unnamed")
+                            (I18N.localisedString model.systemSettings.location "main" "unnamed")
 
 
 view : Model -> Browser.Document Msg
@@ -963,23 +992,23 @@ view model =
     { title = composeTitle model
     , body =
         [ layout
-            (Background.color model.backgroundColour
+            (Background.color (CommonToolStyles.themeBackground model.systemSettings.colourTheme)
                 :: (inFront <|
                         case model.modalMessage of
                             Just message ->
                                 showModalMessage
-                                    model.location
+                                    model.systemSettings.location
                                     (Pixels.inPixels <| Tuple.first model.contentArea)
-                                    (I18N.localisedString model.location "main" message)
+                                    (I18N.localisedString model.systemSettings.location "main" message)
                                     DismissModalMessage
 
                             Nothing ->
                                 none
                    )
-                :: (inFront <| infoTextPopup model.location model.infoText)
+                :: (inFront <| infoTextPopup model.systemSettings.location model.infoText)
                 :: (inFront <|
                         if model.languageEditorOpen then
-                            I18N.editor I18NMsg model.location model.languageEditor
+                            I18N.editor I18NMsg model.systemSettings.location model.languageEditor
 
                         else
                             none
@@ -989,28 +1018,16 @@ view model =
             )
           <|
             column [ width fill, height fill ]
-                [ el
-                    [ width fill
-                    , Border.widthEach { edges | bottom = 1 }
-                    , Border.color ukraineBlue
-                    ]
-                  <|
-                    topLoadingBar model
-                , el
-                    [ width fill
-                    , Border.widthEach { edges | top = 1 }
-                    , Border.color ukraineYellow
-                    ]
-                  <|
-                    html <|
-                        div
-                            [ style "width" "100%", style "height" "100%" ]
-                            [ SplitPane.view
-                                rightDockConfig
-                                (notTheRightDockView model)
-                                (rightDockView model)
-                                model.rightDockLeftEdge
-                            ]
+                [ topLoadingBar model
+                , html <|
+                    div
+                        [ style "width" "100%", style "height" "100%" ]
+                        [ SplitPane.view
+                            rightDockConfig
+                            (notTheRightDockView model)
+                            (rightDockView model)
+                            model.rightDockLeftEdge
+                        ]
                 ]
         ]
     }
@@ -1057,7 +1074,7 @@ upperLeftDockView model =
         commonLayoutStyles
     <|
         ToolsController.toolsForDock
-            model.location
+            model.systemSettings
             ToolsController.DockUpperLeft
             ToolsMsg
             model.track
@@ -1070,7 +1087,7 @@ upperRightDockView model =
         commonLayoutStyles
     <|
         ToolsController.toolsForDock
-            model.location
+            model.systemSettings
             ToolsController.DockUpperRight
             ToolsMsg
             model.track
@@ -1088,7 +1105,7 @@ viewPaneArea model =
         ((htmlAttribute <| Mouse.onClick BackgroundClick) :: commonLayoutStyles)
     <|
         PaneLayoutManager.viewPanes
-            model.location
+            model.systemSettings
             PaneMsg
             model.track
             model.toolOptions.namedSegmentOptions.namedSegments
@@ -1098,14 +1115,14 @@ viewPaneArea model =
             model.paneLayoutOptions
             model.toolOptions.flythroughSettings.flythrough
             model.previews
-            model.toolOptions.imperial
 
 
+topLoadingBar : Model -> Element Msg
 topLoadingBar model =
     let
         localHelper : String -> Element msg
         localHelper =
-            text << I18N.localisedString model.location "main"
+            text << I18N.localisedString model.systemSettings.location "main"
 
         moreOptionsButton =
             button
@@ -1113,7 +1130,7 @@ topLoadingBar model =
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
-                , tooltip below (localisedTooltip model.location "main" "import")
+                , tooltip below (localisedTooltip model.systemSettings.location "main" "import")
                 , inFront <|
                     if model.loadOptionsMenuOpen then
                         column
@@ -1167,7 +1184,7 @@ topLoadingBar model =
                     , Background.color FlatColors.AussiePalette.juneBud
                     , Border.color FlatColors.FlatUIPalette.peterRiver
                     , Border.width 2
-                    , tooltip below (localisedTooltip model.location "main" "saveOptions")
+                    , tooltip below (localisedTooltip model.systemSettings.location "main" "saveOptions")
                     , inFront <|
                         if model.rgtOptionsVisible then
                             el
@@ -1184,7 +1201,7 @@ topLoadingBar model =
                                 ]
                             <|
                                 Tools.RGTOptions.view
-                                    model.location
+                                    model.systemSettings.location
                                     model.rgtOptions
                                     RGTOptions
 
@@ -1224,7 +1241,7 @@ topLoadingBar model =
                 none
         , saveButton
         , row [ alignRight, spacing 5 ]
-            [ Tools.OneClickQuickFix.oneClickQuickFixButton model.location OneClickMsg model.track
+            [ Tools.OneClickQuickFix.oneClickQuickFixButton model.systemSettings.location OneClickMsg model.track
             , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
             , buyMeACoffeeButton
             ]
@@ -1307,11 +1324,14 @@ globalOptions model =
 
 showOptionsMenu model =
     let
-        colourBlock colour =
+        colourBlock theme =
             Input.button
-                [ Background.color colour, width fill, height <| Element.px 20 ]
+                [ Background.color <| CommonToolStyles.themeBackground theme
+                , width fill
+                , height <| Element.px 20
+                ]
                 { label = none
-                , onPress = Just <| BackgroundColour colour
+                , onPress = Just <| SetColourTheme theme
                 }
 
         chooseLanguage : I18NOptions.Location -> Element Msg
@@ -1347,17 +1367,16 @@ showOptionsMenu model =
         in
         column (spacing 4 :: subtleToolStyles)
             [ row (alignRight :: width fill :: subtleToolStyles)
-                [ colourBlock FlatColors.FlatUIPalette.silver
-                , colourBlock FlatColors.FlatUIPalette.asbestos
-                , colourBlock rgtDark
+                [ colourBlock SystemSettings.LightTheme
+                , colourBlock SystemSettings.DarkTheme
                 ]
             , el (alignRight :: width fill :: subtleToolStyles) <|
                 Input.button [ alignRight ]
                     { onPress = Just <| RestoreDefaultToolLayout
-                    , label = I18N.text model.location "main" "default"
+                    , label = I18N.text model.systemSettings.location "main" "default"
                     }
             , el (alignRight :: width fill :: subtleToolStyles) <|
-                imperialToggleMenuEntry model.location
+                imperialToggleMenuEntry model.systemSettings.location
             , row [ spaceEvenly, width fill ] <|
                 List.map chooseLanguage I18N.availableI18N
             , languageEditor
@@ -1402,7 +1421,7 @@ performActionsOnModel actions model =
                                 track
 
                         trackDistance =
-                            if model.toolOptions.imperial then
+                            if model.systemSettings.imperial then
                                 Length.miles x
 
                             else
@@ -2074,7 +2093,14 @@ performActionsOnModel actions model =
                         "location" ->
                             case D.decodeValue D.string value of
                                 Ok countryCode ->
-                                    { foldedModel | location = I18N.fromCountryCode countryCode }
+                                    let
+                                        settings =
+                                            foldedModel.systemSettings
+
+                                        newSettings =
+                                            { settings | location = I18N.fromCountryCode countryCode }
+                                    in
+                                    { foldedModel | systemSettings = newSettings }
 
                                 Err _ ->
                                     foldedModel
@@ -2101,10 +2127,11 @@ performActionsOnModel actions model =
                             }
 
                         "measure" ->
-                            { foldedModel
-                                | toolOptions =
-                                    ToolsController.restoreMeasure foldedModel.toolOptions value
-                            }
+                            let
+                                newSettings =
+                                    ToolsController.restoreMeasure foldedModel.systemSettings value
+                            in
+                            { foldedModel | systemSettings = newSettings }
 
                         "background" ->
                             let
@@ -2113,9 +2140,8 @@ performActionsOnModel actions model =
                             in
                             case getColour of
                                 Ok colour ->
-                                    { foldedModel
-                                        | backgroundColour = ToolsController.decodeColour colour
-                                    }
+                                    --TODO: Restore theme, not colour
+                                    foldedModel
 
                                 _ ->
                                     foldedModel
@@ -2295,7 +2321,7 @@ performActionCommands actions model =
                         [ MapPortController.refreshMap
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.toolOptions.imperial
+                            model.systemSettings.imperial
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2312,7 +2338,7 @@ performActionCommands actions model =
                         [ showPreviewOnMap previewData.tag
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.toolOptions.imperial
+                            model.systemSettings.imperial
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2323,7 +2349,7 @@ performActionCommands actions model =
                         [ MapPortController.hidePreview tag
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.toolOptions.imperial
+                            model.systemSettings.imperial
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2340,7 +2366,7 @@ performActionCommands actions model =
                         , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.toolOptions.imperial
+                            model.systemSettings.imperial
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2350,7 +2376,7 @@ performActionCommands actions model =
                     Cmd.batch <|
                         PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.toolOptions.imperial
+                            model.systemSettings.imperial
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2388,7 +2414,7 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromSvg _, Just track ) ->
-                    showTrackOnMapCentered model.paneLayoutOptions model.toolOptions.imperial track
+                    showTrackOnMapCentered model.paneLayoutOptions model.systemSettings.imperial track
 
                 ( SelectGpxFile message, _ ) ->
                     Select.file [ "text/gpx" ] message
@@ -2397,10 +2423,10 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromGpx _, Just track ) ->
-                    showTrackOnMapCentered model.paneLayoutOptions model.toolOptions.imperial track
+                    showTrackOnMapCentered model.paneLayoutOptions model.systemSettings.imperial track
 
                 ( LoadGpxFromStrava _, Just track ) ->
-                    showTrackOnMapCentered model.paneLayoutOptions model.toolOptions.imperial track
+                    showTrackOnMapCentered model.paneLayoutOptions model.systemSettings.imperial track
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaRouteHeader
@@ -2451,13 +2477,13 @@ performActionCommands actions model =
                     Cmd.batch
                         [ MapPortController.paintCanvasProfileChart
                             context
-                            model.toolOptions.imperial
+                            model.systemSettings.imperial
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                         , MapPortController.paintCanvasGradientChart
                             context
-                            model.toolOptions.imperial
+                            model.systemSettings.imperial
                             track
                         ]
 

@@ -1,6 +1,7 @@
 module Tools.Straightener exposing (Msg(..), Options, apply, defaultOptions, toolId, update, view)
 
 import Actions
+import CommonToolStyles
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
 import Element exposing (..)
 import Element.Background as Background
@@ -10,6 +11,7 @@ import Length
 import LineSegment3d
 import Point3d exposing (zCoordinate)
 import Quantity
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded, adjustAltitude)
@@ -53,18 +55,14 @@ update msg options track =
             ( { options | preserveAltitude = bool }, [] )
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view location wrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view settings wrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
     in
     column
-        [ spacing 10
-        , padding 10
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
     <|
         if track.markerPosition /= Nothing then
             let

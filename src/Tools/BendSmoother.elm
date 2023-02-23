@@ -15,6 +15,7 @@ import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
+import CommonToolStyles
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
 import Element.Background as Background
@@ -32,6 +33,7 @@ import PreviewData exposing (PreviewShape(..))
 import Quantity
 import SketchPlane3d
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.BendSmootherOptions exposing (..)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -397,16 +399,15 @@ update msg options previewColour track =
 
 
 viewBendControls :
-    I18NOptions.Location
-    -> Bool
+    SystemSettings
     -> (Msg -> msg)
     -> Options
     -> Maybe (TrackLoaded msg)
     -> Element msg
-viewBendControls location imperial wrapper options track =
+viewBendControls settings wrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         fixBendButton smooth =
             button
@@ -418,8 +419,8 @@ viewBendControls location imperial wrapper options track =
                             paragraph [] <|
                                 [ text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "smooth")
-                                        [ showShortMeasure imperial (Length.meters isSmooth.radius) ]
+                                        (I18N.localisedString settings.location toolId "smooth")
+                                        [ showShortMeasure settings.imperial (Length.meters isSmooth.radius) ]
                                 ]
 
                         Nothing ->
@@ -428,22 +429,17 @@ viewBendControls location imperial wrapper options track =
     in
     case track of
         Just _ ->
-            column
-                [ padding 5
-                , spacing 5
-                , width fill
-                , centerX
-                ]
-                [ el [ centerX ] <| bendSmoothnessSlider location imperial options wrapper
+            column (CommonToolStyles.toolContentBoxStyle settings)
+                [ el [ centerX ] <| bendSmoothnessSlider settings options wrapper
                 , el [ centerX ] <| fixBendButton options.smoothedBend
                 ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location
 
 
-viewPointControls : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-viewPointControls location imperial wrapper options track =
+viewPointControls : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+viewPointControls settings wrapper options track =
     case track of
         Just _ ->
             let
@@ -460,19 +456,19 @@ viewPointControls location imperial wrapper options track =
                 , width fill
                 , centerX
                 ]
-                [ el [ centerX ] <| segmentSlider imperial options wrapper
+                [ el [ centerX ] <| segmentSlider settings.imperial options wrapper
                 , el [ centerX ] <| fixButton
                 ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial wrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings wrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
     in
     column
         [ padding 10
@@ -494,15 +490,15 @@ view location imperial wrapper options track =
                 }
         , case options.mode of
             SmoothBend ->
-                viewBendControls location imperial wrapper options track
+                viewBendControls settings wrapper options track
 
             SmoothPoint ->
-                viewPointControls location imperial wrapper options track
+                viewPointControls settings wrapper options track
         ]
 
 
-bendSmoothnessSlider : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Element msg
-bendSmoothnessSlider location imperial options wrap =
+bendSmoothnessSlider : SystemSettings -> Options -> (Msg -> msg) -> Element msg
+bendSmoothnessSlider settings options wrap =
     Input.slider
         commonShortHorizontalSliderStyles
         { onChange = wrap << SetBendTrackPointSpacing
@@ -510,18 +506,18 @@ bendSmoothnessSlider location imperial options wrap =
             Input.labelBelow [] <|
                 text <|
                     String.Interpolate.interpolate
-                        (I18N.localisedString location toolId "spacing")
-                        [ showShortMeasure imperial (Length.meters options.bendTrackPointSpacing) ]
+                        (I18N.localisedString settings.location toolId "spacing")
+                        [ showShortMeasure settings.imperial (Length.meters options.bendTrackPointSpacing) ]
         , min =
             Length.inMeters <|
-                if imperial then
+                if settings.imperial then
                     Length.feet 3.0
 
                 else
                     Length.meters 1.0
         , max =
             Length.inMeters <|
-                if imperial then
+                if settings.imperial then
                     Length.feet 30.0
 
                 else

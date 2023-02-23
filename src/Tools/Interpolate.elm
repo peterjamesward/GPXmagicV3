@@ -1,6 +1,7 @@
 module Tools.Interpolate exposing (Msg(..), apply, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -11,6 +12,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.InterpolateOptions exposing (..)
@@ -210,7 +212,7 @@ update msg options previewColour hasTrack =
             in
             ( ensureCorrectExtent
             , [ WithUndo (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
-              , (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
+              , Actions.ApplyInterpolateWithOptions ensureCorrectExtent
               , TrackHasChanged
               ]
             )
@@ -219,13 +221,13 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial wrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings wrapper options track =
     case track of
         Just _ ->
             let
                 i18n =
-                    I18N.text location toolId
+                    I18N.text settings.location toolId
 
                 fixButton =
                     button
@@ -247,8 +249,8 @@ view location imperial wrapper options track =
                             Input.labelBelow [] <|
                                 text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "spacing")
-                                        [ showShortMeasure imperial options.minimumSpacing ]
+                                        (I18N.localisedString settings.location toolId "spacing")
+                                        [ showShortMeasure settings.imperial options.minimumSpacing ]
                         , min = 1.0
                         , max = 50.0
                         , step = Just 0.5
@@ -257,16 +259,11 @@ view location imperial wrapper options track =
                         }
             in
             column
-                [ padding 5
-                , spacing 5
-                , width fill
-                , centerX
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                ]
+                (CommonToolStyles.toolContentBoxStyle settings)
                 [ el [ centerX ] <| spacingSlider
                 , el [ centerX ] extent
                 , el [ centerX ] <| fixButton
                 ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location

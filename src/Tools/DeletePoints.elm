@@ -13,12 +13,14 @@ module Tools.DeletePoints exposing
 
 import Actions exposing (ToolAction(..))
 import BoundingBox3d
+import CommonToolStyles
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, earthPointFromIndex, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import PreviewData exposing (PreviewShape(..))
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -143,11 +145,11 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view location msgWrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view settings msgWrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
@@ -155,7 +157,7 @@ view location msgWrapper options track =
         wholeTrackIsSelected =
             fromStart == 0 && fromEnd == 0
     in
-    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
+    el (CommonToolStyles.toolContentBoxStyle settings) <|
         el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
             if wholeTrackIsSelected then
                 el [ padding 5, centerX, centerY ] <|

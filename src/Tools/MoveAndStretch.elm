@@ -3,6 +3,7 @@ module Tools.MoveAndStretch exposing (Msg(..), apply, defaultOptions, toolId, to
 import Actions exposing (ToolAction(..))
 import Axis3d
 import Color
+import CommonToolStyles
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element exposing (..)
 import Element.Background as Background
@@ -18,6 +19,7 @@ import Quantity exposing (Quantity)
 import String.Interpolate
 import Svg
 import Svg.Attributes as SA
+import SystemSettings exposing (SystemSettings)
 import Tools.CurveFormer exposing (highlightPoints)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -319,7 +321,7 @@ update message options wrapper previewColour track =
         DraggerApply ->
             ( options
             , [ WithUndo (MoveAndStretchWithOptions options)
-              , (MoveAndStretchWithOptions options)
+              , MoveAndStretchWithOptions options
               , TrackHasChanged
               , HidePreview "stretch"
               , HidePreview "stretchMark"
@@ -361,11 +363,11 @@ update message options wrapper previewColour track =
             )
 
 
-view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view location imperial options wrapper track =
+view : SystemSettings -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view settings options wrapper track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         ( nearEnd, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
@@ -390,7 +392,7 @@ view location imperial options wrapper track =
 
         verticalNudgeButtons =
             column [ alignRight ] <|
-                if imperial then
+                if settings.imperial then
                     [ verticalButton "+1yd" <| Length.yard
                     , verticalButton "+1ft" <| Length.foot
                     , verticalButton "+1in" <| Length.inch
@@ -428,7 +430,7 @@ view location imperial options wrapper track =
                         sliderText =
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "white")
+                                    (I18N.localisedString settings.location toolId "white")
                                     [ String.fromInt drag ]
 
                         fineButtons =
@@ -494,11 +496,7 @@ view location imperial options wrapper track =
     in
     -- Try with linear vector, switch to log or something else if needed.
     row
-        [ padding 5
-        , spacing 5
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ twoWayDragControl options wrapper
         , column
             [ Element.alignLeft
@@ -511,8 +509,8 @@ view location imperial options wrapper track =
             , el [ centerX ] <|
                 text <|
                     String.Interpolate.interpolate
-                        (I18N.localisedString location toolId "height")
-                        [ showShortMeasure imperial options.heightSliderSetting ]
+                        (I18N.localisedString settings.location toolId "height")
+                        [ showShortMeasure settings.imperial options.heightSliderSetting ]
             ]
         , verticalNudgeButtons
 

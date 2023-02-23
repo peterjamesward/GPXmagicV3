@@ -39,6 +39,7 @@ import Pixels exposing (Pixels)
 import PreviewData exposing (PreviewData)
 import Quantity exposing (Quantity)
 import SceneBuilder3D
+import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import Tools.Flythrough
 import Tools.GraphOptions exposing (Graph)
@@ -760,7 +761,7 @@ profileViewHandlesClick container trackDistance options track =
 
 
 viewPanes :
-    I18NOptions.Location
+    SystemSettings
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> List NamedSegment
@@ -770,9 +771,8 @@ viewPanes :
     -> PaneLayoutOptions
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
-    -> Bool
     -> Element msg
-viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h ) options mFlythrough previews imperial =
+viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -786,7 +786,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewThirdPerson.view
-                                location
+                                settings.location
                                 context
                                 displayOptions
                                 ( paneWidth, paneHeight )
@@ -826,7 +826,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                     case ( pane.graphContext, mTrack ) of
                         ( Just context, Just _ ) ->
                             ViewGraph.view
-                                location
+                                settings.location
                                 context
                                 ( paneWidth, paneHeight )
                                 graphOptions
@@ -855,7 +855,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                                 segments
                                 (msgWrapper << ProfileViewMessage pane.paneId)
                                 previews
-                                imperial
+                                settings.imperial
 
                         _ ->
                             none
@@ -868,11 +868,11 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
             column [ width fill, centerX ]
-                [ viewModeChoices location msgWrapper pane options
+                [ viewModeChoices settings.location msgWrapper pane options
                 , showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
                     ViewMap.view
-                        location
+                        settings.location
                         ( paneWidth, paneHeight )
                         pane.mapContext
                         (msgWrapper << MapViewMessage)
@@ -881,7 +881,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
         viewPaneNoMap : PaneContext -> Element msg
         viewPaneNoMap pane =
             column [ width fill, centerX ]
-                [ viewModeChoicesNoMap location msgWrapper pane
+                [ viewModeChoicesNoMap settings.location msgWrapper pane
                 , showNonMapViews pane
                 ]
 
@@ -1022,7 +1022,7 @@ viewHelper =
     , ( ViewFirst, "first" )
     , ( ViewPlan, "plan" )
     , ( ViewProfileCanvas, "profile" )
-    , ( ViewProfileWebGL, "profNew")
+    , ( ViewProfileWebGL, "profNew" )
     , ( ViewMap, "map" )
     , ( ViewGraph, "route" )
     ]

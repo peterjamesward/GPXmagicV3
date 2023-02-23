@@ -9,6 +9,7 @@ module Tools.CentroidAverage exposing
     )
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -19,6 +20,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.CentroidAverageOptions exposing (..)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -194,15 +196,15 @@ update msg options previewColour hasTrack =
 
 
 view :
-    I18NOptions.Location
+    SystemSettings
     -> (Msg -> msg)
     -> Options
     -> TrackLoaded msg
     -> Element msg
-view location wrap options track =
+view settings wrap options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         sliders =
             column [ centerX, width fill, spacing 5 ]
@@ -212,7 +214,7 @@ view location wrap options track =
                         Input.labelBelow [] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "weight")
+                                    (I18N.localisedString settings.location toolId "weight")
                                     [ showDecimal2 options.weighting ]
                     , min = 0.0
                     , max = 1.0
@@ -259,13 +261,7 @@ view location wrap options track =
                 else
                     [ text "Applies between markers" ]
     in
-    column
-        [ spacing 5
-        , padding 5
-        , centerX
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+    column (CommonToolStyles.toolContentBoxStyle settings)
         [ el [ centerX ] sliders
         , el [ centerX ] modeChoices
         , el [ centerX ] extent

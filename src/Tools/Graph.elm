@@ -43,6 +43,7 @@ import Set exposing (Set)
 import SketchPlane3d
 import SpatialIndex
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
 import Tools.I18N as I18N
@@ -666,11 +667,11 @@ toolStateChange opened colour options track =
             ( options, [ Actions.HidePreview "graph" ] )
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options msg -> Element msg
-view location imperial wrapper options =
+view : SystemSettings -> (Msg -> msg) -> Options msg -> Element msg
+view settings wrapper options =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         traversals : List TraversalDisplay
         traversals =
@@ -775,7 +776,7 @@ view location imperial wrapper options =
                                             [ if i + 1 == List.length traversals then
                                                 I.button
                                                     [ alignRight
-                                                    , tooltip below (localisedTooltip location toolId "remove")
+                                                    , tooltip below (localisedTooltip settings.location toolId "remove")
                                                     ]
                                                     { onPress = Just <| wrapper RemoveLastTraversal
                                                     , label = useIcon FeatherIcons.delete
@@ -791,7 +792,7 @@ view location imperial wrapper options =
                                               then
                                                 I.button
                                                     [ alignRight
-                                                    , tooltip below (localisedTooltip location toolId "reverse")
+                                                    , tooltip below (localisedTooltip settings.location toolId "reverse")
                                                     ]
                                                     { onPress = Just <| wrapper <| FlipDirection i
                                                     , label = useIcon FeatherIcons.refreshCw
@@ -813,7 +814,7 @@ view location imperial wrapper options =
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text <|
                                                 String.Interpolate.interpolate
-                                                    (I18N.localisedString location toolId "place1")
+                                                    (I18N.localisedString settings.location toolId "place1")
                                                     [ String.fromInt t.startPlace ]
                               }
                             , { header = none
@@ -823,7 +824,7 @@ view location imperial wrapper options =
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text <|
                                                 String.Interpolate.interpolate
-                                                    (I18N.localisedString location toolId "place2")
+                                                    (I18N.localisedString settings.location toolId "place2")
                                                     [ String.fromInt t.endPlace ]
                               }
                             , { header = none
@@ -833,7 +834,7 @@ view location imperial wrapper options =
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text <|
                                                 String.Interpolate.interpolate
-                                                    (I18N.localisedString location toolId "road")
+                                                    (I18N.localisedString settings.location toolId "road")
                                                     [ String.fromInt t.road ]
                               }
                             , { header = none
@@ -940,13 +941,13 @@ view location imperial wrapper options =
                                 I.labelBelow [] <|
                                     text <|
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "isOffset")
+                                            (I18N.localisedString settings.location toolId "isOffset")
                                             [ showDecimal2 <| abs offset
                                             , if offset < 0.0 then
-                                                I18N.localisedString location toolId "left"
+                                                I18N.localisedString settings.location toolId "left"
 
                                               else if offset > 0.0 then
-                                                I18N.localisedString location toolId "right"
+                                                I18N.localisedString settings.location toolId "right"
 
                                               else
                                                 ""
@@ -970,7 +971,7 @@ view location imperial wrapper options =
                                 I.labelBelow [] <|
                                     text <|
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "isRadius")
+                                            (I18N.localisedString settings.location toolId "isRadius")
                                             [ showDecimal2 <| abs radius ]
                             , min = 1.0
                             , max = 15.0
@@ -1044,8 +1045,8 @@ view location imperial wrapper options =
                                 I.labelBelow [] <|
                                     text <|
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "isTolerance")
-                                            [ showShortMeasure imperial options.matchingTolerance ]
+                                            (I18N.localisedString settings.location toolId "isTolerance")
+                                            [ showShortMeasure settings.imperial options.matchingTolerance ]
                             , min = 0.0
                             , max = 5.0
                             , step = Nothing

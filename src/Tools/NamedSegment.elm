@@ -5,6 +5,7 @@ module Tools.NamedSegment exposing (Msg(..), addSegment, defaultOptions, initial
 -- of track points multiple times and in each direction.
 
 import Actions exposing (ToolAction)
+import CommonToolStyles
 import Dict
 import DomainModel exposing (EarthPoint, RoadSection)
 import Element exposing (..)
@@ -23,6 +24,7 @@ import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import Quantity.Interval as Interval
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -146,14 +148,14 @@ exclusionZones track =
         }
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view location imperial wrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view settings wrapper options track =
     let
         validated =
             checkForRuleBreaches track options
 
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         dataStyles selected =
             if selected then
@@ -231,7 +233,7 @@ view location imperial wrapper options track =
                                     \_ t ->
                                         el (highlightErrors t.startOk) <|
                                             text <|
-                                                showLongMeasure imperial t.startDistance
+                                                showLongMeasure settings.imperial t.startDistance
                               }
                             , { header = none
                               , width = fillPortion 1
@@ -239,7 +241,7 @@ view location imperial wrapper options track =
                                     \_ t ->
                                         el (highlightErrors t.endOk) <|
                                             text <|
-                                                showLongMeasure imperial t.endDistance
+                                                showLongMeasure settings.imperial t.endDistance
                               }
                             , { header = none
                               , width = fillPortion 1
@@ -247,19 +249,19 @@ view location imperial wrapper options track =
                                     \i _ ->
                                         row [ spaceEvenly ] <|
                                             Input.button
-                                                [ tooltip onLeft (localisedTooltip location toolId "show") ]
+                                                [ tooltip onLeft (localisedTooltip settings.location toolId "show") ]
                                                 { label = useIcon FeatherIcons.eye
                                                 , onPress = Just <| wrapper (SelectSegment i)
                                                 }
                                                 :: (if Just i == options.selectedSegment then
                                                         [ Input.button
-                                                            [ tooltip onLeft (localisedTooltip location toolId "update")
+                                                            [ tooltip onLeft (localisedTooltip settings.location toolId "update")
                                                             ]
                                                             { label = useIcon FeatherIcons.checkCircle
                                                             , onPress = Just <| wrapper UpdateSegment
                                                             }
                                                         , Input.button
-                                                            [ tooltip onLeft (localisedTooltip location toolId "delete")
+                                                            [ tooltip onLeft (localisedTooltip settings.location toolId "delete")
                                                             ]
                                                             { label = useIcon FeatherIcons.trash2
                                                             , onPress = Just <| wrapper DeleteSegment
@@ -323,11 +325,11 @@ view location imperial wrapper options track =
                                 [ padding 10
                                 , spacing 5
                                 ]
-                                [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
+                                [ column [ spacing 5 ] <| List.map (I18N.text settings.location "info") labels
                                 , column [ spacing 5 ]
-                                    [ text <| showLongMeasure imperial distance
-                                    , text <| showShortMeasure imperial ascent
-                                    , text <| showShortMeasure imperial descent
+                                    [ text <| showLongMeasure settings.imperial distance
+                                    , text <| showShortMeasure settings.imperial ascent
+                                    , text <| showShortMeasure settings.imperial descent
                                     , text <| showDecimal2 maxGrade
                                     ]
                                 ]
@@ -376,7 +378,7 @@ view location imperial wrapper options track =
                                     Input.labelBelow [] <|
                                         text <|
                                             String.Interpolate.interpolate
-                                                (I18N.localisedString location toolId "proximity")
+                                                (I18N.localisedString settings.location toolId "proximity")
                                                 [ showDecimal0 <|
                                                     Maybe.withDefault 0 <|
                                                         Maybe.map Length.inMeters options.landUseProximity
@@ -418,7 +420,7 @@ view location imperial wrapper options track =
                     , Background.color FlatColors.AmericanPalette.brightYarrow
                     ]
                     [ useIconWithSize 48 FeatherIcons.alertTriangle
-                    , paragraph [] [ text <| I18N.localisedString location toolId "warning" ]
+                    , paragraph [] [ text <| I18N.localisedString settings.location toolId "warning" ]
                     ]
 
         duplicateWarning =
@@ -433,23 +435,17 @@ view location imperial wrapper options track =
                     , Background.color FlatColors.AmericanPalette.brightYarrow
                     ]
                     [ useIconWithSize 48 FeatherIcons.alertTriangle
-                    , paragraph [] [ text <| I18N.localisedString location toolId "duplicate" ]
+                    , paragraph [] [ text <| I18N.localisedString settings.location toolId "duplicate" ]
                     ]
     in
-    el
-        [ width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , padding 4
+    column (CommonToolStyles.toolContentBoxStyle settings)
+        [ segmentsTable
+        , selectedSegmentDetail
+        , newSegmentButton
+        , autoSuggestButton
+        , overlapWarning
+        , duplicateWarning
         ]
-    <|
-        column [ width fill, padding 4, spacing 10 ]
-            [ segmentsTable
-            , selectedSegmentDetail
-            , newSegmentButton
-            , autoSuggestButton
-            , overlapWarning
-            , duplicateWarning
-            ]
 
 
 addSegment : NamedSegment -> Options -> Options

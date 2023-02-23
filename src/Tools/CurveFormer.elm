@@ -8,6 +8,7 @@ import Axis2d
 import BoundingBox2d
 import Circle3d exposing (Circle3d)
 import Color
+import CommonToolStyles
 import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d
@@ -39,6 +40,7 @@ import String.Interpolate
 import Svg
 import Svg.Attributes as SA
 import SweptAngle
+import SystemSettings exposing (SystemSettings)
 import Tools.CurveFormerOptions exposing (GradientSmoothing(..), Options, Point)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -289,11 +291,11 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial wrapper options track =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings wrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         squared x =
             x * x
@@ -325,8 +327,8 @@ view location imperial wrapper options track =
                             Input.labelBelow [] <|
                                 text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "radius")
-                                        [ showShortMeasure imperial options.pushRadius ]
+                                        (I18N.localisedString settings.location toolId "radius")
+                                        [ showShortMeasure settings.imperial options.pushRadius ]
                         , min = 2.0
                         , max = 10.0
                         , step = Nothing
@@ -341,8 +343,8 @@ view location imperial wrapper options track =
                             Input.labelBelow [] <|
                                 text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "join")
-                                        [ showShortMeasure imperial options.transitionRadius ]
+                                        (I18N.localisedString settings.location toolId "join")
+                                        [ showShortMeasure settings.imperial options.transitionRadius ]
                         , min = 2.0
                         , max = 10.0
                         , step = Nothing
@@ -357,8 +359,8 @@ view location imperial wrapper options track =
                             Input.labelBelow [] <|
                                 text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "spacing")
-                                        [ showShortMeasure imperial options.spacing ]
+                                        (I18N.localisedString settings.location toolId "spacing")
+                                        [ showShortMeasure settings.imperial options.spacing ]
                         , min = 2.0
                         , max = 10.0
                         , step = Nothing
@@ -397,11 +399,7 @@ view location imperial wrapper options track =
                         }
             in
             row
-                [ paddingEach { edges | right = 10 }
-                , spacing 5
-                , width fill
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                ]
+                (CommonToolStyles.toolContentBoxStyle settings)
                 [ twoWayDragControl options wrapper
                 , column [ width fill, spacing 5 ]
                     [ wrappedRow
@@ -420,8 +418,8 @@ view location imperial wrapper options track =
                                     Input.labelBelow [] <|
                                         text <|
                                             String.Interpolate.interpolate
-                                                (I18N.localisedString location toolId "join")
-                                                [ showShortMeasure imperial options.pullRadius ]
+                                                (I18N.localisedString settings.location toolId "join")
+                                                [ showShortMeasure settings.imperial options.pullRadius ]
                                 , min = 1.0
                                 , max = 40.0
                                 , step = Nothing
@@ -438,7 +436,7 @@ view location imperial wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location
 
 
 point : ( Float, Float ) -> Point

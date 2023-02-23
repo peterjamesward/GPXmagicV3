@@ -1,6 +1,7 @@
 module Tools.StartFinish exposing (Msg(..), addPens, applyCloseLoop, applyMoveStart, applyReverse, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import CubicSpline3d exposing (CubicSpline3d)
 import Direction3d
 import DomainModel exposing (..)
@@ -18,6 +19,7 @@ import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import SketchPlane3d
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -46,11 +48,11 @@ defaultOptions =
     }
 
 
-view : I18NOptions.Location -> Bool -> Options -> TrackLoaded msg -> (Msg -> msg) -> Element msg
-view location imperial options track wrap =
+view : SystemSettings -> Options -> TrackLoaded msg -> (Msg -> msg) -> Element msg
+view settings options track wrap =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         loopButton =
             button
@@ -88,17 +90,13 @@ view location imperial options track wrap =
 
         addRiderPens =
             button
-                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "pens")
+                (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "pens")
                 { onPress = Just (wrap <| AddRiderPens)
                 , label = paragraph [] [ i18n "add" ]
                 }
     in
     column
-        [ spacing 10
-        , padding 10
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , width fill
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
     <|
         case options.loopiness of
             IsALoop ->
@@ -111,8 +109,8 @@ view location imperial options track wrap =
                 [ paragraph []
                     [ text <|
                         String.Interpolate.interpolate
-                            (I18N.localisedString location toolId "isnear")
-                            [ showShortMeasure imperial gap ]
+                            (I18N.localisedString settings.location toolId "isnear")
+                            [ showShortMeasure settings.imperial gap ]
                     ]
                 , loopButton
                 , reverseButton
@@ -123,8 +121,8 @@ view location imperial options track wrap =
                 [ paragraph []
                     [ text <|
                         String.Interpolate.interpolate
-                            (I18N.localisedString location toolId "isnear")
-                            [ showShortMeasure imperial gap ]
+                            (I18N.localisedString settings.location toolId "isnear")
+                            [ showShortMeasure settings.imperial gap ]
                     ]
                 , loopButton
                 , reverseButton

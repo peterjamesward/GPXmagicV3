@@ -1,6 +1,7 @@
 module Tools.GradientProblems exposing (GradientProblem(..), Msg(..), Options, ResultMode(..), defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import DomainModel exposing (PeteTree, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -10,6 +11,7 @@ import FlatColors.ChinesePalette
 import List.Extra
 import PreviewData exposing (PreviewShape(..))
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -318,11 +320,11 @@ update msg options previewColour hasTrack =
             ( options, [ Actions.DisplayInfo id tag ] )
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial msgWrapper options isTrack =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings msgWrapper options isTrack =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         resultsNavigation =
             case options.breaches of
@@ -335,11 +337,11 @@ view location imperial msgWrapper options isTrack =
                             Maybe.withDefault ( 0, 0 ) <|
                                 List.Extra.getAt options.currentBreach options.breaches
                     in
-                    column [ spacing 4, centerX ]
+                    column (CommonToolStyles.toolContentBoxStyle settings)
                         [ el [ centerX ] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId ".of.")
+                                    (I18N.localisedString settings.location toolId ".of.")
                                     [ String.fromInt (options.currentBreach + 1)
                                     , String.fromInt <| List.length options.breaches
                                     , showDecimal2 turn
@@ -347,17 +349,17 @@ view location imperial msgWrapper options isTrack =
                         , row [ centerX, spacing 10 ]
                             [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
                             , Input.button
-                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "prev")
+                                (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "prev")
                                 { label = useIcon FeatherIcons.chevronLeft
                                 , onPress = Just <| msgWrapper <| ViewPrevious
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "this")
+                                (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "this")
                                 { label = useIcon FeatherIcons.mousePointer
                                 , onPress = Just <| msgWrapper <| SetCurrentPosition position
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "next")
+                                (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "next")
                                 { label = useIcon FeatherIcons.chevronRight
                                 , onPress = Just <| msgWrapper <| ViewNext
                                 }
@@ -369,7 +371,7 @@ view location imperial msgWrapper options isTrack =
                 { onPress = Just (msgWrapper <| SetCurrentPosition point)
                 , label =
                     text <|
-                        showLongMeasure imperial <|
+                        showLongMeasure settings.imperial <|
                             DomainModel.distanceFromIndex point track
                 }
     in
@@ -433,7 +435,7 @@ view location imperial msgWrapper options isTrack =
                     , el [ centerX ] <|
                         text <|
                             String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "threshold")
+                                (I18N.localisedString settings.location toolId "threshold")
                                 [ showDecimal2 options.threshold ]
                     , el [ centerX ] autofixButton
                     , el [ centerX ] resultModeSelection
@@ -459,4 +461,4 @@ view location imperial msgWrapper options isTrack =
                     ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location

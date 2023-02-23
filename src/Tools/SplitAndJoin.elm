@@ -1,6 +1,7 @@
 module Tools.SplitAndJoin exposing (Msg(..), defaultOptions, parseAndAppend, toolId, toolStateChange, update, view, writeOneSection)
 
 import Actions exposing (ToolAction)
+import CommonToolStyles
 import DomainModel exposing (GPXSource, PeteTree, indexFromDistance, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
@@ -12,6 +13,7 @@ import GpxParser
 import Length
 import Quantity
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.OneClickQuickFix as OneClickQuickFix
@@ -249,11 +251,11 @@ calculateSections length options =
         (List.drop 1 splitPoints)
 
 
-view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view location imperial options wrapper track =
+view : SystemSettings -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view settings options wrapper track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         effectiveLength =
             if options.addBuffers then
@@ -269,7 +271,7 @@ view location imperial options wrapper track =
             trueLength track.trackTree |> Quantity.divideBy (toFloat splitCount)
 
         partsSlider =
-            if imperial then
+            if settings.imperial then
                 Input.slider
                     commonShortHorizontalSliderStyles
                     { onChange = wrapper << SetSplitLimit << Length.miles
@@ -277,7 +279,7 @@ view location imperial options wrapper track =
                         Input.labelBelow [] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "max")
+                                    (I18N.localisedString settings.location toolId "max")
                                     [ showLongMeasure True options.splitLimit ]
                     , min = 12.0
                     , max = 65.0
@@ -294,7 +296,7 @@ view location imperial options wrapper track =
                         Input.labelBelow [] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "max")
+                                    (I18N.localisedString settings.location toolId "max")
                                     [ showLongMeasure True options.splitLimit ]
                     , min = 20.0
                     , max = 100.0
@@ -326,9 +328,9 @@ view location imperial options wrapper track =
                 , label =
                     text <|
                         String.Interpolate.interpolate
-                            (I18N.localisedString location toolId "split")
+                            (I18N.localisedString settings.location toolId "split")
                             [ String.fromInt splitCount
-                            , showLongMeasure imperial splitLength
+                            , showLongMeasure settings.imperial splitLength
                             ]
                 }
 
@@ -355,10 +357,7 @@ view location imperial options wrapper track =
                 }
     in
     column
-        [ spacing 6
-        , padding 6
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ el [ centerX ] partsSlider
         , endPenCheckbox
         , quickFixCheckbox
