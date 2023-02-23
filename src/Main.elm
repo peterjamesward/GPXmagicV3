@@ -49,6 +49,7 @@ import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import SvgPathExtractor
+import SystemSettings
 import Task
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
@@ -129,6 +130,7 @@ type Msg
     | DisplayWelcome
     | RGTOptions Tools.RGTOptions.Msg
     | ProfilePaint
+    | ToggleImperial
     | NoOp
 
 
@@ -140,7 +142,6 @@ type alias Model =
     , stravaAuthentication : O.Model
     , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
-    , location : I18NOptions.Location
     , rgtOptionsVisible : Bool
     , loadFromUrl : Maybe Url
 
@@ -168,7 +169,7 @@ type alias Model =
     -- Tools
     , toolOptions : ToolsController.Options Msg
     , isPopupOpen : Bool
-    , backgroundColour : Element.Color
+    , systemSettings : SystemSettings.SystemSettings
     , languageEditorOpen : Bool
     , languageEditor : I18NOptions.Options
     , rgtOptions : Tools.RGTOptions.Options
@@ -258,7 +259,6 @@ init mflags origin navigationKey =
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , rgtOptionsVisible = False
       , loadFromUrl = remoteUrl
-      , location = I18N.defaultLocation
       , track = Nothing
       , mapPointsDraggable = False
       , previews = Dict.empty
@@ -366,6 +366,13 @@ update msg model =
                     )
     in
     case msg of
+        ToggleImperial ->
+            let
+                newOptions =
+                    { options | imperial = not options.imperial }
+            in
+            ( newOptions, [ StoreLocally "measure" <| E.bool newOptions.imperial ] )
+
         DisplayWelcome ->
             let
                 -- Try loading remote data now, after map may have initialised
@@ -1317,6 +1324,17 @@ showOptionsMenu model =
                 { label = el [ centerX ] <| text location.country.flag
                 , onPress = Just <| Language location
                 }
+
+        imperialToggleMenuEntry location =
+            Input.button [ alignRight ]
+                { onPress = Just ToggleImperial
+                , label =
+                    if model.systemSettings.imperial then
+                        I18N.text location "main" "metric"
+
+                    else
+                        I18N.text location "main" "imperial"
+                }
     in
     if model.isPopupOpen then
         let
@@ -1339,7 +1357,7 @@ showOptionsMenu model =
                     , label = I18N.text model.location "main" "default"
                     }
             , el (alignRight :: width fill :: subtleToolStyles) <|
-                ToolsController.imperialToggleMenuEntry model.location ToolsMsg model.toolOptions
+                imperialToggleMenuEntry model.location
             , row [ spaceEvenly, width fill ] <|
                 List.map chooseLanguage I18N.availableI18N
             , languageEditor

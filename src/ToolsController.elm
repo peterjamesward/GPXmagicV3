@@ -1,4 +1,27 @@
-module ToolsController exposing (ColourTriplet, DockSettings, Options, ToolCategory(..), ToolDock(..), ToolEntry, ToolMsg(..), ToolState(..), ToolType(..), clearPopups, colourDecoder, decodeColour, defaultOptions, encodeColour, flythroughTick, imperialToggleMenuEntry, refreshOpenTools, restoreDockSettings, restoreMeasure, restoreStoredValues, setToolState, toolsForDock, update)
+module ToolsController exposing
+    ( ColourTriplet
+    , DockSettings
+    , Options
+    , ToolCategory(..)
+    , ToolDock(..)
+    , ToolEntry
+    , ToolMsg(..)
+    , ToolState(..)
+    , ToolType(..)
+    , clearPopups
+    , colourDecoder
+    , decodeColour
+    , defaultOptions
+    , encodeColour
+    , flythroughTick
+    , refreshOpenTools
+    , restoreDockSettings
+    , restoreMeasure
+    , restoreStoredValues
+    , setToolState
+    , toolsForDock
+    , update
+    )
 
 import Actions exposing (ToolAction(..))
 import ColourPalette exposing (stravaOrange)
@@ -18,6 +41,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
+import SystemSettings exposing (SystemSettings)
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
@@ -129,7 +153,6 @@ type alias Options msg =
     , directionChangeOptions : DirectionChanges.Options
     , deleteOptions : DeletePoints.Options
     , essentialOptions : Tools.Essentials.Options
-    , imperial : Bool
     , bezierSplineOptions : Tools.BezierOptions.Options
     , centroidAverageOptions : Tools.CentroidAverageOptions.Options
     , curveFormerOptions : Tools.CurveFormerOptions.Options
@@ -165,7 +188,6 @@ defaultOptions =
     , directionChangeOptions = DirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
     , essentialOptions = Tools.Essentials.defaultOptions
-    , imperial = False
     , bezierSplineOptions = Tools.BezierSplines.defaultOptions
     , centroidAverageOptions = Tools.CentroidAverage.defaultOptions
     , curveFormerOptions = Tools.CurveFormer.defaultOptions
@@ -203,7 +225,6 @@ type ToolMsg
     | DirectionChanges DirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
     | ToolEssentialsMsg Tools.Essentials.Msg
-    | ToggleImperial
     | ToolNoOp
     | ToolBezierMsg Tools.BezierSplines.Msg
     | ToolCentroidMsg Tools.CentroidAverage.Msg
@@ -957,13 +978,6 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
-        ToggleImperial ->
-            let
-                newOptions =
-                    { options | imperial = not options.imperial }
-            in
-            ( newOptions, [ StoreLocally "measure" <| E.bool newOptions.imperial ] )
-
         ToolInfoMsg infoMsg ->
             let
                 newOptions =
@@ -1174,6 +1188,7 @@ update toolMsg isTrack msgWrapper options =
                     ( { options | straightenOptions = newOptions }
                     , actions
                     )
+
                 Nothing ->
                     ( options, [] )
 
@@ -1623,20 +1638,20 @@ toolStateHasChanged toolType newState isTrack options =
 
 
 toolsForDock :
-    I18NOptions.Location
+    SystemSettings
     -> ToolDock
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> Element msg
-toolsForDock location dock msgWrapper isTrack options =
+toolsForDock settings dock msgWrapper isTrack options =
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacing 5, scrollbarY ]
             [ column [ width fill, spacing 5 ]
                 (options.tools
                     |> List.filter
                         (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
-                    |> List.map (viewTool location msgWrapper isTrack options)
+                    |> List.map (viewTool settings msgWrapper isTrack options)
                 )
             , wrappedRow
                 -- Open tools
@@ -1644,7 +1659,7 @@ toolsForDock location dock msgWrapper isTrack options =
               <|
                 (options.tools
                     |> List.filter (\t -> t.dock == dock && t.state == Expanded)
-                    |> List.map (viewTool location msgWrapper isTrack options)
+                    |> List.map (viewTool settings msgWrapper isTrack options)
                 )
             , wrappedRow
                 -- Closed tools
@@ -1652,17 +1667,17 @@ toolsForDock location dock msgWrapper isTrack options =
               <|
                 (options.tools
                     |> List.filter (\t -> t.dock == dock && t.state == Contracted)
-                    |> List.map (viewTool location msgWrapper isTrack options)
+                    |> List.map (viewTool settings msgWrapper isTrack options)
                 )
             ]
         ]
 
 
-viewToolSettings : I18NOptions.Location -> Options msg -> (ToolMsg -> msg) -> Element msg
-viewToolSettings location options wrapper =
+viewToolSettings : SystemSettings -> Options msg -> (ToolMsg -> msg) -> Element msg
+viewToolSettings settings options wrapper =
     let
         optionHelper =
-            compactRadioButton << I18N.localisedString location "tools"
+            compactRadioButton << I18N.localisedString settings.location "tools"
 
         fullOptionList tool =
             if (tool.toolType == ToolSettings) || (tool.toolType == ToolEssentials) then
@@ -1689,7 +1704,7 @@ viewToolSettings location options wrapper =
                     Input.labelRight [ paddingXY 10 0 ] <|
                         row [ spacing 4 ]
                             [ infoButton (wrapper <| DisplayInfo tool.toolId "info")
-                            , I18N.text location tool.toolId "label"
+                            , I18N.text settings.location tool.toolId "label"
                             ]
                 , options = fullOptionList tool
                 }
@@ -1707,17 +1722,17 @@ viewToolSettings location options wrapper =
 
 
 viewTool :
-    I18NOptions.Location
+    SystemSettings
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> ToolEntry
     -> Element msg
-viewTool location msgWrapper isTrack options toolEntry =
+viewTool settings msgWrapper isTrack options toolEntry =
     -- Possible performance gain by being lazy here. Who knows?
     Element.Lazy.lazy5
         viewToolLazy
-        location
+        settings
         msgWrapper
         isTrack
         options
@@ -1725,13 +1740,13 @@ viewTool location msgWrapper isTrack options toolEntry =
 
 
 viewToolLazy :
-    I18NOptions.Location
+    SystemSettings
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> ToolEntry
     -> Element msg
-viewToolLazy location msgWrapper isTrack options toolEntry =
+viewToolLazy settings msgWrapper isTrack options toolEntry =
     el [ padding 2, width fill, alignTop ] <|
         column
             [ width fill
@@ -1752,7 +1767,7 @@ viewToolLazy location msgWrapper isTrack options toolEntry =
                     , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
                     , htmlAttribute (style "z-index" "20")
                     ]
-                    [ showDockOptions location msgWrapper toolEntry
+                    [ showDockOptions settings msgWrapper toolEntry
                     , showColourOptions msgWrapper toolEntry
                     ]
             ]
@@ -1807,7 +1822,7 @@ viewToolLazy location msgWrapper isTrack options toolEntry =
 
                                 SettingsClosed ->
                                     useIconWithSize 16 <| FeatherIcons.chevronsDown
-                            , I18N.text location toolEntry.toolId "label"
+                            , I18N.text settings.location toolEntry.toolId "label"
                             ]
                     }
                 , Input.button
@@ -1824,25 +1839,25 @@ viewToolLazy location msgWrapper isTrack options toolEntry =
                 ]
             , el [ Border.rounded 8, width fill, height fill ] <|
                 if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
-                    viewToolByType location msgWrapper toolEntry isTrack options
+                    viewToolByType settings msgWrapper toolEntry isTrack options
 
                 else
                     none
             ]
 
 
-showDockOptions : I18NOptions.Location -> (ToolMsg -> msg) -> ToolEntry -> Element msg
-showDockOptions location msgWrapper toolEntry =
+showDockOptions : SystemSettings -> (ToolMsg -> msg) -> ToolEntry -> Element msg
+showDockOptions settings msgWrapper toolEntry =
     if toolEntry.isPopupOpen then
         row
             (spacing 4 :: neatToolsBorder)
             [ Input.button
-                [ tooltip below (localisedTooltip location "tools" "left") ]
+                [ tooltip below (localisedTooltip settings.location "tools" "left") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
                 , label = useIcon FeatherIcons.arrowLeft
                 }
             , Input.button
-                [ tooltip below (localisedTooltip location "tools" "right") ]
+                [ tooltip below (localisedTooltip settings.location "tools" "right") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
                 , label = useIcon FeatherIcons.arrowRight
                 }
@@ -1853,7 +1868,7 @@ showDockOptions location msgWrapper toolEntry =
                     /= ToolEssentials
               then
                 Input.button
-                    [ tooltip below (localisedTooltip location "tools" "hide")
+                    [ tooltip below (localisedTooltip settings.location "tools" "hide")
                     , paddingEach { left = 20, right = 0, top = 0, bottom = 0 }
                     ]
                     { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockNone
@@ -1925,45 +1940,41 @@ showColourOptions msgWrapper toolEntry =
 
 
 viewToolByType :
-    I18NOptions.Location
+    SystemSettings
     -> (ToolMsg -> msg)
     -> ToolEntry
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> Element msg
-viewToolByType location msgWrapper entry isTrack options =
+viewToolByType settings msgWrapper entry isTrack options =
     el
         [ centerX, padding 2, width fill, Border.rounded 4 ]
     <|
         case entry.toolType of
             ToolTimestamps ->
                 Tools.Timestamp.view
-                    location
-                    options.imperial
+                    settings
                     (msgWrapper << ToolTimestampMsg)
                     options.timestampOptions
                     isTrack
 
             ToolTrackInfo ->
                 TrackInfoBox.view
-                    location
+                    settings
                     (msgWrapper << ToolInfoMsg)
-                    options.imperial
                     isTrack
                     options.infoOptions
 
             ToolAbruptDirectionChanges ->
                 DirectionChanges.view
-                    location
-                    options.imperial
+                    settings
                     (msgWrapper << DirectionChanges)
                     options.directionChangeOptions
                     isTrack
 
             ToolGradientProblems ->
                 Tools.GradientProblems.view
-                    location
-                    options.imperial
+                    settings
                     (msgWrapper << ToolGradientChangeMsg)
                     options.gradientProblemOptions
                     isTrack
@@ -1972,17 +1983,17 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         DeletePoints.view
-                            location
+                            settings
                             (msgWrapper << DeletePoints)
                             options.deleteOptions
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolEssentials ->
                 Tools.Essentials.view
-                    location
+                    settings
                     options.imperial
                     (msgWrapper << ToolEssentialsMsg)
                     options.essentialOptions
@@ -1992,75 +2003,70 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.BezierSplines.view
-                            location
+                            settings
                             (msgWrapper << ToolBezierMsg)
                             options.bezierSplineOptions
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolCentroidAverage ->
                 case isTrack of
                     Just track ->
                         Tools.CentroidAverage.view
-                            location
+                            settings
                             (msgWrapper << ToolCentroidMsg)
                             options.centroidAverageOptions
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolCurveFormer ->
                 Tools.CurveFormer.view
-                    location
-                    options.imperial
+                    settings
                     (msgWrapper << ToolCurveFormerMsg)
                     options.curveFormerOptions
                     isTrack
 
             ToolBendSmoother ->
                 Tools.BendSmoother.view
-                    location
-                    options.imperial
+                    settings
                     (msgWrapper << ToolBendSmootherMsg)
                     options.bendSmootherOptions
                     isTrack
 
             ToolNudge ->
                 Tools.Nudge.view
-                    location
-                    options.imperial
+                    settings
                     options.nudgeOptions
                     (msgWrapper << ToolNudgeMsg)
                     isTrack
 
             ToolDisplaySettings ->
                 Tools.DisplaySettings.view
-                    location
+                    settings
                     (msgWrapper << ToolDisplaySettingMsg)
                     options.displaySettings
 
             ToolOutAndBack ->
                 Tools.OutAndBack.view
-                    location
-                    options.imperial
+                    settings
                     (msgWrapper << ToolOutAndBackMsg)
                     options.outAndBackSettings
                     isTrack
 
             ToolSimplify ->
                 Tools.Simplify.view
-                    location
+                    settings
                     (msgWrapper << ToolSimplifyMsg)
                     options.simplifySettings
                     isTrack
 
             ToolInterpolate ->
                 Tools.Interpolate.view
-                    location
-                    options.imperial
+                    settings
                     (msgWrapper << ToolInterpolateMsg)
                     options.interpolateSettings
                     isTrack
@@ -2069,33 +2075,30 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.ProfileSmooth.view
-                            location
+                            settings
                             options.profileSmoothSettings
                             (msgWrapper << ToolProfileSmoothMsg)
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolMoveScaleRotate ->
                 Tools.MoveScaleRotate.view
-                    location
-                    options.imperial
+                    settings
                     options.moveScaleRotateSettings
                     (msgWrapper << ToolMoveScaleRotateMsg)
                     isTrack
 
             ToolFlythrough ->
                 Tools.Flythrough.view
-                    location
-                    options.imperial
+                    settings
                     options.flythroughSettings
                     (msgWrapper << ToolFlythroughMsg)
 
             ToolStrava ->
                 Tools.StravaTools.viewStravaTab
-                    location
-                    options.stravaSettings
+                    settings
                     (msgWrapper << ToolStravaMsg)
                     isTrack
 
@@ -2103,84 +2106,79 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.MoveAndStretch.view
-                            location
-                            options.imperial
+                            settings
                             options.moveAndStretchSettings
                             (msgWrapper << ToolMoveAndStretchMsg)
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolStartFinish ->
                 case isTrack of
                     Just track ->
                         Tools.StartFinish.view
-                            location
-                            options.imperial
+                            settings
                             options.startFinishOptions
                             track
                             (msgWrapper << ToolStartFinishMsg)
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolSplitAndJoin ->
                 case isTrack of
                     Just track ->
                         Tools.SplitAndJoin.view
-                            location
-                            options.imperial
+                            settings
                             options.splitAndJoinOptions
                             (msgWrapper << ToolSplitJoinMsg)
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolIntersections ->
                 case isTrack of
                     Just track ->
                         Tools.Intersections.view
-                            location
-                            options.imperial
+                            settings
                             (msgWrapper << ToolIntersectionMsg)
                             options.intersectionOptions
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolStraighten ->
                 case isTrack of
                     Just track ->
                         Tools.Straightener.view
-                            location
+                            settings
                             (msgWrapper << ToolStraightenMsg)
                             options.straightenOptions
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolGraph ->
                 case isTrack of
                     Just _ ->
                         Tools.Graph.view
-                            location
-                            options.imperial
+                            settings
                             (msgWrapper << ToolGraphMsg)
                             options.graphOptions
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolSettings ->
-                viewToolSettings location options msgWrapper
+                viewToolSettings settings options msgWrapper
 
             ToolLandUse ->
                 Tools.LandUse.view
-                    location
+                    settings
                     (msgWrapper << ToolLandUseMsg)
                     options.landUseOptions
                     isTrack
@@ -2189,27 +2187,25 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.SmartSmoother.view
-                            location
-                            options.imperial
+                            settings
                             (msgWrapper << ToolSmartSmootherMsg)
                             options.smartSmootherOptions
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
             ToolNamedSegments ->
                 case isTrack of
                     Just track ->
                         Tools.NamedSegment.view
-                            location
-                            options.imperial
+                            settings
                             (msgWrapper << ToolNamedSegmentMsg)
                             options.namedSegmentOptions
                             track
 
                     Nothing ->
-                        noTrackMessage location
+                        noTrackMessage settings.location
 
 
 
@@ -2545,18 +2541,6 @@ restoreMeasure options value =
 
         Err _ ->
             options
-
-
-imperialToggleMenuEntry location msgWrapper options =
-    Input.button [ alignRight ]
-        { onPress = Just <| msgWrapper ToggleImperial
-        , label =
-            if options.imperial then
-                I18N.text location "main" "metric"
-
-            else
-                I18N.text location "main" "imperial"
-        }
 
 
 
