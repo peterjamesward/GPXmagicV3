@@ -22,6 +22,16 @@ actions (yes, after all that) and using the track/newTrack diff to drive command
 
 # BACKLOG
 
+## Dark mode
+
+Apply background to all tools.
+
+## Route algebra
+
+Open multiple GPX routes (file, Strava) and combine them in Route Maker.
+
+May not even be that hard, given Route Maker exists.
+
 ## Replace MapBox?
 
 https://github.com/klaftertief/slippery-slope
