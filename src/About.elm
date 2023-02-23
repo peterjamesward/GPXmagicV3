@@ -9,6 +9,10 @@ aboutText =
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.9.9
+
+Slider in Gradient problems goes all the way down to 1%.
+
 ## 3.9.8
 
 New "flatten" option in Profile Smoother. Needs Orange and Purple markers. Will replace
