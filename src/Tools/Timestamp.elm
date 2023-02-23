@@ -2,6 +2,7 @@ module Tools.Timestamp exposing (Msg(..), applyDoubling, applyPhysics, applyTick
 
 import Actions exposing (ToolAction(..))
 import ColourPalette exposing (warningColor)
+import CommonToolStyles
 import DomainModel exposing (..)
 import Duration exposing (Duration)
 import Element exposing (..)
@@ -16,6 +17,7 @@ import Point3d
 import Power exposing (Power)
 import Quantity
 import Speed
+import SystemSettings exposing (SystemSettings)
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -484,16 +486,15 @@ trackHasTimestamps track =
 
 
 viewWithTrack :
-    I18NOptions.Location
-    -> Bool
+    SystemSettings
     -> (Msg -> msg)
     -> Options
     -> TrackLoaded msg
     -> Element msg
-viewWithTrack location imperial wrapper options track =
+viewWithTrack settings wrapper options track =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         modeSelection =
             Input.radio [ centerX, spacing 5 ]
@@ -506,14 +507,7 @@ viewWithTrack location imperial wrapper options track =
                 , label = labelHidden "mode"
                 }
     in
-    column
-        [ padding 5
-        , spacing 5
-        , width fill --<| px 300
-        , centerX
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
-    <|
+    column (CommonToolStyles.toolContentBoxStyle settings) <|
         if trackHasTimestamps track && options.mode == Actual then
             let
                 orangeMillis =
@@ -728,11 +722,11 @@ viewWithTrack location imperial wrapper options track =
             ]
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial wrapper options mTrack =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings wrapper options mTrack =
     case mTrack of
         Just isTrack ->
-            viewWithTrack location imperial wrapper options isTrack
+            viewWithTrack settings wrapper options isTrack
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location

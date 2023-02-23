@@ -2,6 +2,7 @@ module Tools.DirectionChanges exposing (DirectionChangeMode(..), Msg(..), Option
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import CommonToolStyles
 import Direction2d
 import DomainModel exposing (GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
@@ -14,6 +15,7 @@ import List.Extra
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -430,27 +432,27 @@ actions options previewColour track =
     ]
 
 
-view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial msgWrapper options isTrack =
+view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view settings msgWrapper options isTrack =
     let
         i18n =
-            I18N.text location toolId
+            I18N.text settings.location toolId
 
         commonButtons current =
-            row [ centerX, spacing 10 ]
+            row (CommonToolStyles.toolContentBoxStyle settings)
                 [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
                 , Input.button
-                    (buttonStylesWithTooltip below <| I18N.localisedString location toolId "prev")
+                    (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "prev")
                     { label = useIcon FeatherIcons.chevronLeft
                     , onPress = Just <| msgWrapper <| ViewPrevious
                     }
                 , Input.button
-                    (buttonStylesWithTooltip below <| I18N.localisedString location toolId "this")
+                    (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "this")
                     { label = useIcon FeatherIcons.mousePointer
                     , onPress = Just <| msgWrapper <| SetCurrentPosition current
                     }
                 , Input.button
-                    (buttonStylesWithTooltip below <| I18N.localisedString location toolId "next")
+                    (buttonStylesWithTooltip below <| I18N.localisedString settings.location toolId "next")
                     { label = useIcon FeatherIcons.chevronRight
                     , onPress = Just <| msgWrapper <| ViewNext
                     }
@@ -471,7 +473,7 @@ view location imperial msgWrapper options isTrack =
                         [ el [ centerX ] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId ".of.")
+                                    (I18N.localisedString settings.location toolId ".of.")
                                     [ String.fromInt (options.currentPointBreach + 1)
                                     , String.fromInt <| List.length options.singlePointBreaches
                                     , showAngle <| turn
@@ -497,10 +499,10 @@ view location imperial msgWrapper options isTrack =
                         [ el [ centerX ] <|
                             text <|
                                 String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId ".radius.")
+                                    (I18N.localisedString settings.location toolId ".radius.")
                                     [ String.fromInt (options.currentBendBreach + 1)
                                     , String.fromInt <| List.length options.bendBreaches
-                                    , showShortMeasure imperial (Quantity.abs radius)
+                                    , showShortMeasure settings.imperial (Quantity.abs radius)
                                     ]
                         , commonButtons at
                         ]
@@ -510,7 +512,7 @@ view location imperial msgWrapper options isTrack =
                 { onPress = Just (msgWrapper <| SetCurrentPosition point)
                 , label =
                     text <|
-                        showLongMeasure imperial <|
+                        showLongMeasure settings.imperial <|
                             DomainModel.distanceFromIndex point track
                 }
 
@@ -568,7 +570,7 @@ view location imperial msgWrapper options isTrack =
                             Input.labelBelow [] <|
                                 text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "change")
+                                        (I18N.localisedString settings.location toolId "change")
                                         [ String.fromInt <| round <| Angle.inDegrees options.threshold ]
                         , min = 15
                         , max = 170
@@ -621,8 +623,8 @@ view location imperial msgWrapper options isTrack =
                                 Input.labelBelow [] <|
                                     text <|
                                         String.Interpolate.interpolate
-                                            (I18N.localisedString location toolId "radius")
-                                            [ showShortMeasure imperial options.radius ]
+                                            (I18N.localisedString settings.location toolId "radius")
+                                            [ showShortMeasure settings.imperial options.radius ]
                             , min = 4.0
                             , max = 100.0
                             , step = Just 1
@@ -655,7 +657,7 @@ view location imperial msgWrapper options isTrack =
                     ]
 
         Nothing ->
-            noTrackMessage location
+            noTrackMessage settings.location
 
 
 widenBend :

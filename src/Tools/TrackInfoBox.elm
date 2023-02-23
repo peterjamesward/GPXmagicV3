@@ -1,6 +1,7 @@
 module Tools.TrackInfoBox exposing (InformationContext(..), MemoryInfo, Msg(..), Options, defaultOptions, toolId, update, updateMemory, view)
 
 import Angle
+import CommonToolStyles
 import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -8,6 +9,7 @@ import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FlatColors.ChinesePalette
 import String.Interpolate
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -86,8 +88,8 @@ trackInfoList =
     ]
 
 
-displayInfoForPoint : I18NOptions.Location -> Bool -> TrackLoaded msg -> Element msg
-displayInfoForPoint location imperial track =
+displayInfoForPoint : SystemSettings -> TrackLoaded msg -> Element msg
+displayInfoForPoint settings track =
     let
         index =
             track.currentPosition
@@ -121,17 +123,14 @@ displayInfoForPoint location imperial track =
             ]
     in
     column []
-        [ row
-            [ padding 10
-            , spacing 5
-            ]
-            [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
+        [ row (CommonToolStyles.toolContentBoxStyle settings)
+            [ column [ spacing 5 ] <| List.map (I18N.text settings.location "info") labels
             , column [ spacing 5 ]
                 [ text <| String.fromInt index
-                , text <| showLongMeasure imperial distance
+                , text <| showLongMeasure settings.imperial distance
                 , text <| UtilsForViews.longitudeString <| Direction2d.toAngle longitude
                 , text <| UtilsForViews.latitudeString <| latitude
-                , text <| showShortMeasure imperial altitude
+                , text <| showShortMeasure settings.imperial altitude
                 , text <| showDecimal2 <| bearing
                 , text <| showDecimal2 leaf.gradientAtStart
                 , UtilsForViews.formattedTime timestamp
@@ -139,7 +138,7 @@ displayInfoForPoint location imperial track =
             ]
         , newTabLink [ centerX ]
             { url = makeLinkUrl track
-            , label = I18N.text location toolId "streetview"
+            , label = I18N.text settings.location toolId "streetview"
             }
         ]
 
@@ -183,12 +182,11 @@ makeLinkUrl track =
 
 
 displayValuesWithTrack :
-    I18NOptions.Location
-    -> Bool
+    SystemSettings
     -> List ( String, Bool -> RoadSection -> Element msg )
     -> TrackLoaded msg
     -> Element msg
-displayValuesWithTrack location imperial infoList track =
+displayValuesWithTrack settings infoList track =
     let
         info =
             asRecord <| track.trackTree
@@ -206,25 +204,22 @@ displayValuesWithTrack location imperial infoList track =
             -- Fix because some missing timestamps give null duration.
             { info | transitTime = duration }
     in
-    row
-        [ padding 10
-        , spacing 5
-        ]
-        [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> I18N.text location "info" txt) infoList
-        , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn imperial infoWithDuration) infoList
+    row (CommonToolStyles.toolContentBoxStyle settings)
+        [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> I18N.text settings.location "info" txt) infoList
+        , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn settings.imperial infoWithDuration) infoList
         ]
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Bool -> Maybe (TrackLoaded msg) -> Options -> Element msg
-view location wrapper imperial ifTrack options =
+view : SystemSettings -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Options -> Element msg
+view settings wrapper ifTrack options =
     let
         helper =
-            I18N.text location "info"
+            I18N.text settings.location "info"
     in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         case ifTrack of
             Just track ->
-                column [ padding 5 ]
+                column (CommonToolStyles.toolContentBoxStyle settings)
                     [ Input.radioRow [ centerX, spacing 5 ]
                         { onChange = wrapper << ChooseDisplayMode
                         , options =
@@ -237,13 +232,13 @@ view location wrapper imperial ifTrack options =
                         }
                     , case options.displayMode of
                         InfoForTrack ->
-                            displayValuesWithTrack location imperial trackInfoList track
+                            displayValuesWithTrack settings trackInfoList track
 
                         InfoForPoint ->
-                            displayInfoForPoint location imperial track
+                            displayInfoForPoint settings track
 
                         InfoForSystem ->
-                            displayMemoryDetails location options
+                            displayMemoryDetails settings options
                     ]
 
             Nothing ->
@@ -256,8 +251,8 @@ updateMemory memory options =
     { options | memoryInfo = Just memory }
 
 
-displayMemoryDetails : I18NOptions.Location -> Options -> Element msg
-displayMemoryDetails location options =
+displayMemoryDetails : SystemSettings -> Options -> Element msg
+displayMemoryDetails settings options =
     let
         asMB value =
             (toFloat value
@@ -269,7 +264,7 @@ displayMemoryDetails location options =
     in
     case options.memoryInfo of
         Nothing ->
-            I18N.text location "info" "none"
+            I18N.text settings.location "info" "none"
 
         Just memory ->
             let
@@ -279,11 +274,8 @@ displayMemoryDetails location options =
                     , "heap"
                     ]
             in
-            row
-                [ padding 10
-                , spacing 5
-                ]
-                [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
+            row (CommonToolStyles.toolContentBoxStyle settings)
+                [ column [ spacing 5 ] <| List.map (I18N.text settings.location "info") labels
                 , column [ spacing 5 ]
                     [ text <| asMB memory.jsHeapSizeLimit
                     , text <| asMB memory.totalJSHeapSize
