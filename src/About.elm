@@ -3,11 +3,18 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.8 (5d6efcea)
+# GPXmagic v3.9.11 (5d6efcea)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.11
+
+New option in Gradient Problems will identify completely flat runs of the route.
+When you go through the results, the Orange and Purple pointers are used to indicate the ends.
+Sometimes, these signify a data problem and may need you to fix. Sometimes, it's just flat.
+There is no Autofix option for these.
 
 ## 3.9.10
 
