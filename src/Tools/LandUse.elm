@@ -2,6 +2,7 @@ module Tools.LandUse exposing (Mode(..), Msg(..), Options, defaultOptions, toolI
 
 import Actions exposing (ToolAction)
 import Color
+import CommonToolStyles
 import Dict
 import Element exposing (..)
 import Element.Background as Background
@@ -78,12 +79,11 @@ view settings wrap options maybeTrack =
                 Nothing ->
                     i18n "notrack"
     in
-    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        column [ padding 4, spacing 6, width fill ]
-            [ none
-            , paragraph [] [ status ]
-            , legend
-            ]
+    column (CommonToolStyles.toolContentBoxStyle settings)
+        [ none
+        , paragraph [] [ status ]
+        , legend
+        ]
 
 
 legend : Element msg

@@ -13,6 +13,7 @@ import Axis3d
 import BoundingBox2d
 import BoundingBox3d
 import Color
+import CommonToolStyles
 import Dict exposing (Dict)
 import Direction2d
 import Direction3d
@@ -25,6 +26,7 @@ import Element.Input as I
 import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import Geometry101
 import Length exposing (Meters, inMeters, meters)
 import LineSegment2d
@@ -710,14 +712,12 @@ view settings wrapper options =
 
         dataStyles selected =
             if selected then
-                [ Font.color FlatColors.ChinesePalette.antiFlashWhite
-                , Font.bold
-                , Background.color rgtPurple
+                [ Font.bold
                 , padding 2
                 ]
 
             else
-                [ Font.color rgtDark, padding 2 ]
+                [ padding 2 ]
 
         traversalsTable : Element msg
         traversalsTable =
@@ -727,16 +727,14 @@ view settings wrapper options =
 
                 headerAttrs =
                     [ Font.bold
-                    , Font.color rgtDark
                     , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
-                    , Border.color rgtPurple
+                    , Border.color FlatColors.FlatUIPalette.concrete
                     ]
 
                 footerAttrs =
                     [ Font.bold
-                    , Font.color rgtDark
                     , Border.widthEach { bottom = 0, top = 2, left = 0, right = 0 }
-                    , Border.color rgtPurple
+                    , Border.color FlatColors.FlatUIPalette.concrete
                     ]
             in
             column
@@ -746,7 +744,7 @@ view settings wrapper options =
                 , padding 5
                 , Border.width 2
                 , Border.rounded 6
-                , Border.color rgtDark
+                , Border.color FlatColors.FlatUIPalette.concrete
                 ]
                 [ row [ width fill ]
                     [ el ((width <| fillPortion 1) :: headerAttrs) <| i18n "blank"
@@ -860,7 +858,8 @@ view settings wrapper options =
 
         guidanceText =
             row
-                [ Background.color FlatColors.AmericanPalette.lightGreenishBlue
+                [ Background.color FlatColors.FlatUIPalette.turquoise
+                , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
                 , Border.rounded 5
                 ]
                 [ useIconWithSize 20 FeatherIcons.info
@@ -878,10 +877,7 @@ view settings wrapper options =
                 ]
     in
     column
-        [ width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , padding 4
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
         [ guidanceText
         , if options.analyzed then
             let

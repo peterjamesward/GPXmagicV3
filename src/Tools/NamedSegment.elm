@@ -159,18 +159,14 @@ view settings wrapper options track =
 
         dataStyles selected =
             if selected then
-                [ Font.color FlatColors.ChinesePalette.antiFlashWhite
-                , Font.bold
-                , Background.color rgtPurple
-                , padding 2
-                ]
+                Font.bold :: CommonToolStyles.toolContentBoxStyle settings
 
             else
-                [ Font.color rgtDark, padding 2 ]
+                CommonToolStyles.toolContentBoxStyle settings
 
         highlightErrors isOk =
             if isOk then
-                [ Font.color rgtDark, padding 2 ]
+                [ padding 2 ]
 
             else
                 [ Font.bold
@@ -183,7 +179,6 @@ view settings wrapper options track =
             let
                 headerAttrs =
                     [ Font.bold
-                    , Font.color rgtDark
                     , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
                     , Border.color rgtPurple
                     ]
@@ -196,7 +191,7 @@ view settings wrapper options track =
                 , padding 5
                 , Border.width 2
                 , Border.rounded 6
-                , Border.color rgtDark
+                , Border.color FlatColors.FlatUIPalette.concrete
                 ]
                 [ row [ width fill ]
                     [ el ((width <| fillPortion 2) :: headerAttrs) <| i18n "name"

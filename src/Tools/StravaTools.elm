@@ -22,6 +22,7 @@ import Element.Background as Background
 import Element.Font as Font
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import Http
 import Iso8601
 import Length
@@ -605,7 +606,9 @@ viewStravaTab settings options wrap track =
 
         routeIdField =
             Input.text
-                [ width (minimum 150 <| fill) ]
+                [ width (minimum 150 <| fill)
+                , Background.color FlatColors.FlatUIPalette.silver
+                ]
                 { onChange = wrap << UserChangedRouteId
                 , text = options.externalRouteId
                 , placeholder = Just <| Input.placeholder [] <| i18n "routeid"
@@ -730,6 +733,7 @@ viewStravaTab settings options wrap track =
                     segmentIdField =
                         Input.text
                             [ width (minimum 150 <| fill)
+                            , Background.color FlatColors.FlatUIPalette.silver
 
                             --, tooltip below (localisedTooltip location toolId "segmenttip")
                             ]

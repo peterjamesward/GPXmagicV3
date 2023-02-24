@@ -1,6 +1,7 @@
 module Tools.Intersections exposing (Msg(..), Options, ResultMode(..), defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import DomainModel
 import Element exposing (..)
 import Element.Background as Background
@@ -220,14 +221,13 @@ view settings msgWrapper options track =
                             [ thisText, categoryText, otherText, distanceText ]
                 }
     in
-    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        column [ centerX, padding 5, spacing 8 ]
-            [ resultModeSelection
-            , case options.resultMode of
-                ResultNavigation ->
-                    resultsNavigation
+    column (CommonToolStyles.toolContentBoxStyle settings)
+        [ resultModeSelection
+        , case options.resultMode of
+            ResultNavigation ->
+                resultsNavigation
 
-                ResultList ->
-                    column [ height <| px 150, scrollbarY ] <|
-                        List.map linkButton options.features
-            ]
+            ResultList ->
+                column [ height <| px 150, scrollbarY ] <|
+                    List.map linkButton options.features
+        ]
