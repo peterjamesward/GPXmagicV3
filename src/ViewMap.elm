@@ -7,6 +7,7 @@ module ViewMap exposing
     )
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -18,6 +19,7 @@ import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -118,12 +120,12 @@ update msg msgWrapper track area context =
 
 
 view :
-    I18NOptions.Location
+    SystemSettings
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Maybe MapContext
     -> (Msg -> msg)
     -> Element msg
-view location ( viewWidth, viewHeight ) mContext msgWrapper =
+view settings ( viewWidth, viewHeight ) mContext msgWrapper =
     let
         handyMapControls context =
             column
@@ -131,21 +133,21 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                 , alignRight
                 , moveDown 100
                 , moveLeft 10
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 , Font.size 40
                 , padding 6
                 , spacing 8
                 , Border.width 1
                 , Border.rounded 4
                 , Border.color FlatColors.AussiePalette.blurple
+                , Background.color (CommonToolStyles.themeBackground SystemSettings.LightTheme)
                 ]
                 [ Input.button
                     [ tooltip onLeft <|
                         if context.followOrange then
-                            localisedTooltip location "panes" "locked"
+                            localisedTooltip settings.location "panes" "locked"
 
                         else
-                            localisedTooltip location "panes" "unlocked"
+                            localisedTooltip settings.location "panes" "unlocked"
                     ]
                     { onPress = Just <| msgWrapper ToggleFollowOrange
                     , label =
@@ -158,10 +160,10 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                 , Input.button
                     [ tooltip onLeft <|
                         if context.draggable then
-                            localisedTooltip location "panes" "drag"
+                            localisedTooltip settings.location "panes" "drag"
 
                         else
-                            localisedTooltip location "panes" "nodrag"
+                            localisedTooltip settings.location "panes" "nodrag"
                     ]
                     { onPress = Just <| msgWrapper ToggleDraggable
                     , label =
@@ -172,7 +174,7 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                             useIcon FeatherIcons.x
                     }
                 , Input.button
-                    [ tooltip onLeft (localisedTooltip location "panes" "mapstyle")
+                    [ tooltip onLeft (localisedTooltip settings.location "panes" "mapstyle")
                     , inFront <| el [ alignRight ] <| mapStyleChoices context
                     ]
                     { onPress = Just <| msgWrapper ToggleMapStyleMenu
@@ -190,7 +192,6 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     , Font.size 12
                     , alignRight
                     , moveLeft 40
-                    , Background.color FlatColors.ChinesePalette.antiFlashWhite
                     ]
                     { onChange = msgWrapper << ChooseMapStyle
                     , options =

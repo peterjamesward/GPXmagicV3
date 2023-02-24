@@ -35,7 +35,17 @@ themeBackground : ColourTheme -> Element.Color
 themeBackground theme =
     case theme of
         LightTheme ->
-            FlatColors.FlatUIPalette.asbestos
+            FlatColors.ChinesePalette.antiFlashWhite
 
         DarkTheme ->
             rgtDark
+
+
+themeForeground : ColourTheme -> Element.Color
+themeForeground theme =
+    case theme of
+        LightTheme ->
+            rgtDark
+
+        DarkTheme ->
+            FlatColors.ChinesePalette.antiFlashWhite

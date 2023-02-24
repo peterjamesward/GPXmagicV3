@@ -13,6 +13,7 @@ import Camera3d
 import Circle2d
 import Color
 import ColourPalette exposing (gradientColourPastel)
+import CommonToolStyles
 import Dict exposing (Dict)
 import Direction2d
 import Direction3d
@@ -44,6 +45,7 @@ import Rectangle2d
 import Scene3d exposing (Entity)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
+import SystemSettings exposing (SystemSettings)
 import Tools.NamedSegmentOptions exposing (NamedSegment)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString, showDecimal2, showLongMeasure, showShortMeasure, uiColourHexString)
@@ -61,20 +63,21 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> ProfileContext -> Element msg
-zoomButtons msgWrapper context =
+zoomButtons : SystemSettings -> (Msg -> msg) -> ProfileContext -> Element msg
+zoomButtons settings msgWrapper context =
     column
         [ alignTop
         , alignRight
         , moveDown 5
         , moveLeft 5
-        , Background.color white
         , Font.size 40
         , padding 6
         , Element.spacing 8
         , Border.width 1
         , Border.rounded 4
         , Border.color FlatColors.AussiePalette.blurple
+        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
         , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
@@ -340,14 +343,14 @@ pointInGradientView context i tree =
 
 view :
     ProfileContext
+    -> SystemSettings
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List NamedSegment
     -> (Msg -> msg)
     -> Dict String PreviewData
-    -> Bool
     -> Element msg
-view context ( givenWidth, givenHeight ) track segments msgWrapper previews imperial =
+view context settings ( givenWidth, givenHeight ) track segments msgWrapper previews =
     let
         ( altitudeWidth, altitudeHeight ) =
             ( givenWidth
@@ -731,14 +734,14 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
                 [ Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         [ distanceAxis
-                        , pointsAsGradientPolyline "black" <| renderDataOnce
+                        , pointsAsGradientPolyline "grey" <| renderDataOnce
                         , Svg.g [] (orangeGradientSvg :: orangeText)
                         , Svg.g [] gradientPreviews
                         ]
                 ]
 
         distanceAxis =
-            pointsAsGradientPolyline "gray"
+            pointsAsGradientPolyline "grey"
                 [ Point3d.xyz leftEdge Quantity.zero Quantity.zero
                 , Point3d.xyz rightEdge Quantity.zero Quantity.zero
                 ]
@@ -797,7 +800,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
 
         textLine lineNum content =
             Svg.text_
-                [ Svg.Attributes.fill "black"
+                [ Svg.Attributes.fill "grey"
                 , Svg.Attributes.fontFamily "sans-serif"
                 , Svg.Attributes.fontSize "14px"
                 , Svg.Attributes.stroke "none"
@@ -819,11 +822,11 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
         orangeText =
             [ textLine 1 <| (showDecimal2 orangeLeaf.gradientAtStart ++ "%")
             , textLine 2 <|
-                showShortMeasure imperial <|
+                showShortMeasure settings.imperial <|
                     Point3d.zCoordinate <|
                         orangePoint.space
             , textLine 3 <|
-                showLongMeasure imperial <|
+                showLongMeasure settings.imperial <|
                     DomainModel.distanceFromIndex track.currentPosition track.trackTree
             ]
 
@@ -848,8 +851,8 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
     in
     column
         (pointer
-            :: Background.color FlatColors.ChinesePalette.antiFlashWhite
-            :: (inFront <| zoomButtons msgWrapper context)
+            --:: Background.color FlatColors.ChinesePalette.antiFlashWhite
+            :: (inFront <| zoomButtons settings msgWrapper context)
             --:: (htmlAttribute <| Mouse.onMove (MouseMove >> msgWrapper))
             :: common3dSceneAttributes
         )

@@ -15,6 +15,7 @@ import Arc2d
 import Axis2d
 import Camera3d exposing (Camera3d)
 import Circle2d
+import CommonToolStyles
 import Dict
 import Direction2d exposing (toAngle)
 import Direction3d
@@ -49,6 +50,7 @@ import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.Graph
 import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
@@ -121,17 +123,18 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> GraphContext -> Element msg
-zoomButtons msgWrapper context =
+zoomButtons : SystemSettings -> (Msg -> msg) -> GraphContext -> Element msg
+zoomButtons settings msgWrapper context =
     column
         [ alignTop
         , alignRight
         , moveDown 5
         , moveLeft 5
-        , Background.color white
         , Font.size 40
         , padding 6
         , spacing 8
+        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
         , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
@@ -250,13 +253,13 @@ onContextMenu msg =
 
 
 view :
-    I18NOptions.Location
+    SystemSettings
     -> GraphContext
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Tools.GraphOptions.Options msg
     -> (Msg -> msg)
     -> Element msg
-view location context ( width, height ) options msgWrapper =
+view settings context ( width, height ) options msgWrapper =
     let
         camera =
             deriveCamera context
@@ -524,7 +527,7 @@ view location context ( width, height ) options msgWrapper =
         , Border.width 0
         , Border.color FlatColors.ChinesePalette.peace
         , Background.color FlatColors.FlatUIPalette.silver
-        , inFront <| zoomButtons msgWrapper context
+        , inFront <| zoomButtons settings msgWrapper context
         , inFront <| popup msgWrapper context options
         ]
     <|

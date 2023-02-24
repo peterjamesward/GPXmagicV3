@@ -598,15 +598,15 @@ initialisePane track options pane =
 
 
 viewModeChoices :
-    I18NOptions.Location
+    SystemSettings
     -> (Msg -> msg)
     -> PaneContext
     -> PaneLayoutOptions
     -> Element msg
-viewModeChoices location msgWrapper context options =
+viewModeChoices settings msgWrapper context options =
     let
         localise =
-            radioButton << I18N.localisedString location "panes"
+            radioButton << I18N.localisedString settings.location "panes"
 
         fullOptionList =
             [ Input.optionWith ViewMap <| localise "Map"
@@ -634,7 +634,7 @@ viewModeChoices location msgWrapper context options =
             , paddingEach { top = 4, left = 4, bottom = 0, right = 10 }
             ]
           <|
-            paneLayoutMenu location msgWrapper options
+            paneLayoutMenu settings.location msgWrapper options
         ]
 
 
@@ -786,7 +786,7 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewThirdPerson.view
-                                settings.location
+                                settings
                                 context
                                 displayOptions
                                 ( paneWidth, paneHeight )
@@ -814,6 +814,7 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
                         ( Just context, Just track ) ->
                             ViewPlan.view
                                 context
+                                settings
                                 displayOptions
                                 ( paneWidth, paneHeight )
                                 track
@@ -826,7 +827,7 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
                     case ( pane.graphContext, mTrack ) of
                         ( Just context, Just _ ) ->
                             ViewGraph.view
-                                settings.location
+                                settings
                                 context
                                 ( paneWidth, paneHeight )
                                 graphOptions
@@ -839,6 +840,7 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
                         Just context ->
                             ViewProfileChartsCanvas.view
                                 context
+                                settings
                                 pane.paneId
                                 ( paneWidth, paneHeight )
                                 (msgWrapper << ProfileViewMessage pane.paneId)
@@ -850,17 +852,17 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
                         ( Just context, Just track ) ->
                             ViewProfileChartsWebGL.view
                                 context
+                                settings
                                 ( paneWidth, paneHeight )
                                 track
                                 segments
                                 (msgWrapper << ProfileViewMessage pane.paneId)
                                 previews
-                                settings.imperial
 
                         _ ->
                             none
                 , conditionallyVisible (pane.activeView == ViewInfo) <|
-                    ViewAbout.view ( paneWidth, paneHeight )
+                    ViewAbout.view ( paneWidth, paneHeight ) settings
                 ]
 
         viewPaneZeroWithMap : PaneContext -> Element msg
@@ -868,11 +870,11 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
             column [ width fill, centerX ]
-                [ viewModeChoices settings.location msgWrapper pane options
+                [ viewModeChoices settings msgWrapper pane options
                 , showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
                     ViewMap.view
-                        settings.location
+                        settings
                         ( paneWidth, paneHeight )
                         pane.mapContext
                         (msgWrapper << MapViewMessage)

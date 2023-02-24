@@ -7,6 +7,7 @@ module ViewProfileChartsCanvas exposing
     )
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles
 import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -28,6 +29,7 @@ import Point3d
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
+import SystemSettings exposing (SystemSettings)
 import TrackLoaded exposing (TrackLoaded)
 import ViewProfileChartContext exposing (DragAction(..), Msg(..), ProfileContext)
 import ViewPureStyles exposing (useIcon)
@@ -41,20 +43,21 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> ProfileContext -> Element msg
-zoomButtons msgWrapper context =
+zoomButtons : SystemSettings -> (Msg -> msg) -> ProfileContext -> Element msg
+zoomButtons settings msgWrapper context =
     column
         [ alignTop
         , alignRight
         , moveDown 5
         , moveLeft 5
-        , Background.color white
         , Font.size 40
         , padding 6
         , Element.spacing 8
         , Border.width 1
         , Border.rounded 4
         , Border.color FlatColors.AussiePalette.blurple
+        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
         , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
@@ -278,28 +281,27 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             ( newContext, [ Actions.RenderProfile newContext ] )
 
         SetEmphasis _ ->
-            (context , [])
+            ( context, [] )
 
         MouseMove event ->
-            (context , [])
-
+            ( context, [] )
 
 
 view :
     ProfileContext
+    -> SystemSettings
     -> PaneId
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> (Msg -> msg)
     -> Element msg
-view context paneId ( givenWidth, givenHeight ) msgWrapper =
+view context settings paneId ( givenWidth, givenHeight ) msgWrapper =
     -- We just declare the container for the profile canvas, the data are provided through a port.
     let
         tenPercentHeight =
             inPixels givenHeight // 10
     in
     column
-        ([ Background.color FlatColors.ChinesePalette.antiFlashWhite
-         , inFront <| zoomButtons msgWrapper context
+        ([ inFront <| zoomButtons settings msgWrapper context
          , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
          , htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
          , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)

@@ -992,29 +992,29 @@ view model =
     { title = composeTitle model
     , body =
         [ layout
-            (Background.color (CommonToolStyles.themeBackground model.systemSettings.colourTheme)
-                :: (inFront <|
-                        case model.modalMessage of
-                            Just message ->
-                                showModalMessage
-                                    model.systemSettings.location
-                                    (Pixels.inPixels <| Tuple.first model.contentArea)
-                                    (I18N.localisedString model.systemSettings.location "main" message)
-                                    DismissModalMessage
+            ([ Background.color (CommonToolStyles.themeBackground model.systemSettings.colourTheme)
+             , Font.color (CommonToolStyles.themeForeground model.systemSettings.colourTheme)
+             , inFront <|
+                case model.modalMessage of
+                    Just message ->
+                        showModalMessage
+                            model.systemSettings.location
+                            (Pixels.inPixels <| Tuple.first model.contentArea)
+                            (I18N.localisedString model.systemSettings.location "main" message)
+                            DismissModalMessage
 
-                            Nothing ->
-                                none
-                   )
-                :: (inFront <| infoTextPopup model.systemSettings.location model.infoText)
-                :: (inFront <|
-                        if model.languageEditorOpen then
-                            I18N.editor I18NMsg model.systemSettings.location model.languageEditor
+                    Nothing ->
+                        none
+             , inFront <| infoTextPopup model.systemSettings.location model.infoText
+             , inFront <|
+                if model.languageEditorOpen then
+                    I18N.editor I18NMsg model.systemSettings.location model.languageEditor
 
-                        else
-                            none
-                   )
+                else
+                    none
+             ]
                 --:: (htmlAttribute <| Mouse.onClick BackgroundClick)
-                :: commonLayoutStyles
+                ++ commonLayoutStyles
             )
           <|
             column [ width fill, height fill ]
@@ -1127,7 +1127,6 @@ topLoadingBar model =
         moreOptionsButton =
             button
                 [ padding 5
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
                 , tooltip below (localisedTooltip model.systemSettings.location "main" "import")
@@ -1160,7 +1159,6 @@ topLoadingBar model =
         loadGpxButton =
             button
                 [ padding 5
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
                 ]
@@ -1174,6 +1172,7 @@ topLoadingBar model =
                     [ padding 5
                     , Background.color FlatColors.AussiePalette.juneBud
                     , Border.color FlatColors.FlatUIPalette.peterRiver
+                    , Font.color (CommonToolStyles.themeForeground SystemSettings.LightTheme)
                     , Border.width 2
                     ]
                     { onPress = Just WriteGpxFile
@@ -1183,6 +1182,7 @@ topLoadingBar model =
                     [ padding 5
                     , Background.color FlatColors.AussiePalette.juneBud
                     , Border.color FlatColors.FlatUIPalette.peterRiver
+                    , Font.color (CommonToolStyles.themeForeground SystemSettings.LightTheme)
                     , Border.width 2
                     , tooltip below (localisedTooltip model.systemSettings.location "main" "saveOptions")
                     , inFront <|
@@ -1230,6 +1230,7 @@ topLoadingBar model =
                     [ padding 5
                     , onEnter WriteGpxFile
                     , width <| minimum 200 <| fill
+                    , Background.color FlatColors.FlatUIPalette.silver
                     ]
                     { text = filename
                     , onChange = FilenameChange

@@ -9,6 +9,7 @@ import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Camera3d exposing (Camera3d)
 import Color
+import CommonToolStyles
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -31,6 +32,7 @@ import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical exposing (metresPerPixel)
+import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
@@ -91,17 +93,18 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> PlanContext -> Element msg
-zoomButtons msgWrapper context =
+zoomButtons : SystemSettings -> (Msg -> msg) -> PlanContext -> Element msg
+zoomButtons settings msgWrapper context =
     column
         [ alignTop
         , alignRight
         , moveDown 5
         , moveLeft 5
-        , Background.color white
         , Font.size 40
         , padding 6
         , spacing 8
+        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
         , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
@@ -145,13 +148,14 @@ onContextMenu msg =
 
 view :
     PlanContext
+    -> SystemSettings
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context display contentArea track scene msgWrapper =
+view context settings display contentArea track scene msgWrapper =
     let
         dragging =
             context.dragAction
@@ -180,7 +184,7 @@ view context display contentArea track scene msgWrapper =
         , Border.width 0
         , Border.color FlatColors.ChinesePalette.peace
         , inFront <| overlay
-        , inFront <| zoomButtons msgWrapper context
+        , inFront <| zoomButtons settings msgWrapper context
         ]
     <|
         html <|

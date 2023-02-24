@@ -40,6 +40,14 @@ Open multiple GPX routes (file, Strava) and combine them in Route Maker.
 
 May not even be that hard, given Route Maker exists.
 
+## Camera
+
+Full control of camera in relation to marker.
+
+## LIDAR
+
+Direct reading of LIDAR data.
+
 ## Replace MapBox?
 
 https://github.com/klaftertief/slippery-slope

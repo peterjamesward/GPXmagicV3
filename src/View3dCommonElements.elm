@@ -4,6 +4,7 @@ import Angle exposing (Angle)
 import Axis2d
 import Camera3d exposing (Camera3d)
 import Circle2d
+import CommonToolStyles
 import Dict
 import Direction2d exposing (Direction2d)
 import DomainModel exposing (EarthPoint)
@@ -30,6 +31,7 @@ import Quantity exposing (Quantity)
 import Rectangle2d
 import Svg
 import Svg.Attributes
+import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.DisplaySettingsOptions
 import Tools.I18NOptions as I18NOptions
@@ -102,20 +104,21 @@ common3dSceneAttributes msgWrapper context =
     ]
 
 
-zoomButtons : I18NOptions.Location -> (Msg -> msg) -> Context -> Element msg
-zoomButtons location msgWrapper context =
+zoomButtons : SystemSettings -> (Msg -> msg) -> Context -> Element msg
+zoomButtons settings msgWrapper context =
     column
         [ alignTop
         , alignRight
         , moveDown 5
         , moveLeft 10
-        , Background.color white
         , Font.size 40
         , padding 6
         , spacing 8
         , Border.width 1
         , Border.rounded 4
         , Border.color FlatColors.AussiePalette.blurple
+        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
         , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
@@ -135,10 +138,10 @@ zoomButtons location msgWrapper context =
             }
         , Input.button
             (if context.followSelectedPoint then
-                [ tooltip onLeft (localisedTooltip location "panes" "locked") ]
+                [ tooltip onLeft (localisedTooltip settings.location "panes" "locked") ]
 
              else
-                [ tooltip onLeft (localisedTooltip location "panes" "unlocked") ]
+                [ tooltip onLeft (localisedTooltip settings.location "panes" "unlocked") ]
             )
             { onPress = Just <| msgWrapper ToggleFollowOrange
             , label =
