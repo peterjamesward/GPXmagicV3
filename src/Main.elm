@@ -2137,9 +2137,6 @@ performActionsOnModel actions model =
                             let
                                 isDark =
                                     D.decodeValue D.bool value
-
-                                _ =
-                                    Debug.log "DARK" isDark
                             in
                             case isDark of
                                 Ok True ->
