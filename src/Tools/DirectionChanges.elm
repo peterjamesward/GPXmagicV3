@@ -609,7 +609,7 @@ view settings msgWrapper options isTrack =
                             --    }
                             ]
             in
-            el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
+            el (CommonToolStyles.toolContentBoxStyle settings) <|
                 column [ padding 4, spacing 6, width fill ]
                     [ modeSelection
                     , angleSelection

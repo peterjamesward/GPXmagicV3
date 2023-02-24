@@ -427,7 +427,7 @@ view settings msgWrapper options isTrack =
                                 }
                             ]
             in
-            el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
+            el (CommonToolStyles.toolContentBoxStyle settings) <|
                 column [ centerX, padding 4, spacing 6 ]
                     [ el [ centerX ] modeSelection
                     , el [ centerX ] thresholdSlider

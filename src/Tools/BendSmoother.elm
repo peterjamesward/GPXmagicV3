@@ -471,12 +471,8 @@ view settings wrapper options track =
             I18N.text settings.location toolId
     in
     column
-        [ padding 10
-        , spacing 5
-        , width fill
-        , centerX
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
+    <|
         [ el [ centerX ] <|
             Input.radioRow
                 [ spacing 5 ]

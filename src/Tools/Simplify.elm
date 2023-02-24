@@ -235,11 +235,8 @@ view settings msgWrapper options isTrack =
                     I18N.text settings.location toolId
             in
             column
-                [ width fill
-                , padding 10
-                , spacing 10
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                ]
+                (CommonToolStyles.toolContentBoxStyle settings)
+            <|
                 [ el [ centerX ] <|
                     Input.button neatToolsBorder <|
                         case Dict.size options.pointsToRemove of

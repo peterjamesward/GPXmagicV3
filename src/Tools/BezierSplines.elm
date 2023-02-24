@@ -10,6 +10,7 @@ module Tools.BezierSplines exposing
 
 import Actions exposing (ToolAction(..))
 import BezierSplines
+import CommonToolStyles
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -286,12 +287,8 @@ view settings wrap options track =
                     }
     in
     column
-        [ spacing 5
-        , padding 5
-        , centerX
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
+        (CommonToolStyles.toolContentBoxStyle settings)
+    <|
         [ el [ centerX ] sliders
         , el [ centerX ] modeChoice
         , el [ centerX ] extent
