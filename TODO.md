@@ -17,6 +17,11 @@ No preview for single point nudge without fade.
 
 # BACKLOG
 
+## Street view
+
+Sure I'm using a free API, so why can I not surface it in a view? 
+Linked to marker.
+
 ## Detect "flat bits"
 
 Like Gradient Problems but **exactly zero** gradient.
@@ -25,7 +30,7 @@ Like Gradient Problems but **exactly zero** gradient.
 
 Sync'd to Orange?
 
-## Route algebra
+## Route joining
 
 Open multiple GPX routes (file, Strava) and combine them in Route Maker.
 
