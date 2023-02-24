@@ -1,7 +1,7 @@
 module Tools.Essentials exposing (Msg(..), Options, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (PeteTree, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -10,14 +10,12 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
-import FlatColors.ChinesePalette
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showLongMeasure)
-import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, useIcon)
+import ViewPureStyles exposing (neatToolsBorder, useIcon)
 
 
 toolId =
@@ -203,7 +201,7 @@ view settings msgWrapper options isTrack =
                 ]
 
             Nothing ->
-                [ noTrackMessage settings.location ]
+                [ noTrackMessage settings ]
 
 
 viewPointers : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg

@@ -1,7 +1,7 @@
 module Tools.Interpolate exposing (Msg(..), apply, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -266,4 +266,4 @@ view settings wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings

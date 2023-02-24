@@ -25,6 +25,7 @@ module ToolsController exposing
 
 import Actions exposing (ToolAction(..))
 import ColourPalette exposing (stravaOrange)
+import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
@@ -1710,13 +1711,14 @@ viewToolSettings settings options wrapper =
                 }
     in
     column
-        [ width fill
-        , height <| px 300
-        , scrollbarY
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , padding 10
-        , spacing 3
-        ]
+        ([ width fill
+         , height <| px 300
+         , scrollbarY
+         , padding 10
+         , spacing 3
+         ]
+            ++ CommonToolStyles.toolContentBoxStyle settings
+        )
     <|
         List.map locationChoices options.tools
 
@@ -1989,7 +1991,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolEssentials ->
                 Tools.Essentials.view
@@ -2008,7 +2010,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolCentroidAverage ->
                 case isTrack of
@@ -2020,7 +2022,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolCurveFormer ->
                 Tools.CurveFormer.view
@@ -2080,7 +2082,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolMoveScaleRotate ->
                 Tools.MoveScaleRotate.view
@@ -2112,7 +2114,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolStartFinish ->
                 case isTrack of
@@ -2124,7 +2126,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             (msgWrapper << ToolStartFinishMsg)
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolSplitAndJoin ->
                 case isTrack of
@@ -2136,7 +2138,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolIntersections ->
                 case isTrack of
@@ -2148,7 +2150,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolStraighten ->
                 case isTrack of
@@ -2160,7 +2162,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolGraph ->
                 case isTrack of
@@ -2171,7 +2173,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             options.graphOptions
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolSettings ->
                 viewToolSettings settings options msgWrapper
@@ -2193,7 +2195,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
             ToolNamedSegments ->
                 case isTrack of
@@ -2205,7 +2207,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage settings.location
+                        noTrackMessage settings
 
 
 

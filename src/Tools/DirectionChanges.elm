@@ -2,7 +2,7 @@ module Tools.DirectionChanges exposing (DirectionChangeMode(..), Msg(..), Option
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import Direction2d
 import DomainModel exposing (GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
@@ -18,11 +18,10 @@ import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
+import ViewPureStyles exposing (infoButton, neatToolsBorder, sliderThumb, useIcon)
 
 
 toolId =
@@ -657,7 +656,7 @@ view settings msgWrapper options isTrack =
                     ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings
 
 
 widenBend :

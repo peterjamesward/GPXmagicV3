@@ -2,7 +2,7 @@ module Tools.Timestamp exposing (Msg(..), applyDoubling, applyPhysics, applyTick
 
 import Actions exposing (ToolAction(..))
 import ColourPalette exposing (warningColor)
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (..)
 import Duration exposing (Duration)
 import Element exposing (..)
@@ -729,4 +729,4 @@ view settings wrapper options mTrack =
             viewWithTrack settings wrapper options isTrack
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings

@@ -3,7 +3,7 @@ module Tools.OutAndBack exposing (Msg(..), apply, defaultOptions, toolId, update
 import Actions exposing (ToolAction(..))
 import Arc3d
 import Axis3d
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -271,4 +271,4 @@ view settings wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings

@@ -8,7 +8,7 @@ import Axis2d
 import BoundingBox2d
 import Circle3d exposing (Circle3d)
 import Color
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d
@@ -49,7 +49,7 @@ import Utils
 import UtilsForViews exposing (flatBox, showShortMeasure)
 import Vector2d
 import Vector3d
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, edges, neatToolsBorder, noTrackMessage, subtleToolStyles)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, edges, neatToolsBorder, subtleToolStyles)
 
 
 toolId =
@@ -436,7 +436,7 @@ view settings wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings
 
 
 point : ( Float, Float ) -> Point

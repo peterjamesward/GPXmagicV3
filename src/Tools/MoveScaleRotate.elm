@@ -4,7 +4,7 @@ import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import Direction2d
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
@@ -448,4 +448,4 @@ view settings options wrapper maybeTrack =
                 ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings

@@ -11,7 +11,7 @@ module Tools.Nudge exposing
     )
 
 import Actions exposing (ToolAction(..))
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (..)
@@ -476,7 +476,7 @@ view settings options msgWrapper track =
     in
     case track of
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings
 
         Just _ ->
             let

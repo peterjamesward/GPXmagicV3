@@ -15,7 +15,7 @@ import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
 import Element.Background as Background
@@ -435,7 +435,7 @@ viewBendControls settings wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings
 
 
 viewPointControls : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
@@ -461,7 +461,7 @@ viewPointControls settings wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg

@@ -6,7 +6,14 @@ import Element.Font as Font
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import SystemSettings exposing (ColourTheme(..), SystemSettings)
-import ViewPureStyles exposing (rgtDark)
+import Tools.I18N as I18N
+
+
+noTrackMessage : SystemSettings -> Element msg
+noTrackMessage settings =
+    paragraph
+        (toolContentBoxStyle settings)
+        [ I18N.text settings.location "tools" "notrack" ]
 
 
 toolContentBoxStyle : SystemSettings -> List (Attribute msg)
@@ -38,14 +45,14 @@ themeBackground theme =
             FlatColors.ChinesePalette.antiFlashWhite
 
         DarkTheme ->
-            rgtDark
+            FlatColors.FlatUIPalette.midnightBlue
 
 
 themeForeground : ColourTheme -> Element.Color
 themeForeground theme =
     case theme of
         LightTheme ->
-            rgtDark
+            FlatColors.FlatUIPalette.midnightBlue
 
         DarkTheme ->
             FlatColors.ChinesePalette.antiFlashWhite

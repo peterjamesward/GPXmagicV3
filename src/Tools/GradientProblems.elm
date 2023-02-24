@@ -1,7 +1,7 @@
 module Tools.GradientProblems exposing (GradientProblem(..), Msg(..), Options, ResultMode(..), defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import CommonToolStyles
+import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (PeteTree, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -14,10 +14,9 @@ import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure)
-import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
+import ViewPureStyles exposing (infoButton, neatToolsBorder, sliderThumb, useIcon)
 
 
 toolId =
@@ -461,4 +460,4 @@ view settings msgWrapper options isTrack =
                     ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings

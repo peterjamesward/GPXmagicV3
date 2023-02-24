@@ -10,6 +10,7 @@ module Tools.Simplify exposing
     )
 
 import Actions exposing (ToolAction(..))
+import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -22,10 +23,9 @@ import Quantity exposing (Quantity, Squared)
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
-import ViewPureStyles exposing (neatToolsBorder, noTrackMessage)
+import ViewPureStyles exposing (neatToolsBorder)
 
 
 toolId =
@@ -268,4 +268,4 @@ view settings msgWrapper options isTrack =
                 ]
 
         Nothing ->
-            noTrackMessage settings.location
+            noTrackMessage settings

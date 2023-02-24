@@ -1,7 +1,34 @@
-module ViewPureStyles exposing (commonLayoutStyles, commonShortHorizontalSliderStyles, commonShortVerticalSliderStyles, compactRadioButton, conditionallyVisible, contrastingColour, displayName, edges, infoButton, neatToolsBorder, noTrackMessage, onEnter, prettyButtonStyles, radioButton, rgtDark, rgtPurple, shortSliderStyles, showModalMessage, sliderThumb, stopProp, subtleToolStyles, ukraineBlue, ukraineYellow, useIcon, useIconWithSize, wideSliderStylesWithWidth)
+module ViewPureStyles exposing
+    ( commonLayoutStyles
+    , commonShortHorizontalSliderStyles
+    , commonShortVerticalSliderStyles
+    , compactRadioButton
+    , conditionallyVisible
+    , contrastingColour
+    , displayName
+    , edges
+    , infoButton
+    , neatToolsBorder
+    , onEnter
+    , prettyButtonStyles
+    , radioButton
+    , rgtDark
+    , rgtPurple
+    , shortSliderStyles
+    , showModalMessage
+    , sliderThumb
+    , stopProp
+    , subtleToolStyles
+    , ukraineBlue
+    , ukraineYellow
+    , useIcon
+    , useIconWithSize
+    , wideSliderStylesWithWidth
+    )
 
 import Color exposing (blue)
 import ColourPalette exposing (scrollbarBackground)
+import CommonToolStyles
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -17,6 +44,7 @@ import Json.Decode as D
 import Markdown
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
+import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 
@@ -359,16 +387,3 @@ onEnter msg =
                     )
             )
         )
-
-
-noTrackMessage location =
-    paragraph
-        [ padding 20
-        , spacing 5
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , centerX
-        , centerY
-        , height fill
-        ]
-        [ I18N.text location "tools" "notrack" ]
