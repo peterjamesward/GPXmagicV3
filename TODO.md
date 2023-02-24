@@ -13,15 +13,6 @@ No preview for single point nudge without fade.
 
 # WIP
 
-## Dark mode
-
-Need to save & restore theme, not colour.
-
-## Refactor Main -> Tools
-
-I hope this will open the door to a much cleaner control flow, perhaps deprecating
-actions (yes, after all that) and using the track/newTrack diff to drive command generation.
-
 ---
 
 # BACKLOG
@@ -47,6 +38,11 @@ Full control of camera in relation to marker.
 ## LIDAR
 
 Direct reading of LIDAR data.
+
+## Refactor Main -> Tools
+
+I hope this will open the door to a much cleaner control flow, perhaps deprecating
+actions (yes, after all that) and using the track/newTrack diff to drive command generation.
 
 ## Replace MapBox?
 

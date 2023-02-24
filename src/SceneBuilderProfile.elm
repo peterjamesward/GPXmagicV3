@@ -60,13 +60,16 @@ module SceneBuilderProfile exposing
 -}
 
 import ColourPalette exposing (gradientColourPastel)
+import CommonToolStyles
 import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, RoadSection)
+import FlatColors.FlatUIPalette
 import Json.Encode as E
 import Length exposing (Meters)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import Quantity.Interval as Interval
+import SystemSettings exposing (SystemSettings)
 import Tools.NamedSegmentOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString, uiColourHexString)
@@ -87,11 +90,11 @@ type alias CommonChartInfo =
     }
 
 
-commonChartScales : ProfileContext -> Bool -> TrackLoaded msg -> Bool -> CommonChartInfo
-commonChartScales profile imperial track isGradients =
+commonChartScales : SystemSettings -> ProfileContext -> TrackLoaded msg -> Bool -> CommonChartInfo
+commonChartScales settings profile track isGradients =
     let
         ( distanceFunction, altitudeFunction ) =
-            if imperial then
+            if settings.imperial then
                 ( Length.inMiles, Length.inFeet )
 
             else
@@ -138,7 +141,7 @@ commonChartScales profile imperial track isGradients =
             )
 
         ( distanceUnits, altitudeUnits ) =
-            if imperial then
+            if settings.imperial then
                 ( "Miles"
                 , if isGradients then
                     "%"
@@ -188,6 +191,20 @@ commonChartScales profile imperial track isGradients =
                                         , ( "display", E.bool True )
                                         ]
                                   )
+                                , ( "grid"
+                                  , E.object
+                                        [ ( "color"
+                                          , E.string <|
+                                                uiColourHexString <|
+                                                    FlatColors.FlatUIPalette.concrete
+                                          )
+                                        ]
+                                  )
+                                , ( "color"
+                                  , E.string <|
+                                        uiColourHexString <|
+                                            FlatColors.FlatUIPalette.concrete
+                                  )
                                 ]
                           )
                         , ( "y"
@@ -198,6 +215,20 @@ commonChartScales profile imperial track isGradients =
                                         [ ( "text", E.string altitudeUnits )
                                         , ( "display", E.bool True )
                                         ]
+                                  )
+                                , ( "grid"
+                                  , E.object
+                                        [ ( "color"
+                                          , E.string <|
+                                                uiColourHexString <|
+                                                    FlatColors.FlatUIPalette.concrete
+                                          )
+                                        ]
+                                  )
+                                , ( "color"
+                                  , E.string <|
+                                        uiColourHexString <|
+                                            FlatColors.FlatUIPalette.concrete
                                   )
                                 ]
                           )
@@ -220,32 +251,32 @@ commonChartScales profile imperial track isGradients =
 
 profileChart :
     ProfileContext
-    -> Bool
+    -> SystemSettings
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> E.Value
-profileChart profile imperial track segments previews =
+profileChart profile settings track segments previews =
     if profile.colouredChart then
-        profileChartWithColours profile imperial track
+        profileChartWithColours profile settings track
 
     else
-        profileChartMonochrome profile imperial track segments previews
+        profileChartMonochrome profile settings track segments previews
 
 
 profileChartMonochrome :
     ProfileContext
-    -> Bool
+    -> SystemSettings
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> E.Value
-profileChartMonochrome profile imperial track segments previews =
+profileChartMonochrome profile settings track segments previews =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
         commonInfo =
-            commonChartScales profile imperial track False
+            commonChartScales settings profile track False
 
         chartStuff =
             E.object
@@ -455,8 +486,8 @@ type alias GradientBucketEntry =
     }
 
 
-profileChartWithColours : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
-profileChartWithColours profile imperial track =
+profileChartWithColours : ProfileContext -> SystemSettings -> TrackLoaded msg -> E.Value
+profileChartWithColours profile settings track =
     -- We cannot change the fill area dynamically under a line chart, so we create
     -- multiple charts with common axes, representing different gradient classes
     -- (steep up, up, flat, down, steep down, say).
@@ -474,7 +505,7 @@ profileChartWithColours profile imperial track =
             bucket * 4 |> toFloat
 
         commonInfo =
-            commonChartScales profile imperial track False
+            commonChartScales settings profile track False
 
         chartStuff =
             E.object
@@ -691,13 +722,13 @@ profileChartWithColours profile imperial track =
     chartStuff
 
 
-gradientChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
-gradientChart profile imperial track =
+gradientChart : ProfileContext -> SystemSettings -> TrackLoaded msg -> E.Value
+gradientChart profile settings track =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
         commonInfo =
-            commonChartScales profile imperial track True
+            commonChartScales settings profile track True
 
         chartStuff =
             E.object

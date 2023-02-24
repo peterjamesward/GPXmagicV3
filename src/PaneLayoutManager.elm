@@ -691,12 +691,12 @@ dimensionsWithLayout layout ( w, h ) =
 
 paintProfileCharts :
     PaneLayoutOptions
-    -> Bool
+    -> SystemSettings
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> Cmd msg
-paintProfileCharts panes imperial track segments previews =
+paintProfileCharts panes settings track segments previews =
     let
         paintIfProfileVisible pane =
             if pane.activeView == ViewProfileCanvas then
@@ -705,13 +705,13 @@ paintProfileCharts panes imperial track segments previews =
                         Cmd.batch
                             [ MapPortController.paintCanvasProfileChart
                                 context
-                                imperial
+                                settings
                                 track
                                 segments
                                 previews
                             , MapPortController.paintCanvasGradientChart
                                 context
-                                imperial
+                                settings
                                 track
                             ]
 

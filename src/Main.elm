@@ -409,7 +409,7 @@ update msg model =
                     ( model
                     , PaneLayoutManager.paintProfileCharts
                         model.paneLayoutOptions
-                        model.systemSettings.imperial
+                        model.systemSettings
                         track
                         model.toolOptions.namedSegmentOptions.namedSegments
                         model.previews
@@ -2330,7 +2330,7 @@ performActionCommands actions model =
                         [ MapPortController.refreshMap
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.systemSettings.imperial
+                            model.systemSettings
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2347,7 +2347,7 @@ performActionCommands actions model =
                         [ showPreviewOnMap previewData.tag
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.systemSettings.imperial
+                            model.systemSettings
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2358,7 +2358,7 @@ performActionCommands actions model =
                         [ MapPortController.hidePreview tag
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.systemSettings.imperial
+                            model.systemSettings
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2375,7 +2375,7 @@ performActionCommands actions model =
                         , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.systemSettings.imperial
+                            model.systemSettings
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2385,7 +2385,7 @@ performActionCommands actions model =
                     Cmd.batch <|
                         PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
-                            model.systemSettings.imperial
+                            model.systemSettings
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
@@ -2486,13 +2486,13 @@ performActionCommands actions model =
                     Cmd.batch
                         [ MapPortController.paintCanvasProfileChart
                             context
-                            model.systemSettings.imperial
+                            model.systemSettings
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                         , MapPortController.paintCanvasGradientChart
                             context
-                            model.systemSettings.imperial
+                            model.systemSettings
                             track
                         ]
 

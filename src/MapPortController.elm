@@ -16,6 +16,7 @@ import Point3d
 import PreviewData exposing (PreviewData)
 import SceneBuilderMap exposing (latLonPairFromGpx)
 import SceneBuilderProfile
+import SystemSettings exposing (SystemSettings)
 import Tools.NamedSegmentOptions
 import TrackLoaded exposing (TrackLoaded)
 import ViewProfileChartContext
@@ -205,12 +206,12 @@ addFullTrackToMap track =
 
 paintCanvasProfileChart :
     ViewProfileChartContext.ProfileContext
-    -> Bool
+    -> SystemSettings
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> Cmd msg
-paintCanvasProfileChart profileContext imperial track segments previews =
+paintCanvasProfileChart profileContext settings track segments previews =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Profile" )
@@ -218,7 +219,7 @@ paintCanvasProfileChart profileContext imperial track segments previews =
             , ( "chart"
               , SceneBuilderProfile.profileChart
                     profileContext
-                    imperial
+                    settings
                     track
                     segments
                     previews
@@ -226,13 +227,13 @@ paintCanvasProfileChart profileContext imperial track segments previews =
             ]
 
 
-paintCanvasGradientChart : ViewProfileChartContext.ProfileContext -> Bool -> TrackLoaded msg -> Cmd msg
-paintCanvasGradientChart profileContext imperial track =
+paintCanvasGradientChart : ViewProfileChartContext.ProfileContext -> SystemSettings -> TrackLoaded msg -> Cmd msg
+paintCanvasGradientChart profileContext settings track =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Gradient" )
             , ( "container", E.string <| "gradient." ++ profileContext.contextSuffix )
-            , ( "chart", SceneBuilderProfile.gradientChart profileContext imperial track )
+            , ( "chart", SceneBuilderProfile.gradientChart profileContext settings track )
             ]
 
 
