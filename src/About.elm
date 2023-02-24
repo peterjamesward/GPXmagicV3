@@ -9,6 +9,10 @@ aboutText =
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.9.10
+
+Rest your eyes by choosing Dark Mode in global settings.
+
 ## 3.9.9
 
 Slider in Gradient problems goes all the way down to 1%.
