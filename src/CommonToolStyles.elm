@@ -5,6 +5,7 @@ import Element.Background as Background
 import Element.Font as Font
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
+import Json.Encode as E
 import SystemSettings exposing (ColourTheme(..), SystemSettings)
 import Tools.I18N as I18N
 
@@ -56,3 +57,9 @@ themeForeground theme =
 
         DarkTheme ->
             FlatColors.ChinesePalette.antiFlashWhite
+
+
+encodeTheme : ColourTheme -> E.Value
+encodeTheme theme =
+    -- Cheating
+    E.bool (theme == DarkTheme)

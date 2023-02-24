@@ -292,7 +292,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "tools"
         , LocalStorage.storageGetItem "panes"
         , LocalStorage.storageGetItem "measure"
-        , LocalStorage.storageGetItem "background"
+        , LocalStorage.storageGetItem "darkTheme"
         , LocalStorage.storageGetItem "visuals"
         , LocalStorage.storageGetItem "docks"
         , LocalStorage.storageGetItem "location"
@@ -716,8 +716,7 @@ update msg model =
                     { model | systemSettings = newSettings }
 
                 actions =
-                    --TODO: Store the theme not the colour.
-                    [ StoreLocally "background" <| encodeColour <| CommonToolStyles.themeBackground theme ]
+                    [ StoreLocally "darkTheme" <| CommonToolStyles.encodeTheme theme ]
             in
             ( newModel
             , performActionCommands actions newModel
@@ -2134,15 +2133,24 @@ performActionsOnModel actions model =
                             in
                             { foldedModel | systemSettings = newSettings }
 
-                        "background" ->
+                        "darkTheme" ->
                             let
-                                getColour =
-                                    D.decodeValue ToolsController.colourDecoder value
+                                isDark =
+                                    D.decodeValue D.bool value
+
+                                _ =
+                                    Debug.log "DARK" isDark
                             in
-                            case getColour of
-                                Ok colour ->
-                                    --TODO: Restore theme, not colour
-                                    foldedModel
+                            case isDark of
+                                Ok True ->
+                                    let
+                                        settings =
+                                            foldedModel.systemSettings
+
+                                        newSettings =
+                                            { settings | colourTheme = SystemSettings.DarkTheme }
+                                    in
+                                    { foldedModel | systemSettings = newSettings }
 
                                 _ ->
                                     foldedModel

@@ -15,7 +15,7 @@ No preview for single point nudge without fade.
 
 ## Dark mode
 
-Apply background to all tools.
+Need to save & restore theme, not colour.
 
 ## Refactor Main -> Tools
 
@@ -26,13 +26,13 @@ actions (yes, after all that) and using the track/newTrack diff to drive command
 
 # BACKLOG
 
-## Video playback window
-
-Sync'd to Orange?
-
 ## Detect "flat bits"
 
 Like Gradient Problems but **exactly zero** gradient.
+
+## Video playback window
+
+Sync'd to Orange?
 
 ## Route algebra
 
