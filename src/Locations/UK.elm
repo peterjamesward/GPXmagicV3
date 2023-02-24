@@ -84,7 +84,7 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
                 , ( "Perspective", """3-D""" )
                 , ( "Rider", """Rider""" )
                 , ( "Profile", """Profile 1""" )
-                , ( "OldProfile", """Profile 2""")
+                , ( "OldProfile", """Profile 2""" )
                 , ( "Plan", """Plan""" )
                 , ( "Route", """Route""" )
                 , ( "About", """About""" )
@@ -219,6 +219,7 @@ You may get better results from using the _Smooth with Arcs_ or _Radiused Bends_
                 , ( "usepoint", """Sudden change""" )
                 , ( "climbs", """Steep climbs""" )
                 , ( "descents", """Steep descents""" )
+                , ( "flats", """Flat sections""" )
                 , ( "summary", """Summary""" )
                 , ( "list", """List""" )
                 , ( "change", """Direction change {0}º""" )
@@ -655,8 +656,8 @@ Purple marker, the Purple marker is moved there; this can give you more control 
                 , ( "fade", """Fade in/out """ )
                 , ( "Apply", """Apply""" )
                 , ( "Zero", """Reset sliders""" )
-                , ( "easing", """Smooth blend""")
-                , ( "spacing", """Spacing """)
+                , ( "easing", """Smooth blend""" )
+                , ( "spacing", """Spacing """ )
                 , ( "info", """
 Sometimes all it takes is a little _Nudge_.
 
@@ -703,12 +704,12 @@ have no offset.
                 , ( "altitudes", """Smooth by averaging altitudes""" )
                 , ( "gradients", """Smooth by averaging gradients""" )
                 , ( "uniform", """Use a uniform gradient across the range""" )
-                , ( "flat", """Flatten""")
+                , ( "flat", """Flatten""" )
                 , ( "uselimit", """Limit gradients""" )
                 , ( "usealts", """Smooth altitudes""" )
                 , ( "usegrad", """Smooth gradients""" )
                 , ( "useuniform", """Uniform gradient""" )
-                , ( "flatten", """Flatten""")
+                , ( "flatten", """Flatten""" )
                 , ( "whole", """Applies to whole track""" )
                 , ( "part", """Applies between markers""" )
                 , ( "needpart", """This method requires a range""" )
@@ -846,7 +847,7 @@ keeping the altitudes and squishing the points up increases gradients.
                 , ( "about", """To load a segment from Strava, you need a route
 that contains the segment geographicaly.""" )
                 , ( "connect", """Please connect to Strava""" )
-                , ( "routeError", """Could not load route""")
+                , ( "routeError", """Could not load route""" )
                 , ( "info", """
 The Strava tool has two functions:
 

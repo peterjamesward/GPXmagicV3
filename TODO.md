@@ -9,6 +9,8 @@ Delete should display "Sorry" message unless one leaf remains.
 
 No preview for single point nudge without fade.
 
+Land use 3D is broken. Suspect elevations are not being read from map.
+
 --- 
 
 # WIP
@@ -22,9 +24,8 @@ No preview for single point nudge without fade.
 Sure I'm using a free API, so why can I not surface it in a view? 
 Linked to marker.
 
-## Detect "flat bits"
-
-Like Gradient Problems but **exactly zero** gradient.
+Yes, to confirm, this is free, no key required:
+https://developers.google.com/maps/documentation/urls/get-started
 
 ## Video playback window
 
