@@ -938,6 +938,12 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "blend", """Varies the emphasis between outward and backwards lines.""" )
                 ]
           )
+        , ( "routing"
+          , Dict.fromList
+                [ ( "label", """Route planner""" )
+                , ( "info", """Uses the mapbox to find a route passing up to 100 waypoints.""" )
+                ]
+          )
         , ( "segments"
           , Dict.fromList
                 [ ( "label", """Named segments""" )

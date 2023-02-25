@@ -11,6 +11,17 @@ type alias MapContext =
     }
 
 
+default : MapContext
+default =
+    { mapClickDebounce = False
+    , lastMapClick = ( 0, 0 )
+    , followOrange = True
+    , draggable = False
+    , mapStyleMenuOpen = False
+    , mapStyle = MapOutdoors
+    }
+
+
 type MapStyle
     = MapBasic
     | MapStreets

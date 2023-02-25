@@ -1,6 +1,8 @@
+// Tell elm about prior OAuth state, and pass window size.
 const app = Elm.Main.init({
     node: document.getElementById("myapp"),
     flags: rememberedBytes()
+
 });
 
 // OAuth integration ...
@@ -342,10 +344,9 @@ function makeTheMap(msg) {
             map.setProjection('globe');
 
             app.ports.mapResponses.send({ 'msg' : 'map ready' });
-            map.resize();
 
+            if (element.style.visibility === true) map.resize();
         });
-
 
     } else {
         //No 'map' node, we have to keep checking.

@@ -33,7 +33,7 @@ type alias PaneLayoutOptions =
     , pane4 : PaneContext
     , sliderState : SliderState
     , scene3d : List (Entity LocalCoords)
-    , mapState : MapTypes.MapState
+    , mapState : MapTypes.MapClickLocation
     , viewBeforeRouteViewForced : Maybe ViewMode
     }
 

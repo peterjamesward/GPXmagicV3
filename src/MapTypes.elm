@@ -9,9 +9,15 @@ type alias MapInfo =
     }
 
 
-type alias MapState =
+type alias MapClickLocation =
     -- Introduced to debounce map messages.
     { lastClickLon : Float
     , lastClickLat : Float
     }
 
+
+type MapState
+    = MapDivNeeded
+    | MapNotLoaded
+    | MapReady
+    | MapBusy

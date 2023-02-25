@@ -228,4 +228,10 @@ view settings ( viewWidth, viewHeight ) mContext msgWrapper =
         Nothing ->
             -- Keep the DOM hierarchy consistent.
             column []
-                [ el [ htmlAttribute (id "map") ] none ]
+                [ el
+                    [ htmlAttribute (id "map")
+                    , width <| px <| inPixels viewWidth
+                    , height <| px <| inPixels viewHeight
+                    ]
+                    none
+                ]

@@ -1,25 +1,26 @@
 
 # BUGS
 
-Title bar display not showing track name when loaded from URL.
-
 Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
 Delete should display "Sorry" message unless one leaf remains.
 
-No preview for single point nudge without fade.
-
 Land use 3D is broken. Suspect elevations are not being read from map.
+
+Must fix initial map load issues. Size, timing.
 
 --- 
 
 # WIP
 
-## Route joining
+## Routing using Mapbox
 
-Open multiple GPX routes (file, Strava) and combine them in Route Maker.
+Easy to add. Click on map to add waypoints.
+cycling (paths) / driving (roads!) profiles.
 
-May not even be that hard, given Route Maker exists.
+Free up to 100,000 requests a month.
+
+https://docs.mapbox.com/help/tutorials/get-started-map-matching-api/
 
 ---
 
@@ -114,5 +115,11 @@ Not sure how to build it, but I cloned it anyway.
 
 https://github.com/lucamug/elm-map
 Might make more sense - more recently updated.
+
+## Route joining
+
+Open multiple GPX routes (file, Strava) and combine them in Route Maker.
+May not even be that hard, given Route Maker exists.
+But, routing tools exist.
 
 

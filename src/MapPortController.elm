@@ -12,8 +12,10 @@ import Length
 import MapTypes
 import MapboxKey exposing (mapboxKey)
 import PaneContext exposing (PaneContext, paneIdToString)
+import Pixels exposing (Pixels)
 import Point3d
 import PreviewData exposing (PreviewData)
+import Quantity exposing (Quantity)
 import SceneBuilderMap exposing (latLonPairFromGpx)
 import SceneBuilderProfile
 import SystemSettings exposing (SystemSettings)
@@ -26,7 +28,7 @@ type MapMsg
     = MapPortMessage E.Value
 
 
-defaultMapState : MapTypes.MapState
+defaultMapState : MapTypes.MapClickLocation
 defaultMapState =
     { lastClickLon = 0.0
     , lastClickLat = 0.0
@@ -39,8 +41,8 @@ port mapCommands : E.Value -> Cmd msg
 port mapResponses : (E.Value -> msg) -> Sub msg
 
 
-createMap : String -> MapTypes.MapInfo -> Cmd msg
-createMap style info =
+createMap : String -> MapTypes.MapInfo -> ( Quantity Int Pixels, Quantity Int Pixels ) -> Cmd msg
+createMap style info ( width, height ) =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Init" )
@@ -49,6 +51,8 @@ createMap style info =
             , ( "lat", E.float info.centreLat )
             , ( "zoom", E.float info.mapZoom )
             , ( "style", E.string style )
+            , ( "width", E.int <| Pixels.inPixels width )
+            , ( "height", E.int <| Pixels.inPixels height )
             ]
 
 
@@ -115,8 +119,8 @@ zoomMapToFitTrack track =
 update :
     MapMsg
     -> TrackLoaded msg
-    -> MapTypes.MapState
-    -> ( MapTypes.MapState, List (ToolAction msg) )
+    -> MapTypes.MapClickLocation
+    -> ( MapTypes.MapClickLocation, List (ToolAction msg) )
 update mapMsg track lastState =
     case mapMsg of
         MapPortMessage value ->
@@ -293,10 +297,10 @@ msgDecoder =
 
 
 processMapPortMessage :
-    MapTypes.MapState
+    MapTypes.MapClickLocation
     -> TrackLoaded msg
     -> E.Value
-    -> ( MapTypes.MapState, List (ToolAction msg) )
+    -> ( MapTypes.MapClickLocation, List (ToolAction msg) )
 processMapPortMessage lastState track json =
     let
         jsonMsg =
@@ -317,7 +321,11 @@ processMapPortMessage lastState track json =
     in
     case jsonMsg of
         Ok "map ready" ->
-            ( lastState, [ TryRemoteLoadIfGiven ] )
+            ( lastState
+            , [ --TryRemoteLoadIfGiven
+                MapRefresh
+              ]
+            )
 
         Ok "click" ->
             --{ 'msg' : 'click'

@@ -53,6 +53,7 @@ import ViewAbout
 import ViewFirstPerson
 import ViewGraph
 import ViewMap
+import ViewMapContext
 import ViewMode exposing (ViewMode(..))
 import ViewPlan
 import ViewProfileChartContext
@@ -83,11 +84,18 @@ defaultPaneContext =
     }
 
 
+alwaysShowsMapContext : PaneContext
+alwaysShowsMapContext =
+    { defaultPaneContext
+        | mapContext = Just ViewMapContext.default
+    }
+
+
 defaultOptions : PaneLayoutOptions
 defaultOptions =
     { paneLayout = PanesOne
     , popupVisible = False
-    , pane1 = defaultPaneContext
+    , pane1 = alwaysShowsMapContext
     , pane2 = { defaultPaneContext | paneId = Pane2 }
     , pane3 = { defaultPaneContext | paneId = Pane3 }
     , pane4 = { defaultPaneContext | paneId = Pane4 }
@@ -907,43 +915,43 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
     in
     column [ alignTop, width fill ]
         [ wrappedRow [ centerX, width fill ] <|
-            if mTrack == Nothing then
-                [ viewPaneZeroWithMap defaultOptions.pane1
-                , slider
-                ]
+            --if mTrack == Nothing then
+            --    [ viewPaneZeroWithMap defaultOptions.pane1
+            --    , slider
+            --    ]
+            --
+            --else
+            case options.paneLayout of
+                PanesOne ->
+                    [ viewPaneZeroWithMap options.pane1
+                    , slider
+                    ]
 
-            else
-                case options.paneLayout of
-                    PanesOne ->
-                        [ viewPaneZeroWithMap options.pane1
-                        , slider
-                        ]
+                PanesLeftRight ->
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
+                    , slider
+                    ]
 
-                    PanesLeftRight ->
-                        [ viewPaneZeroWithMap options.pane1
-                        , viewPaneNoMap options.pane2
-                        , slider
-                        ]
+                PanesUpperLower ->
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
+                    , slider
+                    ]
 
-                    PanesUpperLower ->
-                        [ viewPaneZeroWithMap options.pane1
-                        , viewPaneNoMap options.pane2
-                        , slider
-                        ]
+                PanesGrid ->
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
+                    , viewPaneNoMap options.pane3
+                    , viewPaneNoMap options.pane4
+                    , slider
+                    ]
 
-                    PanesGrid ->
-                        [ viewPaneZeroWithMap options.pane1
-                        , viewPaneNoMap options.pane2
-                        , viewPaneNoMap options.pane3
-                        , viewPaneNoMap options.pane4
-                        , slider
-                        ]
-
-                    PanesOnePlusTwo ->
-                        -- Later.
-                        [ viewPaneZeroWithMap options.pane1
-                        , slider
-                        ]
+                PanesOnePlusTwo ->
+                    -- Later.
+                    [ viewPaneZeroWithMap options.pane1
+                    , slider
+                    ]
         ]
 
 
@@ -1050,14 +1058,16 @@ restoreStoredValues : PaneLayoutOptions -> D.Value -> PaneLayoutOptions
 restoreStoredValues options values =
     case D.decodeValue paneStateDecoder values of
         Ok fromStorage ->
-            { defaultOptions
-                | paneLayout = decodePanesLayout fromStorage.layoutName
-                , popupVisible = False
-                , pane1 = applyStoredPaneDetails fromStorage.pane1
-                , pane2 = applyStoredPaneDetails fromStorage.pane2
-                , pane3 = applyStoredPaneDetails fromStorage.pane3
-                , pane4 = applyStoredPaneDetails fromStorage.pane4
-            }
+            --TODO: Reinstate, currently interferes with map load.
+            --{ defaultOptions
+            --    | paneLayout = decodePanesLayout fromStorage.layoutName
+            --    , popupVisible = False
+            --    , pane1 = applyStoredPaneDetails fromStorage.pane1
+            --    , pane2 = applyStoredPaneDetails fromStorage.pane2
+            --    , pane3 = applyStoredPaneDetails fromStorage.pane3
+            --    , pane4 = applyStoredPaneDetails fromStorage.pane4
+            --}
+            options
 
         Err _ ->
             options

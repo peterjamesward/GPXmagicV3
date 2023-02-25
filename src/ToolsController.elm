@@ -68,6 +68,8 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
 import Tools.LandUse
+import Tools.MapMatchingRouter
+import Tools.MapMatchingRouterOptions
 import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
@@ -136,6 +138,7 @@ type ToolType
     | ToolSmartSmoother
     | ToolNamedSegments
     | ToolTimestamps
+    | ToolRouting
 
 
 type ToolCategory
@@ -179,6 +182,7 @@ type alias Options msg =
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
     , timestampOptions : Tools.TimestampOptions.Options
+    , routingOptions : Tools.MapMatchingRouterOptions.Options
     }
 
 
@@ -214,6 +218,7 @@ defaultOptions =
     , smartSmootherOptions = Tools.SmartSmoother.defaultOptions
     , namedSegmentOptions = Tools.NamedSegment.defaultOptions
     , timestampOptions = Tools.Timestamp.defaultOptions
+    , routingOptions = Tools.MapMatchingRouter.defaultOptions
     }
 
 
@@ -252,6 +257,7 @@ type ToolMsg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
     | ToolNamedSegmentMsg Tools.NamedSegment.Msg
     | ToolTimestampMsg Tools.Timestamp.Msg
+    | ToolRoutingMsg Tools.MapMatchingRouter.Msg
 
 
 type alias ToolEntry =
@@ -298,6 +304,7 @@ defaultTools =
     , graphTool
     , landUseTool
     , timestampTool
+    , routingTool
     ]
 
 
@@ -702,6 +709,20 @@ timestampTool =
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
+    , isPopupOpen = False
+    , categories = [ TcInformation ]
+    }
+
+
+routingTool : ToolEntry
+routingTool =
+    { toolType = ToolRouting
+    , toolId = Tools.MapMatchingRouter.toolId
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
     , categories = [ TcInformation ]
     }
@@ -1260,6 +1281,18 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolRoutingMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.MapMatchingRouter.update
+                        msg
+                        options.routingOptions
+                        (msgWrapper << ToolRoutingMsg)
+            in
+            ( { options | routingOptions = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1632,6 +1665,9 @@ toolStateHasChanged toolType newState isTrack options =
                     { options | namedSegmentOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolRouting ->
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
 
 
@@ -2209,6 +2245,12 @@ viewToolByType settings msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage settings
 
+            ToolRouting ->
+                Tools.MapMatchingRouter.view
+                    settings
+                    (msgWrapper << ToolRoutingMsg)
+                    options.routingOptions
+
 
 
 -- Local storage management
@@ -2319,6 +2361,9 @@ encodeType toolType =
 
         ToolNamedSegments ->
             "ToolNamedSegments"
+
+        ToolRouting ->
+            "ToolRouting"
 
 
 encodeColour : Element.Color -> E.Value

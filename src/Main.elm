@@ -37,6 +37,7 @@ import Length
 import List.Extra
 import LocalStorage
 import MapPortController
+import MapTypes exposing (MapState(..))
 import Markdown
 import MyIP
 import OAuthPorts exposing (randomBytes)
@@ -145,6 +146,9 @@ type alias Model =
     , svgFileOptions : SvgPathExtractor.Options
     , rgtOptionsVisible : Bool
     , loadFromUrl : Maybe Url
+
+    -- State machine for map synchronisation
+    , mapState : MapState
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -260,6 +264,7 @@ init mflags origin navigationKey =
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , rgtOptionsVisible = False
       , loadFromUrl = remoteUrl
+      , mapState = MapDivNeeded
       , track = Nothing
       , mapPointsDraggable = False
       , previews = Dict.empty
@@ -516,6 +521,7 @@ update msg model =
             , MapPortController.createMap
                 ViewMap.defaultStyleUrl
                 mapInfoWithLocation
+                model.contentArea
             )
 
         TryRemoteLoad ->
