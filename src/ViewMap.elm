@@ -16,7 +16,7 @@ import Element.Input as Input exposing (labelHidden)
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
-import Html.Attributes exposing (id)
+import Html.Attributes exposing (id, style)
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
 import SystemSettings exposing (SystemSettings)
@@ -208,19 +208,24 @@ view settings ( viewWidth, viewHeight ) mContext msgWrapper =
 
             else
                 none
+
+        ( w, h ) =
+            ( inPixels viewWidth, inPixels viewHeight )
     in
     case mContext of
         Just context ->
             column
                 [ inFront <| handyMapControls context ]
                 [ el
-                    [ width <| px <| inPixels viewWidth
-                    , height <| px <| inPixels viewHeight
+                    [ width <| px <| w
+                    , height <| px <| h
                     , alignLeft
                     , alignTop
                     , Border.width 2
                     , Border.color FlatColors.ChinesePalette.peace
                     , htmlAttribute (id "map")
+                    , htmlAttribute (style "width" <| String.fromInt w)
+                    , htmlAttribute (style "height" <| String.fromInt h)
                     ]
                     none
                 ]
@@ -232,6 +237,8 @@ view settings ( viewWidth, viewHeight ) mContext msgWrapper =
                     [ htmlAttribute (id "map")
                     , width <| px <| inPixels viewWidth
                     , height <| px <| inPixels viewHeight
+                    , htmlAttribute (style "width" <| String.fromInt w)
+                    , htmlAttribute (style "height" <| String.fromInt h)
                     ]
                     none
                 ]

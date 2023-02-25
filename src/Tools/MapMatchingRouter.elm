@@ -30,11 +30,14 @@ toolId =
 
 defaultOptions : Options
 defaultOptions =
-    { numPoints = 0 }
+    { numPoints = 0
+    , planning = False
+    }
 
 
 type Msg
     = DisplayInfo String String
+    | EnablePlanning
 
 
 initialise : Options
@@ -66,15 +69,15 @@ view settings wrapper options =
         i18n =
             I18N.text settings.location toolId
 
-        dataStyles selected =
-            if selected then
-                Font.bold :: CommonToolStyles.toolContentBoxStyle settings
-
-            else
-                CommonToolStyles.toolContentBoxStyle settings
+        startButton =
+            Input.button
+                neatToolsBorder
+                { onPress = Just <| wrapper EnablePlanning
+                , label = text "Enable map planning"
+                }
     in
     column (CommonToolStyles.toolContentBoxStyle settings)
-        []
+        [ startButton ]
 
 
 update :
@@ -86,6 +89,14 @@ update msg options wrapper =
     case msg of
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
+
+        EnablePlanning ->
+            ( { options
+                | planning = True
+                , numPoints = 0
+              }
+            , [ Actions.EnablePlanningOnMap ]
+            )
 
 
 

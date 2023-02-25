@@ -137,6 +137,13 @@ toggleDragging isDragging track =
             ]
 
 
+enablePlanning : Cmd msg
+enablePlanning =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Planning" ) ]
+
+
 requestElevations : Cmd msg
 requestElevations =
     mapCommands <|

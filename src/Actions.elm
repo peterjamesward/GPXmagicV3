@@ -42,7 +42,8 @@ type alias UndoEntry msg =
     }
 
 
-type ToolAction msg
+type
+    ToolAction msg
     --TODO: Untangled this tangled web I wove. Or at least try.
     --Perhaps by just doing one at a time.
     = NoAction
@@ -130,6 +131,7 @@ type ToolAction msg
     | UsePhysicsModel
     | TryRemoteLoadIfGiven
     | ProfileClick String Float --- CAUTION, check units.
+    | EnablePlanningOnMap
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

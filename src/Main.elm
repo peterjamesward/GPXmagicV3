@@ -2499,6 +2499,9 @@ performActionCommands actions model =
                             track
                         ]
 
+                ( EnablePlanningOnMap, Nothing ) ->
+                    MapPortController.enablePlanning
+
                 _ ->
                     Cmd.none
     in
