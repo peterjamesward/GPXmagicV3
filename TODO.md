@@ -15,53 +15,29 @@ Land use 3D is broken. Suspect elevations are not being read from map.
 
 # WIP
 
----
-
-# BACKLOG
-
-## Street view
-
-Sure I'm using a free API, so why can I not surface it in a view? 
-Linked to marker.
-
-Yes, to confirm, this is free, no key required:
-https://developers.google.com/maps/documentation/urls/get-started
-
-## Video playback window
-
-Sync'd to Orange?
-
 ## Route joining
 
 Open multiple GPX routes (file, Strava) and combine them in Route Maker.
 
 May not even be that hard, given Route Maker exists.
 
-## Camera
+---
 
-Full control of camera in relation to marker.
-
-## LIDAR
-
-Direct reading of LIDAR data.
+# BACKLOG
 
 ## Refactor Main -> Tools
 
 I hope this will open the door to a much cleaner control flow, perhaps deprecating
 actions (yes, after all that) and using the track/newTrack diff to drive command generation.
 
-## Replace MapBox?
+## Video playback window
 
-https://github.com/klaftertief/slippery-slope
+Sync'd to Orange?
+https://www.w3schools.com/jsref/dom_obj_video.asp
 
-Motivation is to be free of some dodgy JavaScript. 
-Free. Forever. 
-Or Haskell, I suppose.
-Bloody good though, pure Elm.
-Not sure how to build it, but I cloned it anyway.
+## Camera
 
-https://github.com/lucamug/elm-map
-Might make more sense - more recently updated.
+Full control of camera in relation to marker.
 
 ## Picture button
 
@@ -70,33 +46,6 @@ Add button to images to allow screen capture. Because "easy".
 ## Test cases for edits.
 
 You could do this you know, just not for the visuals.
-
-## Make Map changes declarative; tidy Action code
-
-This would largely but not entirely obviate Main.performActionCommands.
-
-Since the old and new track (not just the tree) are available post-update,
-I could 'diff' them and output the commands required.
-
-Don't need to diff the tree, as any track change requires re-drawing the whole route on the map.
-(Presuming in Elm that tree /= tree'.)
-
-What changes are there that reflect on the map?
-See MapPortController and Main.performActionCommands.
-Any changes to route, pointers, preview, and of course the map settings.
-
-**This is a worthwhile 'experiment'**
-
-It may also be the key to unlock the Actions space, which has become untidy.
-e.g. Main.performActionsOnModel is largely about positioning pointers post-edit!
-There are some cross-module cases solved with Actions to avoid import cycles,
-but they might factor out.
-
-**Approach**
-
-1. Rework MapController so comparison of states emits the commands; better: MapOptions.
-2. Purge the Actions code so that model is updated directly.
-3. Repeat for other actions.
 
 ## Languages
 
@@ -118,11 +67,6 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 Experiment proved the idea (of roads partitioning polygons) but implementation was weak.
 Roads should divide polygons, but care needed over directionality and crossing points.
 It needs doing properly, including the start and finish cases.
-
-## SVG profile rendering
-
-Info on mouse move.
-Scales?
 
 ## Usability
 
@@ -148,4 +92,27 @@ Provide info text capability on top bar and on view panes.
 
 https://package.elm-lang.org/packages/gampleman/elm-visualization/latest/
 No: renders to SVG not Canvas, so disappointing really.
+
+## Street view
+
+Nope, can't be done in an iFrame. Google stops it.
+
+## LIDAR
+
+Direct reading of LIDAR data.
+-- Nope. Not enough data, tricky to access, mostly not free.
+
+## Replace MapBox?
+
+https://github.com/klaftertief/slippery-slope
+
+Motivation is to be free of some dodgy JavaScript.
+Free. Forever.
+Or Haskell, I suppose.
+Bloody good though, pure Elm.
+Not sure how to build it, but I cloned it anyway.
+
+https://github.com/lucamug/elm-map
+Might make more sense - more recently updated.
+
 
