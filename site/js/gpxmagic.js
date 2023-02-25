@@ -313,7 +313,15 @@ function showPlanningTools() {
 
     // Add the draw tool to the map.
     map.addControl(draw);
+    map.on('draw.delete', removeRoute);
 };
+
+// If the user clicks the delete draw button, remove the layer if it exists
+function removeRoute() {
+  if (!map.getSource('route')) return;
+  map.removeLayer('route');
+  map.removeSource('route');
+}
 
 function storageMessageHandler(msg) {
 //    console.log('behold, a message from the land of Elm');
