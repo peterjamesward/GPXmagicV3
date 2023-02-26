@@ -251,8 +251,10 @@ function mapMessageHandler(msg) {
     };
 };
 
+var draw;
+
 function showPlanningTools() {
-    const draw = new MapboxDraw({
+    draw = new MapboxDraw({
       // Instead of showing all the draw tools, show only the line string and delete tools.
       displayControlsDefault: false,
       controls: {
@@ -314,13 +316,29 @@ function showPlanningTools() {
     // Add the draw tool to the map.
     map.addControl(draw);
     map.on('draw.delete', removeRoute);
-};
+}
 
 // If the user clicks the delete draw button, remove the layer if it exists
 function removeRoute() {
   if (!map.getSource('route')) return;
   map.removeLayer('route');
   map.removeSource('route');
+}
+
+
+// Use the coordinates you drew to make the Map Matching API request
+function updateRoute() {
+  // Set the profile
+  const profile = 'driving';
+  // Get the coordinates that were drawn on the map
+  const data = draw.getAll();
+  const lastFeature = data.features.length - 1;
+  const coords = data.features[lastFeature].geometry.coordinates;
+  // Format the coordinates
+  const newCoords = coords.join(';');
+  // Set the radius for each coordinate pair to 25 meters
+  const radius = coords.map(() => 25);
+  getMatch(newCoords, radius, profile);
 }
 
 function storageMessageHandler(msg) {

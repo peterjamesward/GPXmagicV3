@@ -13,13 +13,10 @@ module Tools.MapMatchingRouter exposing
 import Actions exposing (ToolAction)
 import CommonToolStyles
 import Element exposing (..)
-import Element.Border as Border
-import Element.Font as Font
 import Element.Input as Input
-import FlatColors.FlatUIPalette
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.MapMatchingRouterOptions exposing (Options)
+import Tools.MapMatchingRouterOptions exposing (Options, RouteState(..))
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (neatToolsBorder, rgtPurple)
 
@@ -28,16 +25,25 @@ toolId =
     "routing"
 
 
+api =
+    --"https://api.mapbox.com/matching/v5/mapbox/{profile}/{coordinates}.json?access_token=YOUR_MAPBOX_ACCESS_TOKEN"
+    --e.g. https://api.mapbox.com/matching/v5/mapbox/driving/-117.17282,32.71204;-117.17288,32.71225?
+    -- steps=true&radiuses=25;25&
+    -- access_token=pk.eyJ1IjoicGV0ZXJqYW1lc3dhcmQiLCJhIjoiY2tpcmpwem54MjdhbTJycWpvYjU2dmJpcSJ9.gysxozddlQQ0XaWnywEyJg
+    "https://api.mapbox.com/matching/v5/mapbox/{profile}/{coordinates}.json?access_token=YOUR_MAPBOX_ACCESS_TOKEN"
+
+
 defaultOptions : Options
 defaultOptions =
     { numPoints = 0
-    , planning = False
+    , routeState = RouteIdle
     }
 
 
 type Msg
     = DisplayInfo String String
     | EnablePlanning
+    | GetDrawnPoints
 
 
 initialise : Options
@@ -73,12 +79,33 @@ view settings track wrapper options =
             Input.button
                 neatToolsBorder
                 { onPress = Just <| wrapper EnablePlanning
-                , label = text "Enable map planning"
+                , label = i18n "enable"
+                }
+
+        routeButton =
+            Input.button
+                neatToolsBorder
+                { onPress = Just <| wrapper GetDrawnPoints
+                , label = i18n "fetch"
                 }
     in
     column (CommonToolStyles.toolContentBoxStyle settings) <|
         if track == Nothing then
-            [ startButton ]
+            case options.routeState of
+                RouteIdle ->
+                    [ startButton ]
+
+                RouteDrawing ->
+                    [ routeButton ]
+
+                RouteComputing ->
+                    []
+
+                RouteShown ->
+                    []
+
+                RouteAdopted ->
+                    []
 
         else
             [ i18n "track" ]
@@ -96,7 +123,15 @@ update msg options wrapper =
 
         EnablePlanning ->
             ( { options
-                | planning = True
+                | routeState = RouteDrawing
+                , numPoints = 0
+              }
+            , [ Actions.EnablePlanningOnMap ]
+            )
+
+        GetDrawnPoints ->
+            ( { options
+                | routeState = RouteComputing
                 , numPoints = 0
               }
             , [ Actions.EnablePlanningOnMap ]
