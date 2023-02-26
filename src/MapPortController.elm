@@ -144,6 +144,13 @@ enablePlanning =
             [ ( "Cmd", E.string "Planning" ) ]
 
 
+getPoints : Cmd msg
+getPoints =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "GetPoints" ) ]
+
+
 requestElevations : Cmd msg
 requestElevations =
     mapCommands <|

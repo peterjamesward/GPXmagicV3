@@ -134,7 +134,7 @@ update msg options wrapper =
                 | routeState = RouteComputing
                 , numPoints = 0
               }
-            , [ Actions.EnablePlanningOnMap ]
+            , [ Actions.GetPointsFromMap ]
             )
 
 

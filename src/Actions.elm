@@ -132,6 +132,7 @@ type
     | TryRemoteLoadIfGiven
     | ProfileClick String Float --- CAUTION, check units.
     | EnablePlanningOnMap
+    | GetPointsFromMap
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

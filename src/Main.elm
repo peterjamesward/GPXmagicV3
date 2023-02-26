@@ -2506,6 +2506,9 @@ performActionCommands actions model =
                 ( EnablePlanningOnMap, Nothing ) ->
                     MapPortController.enablePlanning
 
+                ( GetPointsFromMap, Nothing ) ->
+                    MapPortController.getPoints
+
                 _ ->
                     Cmd.none
     in
