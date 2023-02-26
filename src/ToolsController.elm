@@ -2248,6 +2248,7 @@ viewToolByType settings msgWrapper entry isTrack options =
             ToolRouting ->
                 Tools.MapMatchingRouter.view
                     settings
+                    isTrack
                     (msgWrapper << ToolRoutingMsg)
                     options.routingOptions
 

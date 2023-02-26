@@ -63,8 +63,8 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
-view : SystemSettings -> (Msg -> msg) -> Options -> Element msg
-view settings wrapper options =
+view : SystemSettings -> Maybe (TrackLoaded msg) -> (Msg -> msg) -> Options -> Element msg
+view settings track wrapper options =
     let
         i18n =
             I18N.text settings.location toolId
@@ -76,8 +76,12 @@ view settings wrapper options =
                 , label = text "Enable map planning"
                 }
     in
-    column (CommonToolStyles.toolContentBoxStyle settings)
-        [ startButton ]
+    column (CommonToolStyles.toolContentBoxStyle settings) <|
+        if track == Nothing then
+            [ startButton ]
+
+        else
+            [ i18n "track" ]
 
 
 update :
