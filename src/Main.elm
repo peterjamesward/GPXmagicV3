@@ -2339,6 +2339,10 @@ performActionCommands actions model =
                             model.previews
                         ]
 
+                ( MapRefresh, Nothing ) ->
+                    -- Lazy, use this to refresh profile as well.
+                    MapPortController.refreshMap
+
                 ( MakeMapPointsDraggable flag, Just track ) ->
                     MapPortController.toggleDragging flag track
 

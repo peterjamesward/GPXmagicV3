@@ -883,6 +883,7 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
                 , conditionallyVisible (pane.activeView == ViewMap) <|
                     ViewMap.view
                         settings
+                        mTrack
                         ( paneWidth, paneHeight )
                         pane.mapContext
                         (msgWrapper << MapViewMessage)

@@ -121,11 +121,12 @@ update msg msgWrapper track area context =
 
 view :
     SystemSettings
+    -> Maybe (TrackLoaded msg)
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Maybe MapContext
     -> (Msg -> msg)
     -> Element msg
-view settings ( viewWidth, viewHeight ) mContext msgWrapper =
+view settings track ( viewWidth, viewHeight ) mContext msgWrapper =
     let
         handyMapControls context =
             column
@@ -215,7 +216,13 @@ view settings ( viewWidth, viewHeight ) mContext msgWrapper =
     case mContext of
         Just context ->
             column
-                [ inFront <| handyMapControls context ]
+                [ inFront <|
+                    if track /= Nothing then
+                        handyMapControls context
+
+                    else
+                        none
+                ]
                 [ el
                     [ width <| px <| w
                     , height <| px <| h
