@@ -15,12 +15,10 @@ Must fix initial map load issues. Size, timing.
 
 ## Routing using Mapbox
 
-Easy to add. Click on map to add waypoints.
-cycling (paths) / driving (roads!) profiles.
+Looks like we have some ordering problems, or duplication.
 
-Free up to 100,000 requests a month.
-
-https://docs.mapbox.com/help/tutorials/get-started-map-matching-api/
+Need to get altitudes.
+Need to post track back to map.
 
 ---
 
@@ -30,11 +28,6 @@ https://docs.mapbox.com/help/tutorials/get-started-map-matching-api/
 
 I hope this will open the door to a much cleaner control flow, perhaps deprecating
 actions (yes, after all that) and using the track/newTrack diff to drive command generation.
-
-## Video playback window
-
-Sync'd to Orange?
-https://www.w3schools.com/jsref/dom_obj_video.asp
 
 ## Camera
 
@@ -121,5 +114,10 @@ Might make more sense - more recently updated.
 Open multiple GPX routes (file, Strava) and combine them in Route Maker.
 May not even be that hard, given Route Maker exists.
 But, routing tools exist.
+
+## Video playback window
+
+Sync'd to Orange?
+https://www.w3schools.com/jsref/dom_obj_video.asp
 
 
