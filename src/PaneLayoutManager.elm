@@ -454,18 +454,13 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
             ( { options | pane1 = newPane }, actions )
 
         MapPortsMessage mapMsg ->
-            case mTrack of
-                Just track ->
-                    let
-                        ( newState, actions ) =
-                            MapPortController.update mapMsg track options.mapState
-                    in
-                    ( { options | mapState = newState }
-                    , actions
-                    )
-
-                Nothing ->
-                    ( options, [] )
+            let
+                ( newState, actions ) =
+                    MapPortController.update mapMsg mTrack options.mapState
+            in
+            ( { options | mapState = newState }
+            , actions
+            )
 
         SetCurrentPosition pos ->
             -- Slider moves pointer and re-centres view.

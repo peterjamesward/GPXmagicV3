@@ -7,11 +7,9 @@ import Dict
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
-import FlatColors.ChinesePalette
 import LandUseDataTypes
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOPtions
 import Tools.LandUseColours exposing (landUseColours)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour)

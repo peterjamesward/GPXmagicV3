@@ -133,6 +133,7 @@ type
     | ProfileClick String Float --- CAUTION, check units.
     | EnablePlanningOnMap
     | GetPointsFromMap
+    | FetchMatchingRoute (List (List Float))
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

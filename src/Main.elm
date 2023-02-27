@@ -66,6 +66,8 @@ import Tools.Graph
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
+import Tools.MapMatchingRouter
+import Tools.MapMatchingRouterOptions
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.NamedSegment
@@ -133,6 +135,7 @@ type Msg
     | RGTOptions Tools.RGTOptions.Msg
     | ProfilePaint
     | ToggleImperial
+    | MatchingRoute (Result Http.Error Tools.MapMatchingRouterOptions.GeoJson)
     | NoOp
 
 
@@ -867,6 +870,13 @@ update msg model =
 
                 Nothing ->
                     ( model, Cmd.none )
+
+        MatchingRoute result ->
+            let
+                _ =
+                    Debug.log "ROUTE" result
+            in
+            ( model, Cmd.none )
 
 
 adoptTrackInModel : TrackLoaded Msg -> List NamedSegment -> Model -> Model
@@ -2508,6 +2518,9 @@ performActionCommands actions model =
 
                 ( GetPointsFromMap, Nothing ) ->
                     MapPortController.getPoints
+
+                ( FetchMatchingRoute coordinates, Nothing ) ->
+                    Tools.MapMatchingRouter.mapMatchingApi MatchingRoute coordinates
 
                 _ ->
                     Cmd.none

@@ -118,7 +118,7 @@ zoomMapToFitTrack track =
 
 update :
     MapMsg
-    -> TrackLoaded msg
+    -> Maybe (TrackLoaded msg)
     -> MapTypes.MapClickLocation
     -> ( MapTypes.MapClickLocation, List (ToolAction msg) )
 update mapMsg track lastState =
@@ -305,20 +305,15 @@ addMarkersToMap track =
                     ]
 
 
-msgDecoder : Decoder String
-msgDecoder =
-    field "msg" string
-
-
 processMapPortMessage :
     MapTypes.MapClickLocation
-    -> TrackLoaded msg
+    -> Maybe (TrackLoaded msg)
     -> E.Value
     -> ( MapTypes.MapClickLocation, List (ToolAction msg) )
-processMapPortMessage lastState track json =
+processMapPortMessage lastState mTrack json =
     let
         jsonMsg =
-            D.decodeValue msgDecoder json
+            D.decodeValue (D.field "msg" D.string) json
 
         ( lat, lon ) =
             ( D.decodeValue (D.field "lat" D.float) json
@@ -331,7 +326,17 @@ processMapPortMessage lastState track json =
             )
 
         elevations =
-            D.decodeValue (D.field "elevations" (D.list (D.nullable D.float))) json
+            D.decodeValue
+                (D.field "elevations" (D.list (D.nullable D.float)))
+                json
+
+        waypoints =
+            D.decodeValue
+                (D.field "waypoints" (D.list (D.list D.float)))
+                json
+
+        _ =
+            Debug.log "WAYPOINTS" waypoints
     in
     case jsonMsg of
         Ok "map ready" ->
@@ -346,8 +351,8 @@ processMapPortMessage lastState track json =
             --, 'lat' : e.lat()
             --, 'lon' : e.lon()
             --} );
-            case ( lat, lon ) of
-                ( Ok lat1, Ok lon1 ) ->
+            case ( lat, lon, mTrack ) of
+                ( Ok lat1, Ok lon1, Just track ) ->
                     if lat1 == lastState.lastClickLat && lon1 == lastState.lastClickLon then
                         ( lastState, [] )
 
@@ -401,7 +406,12 @@ processMapPortMessage lastState track json =
                     ( lastState, [] )
 
         Ok "drag" ->
-            ( lastState, draggedOnMap json track )
+            case mTrack of
+                Just track ->
+                    ( lastState, draggedOnMap json track )
+
+                Nothing ->
+                    ( lastState, [] )
 
         Ok "elevations" ->
             case elevations of
@@ -415,6 +425,14 @@ processMapPortMessage lastState track json =
             case elevations of
                 Ok mapElevations ->
                     ( lastState, [ ApplyLandUseAltitudes mapElevations ] )
+
+                _ ->
+                    ( lastState, [] )
+
+        Ok "waypoints" ->
+            case waypoints of
+                Ok mapPoints ->
+                    ( lastState, [ FetchMatchingRoute mapPoints ] )
 
                 _ ->
                     ( lastState, [] )
