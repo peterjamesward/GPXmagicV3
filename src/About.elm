@@ -3,11 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.11 (5d6efcea)
+# GPXmagic v3.9.12 (5d6efcea)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.12
+
+Fix unexpected closing tag in GPX output files.
 
 ## 3.9.11
 
