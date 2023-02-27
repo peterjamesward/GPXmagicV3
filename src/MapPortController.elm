@@ -151,6 +151,13 @@ getPoints =
             [ ( "Cmd", E.string "GetPoints" ) ]
 
 
+resetMapAfterDrawing : Cmd msg
+resetMapAfterDrawing =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "StopPlanning" ) ]
+
+
 requestElevations : Cmd msg
 requestElevations =
     mapCommands <|

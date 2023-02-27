@@ -249,6 +249,12 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'StopPlanning':
+            if (isMapCreated) {
+                removePlanningTools();
+            }
+            break;
+
         case 'GetPoints':
             if (isMapCreated) {
                 updateRoute();
@@ -331,6 +337,11 @@ function removeRoute() {
   map.removeSource('route');
 }
 
+
+function removePlanningTools() {
+    removeRoute();
+    map.removeControl(draw);
+}
 
 // Use the coordinates you drew to make the Map Matching API request
 function updateRoute() {

@@ -878,7 +878,24 @@ update msg model =
             in
             case newTrack of
                 Just track ->
-                    ( adoptTrackInModel track [] model, Cmd.none )
+                    let
+                        newModel =
+                            adoptTrackInModel track [] model
+                    in
+                    ( newModel
+                    , Cmd.batch
+                        [ MapPortController.resetMapAfterDrawing
+                        , MapPortController.fetchElevationsForPoints <|
+                            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+                        , showTrackOnMapCentered
+                            newModel.paneLayoutOptions
+                            newModel.systemSettings.imperial
+                            track
+                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
+                        , LocalStorage.sessionClear
+                        , Delay.after 1000 ProfilePaint -- wait for container to paint.
+                        ]
+                    )
 
                 Nothing ->
                     ( { model | modalMessage = Just "noroute" }, Cmd.none )

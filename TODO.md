@@ -7,6 +7,8 @@
 
 **Land use** Land use 3D is broken. Suspect elevations are not being read from map.
 
+**Route maker** Is this broke with simple loops?
+
 --- 
 
 # WIP
