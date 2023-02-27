@@ -334,9 +334,6 @@ processMapPortMessage lastState mTrack json =
             D.decodeValue
                 (D.field "waypoints" (D.list (D.list D.float)))
                 json
-
-        _ =
-            Debug.log "WAYPOINTS" waypoints
     in
     case jsonMsg of
         Ok "map ready" ->

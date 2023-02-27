@@ -135,7 +135,7 @@ type Msg
     | RGTOptions Tools.RGTOptions.Msg
     | ProfilePaint
     | ToggleImperial
-    | MatchingRoute (Result Http.Error Tools.MapMatchingRouterOptions.GeoJson)
+    | MatchingRoute (Result Http.Error Tools.MapMatchingRouterOptions.Matchings)
     | NoOp
 
 
@@ -873,10 +873,15 @@ update msg model =
 
         MatchingRoute result ->
             let
-                _ =
-                    Debug.log "ROUTE" result
+                newTrack =
+                    Tools.MapMatchingRouter.handleRoute result
             in
-            ( model, Cmd.none )
+            case newTrack of
+                Just track ->
+                    ( adoptTrackInModel track [] model, Cmd.none )
+
+                Nothing ->
+                    ( { model | modalMessage = Just "noroute" }, Cmd.none )
 
 
 adoptTrackInModel : TrackLoaded Msg -> List NamedSegment -> Model -> Model

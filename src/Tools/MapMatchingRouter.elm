@@ -1,6 +1,7 @@
 module Tools.MapMatchingRouter exposing
     ( Msg(..)
     , defaultOptions
+    , handleRoute
     , initialise
     , mapMatchingApi
     , toolId
@@ -12,14 +13,19 @@ module Tools.MapMatchingRouter exposing
 -- Use mapbox's map matching API for use to route around <= 100 waypoints.
 
 import Actions exposing (ToolAction)
+import Angle
 import CommonToolStyles
+import Direction2d
+import DomainModel
 import Element exposing (..)
 import Element.Input as Input
 import Http
 import MapboxKey exposing (mapboxKey)
+import Maybe.Extra
+import Quantity
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.MapMatchingRouterOptions exposing (GeoJson, Options, RouteState(..), geoJsonDecoder)
+import Tools.MapMatchingRouterOptions exposing (Intersection, Leg, Matching, Matchings, Options, RouteState(..), Step, matchingsDecoder)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
 import ViewPureStyles exposing (neatToolsBorder, rgtPurple)
@@ -65,7 +71,7 @@ radii coords =
     "25" |> List.repeat (List.length coords) |> String.join ";"
 
 
-mapMatchingApi : (Result Http.Error GeoJson -> msg) -> List (List Float) -> Cmd msg
+mapMatchingApi : (Result Http.Error Matchings -> msg) -> List (List Float) -> Cmd msg
 mapMatchingApi msg coords =
     Http.request
         { method = "GET"
@@ -79,14 +85,65 @@ mapMatchingApi msg coords =
                 , formatCoordinatePairs coords
                 ]
                 [ Builder.string "access_token" mapboxKey
-                , Builder.string "steps" "false"
+                , Builder.string "steps" "true"
                 , Builder.string "radiuses" (radii coords)
                 ]
         , body = Http.emptyBody
-        , expect = Http.expectJson msg geoJsonDecoder
+        , expect = Http.expectJson msg matchingsDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+handleRoute : Result Http.Error Matchings -> Maybe (TrackLoaded msg)
+handleRoute result =
+    case result of
+        Ok resultBody ->
+            let
+                asGPXpoints : List DomainModel.GPXSource
+                asGPXpoints =
+                    resultBody.matchings |> List.concatMap collectMatchings
+
+                collectMatchings : Matching -> List DomainModel.GPXSource
+                collectMatchings matching =
+                    matching.legs |> List.concatMap collectLegs
+
+                collectLegs : Leg -> List DomainModel.GPXSource
+                collectLegs leg =
+                    leg.steps |> List.concatMap collectSteps
+
+                collectSteps : Step -> List DomainModel.GPXSource
+                collectSteps step =
+                    (step.intersections
+                        |> List.concatMap collectIntersections
+                    )
+                        ++ (Maybe.Extra.toList <| asGPX step.maneuver.location)
+
+                collectIntersections : Intersection -> List DomainModel.GPXSource
+                collectIntersections intersection =
+                    Maybe.Extra.toList <| asGPX intersection.location
+
+                asGPX : List Float -> Maybe DomainModel.GPXSource
+                asGPX location =
+                    case location of
+                        [ lon, lat ] ->
+                            Just
+                                { longitude = Direction2d.fromAngle <| Angle.degrees lon
+                                , latitude = Angle.degrees lat
+                                , altitude = Quantity.zero
+                                , timestamp = Nothing
+                                }
+
+                        _ ->
+                            Nothing
+
+                _ =
+                    Debug.log "GPX" asGPXpoints
+            in
+            TrackLoaded.trackFromPoints "Drawn on map" asGPXpoints
+
+        Err _ ->
+            Nothing
 
 
 defaultOptions : Options

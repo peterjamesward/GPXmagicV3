@@ -38,6 +38,8 @@ If the File Open dialog does not appear, please reload the page in the browser a
                 , ( "nogpx", """Could not make a track. Are you sure that's a GPX file?""" )
                 , ( "nowrite", """Sorry, unable to write the file""" )
                 , ( "nosvg", """Sorry, could not extract SVG paths""" )
+                , ( "noroute", """Mapbox was unable to find a route. Perhaps some of the
+points are too far from the nearest road.""" )
                 , ( "message", """Message""" )
                 , ( "dismiss", """Dismiss""" )
                 , ( "1CQF", "One-click Quick Fix!" )
