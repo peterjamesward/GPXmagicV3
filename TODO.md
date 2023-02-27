@@ -1,13 +1,11 @@
 
 # BUGS
 
-Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
+**Stretch** Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
-Delete should display "Sorry" message unless one leaf remains.
+**Delete** Delete should display "Sorry" message unless one leaf remains.
 
-Land use 3D is broken. Suspect elevations are not being read from map.
-
-Must fix initial map load issues. Size, timing.
+**Land use** Land use 3D is broken. Suspect elevations are not being read from map.
 
 --- 
 
@@ -15,10 +13,8 @@ Must fix initial map load issues. Size, timing.
 
 ## Routing using Mapbox
 
-Looks like we have some ordering problems, or duplication.
-
-Need to get altitudes.
-Need to post track back to map.
+1. Need to get altitudes.
+2. Need to post track back to map.
 
 ---
 
