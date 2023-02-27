@@ -332,15 +332,18 @@ function showPlanningTools() {
 
 // If the user clicks the delete draw button, remove the layer if it exists
 function removeRoute() {
-  if (!map.getSource('route')) return;
-  map.removeLayer('route');
-  map.removeSource('route');
+  if (map.getSource('route')) {;
+      map.removeLayer('route');
+      map.removeSource('route');
+  }
 }
 
 
 function removePlanningTools() {
     removeRoute();
-    map.removeControl(draw);
+    if (draw != undefined && map.hasControl(draw)) {
+        map.removeControl(draw);
+    }
 }
 
 // Use the coordinates you drew to make the Map Matching API request

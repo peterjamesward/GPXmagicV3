@@ -893,7 +893,6 @@ update msg model =
                             track
                         , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
                         , LocalStorage.sessionClear
-                        , Delay.after 1000 ProfilePaint -- wait for container to paint.
                         ]
                     )
 
