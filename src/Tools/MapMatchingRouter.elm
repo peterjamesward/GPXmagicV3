@@ -114,11 +114,10 @@ handleRoute result =
 
                 collectSteps : Step -> List DomainModel.GPXSource
                 collectSteps step =
-                    (step.intersections
+                    step.intersections
                         |> List.concatMap collectIntersections
-                    )
-                        ++ (Maybe.Extra.toList <| asGPX step.maneuver.location)
 
+                --++ (Maybe.Extra.toList <| asGPX step.maneuver.location)
                 collectIntersections : Intersection -> List DomainModel.GPXSource
                 collectIntersections intersection =
                     Maybe.Extra.toList <| asGPX intersection.location
