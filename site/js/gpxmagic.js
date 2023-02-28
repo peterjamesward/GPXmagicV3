@@ -338,12 +338,10 @@ function removeRoute() {
   }
 }
 
-
 function removePlanningTools() {
-    removeRoute();
-    if (draw != undefined && map.hasControl(draw)) {
-        map.removeControl(draw);
-    }
+    console.log('removing');
+    draw.deleteAll();
+    map.removeControl(draw);
 }
 
 // Use the coordinates you drew to make the Map Matching API request
@@ -503,7 +501,7 @@ function makeTheMap(msg) {
 
 function addDecorations() {
 
-   if (! map.getSource('mapbox-dem')) { //   ! map.isSourceLoaded('mapbox-dem') ) {
+   if (map.getSource('mapbox-dem') !== undefined) {
       map.addSource('mapbox-dem', {
         'type': 'raster-dem',
         'url': 'mapbox://mapbox.terrain-rgb',
@@ -534,12 +532,16 @@ function centreMap(lon, lat) {
 function addLineToMap(data, points) {
 //    console.log(data);
 
-    if (trackAdded) {
-        //console.log('removing existing track');
-        map.removeLayer('route')
-           .removeSource('route');
-        trackAdded = false;
-    }
+//    if (trackAdded) {
+//        //console.log('removing existing track');
+//        map.removeLayer('route')
+//           .removeSource('route');
+//        trackAdded = false;
+//    }
+
+    if (map.getLayer('route') !== undefined) map.removeLayer('route');
+    if (map.getSource('route') !== undefined) map.removeSource('route');
+    trackAdded = false;
 
     //console.log('adding geojson data');
     map.addSource('route', {
@@ -678,8 +680,8 @@ function addOptionals(msg) {
 function showPreview(msg) {
 
     //console.log ( msg );
-    if (map.getLayer(msg.label)) map.removeLayer(msg.label);
-    if (map.getSource(msg.label)) map.removeSource(msg.label);
+    if (map.getLayer(msg.label) !== undefined) map.removeLayer(msg.label);
+    if (map.getSource(msg.label) !== undefined) map.removeSource(msg.label);
 
     map.addSource(msg.label, {
         'type': 'geojson',

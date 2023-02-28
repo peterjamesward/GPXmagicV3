@@ -9,6 +9,8 @@
 
 **Route maker** Is this broke with simple loops?
 
+**Land use** Put Fetch button in tool.
+
 --- 
 
 # WIP
@@ -16,7 +18,6 @@
 ## Routing using Mapbox
 
 1. Need to get altitudes.
-2. Need to post track back to map.
 
 ---
 

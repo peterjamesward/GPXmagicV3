@@ -885,14 +885,9 @@ update msg model =
                     ( newModel
                     , Cmd.batch
                         [ MapPortController.resetMapAfterDrawing
-                        , MapPortController.fetchElevationsForPoints <|
-                            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-                        , showTrackOnMapCentered
-                            newModel.paneLayoutOptions
-                            newModel.systemSettings.imperial
-                            track
-                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
-                        , LocalStorage.sessionClear
+                        , MapPortController.addFullTrackToMap track
+                        , Delay.after 500 FetchElevationsFromMap
+                        , Delay.after 1000 ProfilePaint -- wait for container to paint.
                         ]
                     )
 
