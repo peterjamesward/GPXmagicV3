@@ -875,6 +875,10 @@ update msg model =
             let
                 newTrack =
                     Tools.MapMatchingRouter.handleRoute result
+
+                newPoints =
+                    Maybe.map (.trackTree >> DomainModel.getAllGPXPointsInNaturalOrder) newTrack
+                        |> Maybe.withDefault []
             in
             case newTrack of
                 Just track ->
@@ -886,7 +890,7 @@ update msg model =
                     , Cmd.batch
                         [ MapPortController.resetMapAfterDrawing
                         , MapPortController.addFullTrackToMap track
-                        , Delay.after 500 FetchElevationsFromMap
+                        , MapPortController.fetchElevationsForPoints newPoints
                         , Delay.after 1000 ProfilePaint -- wait for container to paint.
                         ]
                     )

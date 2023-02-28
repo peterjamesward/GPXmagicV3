@@ -17,7 +17,11 @@
 
 ## Routing using Mapbox
 
-1. Need to get altitudes.
+Need to get altitudes.
+
+Have broken Move on Map
+
+Somewhere is double adding a source, or trying to.
 
 ---
 

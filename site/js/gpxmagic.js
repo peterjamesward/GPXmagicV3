@@ -12,6 +12,18 @@ function rememberedBytes() {
     return bytes ? bytes.split(",").map(x => parseInt(x,10)) : null;
 }
 
+function isUnset(x) {
+    ! isSet(x);
+}
+
+function isSet(x) {
+    if (typeof(x) !== 'undefined' && x !== null) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /* Generate high entropy random bytes using the Web Crypto API and
 remember them so that they are preserved between redirections. This
 allows to protect for XSS & authorization code attacks */
@@ -29,11 +41,9 @@ app.ports.storageCommands.subscribe(storageMessageHandler);
 // We use port messages to synchronise our state here with Elm.
 var map;
 var isMapCreated = false;
-var trackAdded = false;
 var dragPointStart;
 var dragging = false;
 var clickToDrag = false;
-var pointsLayerAdded = false;
 
 var canvas;
 // Make dummy feature just for making drag point feedback.
@@ -57,26 +67,30 @@ function startDraggingPoint(e) {
     var coords = e.lngLat;
     drag.features[0].geometry.coordinates = [coords.lng, coords.lat];
 
-    if (dragging) {
-        map.removeLayer('drag');
-        map.removeSource('drag');
+    if (dragging && isSet(map.getLayer('drag'))) {
+        map.removeLayer('drag')
+           .removeSource('drag');
     };
 
-    map.addSource('drag', {
-        'type': 'geojson',
-        'data': drag
-        });
+    if (isUnset(map.getSource('drag'))) {
+        console.log('add source drag');
+        map.addSource('drag', {
+            'type': 'geojson',
+            'data': drag
+            });
 
- //   console.log('adding drag layer');
-    map.addLayer({
-        'id': 'drag',
-        'type': 'circle',
-        'source': 'drag',
-        'paint': {
-            'circle-radius': 5,
-            'circle-color': '#000000'
-        }
-    });
+     //   console.log('adding drag layer');
+        map.addLayer({
+            'id': 'drag',
+            'type': 'circle',
+            'source': 'drag',
+            'paint': {
+                'circle-radius': 5,
+                'circle-color': '#000000'
+            }
+        });
+    };
+
 
     dragging = true;
     dragPointStart = e.lngLat;
@@ -108,8 +122,8 @@ function onUp(e) {
 
     canvas.style.cursor = '';
     if (dragging) {
-        map.removeLayer('drag');
-        map.removeSource('drag');
+        map.removeLayer('drag')
+           .removeSource('drag');
         dragging = false;
     };
 
@@ -204,25 +218,25 @@ function mapMessageHandler(msg) {
         case 'Style':
             if (isMapCreated) {
                 map.setStyle(msg.style);
-                pointsLayerAdded = false;
-                trackAdded = false;
             }
             break;
 
         case 'Elev':
             if (isMapCreated) {
                 const source = map.getSource('route');
-                const elevations =
-                    source._data.geometry.coordinates.map(
-                        v => map.queryTerrainElevation(v)
-                    );
-                //console.log(elevations);
+                if (isSet(source)) {
+                    const elevations =
+                        source._data.geometry.coordinates.map(
+                            v => map.queryTerrainElevation(v)
+                        );
+                    //console.log(elevations);
 
-                app.ports.mapResponses.send(
-                  { 'msg' : 'elevations'
-                  , 'elevations' : elevations
-                  }
-                );
+                    app.ports.mapResponses.send(
+                      { 'msg' : 'elevations'
+                      , 'elevations' : elevations
+                      }
+                    );
+                };
             }
             break;
 
@@ -233,7 +247,7 @@ function mapMessageHandler(msg) {
                     msg.data.map(
                         v => map.queryTerrainElevation(v)
                     );
-                //console.log(elevations);
+                console.log(elevations);
 
                 app.ports.mapResponses.send(
                   { 'msg' : 'landuse'
@@ -325,17 +339,7 @@ function showPlanningTools() {
       ]
     });
 
-    // Add the draw tool to the map.
     map.addControl(draw);
-    map.on('draw.delete', removeRoute);
-}
-
-// If the user clicks the delete draw button, remove the layer if it exists
-function removeRoute() {
-  if (map.getSource('route')) {;
-      map.removeLayer('route');
-      map.removeSource('route');
-  }
 }
 
 function removePlanningTools() {
@@ -459,11 +463,11 @@ function storageMessageHandler(msg) {
 };
 
 function makeTheMap(msg) {
-    //console.log('create the map');
+    console.log('create the map');
 
     mapboxgl.accessToken = msg.token;
     var element = document.getElementById("map");
-    if(typeof(element) != 'undefined' && element != null && !isMapCreated)
+//    if (isSet(element)) // Check for the container's presence.
     {
         console.log('making the map now');
 
@@ -488,30 +492,34 @@ function makeTheMap(msg) {
 
             app.ports.mapResponses.send({ 'msg' : 'map ready' });
 
+            addDecorations();
             if (element.style.visibility === true) map.resize();
         });
 
-    } else {
-        //No 'map' node, we have to keep checking.
-        //console.log('no map node');
-        app.ports.mapResponses.send({ 'msg' : 'no node' });
+
+//    } else {
+//        //No 'map' node, we have to keep checking.
+//        console.log('no map node');
+//        app.ports.mapResponses.send({ 'msg' : 'no node' });
     };
 };
 
 
 function addDecorations() {
 
-   if (map.getSource('mapbox-dem') !== undefined) {
+   if (isUnset(map.getSource('mapbox-dem'))) {
+      console.log('add source terrain');
       map.addSource('mapbox-dem', {
-        'type': 'raster-dem',
-        'url': 'mapbox://mapbox.terrain-rgb',
-        'tileSize': 512,
-        'maxzoom': 14
+          'type': 'raster-dem',
+          'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+          'tileSize': 512,
+          'maxzoom': 14
       });
-      map.setTerrain({ 'source': 'mapbox-dem'});
+      // add the DEM source as a terrain layer with exaggerated height
+      map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 2.0 });
    };
 
-   if ( map.getLayer('sky') === undefined) {
+   if ( isUnset(map.getLayer('sky'))) {
       // add a sky layer that will show when the map is highly pitched
       map.addLayer({
         'id': 'sky',
@@ -530,20 +538,22 @@ function centreMap(lon, lat) {
 };
 
 function addLineToMap(data, points) {
-//    console.log(data);
 
-//    if (trackAdded) {
-//        //console.log('removing existing track');
-//        map.removeLayer('route')
-//           .removeSource('route');
-//        trackAdded = false;
-//    }
+    // Attempt idempotency.
+    console.log("get layer", map.getLayer('route'));
+    console.log("has type ", typeof(map.getLayer('route')));
+    console.log("is it set?", isSet(map.getLayer('route')) );
 
-    if (map.getLayer('route') !== undefined) map.removeLayer('route');
-    if (map.getSource('route') !== undefined) map.removeSource('route');
-    trackAdded = false;
+    if (isSet(map.getLayer('route')))
+    {   console.log("Removing route layer");
+        map.removeLayer('route')
+           .removeSource('route');
+    } else {
+        console.log("Map says there is no route layer");
+    }
 
-    //console.log('adding geojson data');
+    console.log('adding geojson data');
+    console.log('add source route');
     map.addSource('route', {
         'type': 'geojson',
         'data': data
@@ -564,7 +574,6 @@ function addLineToMap(data, points) {
         }
     });
 
-    trackAdded = true;
     map.on('click', function(e) {
       app.ports.mapResponses.send
         ( { 'msg' : 'click'
@@ -581,68 +590,64 @@ function addLineToMap(data, points) {
 
 function setClickMode(newMode, points) {
 
-   if (pointsLayerAdded) {
-       map.removeLayer('points');
-       map.removeSource('points');
-       pointsLayerAdded = false;
-   }
-
     clickToDrag = newMode;
-    {
-        map.addSource('points', {
-            'type': 'geojson',
-            'data': points
-            });
 
-        map.addLayer({
-            'id': 'points',
-            'type': 'circle',
-            'source': 'points',
-            'paint': {
-                'circle-radius': 5,
-                'circle-color': '#ff8f00'
-            }
+    if (isSet(map.getLayer('points'))) map.removeLayer('points');
+    if (isSet(map.getSource('points'))) map.removeSource('points');
+
+    console.log('setClickMode: add source points');
+    map.addSource('points', {
+        'type': 'geojson',
+        'data': points
         });
 
-        pointsLayerAdded = true;
-
-        if (clickToDrag) {
-
-            // When the cursor enters a feature in the point layer, prepare for dragging.
-            map.on('mouseenter', 'points', function (e) {
-                canvas.style.cursor = 'move';
-                e;
-            });
-
-            map.on('mouseleave', 'points', function (e) {
-                canvas.style.cursor = '';
-                e;
-            });
-
-            map.on('mousedown', 'points', function (e) {
-                // Prevent the default map drag behavior.
-                e.preventDefault();
-                startDraggingPoint(e);
-                e;
-            });
-
-            map.on('click', function(e) {
-              //console.log("click", e);
-              app.ports.mapResponses.send
-                  ( { 'msg' : 'click'
-                    , 'lon' : e.lngLat.lng
-                    , 'lat' : e.lngLat.lat
-                } );
-                e;
-            });
-
-        } else {
-            map.off('mouseenter','points')
-               .off('mouseleave','points')
-               .off('mousedown','points')
-               .off('click','points')
+    map.addLayer({
+        'id': 'points',
+        'type': 'circle',
+        'source': 'points',
+        'paint': {
+            'circle-radius': 5,
+            'circle-color': '#ff8f00'
         }
-    };
+    });
+
+    if (clickToDrag) {
+
+        // When the cursor enters a feature in the point layer, prepare for dragging.
+        map.on('mouseenter', 'points', function (e) {
+            canvas.style.cursor = 'move';
+            e;
+        });
+
+        map.on('mouseleave', 'points', function (e) {
+            canvas.style.cursor = '';
+            e;
+        });
+
+        map.on('mousedown', 'points', function (e) {
+            // Prevent the default map drag behavior.
+            e.preventDefault();
+            startDraggingPoint(e);
+            e;
+        });
+
+        map.on('click', function(e) {
+          //console.log("click", e);
+          app.ports.mapResponses.send
+              ( { 'msg' : 'click'
+                , 'lon' : e.lngLat.lng
+                , 'lat' : e.lngLat.lat
+            } );
+            e;
+        });
+
+    } else {
+        map.off('mouseenter','points')
+           .off('mouseleave','points')
+           .off('mousedown','points')
+           .off('click','points')
+    }
+
 };
 
 var orangeMarker = new mapboxgl.Marker({ color: "#FFA500" });
@@ -651,7 +656,7 @@ var whiteMarker = new mapboxgl.Marker({ color: "#FFFFFF", scale: 0.8 });
 
 function addOptionals(msg) {
 
-    if (typeof(msg.orange) != 'undefined') {
+    if (isSet(msg.orange)) {
         orangeMarker
             .remove()
             .setLngLat([msg.orange.lon, msg.orange.lat])
@@ -659,7 +664,7 @@ function addOptionals(msg) {
     }
 
     purpleMarker.remove();
-    if (typeof(msg.purple) != 'undefined') {
+    if (isSet(msg.purple)) {
         purpleMarker
             .setLngLat([msg.purple.lon, msg.purple.lat])
             .addTo(map);
@@ -680,9 +685,10 @@ function addOptionals(msg) {
 function showPreview(msg) {
 
     //console.log ( msg );
-    if (map.getLayer(msg.label) !== undefined) map.removeLayer(msg.label);
-    if (map.getSource(msg.label) !== undefined) map.removeSource(msg.label);
+    if (isSet(map.getLayer(msg.label))) map.removeLayer(msg.label);
+    if (isSet(map.getSource(msg.label))) map.removeSource(msg.label);
 
+    console.log('add source ', msg.label);
     map.addSource(msg.label, {
         'type': 'geojson',
         'data': msg.data
@@ -720,8 +726,8 @@ function showPreview(msg) {
 function hidePreview(label) {
 
     //console.log("Hide", label);
-    if (map.getLayer(label)) map.removeLayer(label);
-    if (map.getSource(label)) map.removeSource(label);
+    if (isSet(map.getLayer(label))) map.removeLayer(label);
+    if (isSet(map.getSource(label))) map.removeSource(label);
 
 }
 
@@ -770,13 +776,13 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
     var canvasId = canvasContainerDiv + '.profile.';
     var chart = Chart.getChart(canvasId);
 
-    if ( profileDiv === undefined || profileDiv === null) {
+    if ( isUnset(profileDiv) ) {
         console.log('No profile container ' + canvasContainerDiv);
         return;
     }
 
     // If the canvas is there, just swap the data in.
-    if (chart != undefined && chart != null) {
+    if (isSet(chart)) {
 
         //console.log('Updating chart data');
         chart.data.datasets = chartInfo.data.datasets; // Profile
@@ -808,13 +814,13 @@ function gradientChart(canvasContainerDiv, chartInfo) {
     var canvasId = canvasContainerDiv + '.gradient.';
     var chart = Chart.getChart(canvasId);
 
-    if ( profileDiv === undefined || profileDiv === null) {
+    if ( isUnset(profileDiv) ) {
         console.log('No gradient container ' + canvasContainerDiv);
         return;
     }
 
     // If the canvas is there, just swap the data in.
-    if (chart != undefined && chart != null) {
+    if (isSet(chart) ) {
 
         //console.log('Updating chart data');
         chart.data.datasets = chartInfo.data.datasets; // ALL
