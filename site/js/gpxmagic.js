@@ -13,7 +13,11 @@ function rememberedBytes() {
 }
 
 function isUnset(x) {
-    ! isSet(x);
+    if (typeof(x) === 'undefined' || x === null) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function isSet(x) {
@@ -492,7 +496,6 @@ function makeTheMap(msg) {
 
             app.ports.mapResponses.send({ 'msg' : 'map ready' });
 
-            addDecorations();
             if (element.style.visibility === true) map.resize();
         });
 
@@ -507,6 +510,8 @@ function makeTheMap(msg) {
 
 function addDecorations() {
 
+    console.log('ADD DECORATIONS', map.getSource('mapbox-dem'));
+
    if (isUnset(map.getSource('mapbox-dem'))) {
       console.log('add source terrain');
       map.addSource('mapbox-dem', {
@@ -516,7 +521,7 @@ function addDecorations() {
           'maxzoom': 14
       });
       // add the DEM source as a terrain layer with exaggerated height
-      map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 2.0 });
+      map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.2 });
    };
 
    if ( isUnset(map.getLayer('sky'))) {
@@ -540,12 +545,8 @@ function centreMap(lon, lat) {
 function addLineToMap(data, points) {
 
     // Attempt idempotency.
-    console.log("get layer", map.getLayer('route'));
-    console.log("has type ", typeof(map.getLayer('route')));
-    console.log("is it set?", isSet(map.getLayer('route')) );
-
     if (isSet(map.getLayer('route')))
-    {   console.log("Removing route layer");
+    {   //console.log("Removing route layer");
         map.removeLayer('route')
            .removeSource('route');
     } else {

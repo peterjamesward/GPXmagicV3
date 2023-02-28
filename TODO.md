@@ -5,11 +5,7 @@
 
 **Delete** Delete should display "Sorry" message unless one leaf remains.
 
-**Land use** Land use 3D is broken. Suspect elevations are not being read from map.
-
 **Route maker** Is this broke with simple loops?
-
-**Land use** Put Fetch button in tool.
 
 --- 
 
@@ -17,11 +13,8 @@
 
 ## Routing using Mapbox
 
-Need to get altitudes.
-
-Have broken Move on Map
-
-Somewhere is double adding a source, or trying to.
+Need to get altitudes!
+Fixed now for normal GPX, map has terrain, nulls are returned. Could be timing. Could be weak typing.
 
 ---
 
