@@ -348,9 +348,9 @@ function showPlanningTools() {
 
 function removePlanningTools() {
 //    console.log('removing');
-//    draw.deleteAll();
-//    map.removeControl(draw);
-    draw.remove();
+    draw.deleteAll();
+    document.getElementsByClassName('mapboxgl-ctrl-group')[0].style.display = 'none' // WORK-AROUND!
+//    map.removeControl(draw); //BUGGY!
 }
 
 // Use the coordinates you drew to make the Map Matching API request
