@@ -350,6 +350,7 @@ function removePlanningTools() {
 //    console.log('removing');
 //    draw.deleteAll();
 //    map.removeControl(draw);
+    draw.remove();
 }
 
 // Use the coordinates you drew to make the Map Matching API request
