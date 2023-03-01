@@ -71,10 +71,8 @@ function startDraggingPoint(e) {
     var coords = e.lngLat;
     drag.features[0].geometry.coordinates = [coords.lng, coords.lat];
 
-    if (dragging && isSet(map.getLayer('drag'))) {
-        map.removeLayer('drag')
-           .removeSource('drag');
-    };
+    safelyRemoveLayer('drag');
+    safelyRemoveSource('drag');
 
     if (isUnset(map.getSource('drag'))) {
         console.log('add source drag');
@@ -125,11 +123,8 @@ function onUp(e) {
     var coords = e.lngLat;
 
     canvas.style.cursor = '';
-    if (dragging) {
-        map.removeLayer('drag')
-           .removeSource('drag');
-        dragging = false;
-    };
+    safelyRemoveLayer('drag');
+    dragging = false;
 
     map.off('mousemove', onMove);
     map.off('touchmove', onMove);
@@ -226,6 +221,7 @@ function mapMessageHandler(msg) {
             break;
 
         case 'Elev':
+            console.log('Elm asked for route elevations')
             if (isMapCreated) {
                 const source = map.getSource('route');
                 if (isSet(source)) {
@@ -233,7 +229,7 @@ function mapMessageHandler(msg) {
                         source._data.geometry.coordinates.map(
                             v => map.queryTerrainElevation(v)
                         );
-                    //console.log(elevations);
+                    console.log(elevations);
 
                     app.ports.mapResponses.send(
                       { 'msg' : 'elevations'
@@ -246,6 +242,7 @@ function mapMessageHandler(msg) {
 
         case 'LandUse':
           // Ask Map for altitude data corresponding to land use nodes.
+            console.log('Elm asked for specific elevations')
             if (isMapCreated) {
                 const elevations =
                     msg.data.map(
@@ -517,16 +514,39 @@ function centreMap(lon, lat) {
     map.setCenter([lon, lat]);
 };
 
+function safelyRemoveSource(source) {
+    if (isSet(map.getSource(source)))
+    {   console.log("Removing source", map.getSource(source));
+        try {
+            map.removeSource(source);
+        }
+        catch (e) {
+            console.log(e);
+        }
+    } else {
+        console.log("Map says there is no source ", source);
+    }
+}
+
+function safelyRemoveLayer(layer) {
+    if (isSet(map.getLayer(layer)))
+    {   console.log("Removing layer", map.getLayer(layer));
+        try {
+            map.removeLayer(layer);
+        }
+        catch (e) {
+            console.log(e);
+        }
+    } else {
+        console.log("Map says there is no layer ", layer);
+    }
+}
+
 function addLineToMap(data, points) {
 
     // Attempt idempotency.
-    if (isSet(map.getLayer('route')))
-    {   //console.log("Removing route layer");
-        map.removeLayer('route')
-           .removeSource('route');
-    } else {
-        console.log("Map says there is no route layer");
-    }
+    safelyRemoveLayer('route');
+    safelyRemoveSource('route');
 
     console.log('adding geojson data');
     console.log('add source route');
@@ -568,8 +588,8 @@ function setClickMode(newMode, points) {
 
     clickToDrag = newMode;
 
-    if (isSet(map.getLayer('points'))) map.removeLayer('points');
-    if (isSet(map.getSource('points'))) map.removeSource('points');
+    safelyRemoveLayer('points');
+    safelyRemoveSource('points');
 
     console.log('setClickMode: add source points');
     map.addSource('points', {
@@ -661,8 +681,9 @@ function addOptionals(msg) {
 function showPreview(msg) {
 
     //console.log ( msg );
-    if (isSet(map.getLayer(msg.label))) map.removeLayer(msg.label);
-    if (isSet(map.getSource(msg.label))) map.removeSource(msg.label);
+    safelyRemoveLayer(msg.label);
+    safelyRemoveSource(msg.label);
+
 
     console.log('add source ', msg.label);
     map.addSource(msg.label, {
@@ -702,8 +723,8 @@ function showPreview(msg) {
 function hidePreview(label) {
 
     //console.log("Hide", label);
-    if (isSet(map.getLayer(label))) map.removeLayer(label);
-    if (isSet(map.getSource(label))) map.removeSource(label);
+    safelyRemoveLayer(label);
+    safelyRemoveSource(label);
 
 }
 

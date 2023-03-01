@@ -1,11 +1,11 @@
 module Tools.MapMatchingRouter exposing
     ( Msg(..)
     , defaultOptions
-    , handleRoute
     , initialise
     , mapMatchingApi
     , toolId
     , toolStateChange
+    , trackFromDrawnRoute
     , update
     , view
     )
@@ -95,8 +95,8 @@ mapMatchingApi msg coords =
         }
 
 
-handleRoute : Result Http.Error Matchings -> Maybe (TrackLoaded msg)
-handleRoute result =
+trackFromDrawnRoute : Result Http.Error Matchings -> Maybe (TrackLoaded msg)
+trackFromDrawnRoute result =
     case result of
         Ok resultBody ->
             let

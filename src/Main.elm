@@ -874,7 +874,7 @@ update msg model =
         MatchingRoute result ->
             let
                 newTrack =
-                    Tools.MapMatchingRouter.handleRoute result
+                    Tools.MapMatchingRouter.trackFromDrawnRoute result
 
                 newPoints =
                     Maybe.map (.trackTree >> DomainModel.getAllGPXPointsInNaturalOrder) newTrack
@@ -890,8 +890,8 @@ update msg model =
                     , Cmd.batch
                         [ MapPortController.resetMapAfterDrawing
                         , MapPortController.addFullTrackToMap track
-                        , MapPortController.fetchElevationsForPoints newPoints
-                        , Delay.after 1000 ProfilePaint -- wait for container to paint.
+                        , Delay.after 1000 FetchElevationsFromMap -- async to allow map to quiesce.
+                        , Delay.after 1000 ProfilePaint -- async, seems to help
                         ]
                     )
 
@@ -2439,6 +2439,7 @@ performActionCommands actions model =
                     Delay.after 5000 TimeToUpdateMemory
 
                 ( AddFullTrackToMapForElevations, Just track ) ->
+                    -- Deliberate pause here seems to allow map to quiesce.
                     Cmd.batch
                         [ MapPortController.addFullTrackToMap track
                         , Delay.after 100 FetchElevationsFromMap
@@ -2448,6 +2449,7 @@ performActionCommands actions model =
                     MapPortController.requestElevations
 
                 ( SetMapStyle url, _ ) ->
+                    -- Deliberate pause here seems to allow map to quiesce.
                     Cmd.batch
                         [ MapPortController.setMapStyle url
                         , Delay.after 1000 ReplaceTrackOnMapAfterStyleChange
