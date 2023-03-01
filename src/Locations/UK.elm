@@ -942,7 +942,7 @@ It's also _really_ good at removing noise from IRL rides.
           )
         , ( "routing"
           , Dict.fromList
-                [ ( "label", """Route planner""" )
+                [ ( "label", """Draw Route on Map""" )
                 , ( "info", """Uses the mapbox to find a route passing up to 100 waypoints.""" )
                 , ( "track", """Sorry, can only plan before you load a route.""" )
                 , ( "enable", """Enable map planning""" )

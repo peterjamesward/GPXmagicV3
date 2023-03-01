@@ -9,6 +9,12 @@ aboutText =
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.10.0
+
+New **Draw route on map** tool lets you ... well, can you guess?
+
+It's not a replacement for a proper ride planner but it may suffice for some.
+
 ## 3.9.11
 
 New option in Gradient Problems will identify completely flat runs of the route.
