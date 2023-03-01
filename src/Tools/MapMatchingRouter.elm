@@ -135,9 +135,6 @@ trackFromDrawnRoute result =
 
                         _ ->
                             Nothing
-
-                _ =
-                    Debug.log "GPX" asGPXpoints
             in
             TrackLoaded.trackFromPoints "Drawn on map" asGPXpoints
 
