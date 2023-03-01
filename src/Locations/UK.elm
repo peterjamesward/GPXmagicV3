@@ -947,6 +947,15 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "track", """Sorry, can only plan before you load a route.""" )
                 , ( "enable", """Enable map planning""" )
                 , ( "fetch", """Find road route""" )
+                , ( "waiting", """Please wait while Mapbox finds a route.""" )
+                , ( "elevations", """Refresh elevation data""" )
+                , ( "guidance", """Note the simple drawing tools on the Map. Select Line Drawing, 
+then click carefully close to the roads on the map, in the order you need. If you place a point
+too far from any road, the process will fail. When you reach the final point, click twice, 
+then come back here and click the button below.""" )
+                , ( "done", """There should be a route. If the elevations are incomplete, 
+please try using the refresh button below.""" )
+                , ( "fail", """Mapbox did not return a route. Perhaps a point was too far from the road.""" )
                 ]
           )
         , ( "segments"

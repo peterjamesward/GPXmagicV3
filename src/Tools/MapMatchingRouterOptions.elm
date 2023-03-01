@@ -17,7 +17,7 @@ type RouteState
     | RouteDrawing
     | RouteComputing
     | RouteShown
-    | RouteAdopted
+    | RouteFailed
 
 
 type alias Options =

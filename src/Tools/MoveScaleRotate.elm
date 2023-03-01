@@ -427,7 +427,7 @@ view settings options wrapper maybeTrack =
 
                 elevationFetchButton =
                     button
-                        (buttonStylesWithTooltip below "First, tilt the Map view to get elevation data")
+                        neatToolsBorder
                         { onPress = Just <| wrapper UseMapElevations
                         , label = i18n "elevations"
                         }

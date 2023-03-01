@@ -18,7 +18,12 @@ import CommonToolStyles
 import Direction2d
 import DomainModel
 import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
+import FeatherIcons
+import FlatColors.FlatUIPalette
 import Http
 import MapboxKey exposing (mapboxKey)
 import Maybe.Extra
@@ -28,7 +33,7 @@ import Tools.I18N as I18N
 import Tools.MapMatchingRouterOptions exposing (Intersection, Leg, Matching, Matchings, Options, RouteState(..), Step, matchingsDecoder)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
-import ViewPureStyles exposing (neatToolsBorder, rgtPurple)
+import ViewPureStyles exposing (neatToolsBorder, rgtPurple, useIconWithSize)
 
 
 toolId =
@@ -95,8 +100,8 @@ mapMatchingApi msg coords =
         }
 
 
-trackFromDrawnRoute : Result Http.Error Matchings -> Maybe (TrackLoaded msg)
-trackFromDrawnRoute result =
+trackFromDrawnRoute : Result Http.Error Matchings -> Options -> ( Options, Maybe (TrackLoaded msg) )
+trackFromDrawnRoute result options =
     case result of
         Ok resultBody ->
             let
@@ -136,10 +141,12 @@ trackFromDrawnRoute result =
                         _ ->
                             Nothing
             in
-            TrackLoaded.trackFromPoints "Drawn on map" asGPXpoints
+            ( { options | routeState = RouteShown }
+            , TrackLoaded.trackFromPoints "Drawn on map" asGPXpoints
+            )
 
         Err _ ->
-            Nothing
+            ( { options | routeState = RouteFailed }, Nothing )
 
 
 defaultOptions : Options
@@ -153,6 +160,7 @@ type Msg
     = DisplayInfo String String
     | EnablePlanning
     | GetDrawnPoints
+    | UseMapElevations
 
 
 initialise : Options
@@ -184,6 +192,16 @@ view settings track wrapper options =
         i18n =
             I18N.text settings.location toolId
 
+        guidanceText tag =
+            row
+                [ Background.color FlatColors.FlatUIPalette.turquoise
+                , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
+                , Border.rounded 5
+                ]
+                [ useIconWithSize 20 FeatherIcons.info
+                , paragraph [ padding 4 ] [ i18n tag ]
+                ]
+
         startButton =
             Input.button
                 neatToolsBorder
@@ -197,27 +215,42 @@ view settings track wrapper options =
                 { onPress = Just <| wrapper GetDrawnPoints
                 , label = i18n "fetch"
                 }
+
+        elevationFetchButton =
+            Input.button
+                neatToolsBorder
+                { onPress = Just <| wrapper UseMapElevations
+                , label = i18n "elevations"
+                }
     in
     column (CommonToolStyles.toolContentBoxStyle settings) <|
         if track == Nothing then
             case options.routeState of
                 RouteIdle ->
-                    [ startButton ]
+                    [ guidanceText "info"
+                    , startButton
+                    ]
 
                 RouteDrawing ->
-                    [ routeButton ]
+                    [ guidanceText "guidance"
+                    , routeButton
+                    ]
 
                 RouteComputing ->
-                    []
+                    [ guidanceText "waiting" ]
 
                 RouteShown ->
-                    []
+                    [ guidanceText "done"
+                    , elevationFetchButton
+                    ]
 
-                RouteAdopted ->
-                    []
+                RouteFailed ->
+                    [ guidanceText "fail" ]
 
         else
-            [ i18n "track" ]
+            [ guidanceText "done"
+            , elevationFetchButton
+            ]
 
 
 update :
@@ -244,6 +277,11 @@ update msg options wrapper =
                 , numPoints = 0
               }
             , [ Actions.GetPointsFromMap ]
+            )
+
+        UseMapElevations ->
+            ( options
+            , [ Actions.FetchMapElevations ]
             )
 
 

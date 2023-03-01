@@ -873,18 +873,27 @@ update msg model =
 
         MatchingRoute result ->
             let
-                newTrack =
-                    Tools.MapMatchingRouter.trackFromDrawnRoute result
+                toolOptions =
+                    model.toolOptions
 
-                newPoints =
-                    Maybe.map (.trackTree >> DomainModel.getAllGPXPointsInNaturalOrder) newTrack
-                        |> Maybe.withDefault []
+                options =
+                    toolOptions.routingOptions
+
+                ( newOptions, newTrack ) =
+                    Tools.MapMatchingRouter.trackFromDrawnRoute result options
+
+                newToolOptions =
+                    { toolOptions | routingOptions = newOptions }
             in
             case newTrack of
                 Just track ->
                     let
                         newModel =
-                            adoptTrackInModel track [] model
+                            adoptTrackInModel track
+                                []
+                                { model
+                                    | toolOptions = newToolOptions
+                                }
                     in
                     ( newModel
                     , Cmd.batch
@@ -897,7 +906,9 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | modalMessage = Just "noroute" }, Cmd.none )
+                    ( { model | toolOptions = newToolOptions }
+                    , Cmd.none
+                    )
 
 
 adoptTrackInModel : TrackLoaded Msg -> List NamedSegment -> Model -> Model
