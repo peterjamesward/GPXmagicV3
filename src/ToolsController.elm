@@ -718,7 +718,7 @@ routingTool : ToolEntry
 routingTool =
     { toolType = ToolRouting
     , toolId = Tools.MapMatchingRouter.toolId
-    , video = Nothing
+    , video = Just "https://youtu.be/MYBTArdb_X0"
     , state = Contracted
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
