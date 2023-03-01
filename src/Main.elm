@@ -890,6 +890,7 @@ update msg model =
                     , Cmd.batch
                         [ MapPortController.resetMapAfterDrawing
                         , MapPortController.addFullTrackToMap track
+                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
                         , Delay.after 1000 FetchElevationsFromMap -- async to allow map to quiesce.
                         , Delay.after 1000 ProfilePaint -- async, seems to help
                         ]

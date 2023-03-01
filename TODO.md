@@ -11,12 +11,6 @@
 
 # WIP
 
-## Routing using Mapbox
-
-Need to get altitudes! Have to wait for terrain.
-
-Fixed now for normal GPX, map has terrain, nulls are returned. Could be timing. Could be weak typing.
-
 ---
 
 # BACKLOG

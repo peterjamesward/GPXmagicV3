@@ -74,24 +74,22 @@ function startDraggingPoint(e) {
     safelyRemoveLayer('drag');
     safelyRemoveSource('drag');
 
-    if (isUnset(map.getSource('drag'))) {
-        console.log('add source drag');
-        map.addSource('drag', {
-            'type': 'geojson',
-            'data': drag
-            });
-
-     //   console.log('adding drag layer');
-        map.addLayer({
-            'id': 'drag',
-            'type': 'circle',
-            'source': 'drag',
-            'paint': {
-                'circle-radius': 5,
-                'circle-color': '#000000'
-            }
+    //console.log('add source drag');
+    map.addSource('drag', {
+        'type': 'geojson',
+        'data': drag
         });
-    };
+
+    //console.log('adding drag layer');
+    map.addLayer({
+        'id': 'drag',
+        'type': 'circle',
+        'source': 'drag',
+        'paint': {
+            'circle-radius': 5,
+            'circle-color': '#000000'
+        }
+    });
 
 
     dragging = true;
@@ -221,7 +219,7 @@ function mapMessageHandler(msg) {
             break;
 
         case 'Elev':
-            console.log('Elm asked for route elevations')
+            //console.log('Elm asked for route elevations')
             if (isMapCreated) {
                 const source = map.getSource('route');
                 if (isSet(source)) {
@@ -229,7 +227,7 @@ function mapMessageHandler(msg) {
                         source._data.geometry.coordinates.map(
                             v => map.queryTerrainElevation(v)
                         );
-                    console.log(elevations);
+                    //console.log(elevations);
 
                     app.ports.mapResponses.send(
                       { 'msg' : 'elevations'
@@ -242,13 +240,13 @@ function mapMessageHandler(msg) {
 
         case 'LandUse':
           // Ask Map for altitude data corresponding to land use nodes.
-            console.log('Elm asked for specific elevations')
+            //console.log('Elm asked for specific elevations')
             if (isMapCreated) {
                 const elevations =
                     msg.data.map(
                         v => map.queryTerrainElevation(v)
                     );
-                console.log(elevations);
+                //console.log(elevations);
 
                 app.ports.mapResponses.send(
                   { 'msg' : 'landuse'
@@ -445,7 +443,7 @@ function makeTheMap(msg) {
     var element = document.getElementById("map");
 //    if (isSet(element)) // Check for the container's presence.
     {
-        console.log('making the map now');
+        //console.log('making the map now');
 
         map = new mapboxgl.Map({
             container: 'map',
@@ -482,7 +480,7 @@ function makeTheMap(msg) {
 
 function addDecorations() {
 
-    console.log('ADD DECORATIONS', map.getSource('mapbox-dem'));
+    //console.log('ADD DECORATIONS', map.getSource('mapbox-dem'));
 
    if (isUnset(map.getSource('mapbox-dem'))) {
       console.log('add source terrain');
@@ -516,29 +514,29 @@ function centreMap(lon, lat) {
 
 function safelyRemoveSource(source) {
     if (isSet(map.getSource(source)))
-    {   console.log("Removing source", map.getSource(source));
+    {   //console.log("Removing source", map.getSource(source));
         try {
             map.removeSource(source);
         }
         catch (e) {
-            console.log(e);
+            //console.log(e);
         }
     } else {
-        console.log("Map says there is no source ", source);
+        //console.log("Map says there is no source ", source);
     }
 }
 
 function safelyRemoveLayer(layer) {
     if (isSet(map.getLayer(layer)))
-    {   console.log("Removing layer", map.getLayer(layer));
+    {   //console.log("Removing layer", map.getLayer(layer));
         try {
             map.removeLayer(layer);
         }
         catch (e) {
-            console.log(e);
+            //console.log(e);
         }
     } else {
-        console.log("Map says there is no layer ", layer);
+        //console.log("Map says there is no layer ", layer);
     }
 }
 
@@ -548,8 +546,8 @@ function addLineToMap(data, points) {
     safelyRemoveLayer('route');
     safelyRemoveSource('route');
 
-    console.log('adding geojson data');
-    console.log('add source route');
+    //console.log('adding geojson data');
+    //console.log('add source route');
     map.addSource('route', {
         'type': 'geojson',
         'data': data
@@ -591,7 +589,7 @@ function setClickMode(newMode, points) {
     safelyRemoveLayer('points');
     safelyRemoveSource('points');
 
-    console.log('setClickMode: add source points');
+    //console.log('setClickMode: add source points');
     map.addSource('points', {
         'type': 'geojson',
         'data': points
@@ -685,7 +683,7 @@ function showPreview(msg) {
     safelyRemoveSource(msg.label);
 
 
-    console.log('add source ', msg.label);
+    //console.log('add source ', msg.label);
     map.addSource(msg.label, {
         'type': 'geojson',
         'data': msg.data
@@ -828,7 +826,7 @@ function gradientChart(canvasContainerDiv, chartInfo) {
 
     } else {
 
-        console.log('Adding gradient canvas');
+        //console.log('Adding gradient canvas');
         var canvas = document.createElement('canvas');
         canvas.id     = canvasId;
         canvas.width  = profileDiv.width;
@@ -837,7 +835,7 @@ function gradientChart(canvasContainerDiv, chartInfo) {
         canvas.style.position = "absolute";
         profileDiv.appendChild(canvas);
 
-        console.log('Making gradient chart');
+        //console.log('Making gradient chart');
         chart = new Chart(
             document.getElementById(canvasId),
             chartInfo
