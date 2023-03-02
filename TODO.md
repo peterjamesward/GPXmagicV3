@@ -15,6 +15,10 @@
 
 # BACKLOG
 
+## Route maker -- combine routes
+
+Use more than one GPX as input to route maker.
+
 ## Refactor Main -> Tools
 
 I hope this will open the door to a much cleaner control flow, perhaps deprecating
