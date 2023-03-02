@@ -119,8 +119,8 @@ trackFromDrawnRoute result options =
 
                 collectSteps : Step -> List DomainModel.GPXSource
                 collectSteps step =
-                    step.intersections
-                        |> List.concatMap collectIntersections
+                    Maybe.Extra.toList (asGPX step.maneuver.location)
+                        ++ List.concatMap collectIntersections step.intersections
 
                 --++ (Maybe.Extra.toList <| asGPX step.maneuver.location)
                 collectIntersections : Intersection -> List DomainModel.GPXSource
