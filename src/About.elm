@@ -3,11 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.10.0 (98f00d3f)
+# GPXmagic v3.10.1 (98f00d3f)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.10.1
+
+Includes turn points in routes, improving some junctions.
 
 ## 3.10.0
 
