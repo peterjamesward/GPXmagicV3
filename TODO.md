@@ -15,8 +15,7 @@
 
 It's all graphs. 
 * Some are trivial, with one track.
-* Load more than one GPX, each is a track.
-* Draw more than one route, each is a track.
+* Load or draw more than one GPX, each is a track.
 * Analyse them to identify canonical sections.
 * Recombine sections into single route.
 * All views show all sections.
@@ -26,30 +25,36 @@ It's all graphs.
 * New tool, or extended Graph tool to unload, select, hide tracks. (Pick & Mix?)
 
 We have all the tools for this, it just requires some re-arrangement.
-(Does Track == Section?)
+
+Important question.
+> ?? Is the structure Graph -> Route -> Edges ??  
+> See my notebook.
 
 Implementation plan:
 
-1. Branch!
-2. Take Graph out of TrackLoaded.
-3. Allow load of more than one GPX. (New tool rather than change the Load button?)
+1. ~~Branch!~~
+2. Move Graph out of TrackLoaded.
+3. Allow load of more than one GPX. (New tool rather than change the Load button?)  
 4. Change Undo to be Graph-based not Track-based.
 5. Modify views to show multiple tracks. 
 6. Allow drawing of multiple tracks, added to graph
-7. New tool to select Active Track.
+7. New method to select Active Track.
 8. Views to subdue inactive tracks.
-9. Modify graph to analyse multiple tracks.
-10. Manual addition of node in any edge.
-11. Clarify the relationship between tracks (sections) and a route (using sections at least once)
-12. Adopting a route returns us to a "trivial" (one track) graph.
+9. Decide what "nearby" points means. (Perhaps just edits each track separately.)
+10. Modify graph to analyse multiple tracks.
+11. ?? Does adding a Route create a new Track in the Graph, replacing others ?? 
+12. Manual addition of node in any edge.
+13. Clarify the relationship between tracks (sections) and a route (using sections at least once)
+14. Adopting a route returns us to a "trivial" (one track) graph.
 
 ---
 
 # BACKLOG
 
-## Route maker -- combine routes
+## Derive climbs from WKO file
 
-Use more than one GPX as input to route maker.
+_Eric Spencer_
+i haven't fully thought this through yet, but just airing to determine if it's viable as there are some potentially obvious issues. I ride a lot of workouts in ERG mode but many of the roads I use visually don't match the workout segment I'm on (eg. I'm hitting 120% FTP whilst riding downhill). Is there something that could roughly use inputs of my FTP, and my weight, I then provide a wko file that has say 3 blocks of 10 mins at 250W, with 3 mins between at 150W and GPXmagic would create a route with constant climbs and flats that broadly mimic the workout structure for my parameters without needing to use ERG. It would never be the exact durations of the wko as I may put in more or less power but effort wise it will broadly be correct
 
 ## Refactor Main -> Tools
 

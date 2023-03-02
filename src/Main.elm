@@ -1,6 +1,6 @@
 module Main exposing (Model, Msg, main)
 
-import Actions exposing (ToolAction(..))
+import Actions exposing (ToolAction(..), UndoEntry)
 import Angle
 import Browser exposing (application)
 import Browser.Dom as Dom
@@ -143,18 +143,22 @@ type alias Model =
     { filename : Maybe String
     , time : Time.Posix
     , zone : Time.Zone
-    , ipInfo : Maybe IpInfo
+    , ipInfo : Maybe IpInfo -- only used to centre initial map.
     , stravaAuthentication : O.Model
-    , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
     , rgtOptionsVisible : Bool
     , loadFromUrl : Maybe Url
 
-    -- State machine for map synchronisation
+    -- State machine for map synchronisation, such as it is.
     , mapState : MapState
 
     -- Track stuff
-    , track : Maybe (TrackLoaded Msg)
+    , tracks : List (TrackLoaded Msg)
+    , activeTrack : Maybe (TrackLoaded Msg)
+    , undos : List (UndoEntry Msg)
+    , redos : List (UndoEntry Msg)
+    , lastMapClick : ( Float, Float )
+    , referenceLonLat : GPXSource
 
     -- Visuals (scenes now in PaneLayoutManager)
     , previews : Dict String PreviewData
@@ -169,6 +173,7 @@ type alias Model =
     , paneLayoutOptions : PaneContext.PaneLayoutOptions
     , infoText : Maybe ( String, String )
     , welcomeDisplayed : Bool
+    , loadOptionsMenuOpen : Bool
 
     -- Splitters
     , leftDockRightEdge : SplitPane.State

@@ -26,6 +26,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint)
 import Quantity
 import SpatialIndex
+import Tools.GraphOptions exposing (Graph)
 import Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment)
 import Utils
 import UtilsForViews
@@ -34,15 +35,12 @@ import UtilsForViews
 type alias TrackLoaded msg =
     { currentPosition : Int
     , markerPosition : Maybe Int
-    , referenceLonLat : GPXSource
     , renderDepth : Int
     , trackTree : PeteTree
     , trackName : Maybe String
-    , undos : List (UndoEntry msg)
-    , redos : List (UndoEntry msg)
-    , lastMapClick : ( Float, Float )
     , landUseData : LandUseDataTypes.LandUseData
     , leafIndex : LeafIndex
+    , graph : Graph msg
     }
 
 
@@ -50,15 +48,12 @@ newTrackFromTree : GPXSource -> PeteTree -> TrackLoaded msg
 newTrackFromTree refLonLat newTree =
     { currentPosition = 0
     , markerPosition = Nothing
-    , referenceLonLat = refLonLat
     , renderDepth = 10
     , trackTree = newTree
     , trackName = Nothing
-    , undos = []
-    , redos = []
-    , lastMapClick = ( 0, 0 )
     , landUseData = LandUseDataTypes.emptyLandUse
     , leafIndex = indexLeaves newTree
+    , graph = Graph.trivialGraph newTree
     }
 
 
