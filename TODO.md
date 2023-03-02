@@ -29,17 +29,19 @@ We have all the tools for this, it just requires some re-arrangement.
 (Does Track == Section?)
 
 Implementation plan:
-1. Take Graph out of TrackLoaded.
-2. Allow load of more than one GPX. (New tool rather than change the Load button?)
-3. Change Undo to be Graph-based not Track-based.
-4. Modify views to show multiple tracks. 
-5. Allow drawing of multiple tracks, added to graph
-6. New tool to select Active Track.
-7. Views to subdue inactive tracks.
-8. Modify graph to analyse multiple tracks.
-9. Manual addition of node in any edge.
-10. Clarify the relationship between tracks (sections) and a route (using sections at least once)
-11. Adopting a route returns us to a "trivial" (one track) graph.
+
+1. Branch!
+2. Take Graph out of TrackLoaded.
+3. Allow load of more than one GPX. (New tool rather than change the Load button?)
+4. Change Undo to be Graph-based not Track-based.
+5. Modify views to show multiple tracks. 
+6. Allow drawing of multiple tracks, added to graph
+7. New tool to select Active Track.
+8. Views to subdue inactive tracks.
+9. Modify graph to analyse multiple tracks.
+10. Manual addition of node in any edge.
+11. Clarify the relationship between tracks (sections) and a route (using sections at least once)
+12. Adopting a route returns us to a "trivial" (one track) graph.
 
 ---
 
