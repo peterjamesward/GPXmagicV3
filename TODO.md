@@ -11,6 +11,19 @@
 
 # WIP
 
+## Promote Graph
+
+It's all graphs. 
+* Just that some are trivial, with one section.
+* Load more than one GPX, each is a section.
+* Draw more than one route, each is a section.
+* Analyse them to identify canonical sections.
+* Recombine sections.
+* All views show all sections.
+* Edits constrained to one section (as now).
+
+We have all the tools for this, it just requires some re-arrangement.
+
 ---
 
 # BACKLOG
