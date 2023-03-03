@@ -161,6 +161,7 @@ type Msg
     | EnablePlanning
     | GetDrawnPoints
     | UseMapElevations
+    | Reset
 
 
 initialise : Options
@@ -222,35 +223,39 @@ view settings track wrapper options =
                 { onPress = Just <| wrapper UseMapElevations
                 , label = i18n "elevations"
                 }
+
+        resetButton =
+            Input.button
+                neatToolsBorder
+                { onPress = Just <| wrapper Reset
+                , label = i18n "reset"
+                }
     in
     column (CommonToolStyles.toolContentBoxStyle settings) <|
-        if track == Nothing then
-            case options.routeState of
-                RouteIdle ->
-                    [ guidanceText "info"
-                    , startButton
-                    ]
+        case options.routeState of
+            RouteIdle ->
+                [ guidanceText "info"
+                , startButton
+                ]
 
-                RouteDrawing ->
-                    [ guidanceText "guidance"
-                    , routeButton
-                    ]
+            RouteDrawing ->
+                [ guidanceText "guidance"
+                , routeButton
+                ]
 
-                RouteComputing ->
-                    [ guidanceText "waiting" ]
+            RouteComputing ->
+                [ guidanceText "waiting" ]
 
-                RouteShown ->
-                    [ guidanceText "done"
-                    , elevationFetchButton
-                    ]
+            RouteShown ->
+                [ guidanceText "done"
+                , elevationFetchButton
+                , resetButton
+                ]
 
-                RouteFailed ->
-                    [ guidanceText "fail" ]
-
-        else
-            [ guidanceText "done"
-            , elevationFetchButton
-            ]
+            RouteFailed ->
+                [ guidanceText "fail"
+                , resetButton
+                ]
 
 
 update :
@@ -282,6 +287,14 @@ update msg options wrapper =
         UseMapElevations ->
             ( options
             , [ Actions.FetchMapElevations ]
+            )
+
+        Reset ->
+            ( { options
+                | routeState = RouteIdle
+                , numPoints = 0
+              }
+            , []
             )
 
 

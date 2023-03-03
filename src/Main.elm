@@ -1464,6 +1464,12 @@ performActionsOnModel actions model =
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
             case ( action, foldedModel.activeTrack ) of
+                ( SetActiveTrack trackIndex, _ ) ->
+                    { foldedModel
+                        | activeTrack = Tools.Tracks.setTrack trackIndex foldedModel.toolOptions.tracksOptions
+                        , needsRendering = True
+                    }
+
                 ( ProfileClick container x, Just track ) ->
                     -- This must be handled with the right context, to prevent
                     -- sideways scroll being interpreted as a click.
@@ -2351,6 +2357,9 @@ performActionCommands actions model =
         performAction : ToolAction Msg -> Cmd Msg
         performAction action =
             case ( action, model.activeTrack ) of
+                ( SetActiveTrack _, _ ) ->
+                    performAction TrackHasChanged
+
                 ( TryRemoteLoadIfGiven, _ ) ->
                     case model.loadFromUrl of
                         Nothing ->
@@ -2550,13 +2559,13 @@ performActionCommands actions model =
                             track
                         ]
 
-                ( EnablePlanningOnMap, Nothing ) ->
+                ( EnablePlanningOnMap, _ ) ->
                     MapPortController.enablePlanning
 
-                ( GetPointsFromMap, Nothing ) ->
+                ( GetPointsFromMap, _ ) ->
                     MapPortController.getPoints
 
-                ( FetchMatchingRoute coordinates, Nothing ) ->
+                ( FetchMatchingRoute coordinates, _ ) ->
                     Tools.MapMatchingRouter.mapMatchingApi MatchingRoute coordinates
 
                 _ ->

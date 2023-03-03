@@ -949,6 +949,7 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "fetch", """Find road route""" )
                 , ( "waiting", """Please wait while Mapbox finds a route.""" )
                 , ( "elevations", """Refresh elevation data""" )
+                , ( "reset", """Reset""" )
                 , ( "guidance", """Note the simple drawing tools on the Map. Select Line Drawing, 
 then click carefully close to the roads on the map, in the order you need. If you place a point
 too far from any road, the process will fail. When you reach the final point, click twice, 

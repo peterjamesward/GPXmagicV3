@@ -3,6 +3,7 @@ module Tools.Tracks exposing
     , Options
     , addTrack
     , defaultOptions
+    , setTrack
     , toolId
     , update
     , view
@@ -11,9 +12,13 @@ module Tools.Tracks exposing
 import Actions
 import CommonToolStyles
 import Element exposing (..)
+import Element.Input as Input
+import FeatherIcons
+import List.Extra
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
+import ViewPureStyles exposing (useIcon)
 
 
 toolId =
@@ -41,8 +46,8 @@ type Msg
 update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options =
     case msg of
-        SelectActiveTrack mode ->
-            ( options, [ Actions.SetActiveTrack 0 ] )
+        SelectActiveTrack index ->
+            ( options, [ Actions.SetActiveTrack index ] )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options msg -> Element msg
@@ -51,18 +56,48 @@ view settings wrapper options =
         helper =
             I18N.text settings.location toolId
     in
-    column (CommonToolStyles.toolContentBoxStyle settings) <|
-        List.map displayTrackInfo options.tracks
+    el (CommonToolStyles.toolContentBoxStyle settings) <|
+        column [ spacing 5 ] <|
+            List.indexedMap
+                (\index entry ->
+                    displayTrackInfo index entry wrapper
+                )
+                options.tracks
 
 
-displayTrackInfo : TrackLoaded msg -> Element msg
-displayTrackInfo track =
-    text track.trackName
+displayTrackInfo : Int -> TrackLoaded msg -> (Msg -> msg) -> Element msg
+displayTrackInfo index track wrapper =
+    row [ spacing 5 ]
+        [ Input.button
+            []
+            { label = useIcon FeatherIcons.eye
+            , onPress = Just <| wrapper (SelectActiveTrack index)
+            }
+        , text track.trackName
+        ]
 
 
 addTrack : TrackLoaded msg -> Options msg -> Options msg
 addTrack track options =
+    let
+        unambiguousName =
+            case
+                List.Extra.find
+                    (\t -> t.trackName == track.trackName)
+                    options.tracks
+            of
+                Just _ ->
+                    track.trackName ++ "-" ++ String.fromInt options.nextTrackNumber
+
+                Nothing ->
+                    track.trackName
+    in
     { options
-        | tracks = track :: options.tracks
+        | tracks = { track | trackName = unambiguousName } :: options.tracks
         , nextTrackNumber = options.nextTrackNumber + 1
     }
+
+
+setTrack : Int -> Options msg -> Maybe (TrackLoaded msg)
+setTrack index options =
+    List.Extra.getAt index options.tracks
