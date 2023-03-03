@@ -276,10 +276,8 @@ function mapMessageHandler(msg) {
     };
 };
 
-var draw;
-
-function showPlanningTools() {
-    draw = new MapboxDraw({
+// Create the draw control once only.
+var draw= new MapboxDraw({
       // Instead of showing all the draw tools, show only the line string and delete tools.
       displayControlsDefault: false,
       controls: {
@@ -338,7 +336,16 @@ function showPlanningTools() {
       ]
     });
 
-    map.addControl(draw, 'top-left');
+
+function showPlanningTools() {
+
+    if (map.hasControl(draw)) {
+        document.getElementsByClassName('mapboxgl-ctrl-group')[0].style.display = 'block' // WORK-AROUND!
+    } else {
+        map.addControl(draw, 'top-left');
+    }
+
+
 }
 
 function removePlanningTools() {
