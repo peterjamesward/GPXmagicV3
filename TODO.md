@@ -30,7 +30,7 @@ We have all the tools for this, it just requires some re-arrangement.
 
 Implementation plan:
 
-1. Branch!
+1. ~~Branch~~!
 2. Take Graph out of TrackLoaded.
 3. Allow load of more than one GPX. (New tool rather than change the Load button?)
 4. Change Undo to be Graph-based not Track-based.
