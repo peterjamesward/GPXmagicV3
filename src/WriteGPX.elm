@@ -134,13 +134,10 @@ writeFooter =
     "</trk></gpx>\n"
 
 
-writeGPX : Maybe String -> Tools.RGTOptions.Options -> TrackLoaded msg -> List NamedSegment -> String
+writeGPX : String -> Tools.RGTOptions.Options -> TrackLoaded msg -> List NamedSegment -> String
 writeGPX name options track segments =
     --May need to consider storage and excessive concatenation, but try obvious first.
     let
-        useName =
-            Maybe.withDefault "A track from GPXmagic" name
-
         writeSegments segs startFrom =
             case segs of
                 seg :: moreSegs ->
@@ -176,6 +173,6 @@ writeGPX name options track segments =
                                 0
                                 track.trackTree
     in
-    writePreamble useName options
+    writePreamble name options
         ++ writeSegments segments 0
         ++ writeFooter

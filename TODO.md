@@ -14,42 +14,26 @@
 ## Promote Graph
 
 It's all graphs. 
-* Some are trivial, with one track.
-* Load more than one GPX, each is a track.
-* Draw more than one route, each is a track.
-* Analyse them to identify canonical sections.
-* Recombine sections into single route.
-* All views show all sections.
-* Perhaps show "non-active" tracks subdued in all views.
-* Edits constrained to one section/track (as now).
-* Push the Graph (not Track) on the undo stack (relying on shared immutable data).
-* New tool, or extended Graph tool to unload, select, hide tracks. (Pick & Mix?)
 
-We have all the tools for this, it just requires some re-arrangement.
-(Does Track == Section?)
+We have all the tools for this, it just requires some re-arrangement. See Notebook.
 
 Implementation plan:
 
 1. ~~Branch~~!
-2. Take Graph out of TrackLoaded.
-3. Allow load of more than one GPX. (New tool rather than change the Load button?)
-4. Change Undo to be Graph-based not Track-based.
-5. Modify views to show multiple tracks. 
-6. Allow drawing of multiple tracks, added to graph
-7. New tool to select Active Track.
-8. Views to subdue inactive tracks.
-9. Modify graph to analyse multiple tracks.
-10. Manual addition of node in any edge.
-11. Clarify the relationship between tracks (sections) and a route (using sections at least once)
-12. Adopting a route returns us to a "trivial" (one track) graph.
+2. Use List TrackLoaded instead of Maybe in Main.Model.
+3. Allow load of more than one GPX. 
+4. Likewise, allow more than one drawn route.
+5. (No need for Close button, just reload the page!)
+6. Label tracks using reverse geocoding API.
+7. Tool listing tracks loaded and select active track for editing.
+8. Modify views to show multiple tracks.
+9. Overlay views with track description?
+10. Tracks become Edges in promoted graph
+11. TBC ...
 
 ---
 
 # BACKLOG
-
-## Route maker -- combine routes
-
-Use more than one GPX as input to route maker.
 
 ## Refactor Main -> Tools
 

@@ -158,11 +158,8 @@ writeOneSection sections options track rgtOptions =
                         , Length.meters end
                         )
 
-                trackName =
-                    track.trackName |> Maybe.withDefault "track"
-
                 filename =
-                    trackName
+                    track.trackName
                         ++ "_"
                         ++ withLeadingZeros 2 (String.fromInt index)
                         ++ ".gpx"
@@ -175,7 +172,7 @@ writeOneSection sections options track rgtOptions =
                             , indexFromDistance metricEnd track.trackTree
                             )
                     in
-                    TrackLoaded.trackFromPoints trackName <|
+                    TrackLoaded.trackFromPoints filename <|
                         List.map Tuple.second <|
                             DomainModel.extractPointsInRange
                                 startIndex

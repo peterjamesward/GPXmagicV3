@@ -37,7 +37,7 @@ type alias TrackLoaded msg =
     , referenceLonLat : GPXSource
     , renderDepth : Int
     , trackTree : PeteTree
-    , trackName : Maybe String
+    , trackName : String
     , undos : List (UndoEntry msg)
     , redos : List (UndoEntry msg)
     , lastMapClick : ( Float, Float )
@@ -53,7 +53,7 @@ newTrackFromTree refLonLat newTree =
     , referenceLonLat = refLonLat
     , renderDepth = 10
     , trackTree = newTree
-    , trackName = Nothing
+    , trackName = "UNNAMED"
     , undos = []
     , redos = []
     , lastMapClick = ( 0, 0 )
@@ -187,7 +187,7 @@ trackFromPoints trackName gpxTrack =
                 , referenceLonLat = DomainModel.gpxPointFromIndex 0 aTree
                 , undos = []
                 , redos = []
-                , trackName = Just trackName
+                , trackName = trackName
                 , lastMapClick = ( 0, 0 )
                 , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
                 , leafIndex = indexLeaves aTree
