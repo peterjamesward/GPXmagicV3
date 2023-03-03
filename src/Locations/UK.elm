@@ -958,6 +958,12 @@ please try using the refresh button below.""" )
                 , ( "fail", """Mapbox did not return a route. Perhaps a point was too far from the road.""" )
                 ]
           )
+        , ( "tracks"
+          , Dict.fromList
+                [ ( "label", """Tracks Loaded""" )
+                , ( "info", """Manage multiple tracks.""" )
+                ]
+          )
         , ( "segments"
           , Dict.fromList
                 [ ( "label", """Named segments""" )

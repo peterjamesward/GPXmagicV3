@@ -134,6 +134,7 @@ type
     | EnablePlanningOnMap
     | GetPointsFromMap
     | FetchMatchingRoute (List (List Float))
+    | SetActiveTrack Int
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

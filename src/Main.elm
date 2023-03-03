@@ -86,6 +86,7 @@ import Tools.StravaDataLoad
 import Tools.StravaTools
 import Tools.Timestamp
 import Tools.TrackInfoBox
+import Tools.Tracks
 import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Url)
@@ -153,7 +154,6 @@ type alias Model =
     , mapState : MapState
 
     -- Track stuff
-    , track : List (TrackLoaded Msg) -- TODO: Renamed to plural once this compiles.
     , activeTrack : Maybe (TrackLoaded Msg)
 
     -- Visuals (scenes now in PaneLayoutManager)
@@ -268,7 +268,6 @@ init mflags origin navigationKey =
       , loadFromUrl = remoteUrl
       , mapState = MapDivNeeded
       , activeTrack = Nothing
-      , track = []
       , mapPointsDraggable = False
       , previews = Dict.empty
       , needsRendering = False
@@ -932,16 +931,22 @@ adoptTrackInModel track segments model =
                 , analyzed = False
             }
 
+        tracksOptions =
+            toolOptions.tracksOptions
+
+        newTracksOptions =
+            Tools.Tracks.addTrack track tracksOptions
+
         newToolOptions =
             { toolOptions
                 | graphOptions = graphFromTrack
+                , tracksOptions = newTracksOptions
                 , namedSegmentOptions = Tools.NamedSegment.initialise segments
             }
 
         modelWithTrack =
             { model
                 | activeTrack = Just track
-                , track = track :: model.track
                 , paneLayoutOptions =
                     PaneLayoutManager.initialise
                         track

@@ -20,16 +20,16 @@ We have all the tools for this, it just requires some re-arrangement. See Notebo
 Implementation plan:
 
 1. ~~Branch~~!
-2. Use List TrackLoaded instead of Maybe in Main.Model.
-3. Allow load of more than one GPX. 
-4. Likewise, allow more than one drawn route.
-5. (No need for Close button, just reload the page!)
-6. Label tracks using reverse geocoding API.
-7. Tool listing tracks loaded and select active track for editing.
-8. Modify views to show multiple tracks.
-9. Overlay views with track description?
-10. Tracks become Edges in promoted graph
-11. TBC ...
+2. ~~Use List TrackLoaded instead of Maybe in Main.Model.~~
+3. ~~Allow load of more than one GPX.~~ 
+4. Disambiguate duplicate track names.
+5. Likewise, allow more than one drawn route.
+6. And route from SVG
+7. And route from Strava
+9. Tool ~~listing tracks loaded~~ and select active track for editing.
+10. Modify views to show multiple tracks (subdued, elided).
+12. Tracks become Edges in promoted graph
+13. TBC ...
 
 ---
 

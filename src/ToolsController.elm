@@ -95,6 +95,7 @@ import Tools.StravaTools
 import Tools.Timestamp
 import Tools.TimestampOptions
 import Tools.TrackInfoBox as TrackInfoBox
+import Tools.Tracks
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (..)
 
@@ -139,6 +140,7 @@ type ToolType
     | ToolNamedSegments
     | ToolTimestamps
     | ToolRouting
+    | ToolTracks
 
 
 type ToolCategory
@@ -183,6 +185,7 @@ type alias Options msg =
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
     , timestampOptions : Tools.TimestampOptions.Options
     , routingOptions : Tools.MapMatchingRouterOptions.Options
+    , tracksOptions : Tools.Tracks.Options msg
     }
 
 
@@ -219,6 +222,7 @@ defaultOptions =
     , namedSegmentOptions = Tools.NamedSegment.defaultOptions
     , timestampOptions = Tools.Timestamp.defaultOptions
     , routingOptions = Tools.MapMatchingRouter.defaultOptions
+    , tracksOptions = Tools.Tracks.defaultOptions
     }
 
 
@@ -258,6 +262,7 @@ type ToolMsg
     | ToolNamedSegmentMsg Tools.NamedSegment.Msg
     | ToolTimestampMsg Tools.Timestamp.Msg
     | ToolRoutingMsg Tools.MapMatchingRouter.Msg
+    | ToolTracksMsg Tools.Tracks.Msg
 
 
 type alias ToolEntry =
@@ -305,6 +310,7 @@ defaultTools =
     , landUseTool
     , timestampTool
     , routingTool
+    , tracksTool
     ]
 
 
@@ -721,6 +727,20 @@ routingTool =
     , video = Just "https://youtu.be/MYBTArdb_X0"
     , state = Contracted
     , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , isPopupOpen = False
+    , categories = [ TcInformation ]
+    }
+
+
+tracksTool : ToolEntry
+tracksTool =
+    { toolType = ToolTracks
+    , toolId = Tools.Tracks.toolId
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperLeft
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -1293,6 +1313,17 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolTracksMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.Tracks.update
+                        msg
+                        options.tracksOptions
+            in
+            ( { options | tracksOptions = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1667,6 +1698,9 @@ toolStateHasChanged toolType newState isTrack options =
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolRouting ->
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
+
+        ToolTracks ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
 
@@ -2252,6 +2286,12 @@ viewToolByType settings msgWrapper entry isTrack options =
                     (msgWrapper << ToolRoutingMsg)
                     options.routingOptions
 
+            ToolTracks ->
+                Tools.Tracks.view
+                    settings
+                    (msgWrapper << ToolTracksMsg)
+                    options.tracksOptions
+
 
 
 -- Local storage management
@@ -2365,6 +2405,9 @@ encodeType toolType =
 
         ToolRouting ->
             "ToolRouting"
+
+        ToolTracks ->
+            "ToolTracks"
 
 
 encodeColour : Element.Color -> E.Value
