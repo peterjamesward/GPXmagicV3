@@ -17,27 +17,17 @@ type Direction
 
 type alias XY =
     -- First pass is about detecting revisited points and working out where the edges are.
-    -- For that, we build a dictionary indexed by track point position (metric units).
+    -- For that, we build a dictionary indexed by track point position (meters from reference).
     ( Float, Float )
 
 
 type alias Options msg =
-    { graph : Graph msg
-    , matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
+    --TODO: Moving out things that are not specific to one Route
+    { matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
     , centreLineOffset : Length.Length
     , minimumRadiusAtPlaces : Length.Length
-    , boundingBox : BoundingBox3d Length.Meters LocalCoords
-    , selectedTraversal : Int
-    , analyzed : Bool
-    , originalTrack : Maybe (TrackLoaded msg)
-    , editingTrack : Int
-    , undoGraph : Maybe (Graph msg) -- our private undo stack (of one).
-    , undoOriginalTrack : Maybe (TrackLoaded msg)
     , clustersForPreview : List Cluster
     , perpsForPreview : List InsertedPointOnLeaf
-    , suggestedNewTree : Maybe PeteTree
-    , suggestedNewGraph : Maybe (Graph msg)
-    , graphUndos : List (Graph msg)
     }
 
 
