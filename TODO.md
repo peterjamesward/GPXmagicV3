@@ -1,6 +1,8 @@
 
 # BUGS
 
+**Nudge** with fade removes points. 
+
 **Stretch** Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
 **Delete** Delete should display "Sorry" message unless one leaf remains.
