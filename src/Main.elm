@@ -318,11 +318,13 @@ render model =
         ( Just activeTrack, True ) ->
             let
                 paneLayout =
+                    -- This is all the DOM changes, WebGL, SVG.
+                    --TODO: Should `previews` sit with 3D scene, which is in PaneLayout.
                     PaneLayoutManager.render
                         model.toolOptions
                         model.paneLayoutOptions
                         (Tuple.first model.contentArea)
-                        activeTrack
+                        model.toolOptions.tracksOptions
                         model.previews
             in
             { model

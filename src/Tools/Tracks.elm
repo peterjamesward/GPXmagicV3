@@ -3,6 +3,7 @@ module Tools.Tracks exposing
     , Options
     , addTrack
     , defaultOptions
+    , getActiveTrack
     , setTrack
     , toolId
     , update
@@ -88,7 +89,7 @@ displayTrackInfo index track wrapper =
     row [ spacing 5 ]
         [ Input.button
             []
-            { label = useIcon FeatherIcons.eye
+            { label = useIcon FeatherIcons.edit
             , onPress = Just <| wrapper (SelectActiveTrack index)
             }
         , text track.trackName
@@ -122,3 +123,13 @@ setTrack index options =
     ( List.Extra.getAt index options.tracks
     , { options | activeTrackIndex = Just index }
     )
+
+
+getActiveTrack : Options msg -> Maybe (TrackLoaded msg)
+getActiveTrack options =
+    case options.activeTrackIndex of
+        Just index ->
+            List.Extra.getAt index options.tracks
+
+        Nothing ->
+            Nothing

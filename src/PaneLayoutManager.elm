@@ -46,6 +46,7 @@ import Tools.GraphOptions exposing (Graph)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.NamedSegmentOptions exposing (NamedSegment)
+import Tools.Tracks
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements
@@ -179,17 +180,24 @@ render :
     ToolsController.Options msg
     -> PaneLayoutOptions
     -> Quantity Int Pixels
-    -> TrackLoaded msg
+    -> Tools.Tracks.Options msg
     -> Dict String PreviewData
     -> PaneLayoutOptions
-render toolSettings options width track previews =
+render toolSettings options width tracks previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
-    { options
-        | scene3d =
-            SceneBuilder3D.renderPreviews previews
-                ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
-    }
+    case Tools.Tracks.getActiveTrack tracks of
+        Just activeTrack ->
+            { options
+                | scene3d =
+                    SceneBuilder3D.renderPreviews previews
+                        ++ SceneBuilder3D.render3dView
+                            toolSettings.displaySettings
+                            activeTrack
+            }
+
+        Nothing ->
+            options
 
 
 update :

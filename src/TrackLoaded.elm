@@ -43,6 +43,7 @@ type alias TrackLoaded msg =
     , lastMapClick : ( Float, Float )
     , landUseData : LandUseDataTypes.LandUseData
     , leafIndex : LeafIndex
+    , visible : Bool
     }
 
 
@@ -59,6 +60,7 @@ newTrackFromTree refLonLat newTree =
     , lastMapClick = ( 0, 0 )
     , landUseData = LandUseDataTypes.emptyLandUse
     , leafIndex = indexLeaves newTree
+    , visible = True
     }
 
 
@@ -191,6 +193,7 @@ trackFromPoints trackName gpxTrack =
                 , lastMapClick = ( 0, 0 )
                 , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
                 , leafIndex = indexLeaves aTree
+                , visible = True
                 }
 
         Nothing ->
