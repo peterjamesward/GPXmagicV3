@@ -334,6 +334,29 @@ render model =
             model
 
 
+updateActiveTrack : TrackLoaded Msg -> Model -> Model
+updateActiveTrack newTrack model =
+    -- Simplifies transition to multiple tracks.
+    let
+        toolsOptions =
+            model.toolOptions
+
+        tracksOptions =
+            toolsOptions.tracksOptions
+
+        ( useTrack, newOptions ) =
+            Tools.Tracks.updateActiveTrack newTrack model.toolOptions.tracksOptions
+
+        newToolsOptions =
+            { toolsOptions | tracksOptions = newOptions }
+    in
+    { model
+        | activeTrack = Just useTrack
+        , toolOptions = newToolsOptions
+        , needsRendering = True
+    }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -774,11 +797,7 @@ update msg model =
         FilenameChange newName ->
             case model.activeTrack of
                 Just track ->
-                    let
-                        updatedTrack =
-                            { track | trackName = newName }
-                    in
-                    ( { model | activeTrack = Just updatedTrack }
+                    ( updateActiveTrack { track | trackName = newName } model
                     , Cmd.none
                     )
 
@@ -871,7 +890,7 @@ update msg model =
                                 | landUseData = landUse
                             }
                     in
-                    ( { model | activeTrack = Just newTrack }, cmds )
+                    ( updateActiveTrack newTrack model, cmds )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -1465,9 +1484,23 @@ performActionsOnModel actions model =
         performAction action foldedModel =
             case ( action, foldedModel.activeTrack ) of
                 ( SetActiveTrack trackIndex, _ ) ->
+                    let
+                        toolOptions =
+                            model.toolOptions
+
+                        tracksOptions =
+                            toolOptions.tracksOptions
+
+                        ( newTrack, newOptions ) =
+                            Tools.Tracks.setTrack trackIndex tracksOptions
+
+                        newToolOptions =
+                            { toolOptions | tracksOptions = newOptions }
+                    in
                     { foldedModel
-                        | activeTrack = Tools.Tracks.setTrack trackIndex foldedModel.toolOptions.tracksOptions
+                        | activeTrack = newTrack
                         , needsRendering = True
+                        , toolOptions = newToolOptions
                     }
 
                 ( ProfileClick container x, Just track ) ->
@@ -1496,7 +1529,7 @@ performActionsOnModel actions model =
                                 Nothing ->
                                     track
                     in
-                    { foldedModel | activeTrack = Just newTrack }
+                    updateActiveTrack newTrack foldedModel
 
                 ( MakeMapPointsDraggable flag, _ ) ->
                     { foldedModel | mapPointsDraggable = flag }
@@ -1520,16 +1553,10 @@ performActionsOnModel actions model =
                     }
 
                 ( SetCurrent position, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just { track | currentPosition = position }
-                        , needsRendering = True
-                    }
+                    updateActiveTrack { track | currentPosition = position } foldedModel
 
                 ( SetCurrentFromMapClick position, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just { track | currentPosition = position }
-                        , needsRendering = True
-                    }
+                    updateActiveTrack { track | currentPosition = position } foldedModel
 
                 ( ShowPreview previewData, Just _ ) ->
                     -- Put preview into the scene.
@@ -1554,61 +1581,44 @@ performActionsOnModel actions model =
 
                 ( WithUndo undoAction, Just track ) ->
                     -- Finally, we can do this only once.
-                    { foldedModel
-                        | activeTrack = Just <| TrackLoaded.addToUndoStack undoAction track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (TrackLoaded.addToUndoStack undoAction track)
+                        foldedModel
 
                 ( BendSmootherApplyWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.BendSmoother.applyUsingOptions options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.BendSmoother.applyUsingOptions options track)
+                        foldedModel
 
                 ( DeletePointOrPoints fromStart fromEnd, Just track ) ->
-                    { foldedModel
-                        | activeTrack =
-                            Just <|
-                                DeletePoints.delete
-                                    fromStart
-                                    fromEnd
-                                    track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (DeletePoints.delete fromStart fromEnd track)
+                        foldedModel
 
                 ( BezierApplyWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack =
-                            Just <|
-                                Tools.BezierSplines.applyUsingOptions
-                                    options
-                                    track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.BezierSplines.applyUsingOptions options track)
+                        foldedModel
 
                 ( CentroidAverageApplyWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.CentroidAverage.applyUsingOptions options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.CentroidAverage.applyUsingOptions options track)
+                        foldedModel
 
                 ( SmartSmootherApplyWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.SmartSmoother.applyUsingOptions options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.SmartSmoother.applyUsingOptions options track)
+                        foldedModel
 
                 ( CurveFormerApplyWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.CurveFormer.applyUsingOptions options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.CurveFormer.applyUsingOptions options track)
+                        foldedModel
 
                 ( NudgeApplyWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.Nudge.applyUsingOptions options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.Nudge.applyUsingOptions options track)
+                        foldedModel
 
                 ( PasteStravaSegment options, Just track ) ->
                     -- This is like Nudge in that the affected area is given
@@ -1652,11 +1662,8 @@ performActionsOnModel actions model =
                         newTrack =
                             TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
-                    { foldedModel
-                        | activeTrack = Just newTrack
-                        , needsRendering = True
-                        , toolOptions = newToolOptions
-                    }
+                    updateActiveTrack newTrack foldedModel
+                        |> (\m -> { m | toolOptions = newToolOptions })
 
                 ( ClearStravaSegmentData, _ ) ->
                     let
@@ -1685,28 +1692,24 @@ performActionsOnModel actions model =
                     }
 
                 ( OutAndBackApplyWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.OutAndBack.apply options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.OutAndBack.apply options track)
+                        foldedModel
 
                 ( ApplySimplify, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track)
+                        foldedModel
 
                 ( MoveAndStretchWithOptions settings, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.MoveAndStretch.apply settings track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.MoveAndStretch.apply settings track)
+                        foldedModel
 
                 ( OneClickQuickFix, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.OneClickQuickFix.apply track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.OneClickQuickFix.apply track)
+                        foldedModel
 
                 ( ApplyInterpolateWithOptions options, Just track ) ->
                     let
@@ -1716,89 +1719,78 @@ performActionsOnModel actions model =
                         newTrack =
                             TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
-                    { foldedModel
-                        | activeTrack = Just newTrack
-                        , needsRendering = True
-                    }
+                    updateActiveTrack newTrack foldedModel
 
                 ( Straighten, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.Straightener.apply model.toolOptions.straightenOptions track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.Straightener.apply model.toolOptions.straightenOptions track)
+                        foldedModel
 
                 ( ApplySmoothProfile options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.ProfileSmooth.apply options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.ProfileSmooth.apply options track)
+                        foldedModel
 
                 ( AdjustTimes options, Just track ) ->
-                    { foldedModel | activeTrack = Just <| Tools.Timestamp.applyTimeShift options track }
+                    updateActiveTrack
+                        (Tools.Timestamp.applyTimeShift options track)
+                        foldedModel
 
                 ( TimeDoubling, Just track ) ->
-                    { foldedModel | activeTrack = Just <| Tools.Timestamp.applyDoubling track }
+                    updateActiveTrack
+                        (Tools.Timestamp.applyDoubling track)
+                        foldedModel
 
                 ( UsePhysicsModel, Just track ) ->
-                    { foldedModel
-                        | activeTrack =
-                            Just <|
-                                Tools.Timestamp.applyPhysics
-                                    model.toolOptions.timestampOptions
-                                    track
-                    }
+                    updateActiveTrack
+                        (Tools.Timestamp.applyPhysics model.toolOptions.timestampOptions track)
+                        foldedModel
 
                 ( SetTimeTicks ticks, Just track ) ->
-                    { foldedModel | activeTrack = Just <| Tools.Timestamp.applyTicks ticks track }
+                    updateActiveTrack
+                        (Tools.Timestamp.applyTicks ticks track)
+                        foldedModel
 
                 ( CloseLoopWithOptions options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.StartFinish.applyCloseLoop options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.StartFinish.applyCloseLoop options track)
+                        foldedModel
 
                 ( ReverseTrack, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.StartFinish.applyReverse track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.StartFinish.applyReverse track)
+                        foldedModel
 
                 ( MoveStartPoint newStart, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.StartFinish.applyMoveStart newStart track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.StartFinish.applyMoveStart newStart track)
+                        foldedModel
 
                 ( AddRiderPens, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.StartFinish.addPens track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.StartFinish.addPens track)
+                        foldedModel
 
                 ( ApplyRotateAndScale options, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.MoveScaleRotate.applyRotateAndScale options track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.MoveScaleRotate.applyRotateAndScale options track)
+                        foldedModel
 
                 ( ApplyRecentre coords, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.MoveScaleRotate.applyRecentre coords track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.MoveScaleRotate.applyRecentre coords track)
+                        foldedModel
 
                 ( ApplyMapElevations elevations, Just track ) ->
-                    { foldedModel
-                        | activeTrack = Just <| Tools.MoveScaleRotate.applyMapElevations elevations track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.MoveScaleRotate.applyMapElevations elevations track)
+                        foldedModel
 
                 ( ApplyLandUseAltitudes altitudes, Just track ) ->
                     -- Using mapbox elevations to set altitude of OSM places.
-                    { foldedModel
-                        | activeTrack = Just <| LandUseDataOSM.applyAltitudes altitudes track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (LandUseDataOSM.applyAltitudes altitudes track)
+                        foldedModel
 
                 ( PointMovedOnMap startLon startLat endLon endLat, Just track ) ->
                     let
@@ -1837,17 +1829,14 @@ performActionsOnModel actions model =
                         withUndo =
                             TrackLoaded.addToUndoStack action track
                     in
-                    { foldedModel
-                        | activeTrack = Just { withUndo | trackTree = newTree }
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        { withUndo | trackTree = newTree }
+                        foldedModel
 
                 ( SaveLastMapClick lon lat, Just track ) ->
-                    let
-                        newTrack =
-                            { track | lastMapClick = ( lon, lat ) }
-                    in
-                    { foldedModel | activeTrack = Just newTrack }
+                    updateActiveTrack
+                        { track | lastMapClick = ( lon, lat ) }
+                        foldedModel
 
                 ( TrackFromSvg svgContent, _ ) ->
                     let
@@ -1871,10 +1860,9 @@ performActionsOnModel actions model =
                         newTrack =
                             track |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel
-                        | activeTrack = Just newTrack
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        newTrack
+                        foldedModel
 
                 ( StartRoutePlanning, Just track ) ->
                     let
@@ -1896,11 +1884,9 @@ performActionsOnModel actions model =
                         newTrack =
                             { track | trackTree = newTree }
                     in
-                    { foldedModel
-                        | toolOptions = newToolOptions
-                        , activeTrack = Just newTrack
-                        , paneLayoutOptions = newPaneLayout
-                    }
+                    updateActiveTrack
+                        newTrack
+                        { foldedModel | paneLayoutOptions = newPaneLayout }
 
                 ( ExitRoutePlanning, Just _ ) ->
                     let
@@ -2002,22 +1988,15 @@ performActionsOnModel actions model =
 
                         newToolOptions =
                             { toolOptions | graphOptions = newGraphOptions }
-
-                        newTrack =
-                            case Tools.Graph.getTrack 0 newGraphOptions of
-                                Just foundNewTrack ->
-                                    foundNewTrack
-                                        |> TrackLoaded.addToUndoStack action
-                                        |> Just
-
-                                Nothing ->
-                                    foldedModel.activeTrack
                     in
-                    { foldedModel
-                        | toolOptions = newToolOptions
-                        , activeTrack = newTrack
-                        , needsRendering = True
-                    }
+                    case Tools.Graph.getTrack 0 newGraphOptions of
+                        Just foundNewTrack ->
+                            updateActiveTrack
+                                foundNewTrack
+                                { foldedModel | toolOptions = newToolOptions }
+
+                        Nothing ->
+                            foldedModel
 
                 ( CombineNearbyPoints, Just track ) ->
                     -- Trickier refactor because of extra graph option state.
@@ -2052,11 +2031,7 @@ performActionsOnModel actions model =
                                 , markerPosition = newPurple
                             }
                     in
-                    { foldedModel
-                        | activeTrack = Just newTrack
-                        , needsRendering = True
-                        , toolOptions = newToolOptions
-                    }
+                    updateActiveTrack newTrack foldedModel
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
@@ -2079,10 +2054,9 @@ performActionsOnModel actions model =
 
                 ( Actions.WidenBend points adjustment, Just track ) ->
                     -- This for one contiguous set of points, i.e. one bend.
-                    { foldedModel
-                        | activeTrack = Just <| Tools.DirectionChanges.widenBend points adjustment track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.DirectionChanges.widenBend points adjustment track)
+                        foldedModel
 
                 ( TrackHasChanged, Just _ ) ->
                     -- Must be wary of looping here.
@@ -2122,15 +2096,7 @@ performActionsOnModel actions model =
                     }
 
                 ( SetMarker maybeMarker, Just track ) ->
-                    let
-                        updatedTrack =
-                            { track | markerPosition = maybeMarker }
-                    in
-                    { foldedModel
-                        | activeTrack = Just updatedTrack
-
-                        --, needsRendering = True
-                    }
+                    updateActiveTrack { track | markerPosition = maybeMarker } foldedModel
 
                 ( StartFlythoughTicks, Just _ ) ->
                     { foldedModel | flythroughRunning = True }
@@ -2264,18 +2230,18 @@ performActionsOnModel actions model =
 
                                 newToolOptions =
                                     { toolOptions | graphOptions = newGraphOptions }
-
-                                newTrack =
-                                    Tools.Graph.getTrack 0 newGraphOptions
                             in
-                            { foldedModel
-                                | toolOptions = newToolOptions
-                                , activeTrack = newTrack
-                                , needsRendering = True
-                            }
+                            case Tools.Graph.getTrack 0 newGraphOptions of
+                                Just newTrack ->
+                                    updateActiveTrack newTrack foldedModel
+
+                                Nothing ->
+                                    foldedModel
 
                         _ ->
-                            { foldedModel | activeTrack = Just <| TrackLoaded.undoLastAction track }
+                            updateActiveTrack
+                                (TrackLoaded.undoLastAction track)
+                                foldedModel
 
                 ( RedoUndoneAction, Just track ) ->
                     case track.redos of
@@ -2293,14 +2259,9 @@ performActionsOnModel actions model =
                             in
                             case modelAfterRedo.activeTrack of
                                 Just trackAfterRedo ->
-                                    let
-                                        trackWithCorrectRedoStack =
-                                            { trackAfterRedo | redos = moreRedos }
-                                    in
-                                    { modelAfterRedo
-                                        | activeTrack = Just trackWithCorrectRedoStack
-                                        , needsRendering = True
-                                    }
+                                    updateActiveTrack
+                                        { trackAfterRedo | redos = moreRedos }
+                                        modelAfterRedo
 
                                 Nothing ->
                                     -- Not good, live with it.

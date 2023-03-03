@@ -6,6 +6,7 @@ module Tools.Tracks exposing
     , setTrack
     , toolId
     , update
+    , updateActiveTrack
     , view
     )
 
@@ -29,6 +30,7 @@ type alias Options msg =
     --TODO: This will develop, taking track stuff from Main, and perhaps subsume Graph.
     { nextTrackNumber : Int
     , tracks : List (TrackLoaded msg)
+    , activeTrackIndex : Maybe Int
     }
 
 
@@ -36,6 +38,7 @@ defaultOptions : Options msg
 defaultOptions =
     { nextTrackNumber = 1
     , tracks = []
+    , activeTrackIndex = Nothing
     }
 
 
@@ -48,6 +51,21 @@ update msg options =
     case msg of
         SelectActiveTrack index ->
             ( options, [ Actions.SetActiveTrack index ] )
+
+
+updateActiveTrack : TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
+updateActiveTrack newTrack options =
+    case options.activeTrackIndex of
+        Just index ->
+            ( newTrack
+            , { options
+                | tracks =
+                    List.Extra.setAt index newTrack options.tracks
+              }
+            )
+
+        Nothing ->
+            ( newTrack, options )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options msg -> Element msg
@@ -95,9 +113,12 @@ addTrack track options =
     { options
         | tracks = { track | trackName = unambiguousName } :: options.tracks
         , nextTrackNumber = options.nextTrackNumber + 1
+        , activeTrackIndex = Just 0
     }
 
 
-setTrack : Int -> Options msg -> Maybe (TrackLoaded msg)
+setTrack : Int -> Options msg -> ( Maybe (TrackLoaded msg), Options msg )
 setTrack index options =
-    List.Extra.getAt index options.tracks
+    ( List.Extra.getAt index options.tracks
+    , { options | activeTrackIndex = Just index }
+    )
