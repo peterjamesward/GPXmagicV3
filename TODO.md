@@ -34,7 +34,7 @@ Implementation plan:
 13. State error - loading new track zooms map to previously loaded.
 14. ~~Multiple tracks overlap in Plan and 3D now.~~
 15. Profile1 is not zero at left. Strange.
-16. Remove invisibles from map doesn't. 
+16. ~~Remove invisibles from map doesn't.~~ 
 17. Ability to unload a track.
 18. Common reference point affects Move track operation. **TBD**.
 19. (Optimise loading from GPX/Strava to avoid having to rebuild tree.)

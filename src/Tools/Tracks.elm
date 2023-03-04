@@ -209,14 +209,26 @@ getActiveTrack options =
 mapOverVisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
 mapOverVisibleTracks f options =
     options.tracks
-        |> List.filter .visible
         |> List.indexedMap
-            (\i track -> f track (Just i == options.activeTrackIndex))
+            (\i track ->
+                if track.visible then
+                    Just <| f track (Just i == options.activeTrackIndex)
+
+                else
+                    Nothing
+            )
+        |> List.filterMap identity
 
 
 mapOverInvisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
 mapOverInvisibleTracks f options =
     options.tracks
-        |> List.filter (not << .visible)
         |> List.indexedMap
-            (\i track -> f track (Just i == options.activeTrackIndex))
+            (\i track ->
+                if not track.visible then
+                    Just <| f track (Just i == options.activeTrackIndex)
+
+                else
+                    Nothing
+            )
+        |> List.filterMap identity

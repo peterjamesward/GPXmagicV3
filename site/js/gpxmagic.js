@@ -606,6 +606,7 @@ function addLineToMap(label, data, points) {
 
 function removeTrack(label) {
 
+    console.log('Removing ', label);
     lineLabel = "line:" + label;
     pointsLabel = "points:" + label;
 
