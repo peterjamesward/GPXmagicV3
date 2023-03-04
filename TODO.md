@@ -15,8 +15,10 @@
 
 Implementation: (RM = existing Route Maker)
 
-1. ~~Map not centering on track load. May be stale state - seems to lag by one load.~~
-2. When we switch tracks, presentation contexts may not "make sense". Think this is why profile1 is out of whack.
+1. When we switch tracks, presentation contexts may not "make sense". 
+> Think this is why profile1 is out of whack. Possible simple fix is to make the 
+> horizontal position [0..1] proportion of track length instead of absolute distance.
+2. Need to do something about Named Segments.
 3. Ability to unload a track. Only active on active track.
 4. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
 5. Limited Undo as in RM; use simple state machine across canonicalization & routing.
