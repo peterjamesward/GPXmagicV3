@@ -1482,6 +1482,15 @@ subscriptions model =
 performActionsOnModel : List (ToolAction Msg) -> Model -> Model
 performActionsOnModel actions model =
     let
+        adjustReference =
+            -- Some edits require us to re-align the shared common point.
+            case model.toolOptions.tracksOptions.commonReferenceGPX of
+                Just centre ->
+                    TrackLoaded.changeReferencePoint centre
+
+                Nothing ->
+                    identity
+
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
             case ( action, foldedModel.activeTrack ) of
@@ -1775,12 +1784,12 @@ performActionsOnModel actions model =
 
                 ( ApplyRotateAndScale options, Just track ) ->
                     updateActiveTrack
-                        (Tools.MoveScaleRotate.applyRotateAndScale options track)
+                        (adjustReference <| Tools.MoveScaleRotate.applyRotateAndScale options track)
                         foldedModel
 
                 ( ApplyRecentre coords, Just track ) ->
                     updateActiveTrack
-                        (Tools.MoveScaleRotate.applyRecentre coords track)
+                        (adjustReference <| Tools.MoveScaleRotate.applyRecentre coords track)
                         foldedModel
 
                 ( ApplyMapElevations elevations, Just track ) ->

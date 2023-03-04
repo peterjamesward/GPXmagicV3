@@ -19,24 +19,8 @@ We have all the tools for this, it just requires some re-arrangement. See Notebo
 
 Implementation plan:
 
-1. ~~Branch~~!
-2. ~~Use List TrackLoaded instead of Maybe in Main.Model.~~
-3. ~~Allow load of more than one GPX.~~ 
-4. ~~Disambiguate duplicate track names.~~
-5. ~~Likewise, allow more than one drawn route. (WIP, parked)~~
-6. ~~And route from SVG~~
-7. ~~And route from Strava~~
-8. ~~Edit track name updates tool entry.~~
-9. ~~All track edits must update track list in the tool~~ -- hook into Undo?
-10. ~~Tool ~~listing tracks loaded~~ ~~and select active track for editing.~~
-11. ~~Tracks need a common reference point, assuming reasonable proximity.~~
-12. ~~Multiple tracks not quite switching properly on Map.~~
-13. State error - loading new track zooms map to previously loaded.
-14. ~~Multiple tracks overlap in Plan and 3D now.~~
-15. Common reference point affects Move track operation. **TBD**.
 16. Profile1 is not always zero at left. Strange.
 17. Map not centering on track load. May be stale state - seems to lag by one load.
-18. ~~Remove invisibles from map doesn't.~~ 
 19. Ability to unload a track. Only active on active track.
 20. (Optimise loading from GPX/Strava to avoid having to rebuild tree.)
 21. Limited Undo in Graph; use simple state machine across canonicalization & routing.
