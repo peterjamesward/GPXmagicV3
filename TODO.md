@@ -33,17 +33,18 @@ Implementation plan:
 12. ~~Multiple tracks not quite switching properly on Map.~~
 13. State error - loading new track zooms map to previously loaded.
 14. ~~Multiple tracks overlap in Plan and 3D now.~~
-15. Profile1 is not zero at left. Strange.
-16. ~~Remove invisibles from map doesn't.~~ 
-17. Ability to unload a track.
-18. Common reference point affects Move track operation. **TBD**.
-19. (Optimise loading from GPX/Strava to avoid having to rebuild tree.)
-20. Limited Undo in Graph; use simple state machine across canonicalization & routing.
-21. Tracks become Edges in promoted graph
-22. Snap nearby points and roads.
-23. Canonicalise.
-24. Routing from existing Route Maker.
-25. New track with offset.
+15. Common reference point affects Move track operation. **TBD**.
+16. Profile1 is not always zero at left. Strange.
+17. Map not centering on track load. May be stale state - seems to lag by one load.
+18. ~~Remove invisibles from map doesn't.~~ 
+19. Ability to unload a track. Only active on active track.
+20. (Optimise loading from GPX/Strava to avoid having to rebuild tree.)
+21. Limited Undo in Graph; use simple state machine across canonicalization & routing.
+22. Tracks become Edges in promoted graph
+23. Snap nearby points and roads.
+24. Canonicalise.
+25. Routing from existing Route Maker.
+26. New track with offset.
 
 ---
 
