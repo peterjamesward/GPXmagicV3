@@ -383,10 +383,7 @@ update msg model =
                     in
                     ( modelWithTrack
                     , Cmd.batch
-                        [ showTrackOnMapCentered
-                            modelWithTrack.paneLayoutOptions
-                            modelWithTrack.systemSettings.imperial
-                            track
+                        [ showTrackOnMapCentered model.toolOptions.tracksOptions
                         , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
                         , LocalStorage.sessionClear
                         , Delay.after 1000 ProfilePaint -- wait for container to paint.
@@ -924,7 +921,7 @@ update msg model =
                     ( newModel
                     , Cmd.batch
                         [ MapPortController.resetMapAfterDrawing
-                        , MapPortController.addFullTrackToMap track
+                        , MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
                         , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
                         , Delay.after 1000 FetchElevationsFromMap -- async to allow map to quiesce.
                         , Delay.after 1000 ProfilePaint -- async, seems to help
@@ -2452,7 +2449,7 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromSvg _, Just track ) ->
-                    showTrackOnMapCentered model.paneLayoutOptions model.systemSettings.imperial track
+                    showTrackOnMapCentered model.toolOptions.tracksOptions
 
                 ( SelectGpxFile message, _ ) ->
                     Select.file [ "text/gpx" ] message
@@ -2461,10 +2458,10 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromGpx _, Just track ) ->
-                    showTrackOnMapCentered model.paneLayoutOptions model.systemSettings.imperial track
+                    showTrackOnMapCentered model.toolOptions.tracksOptions
 
                 ( LoadGpxFromStrava _, Just track ) ->
-                    showTrackOnMapCentered model.paneLayoutOptions model.systemSettings.imperial track
+                    showTrackOnMapCentered model.toolOptions.tracksOptions
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaRouteHeader
@@ -2540,10 +2537,15 @@ performActionCommands actions model =
     Cmd.batch <| List.map performAction actions
 
 
-showTrackOnMapCentered : PaneContext.PaneLayoutOptions -> Bool -> TrackLoaded msg -> Cmd msg
-showTrackOnMapCentered panes imperial track =
-    Cmd.batch
-        [ MapPortController.addFullTrackToMap track
-        , MapPortController.zoomMapToFitTrack track
-        , MapPortController.addMarkersToMap track
-        ]
+showTrackOnMapCentered : Tools.Tracks.Options msg -> Cmd msg
+showTrackOnMapCentered tracks =
+    case Tools.Tracks.getActiveTrack tracks of
+        Just activeTrack ->
+            Cmd.batch
+                [ MapPortController.addAllTracksToMap tracks
+                , MapPortController.zoomMapToFitTrack activeTrack
+                , MapPortController.addMarkersToMap activeTrack
+                ]
+
+        Nothing ->
+            MapPortController.addAllTracksToMap tracks

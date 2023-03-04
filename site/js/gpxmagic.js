@@ -160,6 +160,12 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'Inactive':
+            if (isMapCreated) {
+                addInactiveToMap(msg.label, msg.data);
+            }
+            break;
+
         case 'Mark':
             if (isMapCreated) {
                 //console.log('adding marker');
@@ -586,6 +592,35 @@ function addLineToMap(data, points) {
     });
 
     addDecorations();
+
+};
+
+function addInactiveToMap(label, data) {
+    // Attempt idempotency.
+    safelyRemoveLayer(label);
+    safelyRemoveSource(label);
+
+    //console.log('adding geojson data');
+    //console.log('add source route');
+    map.addSource(label, {
+        'type': 'geojson',
+        'data': data
+        });
+
+    //console.log('adding route layer');
+    map.addLayer({
+        'id': label,
+        'type': 'line',
+        'source': label,
+        'layout': {
+        'line-join': 'round',
+        'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': '#888',
+            'line-width': 8
+        }
+    });
 
 };
 

@@ -20,6 +20,7 @@ import SceneBuilderMap exposing (latLonPairFromGpx)
 import SceneBuilderProfile
 import SystemSettings exposing (SystemSettings)
 import Tools.NamedSegmentOptions
+import Tools.Tracks
 import TrackLoaded exposing (TrackLoaded)
 import ViewProfileChartContext
 
@@ -185,29 +186,23 @@ setMapStyle url =
             ]
 
 
-addTrackToMap : TrackLoaded msg -> Cmd msg
-addTrackToMap track =
-    addFullTrackToMap track
-
-
-
-{-
-   -- This is to add the route as a polyline, with selective rendering
-   let
-       { longitude, latitude, altitude } =
-           gpxPointFromIndex track.currentPosition track.trackTree
-   in
-   mapCommands <|
-       E.object
-           [ ( "Cmd", E.string "Track" )
-           , ( "token", E.string mapboxKey )
-           , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
-           , ( "lat", E.float <| Angle.inDegrees latitude )
-           , ( "zoom", E.float 10.0 )
-           , ( "data", SceneBuilderMap.renderMapJson track ) -- Route as polyline
-           , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
-           ]
--}
+addInactiveTrackToMap : TrackLoaded msg -> Cmd msg
+addInactiveTrackToMap track =
+    --addFullTrackToMap track
+    -- This is to add the route as a polyline, with selective rendering
+    let
+        { longitude, latitude, altitude } =
+            gpxPointFromIndex track.currentPosition track.trackTree
+    in
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Inactive" )
+            , ( "token", E.string mapboxKey )
+            , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
+            , ( "lat", E.float <| Angle.inDegrees latitude )
+            , ( "label", E.string track.trackName ) -- worth a try
+            , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
+            ]
 
 
 addFullTrackToMap : TrackLoaded msg -> Cmd msg
@@ -227,6 +222,20 @@ addFullTrackToMap track =
             , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
             , ( "points", SceneBuilderMap.trackPointsToJSONwithoutCulling track ) -- Make track points draggable
             ]
+
+
+addAllTracksToMap : Tools.Tracks.Options msg -> Cmd msg
+addAllTracksToMap options =
+    let
+        addToMap track active =
+            if active then
+                addFullTrackToMap track
+
+            else
+                addInactiveTrackToMap track
+    in
+    Cmd.batch <|
+        Tools.Tracks.mapOverTracks addToMap options
 
 
 paintCanvasProfileChart :

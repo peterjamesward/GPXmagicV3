@@ -186,18 +186,24 @@ render :
 render toolSettings options width tracks previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
-    case Tools.Tracks.getActiveTrack tracks of
-        Just activeTrack ->
-            { options
-                | scene3d =
-                    SceneBuilder3D.renderPreviews previews
-                        ++ SceneBuilder3D.render3dView
-                            toolSettings.displaySettings
-                            activeTrack
-            }
+    let
+        renderTrack track active =
+            if active then
+                SceneBuilder3D.render3dView
+                    toolSettings.displaySettings
+                    track
 
-        Nothing ->
-            options
+            else
+                SceneBuilder3D.renderInactiveView track
+    in
+    { options
+        | scene3d =
+            SceneBuilder3D.renderPreviews previews
+                ++ (tracks
+                        |> Tools.Tracks.mapOverTracks renderTrack
+                        |> List.concat
+                   )
+    }
 
 
 update :

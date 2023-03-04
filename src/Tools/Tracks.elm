@@ -4,6 +4,7 @@ module Tools.Tracks exposing
     , addTrack
     , defaultOptions
     , getActiveTrack
+    , mapOverTracks
     , setTrack
     , toolId
     , update
@@ -12,15 +13,12 @@ module Tools.Tracks exposing
     )
 
 import Actions
-import Angle
 import CommonToolStyles
-import Direction2d
 import DomainModel exposing (GPXSource)
 import Element exposing (..)
 import Element.Input as Input
 import FeatherIcons
 import List.Extra
-import Quantity
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
@@ -157,3 +155,10 @@ getActiveTrack options =
 
         Nothing ->
             Nothing
+
+
+mapOverTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
+mapOverTracks f options =
+    options.tracks
+        |> List.indexedMap
+            (\i track -> f track (Just i == options.activeTrackIndex))

@@ -1,4 +1,12 @@
-module SceneBuilder3D exposing (Index, IndexEntry, LocationContext(..), TerrainFoldState, render3dView, renderPreviews)
+module SceneBuilder3D exposing
+    ( Index
+    , IndexEntry
+    , LocationContext(..)
+    , TerrainFoldState
+    , render3dView
+    , renderInactiveView
+    , renderPreviews
+    )
 
 -- In V3 there is only one 3d model, used for first, third, and Plan views.
 -- Profile is 2d drawing (or chart).
@@ -223,6 +231,47 @@ render3dView settings track =
             track.trackTree
             foldFn
             (groundPlane ++ renderCurrentMarkers)
+
+
+renderInactiveView : TrackLoaded msg -> List (Entity LocalCoords)
+renderInactiveView track =
+    let
+        nominalRenderDepth =
+            clamp 1 10 <|
+                round <|
+                    logBase 2 (toFloat <| skipCount track.trackTree)
+
+        depthFn : RoadSection -> Maybe Int
+        depthFn _ =
+            Just nominalRenderDepth
+
+        makeVisibleSegment : RoadSection -> List (Entity LocalCoords)
+        makeVisibleSegment road =
+            [ Scene3d.point { radius = Pixels.pixels 2 }
+                (Material.color Color.black)
+                road.endPoint.space
+            , Scene3d.lineSegment (Material.color Color.lightCharcoal) <|
+                LineSegment3d.from road.startPoint.space road.endPoint.space
+            ]
+
+        renderPointZero =
+            Scene3d.point { radius = Pixels.pixels 2 }
+                (Material.color Color.black)
+                (DomainModel.getFirstLeaf track.trackTree |> .startPoint |> .space)
+
+        foldFn : RoadSection -> List (Entity LocalCoords) -> List (Entity LocalCoords)
+        foldFn road scene =
+            makeVisibleSegment road ++ scene
+    in
+    renderPointZero
+        :: DomainModel.traverseTreeBetweenLimitsToDepth
+            0
+            (skipCount track.trackTree)
+            depthFn
+            0
+            track.trackTree
+            foldFn
+            []
 
 
 type alias LandUseStuff =
