@@ -15,7 +15,7 @@
 
 Implementation:
 
-1. Map not centering on track load. May be stale state - seems to lag by one load.
+1. ~~Map not centering on track load. May be stale state - seems to lag by one load.~~
 2. Profile1 is not always zero at left. Strange.
 3. Ability to unload a track. Only active on active track.
 4. (Optimise loading from GPX/Strava to avoid having to rebuild tree.)
