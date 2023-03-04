@@ -13,22 +13,18 @@
 
 ## Promote Graph
 
-It's all graphs. 
+Implementation:
 
-We have all the tools for this, it just requires some re-arrangement. See Notebook.
-
-Implementation plan:
-
-16. Profile1 is not always zero at left. Strange.
-17. Map not centering on track load. May be stale state - seems to lag by one load.
-19. Ability to unload a track. Only active on active track.
-20. (Optimise loading from GPX/Strava to avoid having to rebuild tree.)
-21. Limited Undo in Graph; use simple state machine across canonicalization & routing.
-22. Tracks become Edges in promoted graph
-23. Snap nearby points and roads.
-24. Canonicalise.
-25. Routing from existing Route Maker.
-26. New track with offset.
+1. Map not centering on track load. May be stale state - seems to lag by one load.
+2. Profile1 is not always zero at left. Strange.
+3. Ability to unload a track. Only active on active track.
+4. (Optimise loading from GPX/Strava to avoid having to rebuild tree.)
+5. Limited Undo in Graph; use simple state machine across canonicalization & routing.
+6. Tracks become Edges in promoted graph
+7. Snap nearby points and roads from RM.
+8. Canonicalise from RM.
+9. Routing from RM.
+10. New track with offset from RM..
 
 ---
 
