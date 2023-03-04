@@ -34,9 +34,9 @@ Implementation plan:
 13. State error - loading new track zooms map to previously loaded.
 14. ~~Multiple tracks overlap in Plan and 3D now.~~
 15. Profile1 is not zero at left.
-16. Ability to toggle visibility for each track (this is "eye" icon)
+16. Obey visibility for each track in Map view
 17. Common reference point affects Move track operation. **TBD**.
-18. Optimise loading of GPX/Strava to avoid having to rebuild tree.
+18. (Optimise loading of GPX/Strava to avoid having to rebuild tree.)
 19. Move Undo to "Tracks" level, not TrackLoaded.
 20. Tracks become Edges in promoted graph
 21. Ability to unload a track.
