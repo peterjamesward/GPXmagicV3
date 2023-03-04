@@ -4,6 +4,7 @@ module Tools.Tracks exposing
     , addTrack
     , defaultOptions
     , getActiveTrack
+    , mapOverInvisibleTracks
     , mapOverVisibleTracks
     , setTrack
     , toolId
@@ -209,5 +210,13 @@ mapOverVisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
 mapOverVisibleTracks f options =
     options.tracks
         |> List.filter .visible
+        |> List.indexedMap
+            (\i track -> f track (Just i == options.activeTrackIndex))
+
+
+mapOverInvisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
+mapOverInvisibleTracks f options =
+    options.tracks
+        |> List.filter (not << .visible)
         |> List.indexedMap
             (\i track -> f track (Just i == options.activeTrackIndex))

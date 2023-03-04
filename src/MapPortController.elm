@@ -226,6 +226,16 @@ addFullTrackToMap track =
             ]
 
 
+removeTrackFromMap : TrackLoaded msg -> Cmd msg
+removeTrackFromMap track =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Remove" )
+            , ( "token", E.string mapboxKey )
+            , ( "label", E.string track.trackName ) -- worth a try
+            ]
+
+
 addAllTracksToMap : Tools.Tracks.Options msg -> Cmd msg
 addAllTracksToMap options =
     let
@@ -235,9 +245,17 @@ addAllTracksToMap options =
 
             else
                 addInactiveTrackToMap track
+
+        removeFromMap track active =
+            if active then
+                Cmd.none
+
+            else
+                removeTrackFromMap track
     in
     Cmd.batch <|
-        Tools.Tracks.mapOverVisibleTracks addToMap options
+        Tools.Tracks.mapOverInvisibleTracks removeFromMap options
+            ++ Tools.Tracks.mapOverVisibleTracks addToMap options
 
 
 paintCanvasProfileChart :

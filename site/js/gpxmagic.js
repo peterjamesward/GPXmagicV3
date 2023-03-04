@@ -166,6 +166,12 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'Remove':
+            if (isMapCreated) {
+                removeTrack(msg.label,);
+            }
+            break;
+
         case 'Mark':
             if (isMapCreated) {
                 //console.log('adding marker');
@@ -598,18 +604,23 @@ function addLineToMap(label, data, points) {
 
 };
 
-function addInactiveToMap(label, data) {
+function removeTrack(label) {
 
     lineLabel = "line:" + label;
     pointsLabel = "points:" + label;
 
-    console.log('Inactive ', label);
-
-    // Attempt idempotency.
     safelyRemoveLayer(lineLabel);
     safelyRemoveSource(lineLabel);
     safelyRemoveLayer(pointsLabel);
     safelyRemoveSource(pointsLabel);
+}
+
+function addInactiveToMap(label, data) {
+
+    lineLabel = "line:" + label;
+
+    console.log('Inactive ', label);
+    removeTrack(label);
 
     //console.log('adding geojson data');
     //console.log('add source route');
