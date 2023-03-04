@@ -127,7 +127,7 @@ addTrack track options =
                     track
     in
     { options
-        | tracks = { track | trackName = unambiguousName } :: options.tracks
+        | tracks = { trackWithCommonReference | trackName = unambiguousName } :: options.tracks
         , nextTrackNumber = options.nextTrackNumber + 1
         , activeTrackIndex = Just 0
         , commonReferenceGPX =

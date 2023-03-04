@@ -30,17 +30,20 @@ Implementation plan:
 9. ~~All track edits must update track list in the tool~~ -- hook into Undo?
 10. ~~Tool ~~listing tracks loaded~~ ~~and select active track for editing.~~
 11. ~~Tracks need a common reference point, assuming reasonable proximity.~~
-12. Modify views to show multiple tracks (subdued, elided).
-13. Ability to toggle visibility for each track (this is "eye" icon)
-14. Common reference point affects Move track operation. TBD.
-15. Optimise loading of GPX/Strava to avoid having to rebuild tree.
-16. Move Undo to "Tracks" level, not TrackLoaded.
-17. Tracks become Edges in promoted graph
-18. Ability to unload a track.
-19. Snap nearby points and roads.
-20. Canonicalise.
-21. Routing from existing Route Maker.
-22. TBC ...
+12. ~~Multiple tracks not quite switching properly on Map.~~
+13. State error - loading new track zooms map to previously loaded.
+14. ~~Multiple tracks overlap in Plan and 3D now.~~
+15. Profile1 is not zero at left.
+16. Ability to toggle visibility for each track (this is "eye" icon)
+17. Common reference point affects Move track operation. **TBD**.
+18. Optimise loading of GPX/Strava to avoid having to rebuild tree.
+19. Move Undo to "Tracks" level, not TrackLoaded.
+20. Tracks become Edges in promoted graph
+21. Ability to unload a track.
+22. Snap nearby points and roads.
+23. Canonicalise.
+24. Routing from existing Route Maker.
+25. TBC ...
 
 ---
 

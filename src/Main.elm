@@ -2338,9 +2338,9 @@ performActionCommands actions model =
                     MapPortController.addMarkersToMap track
 
                 ( SetCurrentFromMapClick _, Just _ ) ->
+                    --MapPortController.addMarkersToMap track
                     Cmd.none
 
-                --MapPortController.addMarkersToMap track
                 ( MapCenterOnCurrent, Just track ) ->
                     MapPortController.centreMapOnCurrent track
 
@@ -2394,9 +2394,9 @@ performActionCommands actions model =
 
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch
-                        [ MapPortController.addFullTrackToMap track
-                        , MapPortController.addMarkersToMap track
-                        , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
+                        [ MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
+
+                        --, Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
                             model.systemSettings

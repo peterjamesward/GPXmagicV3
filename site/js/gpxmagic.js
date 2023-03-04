@@ -155,8 +155,8 @@ function mapMessageHandler(msg) {
 
         case 'Track':
             if (isMapCreated) {
-                addLineToMap(msg.data, msg.points);
-                setClickMode(false, msg.points);
+                addLineToMap(msg.label, msg.data, msg.points);
+                setClickMode(msg.label, false, msg.points);
             }
             break;
 
@@ -187,7 +187,7 @@ function mapMessageHandler(msg) {
 
         case 'Drag':
             if (isMapCreated) {
-                setClickMode(msg.Enable, msg.points);
+                setClickMode(msg.label, msg.Enable, msg.points);
             }
             break;
 
@@ -553,24 +553,27 @@ function safelyRemoveLayer(layer) {
     }
 }
 
-function addLineToMap(data, points) {
+function addLineToMap(label, data, points) {
+
+    lineLabel = "line:" + label;
+    console.log('Adding ', lineLabel);
 
     // Attempt idempotency.
-    safelyRemoveLayer('route');
-    safelyRemoveSource('route');
+    safelyRemoveLayer(lineLabel);
+    safelyRemoveSource(lineLabel);
 
     //console.log('adding geojson data');
     //console.log('add source route');
-    map.addSource('route', {
+    map.addSource(lineLabel, {
         'type': 'geojson',
         'data': data
         });
 
     //console.log('adding route layer');
     map.addLayer({
-        'id': 'route',
+        'id': lineLabel,
         'type': 'line',
-        'source': 'route',
+        'source': lineLabel,
         'layout': {
         'line-join': 'round',
         'line-cap': 'round'
@@ -596,22 +599,30 @@ function addLineToMap(data, points) {
 };
 
 function addInactiveToMap(label, data) {
+
+    lineLabel = "line:" + label;
+    pointsLabel = "points:" + label;
+
+    console.log('Inactive ', label);
+
     // Attempt idempotency.
-    safelyRemoveLayer(label);
-    safelyRemoveSource(label);
+    safelyRemoveLayer(lineLabel);
+    safelyRemoveSource(lineLabel);
+    safelyRemoveLayer(pointsLabel);
+    safelyRemoveSource(pointsLabel);
 
     //console.log('adding geojson data');
     //console.log('add source route');
-    map.addSource(label, {
+    map.addSource(lineLabel, {
         'type': 'geojson',
         'data': data
         });
 
     //console.log('adding route layer');
     map.addLayer({
-        'id': label,
+        'id': lineLabel,
         'type': 'line',
-        'source': label,
+        'source': lineLabel,
         'layout': {
         'line-join': 'round',
         'line-cap': 'round'
@@ -624,23 +635,27 @@ function addInactiveToMap(label, data) {
 
 };
 
-function setClickMode(newMode, points) {
+function setClickMode(label, newMode, points) {
+
+    pointsLabel = "points:" + label;
+
+    console.log('Set click mode ', label);
 
     clickToDrag = newMode;
 
-    safelyRemoveLayer('points');
-    safelyRemoveSource('points');
+    safelyRemoveLayer(pointsLabel);
+    safelyRemoveSource(pointsLabel);
 
     //console.log('setClickMode: add source points');
-    map.addSource('points', {
+    map.addSource(pointsLabel, {
         'type': 'geojson',
         'data': points
         });
 
     map.addLayer({
-        'id': 'points',
+        'id': pointsLabel,
         'type': 'circle',
-        'source': 'points',
+        'source': pointsLabel,
         'paint': {
             'circle-radius': 5,
             'circle-color': '#ff8f00'
@@ -650,17 +665,17 @@ function setClickMode(newMode, points) {
     if (clickToDrag) {
 
         // When the cursor enters a feature in the point layer, prepare for dragging.
-        map.on('mouseenter', 'points', function (e) {
+        map.on('mouseenter', pointsLabel, function (e) {
             canvas.style.cursor = 'move';
             e;
         });
 
-        map.on('mouseleave', 'points', function (e) {
+        map.on('mouseleave', pointsLabel, function (e) {
             canvas.style.cursor = '';
             e;
         });
 
-        map.on('mousedown', 'points', function (e) {
+        map.on('mousedown', pointsLabel, function (e) {
             // Prevent the default map drag behavior.
             e.preventDefault();
             startDraggingPoint(e);
@@ -678,10 +693,10 @@ function setClickMode(newMode, points) {
         });
 
     } else {
-        map.off('mouseenter','points')
-           .off('mouseleave','points')
-           .off('mousedown','points')
-           .off('click','points')
+        map.off('mouseenter',pointsLabel)
+           .off('mouseleave',pointsLabel)
+           .off('mousedown',pointsLabel)
+           .off('click',pointsLabel)
     }
 
 };

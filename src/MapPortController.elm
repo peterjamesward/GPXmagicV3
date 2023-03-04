@@ -134,6 +134,7 @@ toggleDragging isDragging track =
         E.object
             [ ( "Cmd", E.string "Drag" )
             , ( "Enable", E.bool isDragging )
+            , ( "label", E.string track.trackName )
             , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
             ]
 
@@ -219,6 +220,7 @@ addFullTrackToMap track =
             , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
             , ( "lat", E.float <| Angle.inDegrees latitude )
             , ( "zoom", E.float 10.0 )
+            , ( "label", E.string track.trackName )
             , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
             , ( "points", SceneBuilderMap.trackPointsToJSONwithoutCulling track ) -- Make track points draggable
             ]
@@ -229,7 +231,7 @@ addAllTracksToMap options =
     let
         addToMap track active =
             if active then
-                addFullTrackToMap track
+                Cmd.batch [ addFullTrackToMap track, addMarkersToMap track ]
 
             else
                 addInactiveTrackToMap track
