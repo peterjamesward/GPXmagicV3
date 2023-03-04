@@ -5,7 +5,9 @@ module TrackLoaded exposing
     , adjustAltitude
     , asPreviewPoints
     , buildPreview
+    , changeReferencePoint
     , getRangeFromMarkers
+    , getReferencePoint
     , indexLeaves
     , newTrackFromTree
     , previewFromTree
@@ -171,6 +173,29 @@ indexLeaves tree =
                 )
     in
     leafIndex
+
+
+getReferencePoint : TrackLoaded msg -> GPXSource
+getReferencePoint track =
+    track.referenceLonLat
+
+
+changeReferencePoint : GPXSource -> TrackLoaded msg -> TrackLoaded msg
+changeReferencePoint newReference track =
+    --Note, failure leaves tree unchanged.
+    { track
+        | trackTree =
+            case
+                DomainModel.treeFromSourcesWithExistingReference newReference <|
+                    DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+            of
+                Just newTree ->
+                    newTree
+
+                Nothing ->
+                    track.trackTree
+        , referenceLonLat = newReference
+    }
 
 
 trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)

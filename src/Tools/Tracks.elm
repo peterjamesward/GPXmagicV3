@@ -12,11 +12,15 @@ module Tools.Tracks exposing
     )
 
 import Actions
+import Angle
 import CommonToolStyles
+import Direction2d
+import DomainModel exposing (GPXSource)
 import Element exposing (..)
 import Element.Input as Input
 import FeatherIcons
 import List.Extra
+import Quantity
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
@@ -32,6 +36,7 @@ type alias Options msg =
     { nextTrackNumber : Int
     , tracks : List (TrackLoaded msg)
     , activeTrackIndex : Maybe Int
+    , commonReferenceGPX : Maybe GPXSource -- from where we derive (X,Y) by map projection.
     }
 
 
@@ -40,6 +45,7 @@ defaultOptions =
     { nextTrackNumber = 1
     , tracks = []
     , activeTrackIndex = Nothing
+    , commonReferenceGPX = Nothing
     }
 
 
@@ -98,6 +104,9 @@ displayTrackInfo index track wrapper =
 
 addTrack : TrackLoaded msg -> Options msg -> Options msg
 addTrack track options =
+    --If this is not the first track, we must adjust its reference point.
+    --That may be inefficient but we can absorb the cost at load time.
+    --If not, we (I) will have to change it.
     let
         unambiguousName =
             case
@@ -110,11 +119,26 @@ addTrack track options =
 
                 Nothing ->
                     track.trackName
+
+        trackWithCommonReference =
+            case options.commonReferenceGPX of
+                Just commonReference ->
+                    TrackLoaded.changeReferencePoint commonReference track
+
+                Nothing ->
+                    track
     in
     { options
         | tracks = { track | trackName = unambiguousName } :: options.tracks
         , nextTrackNumber = options.nextTrackNumber + 1
         , activeTrackIndex = Just 0
+        , commonReferenceGPX =
+            case options.commonReferenceGPX of
+                Just common ->
+                    Just common
+
+                Nothing ->
+                    Just <| TrackLoaded.getReferencePoint track
     }
 
 

@@ -29,9 +29,9 @@ Implementation plan:
 8. ~~Edit track name updates tool entry.~~
 9. ~~All track edits must update track list in the tool~~ -- hook into Undo?
 10. ~~Tool ~~listing tracks loaded~~ ~~and select active track for editing.~~
-11. Modify views to show multiple tracks (subdued, elided).
-12. Ability to toggle visibility for each track (this is "eye" icon)
-13. Tracks need a common reference point, assuming reasonable proximity. (Or is that only when we join them?)
+11. Tracks need a common reference point, assuming reasonable proximity.
+12. Modify views to show multiple tracks (subdued, elided).
+13. Ability to toggle visibility for each track (this is "eye" icon)
 14. Do we leave Undo at track level or move up?
 15. Tracks become Edges in promoted graph
 16. TBC ...

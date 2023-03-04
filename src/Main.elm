@@ -939,6 +939,9 @@ update msg model =
 
 adoptTrackInModel : TrackLoaded Msg -> List NamedSegment -> Model -> Model
 adoptTrackInModel track segments model =
+    --If this is not the first track, we must adjust its reference point.
+    --That may be inefficient but we can absorb the cost at load time.
+    --If not, we (I) will have to change it.
     let
         toolOptions =
             model.toolOptions
@@ -967,7 +970,7 @@ adoptTrackInModel track segments model =
 
         modelWithTrack =
             { model
-                | activeTrack = Just track
+                | activeTrack = Tools.Tracks.getActiveTrack newTracksOptions
                 , paneLayoutOptions =
                     PaneLayoutManager.initialise
                         track
