@@ -4,7 +4,7 @@ module Tools.Tracks exposing
     , addTrack
     , defaultOptions
     , getActiveTrack
-    , mapOverTracks
+    , mapOverVisibleTracks
     , setTrack
     , toolId
     , update
@@ -49,6 +49,7 @@ defaultOptions =
 
 type Msg
     = SelectActiveTrack Int
+    | ToggleVisibility Int
 
 
 update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
@@ -56,6 +57,26 @@ update msg options =
     case msg of
         SelectActiveTrack index ->
             ( options, [ Actions.SetActiveTrack index ] )
+
+        ToggleVisibility index ->
+            case List.Extra.getAt index options.tracks of
+                Just found ->
+                    let
+                        updatedTrack =
+                            { found | visible = not found.visible }
+                    in
+                    ( { options
+                        | tracks =
+                            List.Extra.updateAt
+                                index
+                                (always updatedTrack)
+                                options.tracks
+                      }
+                    , [ Actions.SetActiveTrack <| Maybe.withDefault 0 options.activeTrackIndex ]
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
 
 updateActiveTrack : TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
@@ -83,19 +104,34 @@ view settings wrapper options =
         column [ spacing 5 ] <|
             List.indexedMap
                 (\index entry ->
-                    displayTrackInfo index entry wrapper
+                    displayTrackInfo index entry wrapper options
                 )
                 options.tracks
 
 
-displayTrackInfo : Int -> TrackLoaded msg -> (Msg -> msg) -> Element msg
-displayTrackInfo index track wrapper =
+displayTrackInfo : Int -> TrackLoaded msg -> (Msg -> msg) -> Options msg -> Element msg
+displayTrackInfo index track wrapper options =
     row [ spacing 5 ]
         [ Input.button
             []
             { label = useIcon FeatherIcons.edit
             , onPress = Just <| wrapper (SelectActiveTrack index)
             }
+        , if Just index == options.activeTrackIndex then
+            -- Can't change visibility of active track.
+            none
+
+          else
+            Input.button []
+                { label =
+                    useIcon <|
+                        if track.visible then
+                            FeatherIcons.eyeOff
+
+                        else
+                            FeatherIcons.eye
+                , onPress = Just <| wrapper (ToggleVisibility index)
+                }
         , text track.trackName
         ]
 
@@ -142,9 +178,21 @@ addTrack track options =
 
 setTrack : Int -> Options msg -> ( Maybe (TrackLoaded msg), Options msg )
 setTrack index options =
-    ( List.Extra.getAt index options.tracks
-    , { options | activeTrackIndex = Just index }
-    )
+    case List.Extra.getAt index options.tracks of
+        Just found ->
+            let
+                visibleTrack =
+                    { found | visible = True }
+            in
+            ( Just visibleTrack
+            , { options
+                | activeTrackIndex = Just index
+                , tracks = List.Extra.updateAt index (always visibleTrack) options.tracks
+              }
+            )
+
+        Nothing ->
+            ( Nothing, options )
 
 
 getActiveTrack : Options msg -> Maybe (TrackLoaded msg)
@@ -157,8 +205,9 @@ getActiveTrack options =
             Nothing
 
 
-mapOverTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
-mapOverTracks f options =
+mapOverVisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
+mapOverVisibleTracks f options =
     options.tracks
+        |> List.filter .visible
         |> List.indexedMap
             (\i track -> f track (Just i == options.activeTrackIndex))

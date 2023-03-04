@@ -237,7 +237,7 @@ addAllTracksToMap options =
                 addInactiveTrackToMap track
     in
     Cmd.batch <|
-        Tools.Tracks.mapOverTracks addToMap options
+        Tools.Tracks.mapOverVisibleTracks addToMap options
 
 
 paintCanvasProfileChart :
