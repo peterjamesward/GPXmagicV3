@@ -40,6 +40,7 @@ import Length exposing (Meters, meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
+import Plane3d
 import Point2d exposing (Point2d)
 import Point3d
 import Point3d.Projection as Point3d
@@ -53,7 +54,7 @@ import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.Graph
-import Tools.GraphOptions as Graph exposing (ClickDetect(..), Direction(..), Graph)
+import Tools.GraphOptions as Graph exposing (ClickDetect(..), Direction(..), Edge, Graph)
 import Tools.I18NOptions as I18NOptions
 import Tools.TracksOptions as Tracks
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
@@ -175,53 +176,59 @@ popup msgWrapper context options graph =
                 ClickNone ->
                     []
 
-                ClickNode node ->
-                    [ text <| "Place " ++ String.fromInt node ++ "..."
-                    , if Tools.Graph.loopCanBeAdded node options.userRoute graph then
-                        Input.button []
-                            { onPress = Just <| msgWrapper <| AddSelfLoop node
-                            , label =
-                                text <|
-                                    "Add "
-                                        ++ showShortMeasure False options.minimumRadiusAtPlaces
-                                        ++ " loop here"
-                            }
+                _ ->
+                    []
 
-                      else
-                        none
-                    , Input.button []
-                        { onPress = Just <| msgWrapper PopupHide
-                        , label = text "Close menu"
-                        }
-                    ]
+        {-
+           ClickNode node ->
+               [ text <| "Place " ++ String.fromInt node ++ "..."
+               , if Tools.Graph.loopCanBeAdded node options.userRoute graph then
+                   Input.button []
+                       { onPress = Just <| msgWrapper <| AddSelfLoop node
+                       , label =
+                           text <|
+                               "Add "
+                                   ++ showShortMeasure False options.minimumRadiusAtPlaces
+                                   ++ " loop here"
+                       }
 
-                ClickEdge edge ->
-                    [ text <| "Road " ++ String.fromInt edge ++ "..."
-                    , if Tools.Graph.edgeCanBeAdded edge options.userRoute graph then
-                        Input.button []
-                            { onPress = Just <| msgWrapper <| AddTraversal edge
-                            , label = text "Add to route"
-                            }
+                 else
+                   none
+               , Input.button []
+                   { onPress = Just <| msgWrapper PopupHide
+                   , label = text "Close menu"
+                   }
+               ]
+        -}
+        {-
+           ClickEdge edge ->
+               [ text <| "Road " ++ String.fromInt edge ++ "..."
+               , if Tools.Graph.traversalCanBeAdded edge options.userRoute graph then
+                   Input.button []
+                       { onPress = Just <| msgWrapper <| AddTraversal edge
+                       , label = text "Add to route"
+                       }
 
-                      else
-                        none
-                    , Input.button []
-                        { onPress = Just <| msgWrapper <| EditRoad edge
-                        , label = text "Edit this road"
-                        }
-                    , if Tools.Graph.edgeCanBeDeleted edge options.userRoute graph then
-                        Input.button []
-                            { onPress = Just <| msgWrapper <| DeleteRoad edge
-                            , label = text "Delete this Road"
-                            }
+                 else
+                   none
+               , Input.button []
+                   { onPress = Just <| msgWrapper <| EditRoad edge
+                   , label = text "Edit this road"
+                   }
+               , if Tools.Graph.edgeCanBeDeleted edge options.userRoute graph then
+                   Input.button []
+                       { onPress = Just <| msgWrapper <| DeleteRoad edge
+                       , label = text "Delete this Road"
+                       }
 
-                      else
-                        none
-                    , Input.button []
-                        { onPress = Just <| msgWrapper PopupHide
-                        , label = text "Close menu"
-                        }
-                    ]
+                 else
+                   none
+               , Input.button []
+                   { onPress = Just <| msgWrapper PopupHide
+                   , label = text "Close menu"
+                   }
+               ]
+        -}
     in
     case context.clickPoint of
         Nothing ->
@@ -282,9 +289,8 @@ view settings context ( width, height ) options graph msgWrapper =
             graph.nodes
                 |> Dict.map
                     (\_ pt ->
-                        pt
-                            |> Point2d.fromTuple meters
-                            |> Point3d.on SketchPlane3d.xy
+                        pt.space
+                            |> Point3d.projectOnto Plane3d.xy
                             |> Point3d.toScreenSpace camera screenRectangle
                     )
 
@@ -310,17 +316,20 @@ view settings context ( width, height ) options graph msgWrapper =
                     (\( index, edgeInfo ) ->
                         case context.edgeMode of
                             EdgeArc ->
-                                renderEdgeArc index edgeInfo.track.trackTree
+                                renderEdgeArc index edgeInfo
 
                             EdgeSketch ->
-                                renderEdge index edgeInfo.track.trackTree
+                                renderEdge index edgeInfo
                     )
 
         edgeToHighlight =
-            List.Extra.getAt options.selectedTraversal options.userRoute
-                |> Maybe.map .edge
-                |> Maybe.withDefault -1
+            "NOT YET"
 
+        {-
+           List.Extra.getAt options.selectedTraversal options.userRoute
+               |> Maybe.map .edge
+               |> Maybe.withDefault -1
+        -}
         arrowAttributes atPoint =
             [ Svg.Attributes.fill <| uiColourHexString rgtPurple
             , Svg.Attributes.fontFamily "sans serif"
@@ -330,47 +339,48 @@ view settings context ( width, height ) options graph msgWrapper =
             , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint) + 10))
             ]
 
-        arrowsOnHighlightedEdge =
-            case List.Extra.getAt options.selectedTraversal options.userRoute of
-                Nothing ->
-                    []
+        {-
+           arrowsOnHighlightedEdge =
+               case List.Extra.getAt options.selectedTraversal options.userRoute of
+                   Nothing ->
+                       []
 
-                Just { edge, direction } ->
-                    case Dict.get edge graph.edges of
-                        Nothing ->
-                            []
+                   Just { edge, direction } ->
+                       case Dict.get edge graph.edges of
+                           Nothing ->
+                               []
 
-                        Just edgeInfo ->
-                            let
-                                midPoint =
-                                    skipCount edgeInfo.track.trackTree // 2
+                           Just edgeInfo ->
+                               let
+                                   midPoint =
+                                       skipCount edgeInfo.track.trackTree // 2
 
-                                midLeaf =
-                                    asRecord <| leafFromIndex midPoint edgeInfo.track.trackTree
+                                   midLeaf =
+                                       asRecord <| leafFromIndex midPoint edgeInfo.track.trackTree
 
-                                ( p1, _ ) =
-                                    ( midLeaf.startPoint.space |> Point3d.toScreenSpace camera screenRectangle
-                                    , midLeaf.endPoint.space |> Point3d.toScreenSpace camera screenRectangle
-                                    )
+                                   ( p1, _ ) =
+                                       ( midLeaf.startPoint.space |> Point3d.toScreenSpace camera screenRectangle
+                                       , midLeaf.endPoint.space |> Point3d.toScreenSpace camera screenRectangle
+                                       )
 
-                                rotation =
-                                    case direction of
-                                        Natural ->
-                                            toAngle midLeaf.directionAtStart
+                                   rotation =
+                                       case direction of
+                                           Natural ->
+                                               toAngle midLeaf.directionAtStart
 
-                                        Reverse ->
-                                            toAngle <| Direction2d.reverse midLeaf.directionAtStart
-                            in
-                            [ Svg.text_
-                                (arrowAttributes p1)
-                                [ Svg.text ">>>>" ]
-                                -- Hack: flip the text upside down since our later
-                                -- 'Svg.relativeTo topLeftFrame' call will flip it
-                                -- back right side up
-                                |> Svg.mirrorAcross (Axis2d.through p1 Direction2d.x)
-                                |> Svg.rotateAround p1 rotation
-                            ]
-
+                                           Reverse ->
+                                               toAngle <| Direction2d.reverse midLeaf.directionAtStart
+                               in
+                               [ Svg.text_
+                                   (arrowAttributes p1)
+                                   [ Svg.text ">>>>" ]
+                                   -- Hack: flip the text upside down since our later
+                                   -- 'Svg.relativeTo topLeftFrame' call will flip it
+                                   -- back right side up
+                                   |> Svg.mirrorAcross (Axis2d.through p1 Direction2d.x)
+                                   |> Svg.rotateAround p1 rotation
+                               ]
+        -}
         edgeAttributes edgeIndex =
             if edgeIndex == edgeToHighlight then
                 [ Svg.Attributes.stroke <| uiColourHexString rgtPurple
@@ -388,7 +398,7 @@ view settings context ( width, height ) options graph msgWrapper =
                 , Svg.Attributes.strokeLinejoin "round"
                 ]
 
-        pointsAsPolyline : Int -> List (Point2d.Point2d units coordinates) -> Svg msg
+        pointsAsPolyline : String -> List (Point2d.Point2d units coordinates) -> Svg msg
         pointsAsPolyline edgeIndex points =
             Svg.polyline2d
                 (edgeAttributes edgeIndex)
@@ -402,30 +412,33 @@ view settings context ( width, height ) options graph msgWrapper =
             Point3d.toScreenSpace camera screenRectangle road.endPoint.space
                 :: outputs
 
-        renderEdge : Int -> PeteTree -> Svg msg
-        renderEdge edgeIndex tree =
+        renderEdge : String -> Edge msg -> Svg msg
+        renderEdge edgeKey edge =
             let
                 svgPoints =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         0
-                        (skipCount tree)
+                        (skipCount edge.track.trackTree)
                         (always <| Just 8)
                         0
-                        tree
+                        edge.track.trackTree
                         edgeFold
                         [ startPoint ]
 
                 startPoint =
-                    DomainModel.earthPointFromIndex 0 tree
+                    DomainModel.earthPointFromIndex 0 edge.track.trackTree
                         |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
             in
-            svgPoints |> pointsAsPolyline edgeIndex
+            svgPoints |> pointsAsPolyline edgeKey
 
-        renderEdgeArc : Int -> PeteTree -> Svg msg
-        renderEdgeArc edgeIndex tree =
+        renderEdgeArc : String -> Edge msg -> Svg msg
+        renderEdgeArc edgeIndex edge =
             -- If we can construct an arc, use it, otherwise just two lines.
             let
+                tree =
+                    edge.track.trackTree
+
                 ( start, mid, end ) =
                     ( DomainModel.earthPointFromIndex 0 tree
                         |> .space
@@ -443,7 +456,7 @@ view settings context ( width, height ) options graph msgWrapper =
                     arc |> Svg.arc2d (edgeAttributes edgeIndex)
 
                 Nothing ->
-                    renderEdge edgeIndex tree
+                    renderEdge edgeIndex edge
 
         textAttributes atPoint =
             [ Svg.Attributes.fill "rgb(250, 250, 250)"
@@ -455,43 +468,45 @@ view settings context ( width, height ) options graph msgWrapper =
             ]
 
         -- Create text SVG labels beside each projected 2D point
-        nodeLabels =
-            nodes2d
-                |> Dict.map
-                    (\index vertex ->
-                        Svg.text_
-                            (textAttributes vertex)
-                            [ Svg.text ("Place " ++ String.fromInt index) ]
-                            -- Hack: flip the text upside down since our later
-                            -- 'Svg.relativeTo topLeftFrame' call will flip it
-                            -- back right side up
-                            |> Svg.mirrorAcross (Axis2d.through vertex Direction2d.x)
-                    )
-                |> Dict.values
-
+        {-
+           nodeLabels =
+               nodes2d
+                   |> Dict.map
+                       (\index vertex ->
+                           Svg.text_
+                               (textAttributes vertex)
+                               [ Svg.text ("Place " ++ String.fromInt index) ]
+                               -- Hack: flip the text upside down since our later
+                               -- 'Svg.relativeTo topLeftFrame' call will flip it
+                               -- back right side up
+                               |> Svg.mirrorAcross (Axis2d.through vertex Direction2d.x)
+                       )
+                   |> Dict.values
+        -}
         -- Create text SVG labels beside each projected edge
-        edgeLabels =
-            graph.edges
-                |> Dict.toList
-                |> List.map
-                    (\( index, edgeInfo ) ->
-                        let
-                            labelAt =
-                                earthPointFromIndex
-                                    (skipCount edgeInfo.track.trackTree // 2)
-                                    edgeInfo.track.trackTree
-                                    |> .space
-                                    |> Point3d.toScreenSpace camera screenRectangle
-                        in
-                        Svg.text_
-                            (textAttributes labelAt)
-                            [ Svg.text ("Road " ++ String.fromInt index) ]
-                            -- Hack: flip the text upside down since our later
-                            -- 'Svg.relativeTo topLeftFrame' call will flip it
-                            -- back right side up
-                            |> Svg.mirrorAcross (Axis2d.through labelAt Direction2d.x)
-                    )
-
+        {-
+           edgeLabels =
+               graph.edges
+                   |> Dict.toList
+                   |> List.map
+                       (\( index, edgeInfo ) ->
+                           let
+                               labelAt =
+                                   earthPointFromIndex
+                                       (skipCount edgeInfo.track.trackTree // 2)
+                                       edgeInfo.track.trackTree
+                                       |> .space
+                                       |> Point3d.toScreenSpace camera screenRectangle
+                           in
+                           Svg.text_
+                               (textAttributes labelAt)
+                               [ Svg.text ("Road " ++ String.fromInt index) ]
+                               -- Hack: flip the text upside down since our later
+                               -- 'Svg.relativeTo topLeftFrame' call will flip it
+                               -- back right side up
+                               |> Svg.mirrorAcross (Axis2d.through labelAt Direction2d.x)
+                       )
+        -}
         -- Used for converting from coordinates relative to the bottom-left
         -- corner of the 2D drawing into coordinates relative to the top-left
         -- corner (which is what SVG natively works in)
@@ -510,9 +525,9 @@ view settings context ( width, height ) options graph msgWrapper =
                     (Svg.g []
                         (svgNodes
                             ++ svgEdges
-                            ++ nodeLabels
-                            ++ edgeLabels
-                            ++ arrowsOnHighlightedEdge
+                         --++ nodeLabels
+                         --++ edgeLabels
+                         --++ arrowsOnHighlightedEdge
                         )
                     )
                 ]
@@ -797,62 +812,74 @@ detectHit event graph ( w, h ) context =
 
         candidates : List ( Int, ( Int, Bool, Quantity Float Pixels ) )
         candidates =
-            graph.edges
-                |> Dict.toList
-                |> List.map
-                    (\( edgeIndex, edgeInfo ) ->
-                        let
-                            thisEdgeNearestIndex =
-                                nearestToRay
-                                    ray
-                                    edgeInfo.track.trackTree
-                                    edgeInfo.track.leafIndex
-                                    edgeInfo.track.currentPosition
+            []
 
-                            thisEdgeNearestPoint =
-                                earthPointFromIndex thisEdgeNearestIndex edgeInfo.track.trackTree
-                                    |> .space
-                                    |> Point3d.toScreenSpace camera screenRectangle
-                        in
-                        ( edgeIndex
-                        , ( thisEdgeNearestIndex
-                          , thisEdgeNearestIndex == skipCount edgeInfo.track.trackTree
-                          , Point2d.distanceFrom screenPoint thisEdgeNearestPoint
-                          )
-                        )
-                    )
+        {-
+           graph.edges
+               |> Dict.toList
+               |> List.map
+                   (\( edgeIndex, edgeInfo ) ->
+                       let
+                           thisEdgeNearestIndex =
+                               nearestToRay
+                                   ray
+                                   edgeInfo.track.trackTree
+                                   edgeInfo.track.leafIndex
+                                   edgeInfo.track.currentPosition
 
+                           thisEdgeNearestPoint =
+                               earthPointFromIndex thisEdgeNearestIndex edgeInfo.track.trackTree
+                                   |> .space
+                                   |> Point3d.toScreenSpace camera screenRectangle
+                       in
+                       ( edgeIndex
+                       , ( thisEdgeNearestIndex
+                         , thisEdgeNearestIndex == skipCount edgeInfo.track.trackTree
+                         , Point2d.distanceFrom screenPoint thisEdgeNearestPoint
+                         )
+                       )
+                   )
+        -}
         bestCandidate =
-            candidates
-                |> List.Extra.minimumBy
-                    (\( _, ( _, _, dist ) ) -> Pixels.inPixels dist)
+            Nothing
 
-        returnStartNode edgeIndex =
-            case Dict.get edgeIndex graph.edges of
-                Nothing ->
-                    ClickNone
+        --candidates
+        --    |> List.Extra.minimumBy
+        --        (\( _, ( _, _, dist ) ) -> Pixels.inPixels dist)
+        {-
+           returnStartNode edgeIndex =
+               case Dict.get edgeIndex graph.edges of
+                   Nothing ->
+                       ClickNone
 
-                Just edgeInfo ->
-                    ClickNode edgeInfo.lowNode
+                   Just edgeInfo ->
+                       ClickNode edgeInfo.lowNode
 
-        returnEndNode edgeIndex =
-            case Dict.get edgeIndex graph.edges of
-                Nothing ->
-                    ClickNone
+           returnEndNode edgeIndex =
+               case Dict.get edgeIndex graph.edges of
+                   Nothing ->
+                       ClickNone
 
-                Just edgeInfo ->
-                    ClickNode edgeInfo.highNode
+                   Just edgeInfo ->
+                       ClickNode edgeInfo.highNode
+        -}
     in
-    case bestCandidate of
-        Nothing ->
-            ClickNone
+    ClickNone
 
-        Just ( edgeIndex, ( pointIndex, isEnd, _ ) ) ->
-            if pointIndex == 0 then
-                returnStartNode edgeIndex
 
-            else if isEnd then
-                returnEndNode edgeIndex
 
-            else
-                ClickEdge edgeIndex
+{-
+   case bestCandidate of
+       Nothing ->
+           ClickNone
+
+       Just ( edgeIndex, ( pointIndex, isEnd, _ ) ) ->
+           if pointIndex == 0 then
+               returnStartNode edgeIndex
+
+           else if isEnd then
+               returnEndNode edgeIndex
+
+           else
+               ClickEdge edgeIndex
+-}

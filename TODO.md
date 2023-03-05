@@ -17,12 +17,13 @@ Implementation: (RM = existing Route Maker)
 
 1. Routing from RM - make the Route view work with tracks.
    1. Need to make Tracks into Edges.
-   2. Move GraphOptions into Tracks.Options
-   3. Maintain Graph in Tracks.updateActiveTrack
-   4. Hmm. Think I should bite bullet and merge Graph entirely into Tracks.
-   5. ? _Use track name as edge name_ ?
-   6. View should reflect new tracks added.
-   7. Should be able to make a route, if ends join up.
+   2. Can't use node indices as keys! Maybe stringified (lon,lat) for nodes, sorted pairs for edges.
+   3. Move GraphOptions into Tracks.Options
+   4. Maintain Graph in Tracks.updateActiveTrack
+   5. Hmm. Think I should bite bullet and merge Graph entirely into Tracks.
+   6. ? _Use track name as edge name_ ?
+   7. View should reflect new tracks added.
+   8. Should be able to make a route, if ends join up.
 2. Limited Undo as in RM; use simple state machine across canonicalization & routing.
 3. Tracks become Edges in promoted graph
 4. Snap nearby points and roads from RM.

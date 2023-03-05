@@ -97,9 +97,11 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
                 , ( "mapstyle", """Choose map style""" )
                 ]
           )
-        , ( "graph"
+        , ( "tracks"
           , Dict.fromList
-                [ ( "label", """Route maker""" )
+                [ ( "label", """Route builder""" )
+                , ( "info", """Manage multiple tracks.""" )
+                , ( "unload", """Remove the active track (no Undo)""" )
                 , ( "find", """Enter Route maker mode""" )
                 , ( "adopt", """Merge nearby points""" )
                 , ( "adoptInfo", """You may want to "snap" multiple passes of the track
@@ -957,13 +959,6 @@ then come back here and click the button below.""" )
                 , ( "done", """There should be a route. If the elevations are incomplete, 
 please try using the refresh button below.""" )
                 , ( "fail", """Mapbox did not return a route. Perhaps a point was too far from the road.""" )
-                ]
-          )
-        , ( "tracks"
-          , Dict.fromList
-                [ ( "label", """Route builder""" )
-                , ( "info", """Manage multiple tracks.""" )
-                , ( "unload", """Remove the active track (no Undo)""" )
                 ]
           )
         , ( "segments"

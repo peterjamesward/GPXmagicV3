@@ -265,7 +265,7 @@ update msg options =
                , [ Actions.MakeRouteFromGraph
                  , Actions.TrackHasChanged
                  , Actions.ExitRoutePlanning
-                 , Actions.HidePreview "graph"
+                 , Actions.HidePreview toolId
                  ]
                )
         -}
@@ -362,37 +362,38 @@ graphView settings wrapper options graph =
         i18n =
             I18N.text settings.location toolId
 
-        traversals : List Graph.TraversalDisplay
-        traversals =
-            -- Display-ready version of the route.
-            options.userRoute
-                |> List.map
-                    (\traversal ->
-                        case Dict.get traversal.edge graph.edges of
-                            Nothing ->
-                                { startPlace = -1
-                                , road = -1
-                                , endPlace = -1
-                                , length = Quantity.zero
-                                }
+        {-
+           traversals : List Graph.TraversalDisplay
+           traversals =
+               -- Display-ready version of the route.
+               options.userRoute
+                   |> List.map
+                       (\traversal ->
+                           case Dict.get traversal.edge graph.edges of
+                               Nothing ->
+                                   { startPlace = -1
+                                   , road = -1
+                                   , endPlace = -1
+                                   , length = Quantity.zero
+                                   }
 
-                            Just edgeInfo ->
-                                case traversal.direction of
-                                    Natural ->
-                                        { startPlace = edgeInfo.lowNode
-                                        , road = traversal.edge
-                                        , endPlace = edgeInfo.highNode
-                                        , length = trueLength edgeInfo.track.trackTree
-                                        }
+                               Just edgeInfo ->
+                                   case traversal.direction of
+                                       Natural ->
+                                           { startPlace = edgeInfo.lowNode
+                                           , road = traversal.edge
+                                           , endPlace = edgeInfo.highNode
+                                           , length = trueLength edgeInfo.track.trackTree
+                                           }
 
-                                    Reverse ->
-                                        { startPlace = edgeInfo.highNode
-                                        , road = traversal.edge
-                                        , endPlace = edgeInfo.lowNode
-                                        , length = trueLength edgeInfo.track.trackTree
-                                        }
-                    )
-
+                                       Reverse ->
+                                           { startPlace = edgeInfo.highNode
+                                           , road = traversal.edge
+                                           , endPlace = edgeInfo.lowNode
+                                           , length = trueLength edgeInfo.track.trackTree
+                                           }
+                       )
+        -}
         dataStyles selected =
             if selected then
                 [ Font.bold
@@ -402,143 +403,144 @@ graphView settings wrapper options graph =
             else
                 [ padding 2 ]
 
-        traversalsTable : Element msg
-        traversalsTable =
-            let
-                totalLength =
-                    traversals |> List.map .length |> Quantity.sum
+        {-
+           traversalsTable : Element msg
+           traversalsTable =
+               let
+                   totalLength =
+                       traversals |> List.map .length |> Quantity.sum
 
-                headerAttrs =
-                    [ Font.bold
-                    , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
-                    , Border.color FlatColors.FlatUIPalette.concrete
-                    ]
+                   headerAttrs =
+                       [ Font.bold
+                       , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                       , Border.color FlatColors.FlatUIPalette.concrete
+                       ]
 
-                footerAttrs =
-                    [ Font.bold
-                    , Border.widthEach { bottom = 0, top = 2, left = 0, right = 0 }
-                    , Border.color FlatColors.FlatUIPalette.concrete
-                    ]
-            in
-            column
-                [ width <| maximum 500 fill
-                , height <| px 300
-                , spacing 10
-                , padding 5
-                , Border.width 2
-                , Border.rounded 6
-                , Border.color FlatColors.FlatUIPalette.concrete
-                ]
-                [ row [ width fill ]
-                    [ el ((width <| fillPortion 1) :: headerAttrs) <| i18n "blank"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "from"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "to"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "along"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "distance"
-                    ]
+                   footerAttrs =
+                       [ Font.bold
+                       , Border.widthEach { bottom = 0, top = 2, left = 0, right = 0 }
+                       , Border.color FlatColors.FlatUIPalette.concrete
+                       ]
+               in
+               column
+                   [ width <| maximum 500 fill
+                   , height <| px 300
+                   , spacing 10
+                   , padding 5
+                   , Border.width 2
+                   , Border.rounded 6
+                   , Border.color FlatColors.FlatUIPalette.concrete
+                   ]
+                   [ row [ width fill ]
+                       [ el ((width <| fillPortion 1) :: headerAttrs) <| i18n "blank"
+                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "from"
+                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "to"
+                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "along"
+                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "distance"
+                       ]
 
-                -- workaround for a bug: it's necessary to wrap `table` in an `el`
-                -- to get table height attribute to apply
-                , el [ width fill ] <|
-                    indexedTable
-                        [ width fill
-                        , height <| px 220
-                        , scrollbarY
-                        , spacing 4
-                        ]
-                        { data = traversals
-                        , columns =
-                            [ { header = none
-                              , width = fillPortion 1
-                              , view =
-                                    \i t ->
-                                        row
-                                            [ spacing 2 ]
-                                            [ if i + 1 == List.length traversals then
-                                                Input.button
-                                                    [ alignRight
-                                                    , tooltip below (localisedTooltip settings.location toolId "remove")
-                                                    ]
-                                                    { onPress = Nothing --Just <| wrapper RemoveLastTraversal
-                                                    , label = useIcon FeatherIcons.delete
-                                                    }
+                   -- workaround for a bug: it's necessary to wrap `table` in an `el`
+                   -- to get table height attribute to apply
+                   , el [ width fill ] <|
+                       indexedTable
+                           [ width fill
+                           , height <| px 220
+                           , scrollbarY
+                           , spacing 4
+                           ]
+                           { data = traversals
+                           , columns =
+                               [ { header = none
+                                 , width = fillPortion 1
+                                 , view =
+                                       \i t ->
+                                           row
+                                               [ spacing 2 ]
+                                               [ if i + 1 == List.length traversals then
+                                                   Input.button
+                                                       [ alignRight
+                                                       , tooltip below (localisedTooltip settings.location toolId "remove")
+                                                       ]
+                                                       { onPress = Nothing --Just <| wrapper RemoveLastTraversal
+                                                       , label = useIcon FeatherIcons.delete
+                                                       }
 
-                                              else
-                                                none
-                                            , if
-                                                List.length traversals
-                                                    == 1
-                                                    || t.startPlace
-                                                    == t.endPlace
-                                              then
-                                                Input.button
-                                                    [ alignRight
-                                                    , tooltip below (localisedTooltip settings.location toolId "reverse")
-                                                    ]
-                                                    { onPress = Nothing --Just <| wrapper <| FlipDirection i
-                                                    , label = useIcon FeatherIcons.refreshCw
-                                                    }
+                                                 else
+                                                   none
+                                               , if
+                                                   List.length traversals
+                                                       == 1
+                                                       || t.startPlace
+                                                       == t.endPlace
+                                                 then
+                                                   Input.button
+                                                       [ alignRight
+                                                       , tooltip below (localisedTooltip settings.location toolId "reverse")
+                                                       ]
+                                                       { onPress = Nothing --Just <| wrapper <| FlipDirection i
+                                                       , label = useIcon FeatherIcons.refreshCw
+                                                       }
 
-                                              else
-                                                none
-                                            , Input.button
-                                                [ alignRight ]
-                                                { onPress = Nothing --Just <| wrapper <| HighlightTraversal i
-                                                , label = useIcon FeatherIcons.eye
-                                                }
-                                            ]
-                              }
-                            , { header = none
-                              , width = fillPortion 2
-                              , view =
-                                    \i t ->
-                                        el (dataStyles (i == options.selectedTraversal)) <|
-                                            text <|
-                                                String.Interpolate.interpolate
-                                                    (I18N.localisedString settings.location toolId "place1")
-                                                    [ String.fromInt t.startPlace ]
-                              }
-                            , { header = none
-                              , width = fillPortion 2
-                              , view =
-                                    \i t ->
-                                        el (dataStyles (i == options.selectedTraversal)) <|
-                                            text <|
-                                                String.Interpolate.interpolate
-                                                    (I18N.localisedString settings.location toolId "place2")
-                                                    [ String.fromInt t.endPlace ]
-                              }
-                            , { header = none
-                              , width = fillPortion 2
-                              , view =
-                                    \i t ->
-                                        el (dataStyles (i == options.selectedTraversal)) <|
-                                            text <|
-                                                String.Interpolate.interpolate
-                                                    (I18N.localisedString settings.location toolId "road")
-                                                    [ String.fromInt t.road ]
-                              }
-                            , { header = none
-                              , width = fillPortion 2
-                              , view =
-                                    \i t ->
-                                        el (dataStyles (i == options.selectedTraversal)) <|
-                                            text <|
-                                                showLongMeasure False t.length
-                              }
-                            ]
-                        }
-                , row [ width fill ]
-                    [ el ((width <| fillPortion 1) :: footerAttrs) <| text " "
-                    , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
-                    , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
-                    , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
-                    , el ((width <| fillPortion 2) :: footerAttrs) <|
-                        text <|
-                            showLongMeasure False totalLength
-                    ]
-                ]
-
+                                                 else
+                                                   none
+                                               , Input.button
+                                                   [ alignRight ]
+                                                   { onPress = Nothing --Just <| wrapper <| HighlightTraversal i
+                                                   , label = useIcon FeatherIcons.eye
+                                                   }
+                                               ]
+                                 }
+                               , { header = none
+                                 , width = fillPortion 2
+                                 , view =
+                                       \i t ->
+                                           el (dataStyles (i == options.selectedTraversal)) <|
+                                               text <|
+                                                   String.Interpolate.interpolate
+                                                       (I18N.localisedString settings.location toolId "place1")
+                                                       [ String.fromInt t.startPlace ]
+                                 }
+                               , { header = none
+                                 , width = fillPortion 2
+                                 , view =
+                                       \i t ->
+                                           el (dataStyles (i == options.selectedTraversal)) <|
+                                               text <|
+                                                   String.Interpolate.interpolate
+                                                       (I18N.localisedString settings.location toolId "place2")
+                                                       [ String.fromInt t.endPlace ]
+                                 }
+                               , { header = none
+                                 , width = fillPortion 2
+                                 , view =
+                                       \i t ->
+                                           el (dataStyles (i == options.selectedTraversal)) <|
+                                               text <|
+                                                   String.Interpolate.interpolate
+                                                       (I18N.localisedString settings.location toolId "road")
+                                                       [ String.fromInt t.road ]
+                                 }
+                               , { header = none
+                                 , width = fillPortion 2
+                                 , view =
+                                       \i t ->
+                                           el (dataStyles (i == options.selectedTraversal)) <|
+                                               text <|
+                                                   showLongMeasure False t.length
+                                 }
+                               ]
+                           }
+                   , row [ width fill ]
+                       [ el ((width <| fillPortion 1) :: footerAttrs) <| text " "
+                       , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                       , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                       , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                       , el ((width <| fillPortion 2) :: footerAttrs) <|
+                           text <|
+                               showLongMeasure False totalLength
+                       ]
+                   ]
+        -}
         guidanceText =
             row
                 [ Background.color FlatColors.FlatUIPalette.turquoise
@@ -585,7 +587,7 @@ graphView settings wrapper options graph =
                 finishButton =
                     if not <| List.isEmpty options.userRoute then
                         row [ spacing 3 ]
-                            [ infoButton (wrapper <| DisplayInfo "graph" "render")
+                            [ infoButton (wrapper <| DisplayInfo toolId "render")
                             , Input.button
                                 neatToolsBorder
                                 { onPress = Nothing --Just (wrapper ConvertFromGraph)
@@ -612,7 +614,7 @@ graphView settings wrapper options graph =
                 offsetSlider =
                     row [ spacing 5 ]
                         [ none
-                        , infoButton (wrapper <| DisplayInfo "graph" "offset")
+                        , infoButton (wrapper <| DisplayInfo toolId "offset")
 
                         --, Input.slider
                         --    commonShortHorizontalSliderStyles
@@ -643,7 +645,7 @@ graphView settings wrapper options graph =
                 minRadiusSlider =
                     row [ spacing 5 ]
                         [ none
-                        , infoButton (wrapper <| DisplayInfo "graph" "radius")
+                        , infoButton (wrapper <| DisplayInfo toolId "radius")
 
                         --, Input.slider
                         --    commonShortHorizontalSliderStyles
@@ -691,7 +693,8 @@ graphView settings wrapper options graph =
                     , clearRouteButton
                     , revertButton
                     ]
-                , traversalsTable
+
+                --, traversalsTable
                 , undoButton
                 , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
                 , finishButton
@@ -701,7 +704,7 @@ graphView settings wrapper options graph =
             let
                 analyseButton =
                     row [ spacing 3, width fill ]
-                        [ infoButton (wrapper <| DisplayInfo "graph" "info")
+                        [ infoButton (wrapper <| DisplayInfo toolId "info")
                         , Input.button neatToolsBorder
                             { onPress = Nothing --Just (wrapper GraphAnalyse)
                             , label = i18n "find"
@@ -710,7 +713,7 @@ graphView settings wrapper options graph =
 
                 adoptTrackButton =
                     row [ spacing 3, width fill ]
-                        [ infoButton (wrapper <| DisplayInfo "graph" "adoptInfo")
+                        [ infoButton (wrapper <| DisplayInfo toolId "adoptInfo")
                         , Input.button neatToolsBorder
                             { onPress = Just (wrapper AdoptNewTrack)
                             , label = i18n "adopt"
@@ -720,7 +723,7 @@ graphView settings wrapper options graph =
                 toleranceSlider =
                     row [ spacing 5 ]
                         [ none
-                        , infoButton (wrapper <| DisplayInfo "graph" "tolerance")
+                        , infoButton (wrapper <| DisplayInfo toolId "tolerance")
 
                         --, Input.slider
                         --    commonShortHorizontalSliderStyles
@@ -778,7 +781,7 @@ addTrack : TrackLoaded msg -> Options msg -> Options msg
 addTrack track options =
     --If this is not the first track, we must adjust its reference point.
     --That may be inefficient but we can absorb the cost at load time.
-    --If not, we (I) will have to change it.
+    --If not, we (I) will have to change it. POITROAE.
     --TODO: Reflect with an Edge in the Graph.
     let
         unambiguousName =
@@ -812,6 +815,7 @@ addTrack track options =
 
                 Nothing ->
                     Just <| TrackLoaded.getReferencePoint track
+        , graph = Graph.addEdge track options.graph
     }
 
 

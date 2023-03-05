@@ -7,7 +7,6 @@ module Tools.GraphOptions exposing
     , InsertedPointOnLeaf
     , Traversal
     , TraversalDisplay
-    , XY
     )
 
 --This module now about the graph structure, not the UI.
@@ -24,30 +23,24 @@ import TrackLoaded exposing (TrackLoaded)
 
 
 type Direction
-    = Natural -- from low node to high
-    | Reverse -- from high to low
-
-
-type alias XY =
-    -- First pass is about detecting revisited points and working out where the edges are.
-    -- For that, we build a dictionary indexed by track point position (meters from reference).
-    ( Float, Float )
+    = Natural -- from low (sort order) node to high
+    | Reverse -- from high (sort order) to low
 
 
 type alias Edge msg =
     -- (low node index, high node index, point 1 XY)
     --( ( Int, Int, XY ), TrackLoaded msg )
-    { lowNode : Int
-    , highNode : Int
-    , via : XY
+    { lowNode : String
+    , highNode : String
+    , via : String
     , track : TrackLoaded msg
     , originalDirection : Direction
     }
 
 
 type alias Graph msg =
-    { nodes : Dict Int XY
-    , edges : Dict Int (Edge msg)
+    { nodes : Dict String EarthPoint
+    , edges : Dict String (Edge msg)
     , referenceLonLat : GPXSource
     }
 
