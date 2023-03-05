@@ -15,9 +15,7 @@
 
 Implementation: (RM = existing Route Maker)
 
-1. When we switch tracks, presentation contexts may not "make sense". 
-> Think this is why profile1 is out of whack. Possible simple fix is to make the 
-> horizontal position [0..1] proportion of track length instead of absolute distance.
+~~1. When we switch tracks, presentation contexts may not "make sense".~~ 
 2. Need to do something about Named Segments.
 3. Ability to unload a track. Only active on active track.
 4. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)

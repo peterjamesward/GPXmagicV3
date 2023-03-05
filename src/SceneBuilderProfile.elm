@@ -117,6 +117,9 @@ commonChartScales settings profile track isGradients =
 
             else
                 profile.focalPoint
+                    |> Quantity.clamp
+                        leftmostCentreDistance
+                        rightmostCentreDistance
 
         halfOfView =
             -- Zoom level zero shows whole track.
