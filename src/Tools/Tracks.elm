@@ -8,6 +8,7 @@ module Tools.Tracks exposing
     , mapOverVisibleTracks
     , setTrack
     , toolId
+    , unloadActiveTrack
     , update
     , updateActiveTrack
     , view
@@ -23,7 +24,7 @@ import List.Extra
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
-import ViewPureStyles exposing (useIcon)
+import ViewPureStyles exposing (neatToolsBorder, useIcon)
 
 
 toolId =
@@ -51,6 +52,7 @@ defaultOptions =
 type Msg
     = SelectActiveTrack Int
     | ToggleVisibility Int
+    | UnloadActiveTrack
 
 
 update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
@@ -79,6 +81,19 @@ update msg options =
                 Nothing ->
                     ( options, [] )
 
+        UnloadActiveTrack ->
+            case options.activeTrackIndex of
+                Just active ->
+                    case List.Extra.getAt active options.tracks of
+                        Just track ->
+                            ( options, [ Actions.UnloadActiveTrack track.trackName ] )
+
+                        Nothing ->
+                            ( options, [] )
+
+                Nothing ->
+                    ( options, [] )
+
 
 updateActiveTrack : TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
 updateActiveTrack newTrack options =
@@ -100,14 +115,32 @@ view settings wrapper options =
     let
         helper =
             I18N.text settings.location toolId
+
+        listOfTracks =
+            column [ spacing 5 ] <|
+                List.indexedMap
+                    (\index entry ->
+                        displayTrackInfo index entry wrapper options
+                    )
+                    options.tracks
+
+        unloadButton =
+            el [ centerX, width fill ] <|
+                if options.activeTrackIndex /= Nothing then
+                    Input.button
+                        neatToolsBorder
+                        { label = helper "unload"
+                        , onPress = Just <| wrapper UnloadActiveTrack
+                        }
+
+                else
+                    none
     in
     el (CommonToolStyles.toolContentBoxStyle settings) <|
-        column [ spacing 5 ] <|
-            List.indexedMap
-                (\index entry ->
-                    displayTrackInfo index entry wrapper options
-                )
-                options.tracks
+        column [ spacing 5 ]
+            [ listOfTracks
+            , unloadButton
+            ]
 
 
 displayTrackInfo : Int -> TrackLoaded msg -> (Msg -> msg) -> Options msg -> Element msg
@@ -204,6 +237,38 @@ getActiveTrack options =
 
         Nothing ->
             Nothing
+
+
+unloadActiveTrack : Options msg -> ( Maybe (TrackLoaded msg), Options msg )
+unloadActiveTrack options =
+    case options.activeTrackIndex of
+        Just active ->
+            let
+                newOptions =
+                    { options
+                        | tracks = List.Extra.removeAt active options.tracks
+                        , activeTrackIndex =
+                            if List.length options.tracks > 1 then
+                                Just 0
+
+                            else
+                                Nothing
+                    }
+
+                newTrack =
+                    case newOptions.activeTrackIndex of
+                        Just index ->
+                            List.Extra.getAt index newOptions.tracks
+
+                        Nothing ->
+                            Nothing
+            in
+            ( newTrack
+            , newOptions
+            )
+
+        Nothing ->
+            ( Nothing, options )
 
 
 mapOverVisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a

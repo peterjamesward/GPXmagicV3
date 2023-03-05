@@ -963,6 +963,7 @@ please try using the refresh button below.""" )
           , Dict.fromList
                 [ ( "label", """Tracks Loaded""" )
                 , ( "info", """Manage multiple tracks.""" )
+                , ( "unload", """Remove the active track (no Undo)""" )
                 ]
           )
         , ( "segments"

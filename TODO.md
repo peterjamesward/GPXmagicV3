@@ -15,19 +15,14 @@
 
 Implementation: (RM = existing Route Maker)
 
-~~1. When we switch tracks, presentation contexts may not "make sense".~~ 
-~~2. Need to do something about Named Segments.~~
-~~3. Implement UpdateNamedSegments action.~~
-~~4. At Main.1659, add Strava derived segment to track's list.~~
-5. Ability to unload a track. Only active on active track.
-6. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
-7. Limited Undo as in RM; use simple state machine across canonicalization & routing.
-8. Tracks become Edges in promoted graph
-9. Snap nearby points and roads from RM.
-10. Canonicalise from RM.
-11. Routing from RM.
-12. New track with offset from RM..
-13. Rename tool: "Many ways", ...?
+7. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
+8. Limited Undo as in RM; use simple state machine across canonicalization & routing.
+9. Tracks become Edges in promoted graph
+10. Snap nearby points and roads from RM.
+11. Canonicalise from RM.
+12. Routing from RM.
+13. New track with offset from RM..
+14. Rename tool: "Many ways", ...?
 
 ---
 

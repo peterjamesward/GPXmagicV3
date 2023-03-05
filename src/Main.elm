@@ -1486,6 +1486,26 @@ performActionsOnModel actions model =
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
             case ( action, foldedModel.activeTrack ) of
+                ( UnloadActiveTrack _, Just _ ) ->
+                    let
+                        toolOptions =
+                            model.toolOptions
+
+                        tracksOptions =
+                            toolOptions.tracksOptions
+
+                        ( newTrack, newOptions ) =
+                            Tools.Tracks.unloadActiveTrack tracksOptions
+
+                        newToolOptions =
+                            { toolOptions | tracksOptions = newOptions }
+                    in
+                    { foldedModel
+                        | activeTrack = newTrack
+                        , needsRendering = True
+                        , toolOptions = newToolOptions
+                    }
+
                 ( SetActiveTrack trackIndex, _ ) ->
                     let
                         toolOptions =
@@ -2322,6 +2342,12 @@ performActionCommands actions model =
                 ( SetActiveTrack _, _ ) ->
                     performAction TrackHasChanged
 
+                ( UnloadActiveTrack oldTrackName, _ ) ->
+                    Cmd.batch
+                        [ MapPortController.removeTrackFromMapByName oldTrackName
+                        , performAction TrackHasChanged
+                        ]
+
                 ( TryRemoteLoadIfGiven, _ ) ->
                     case model.loadFromUrl of
                         Nothing ->
@@ -2391,8 +2417,6 @@ performActionCommands actions model =
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch
                         [ MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
-
-                        --, Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
                             model.systemSettings

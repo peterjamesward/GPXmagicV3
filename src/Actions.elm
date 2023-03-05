@@ -137,6 +137,7 @@ type
     | FetchMatchingRoute (List (List Float))
     | SetActiveTrack Int
     | UpdateNamedSegments (List NamedSegment)
+    | UnloadActiveTrack String
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

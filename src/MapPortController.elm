@@ -236,6 +236,16 @@ removeTrackFromMap track =
             ]
 
 
+removeTrackFromMapByName : String -> Cmd msg
+removeTrackFromMapByName trackName =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Remove" )
+            , ( "token", E.string mapboxKey )
+            , ( "label", E.string trackName ) -- worth a try
+            ]
+
+
 addAllTracksToMap : Tools.Tracks.Options msg -> Cmd msg
 addAllTracksToMap options =
     let
