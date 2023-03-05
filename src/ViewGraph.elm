@@ -53,8 +53,9 @@ import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.Graph
-import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
+import Tools.GraphOptions as Graph exposing (ClickDetect(..), Direction(..), Graph)
 import Tools.I18NOptions as I18NOptions
+import Tools.TracksOptions as Tracks
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
@@ -161,8 +162,13 @@ zoomButtons settings msgWrapper context =
         ]
 
 
-popup : (Msg -> msg) -> GraphContext -> Tools.GraphOptions.Options msg -> Element msg
-popup msgWrapper context options =
+popup :
+    (Msg -> msg)
+    -> GraphContext
+    -> Tracks.GraphOptions msg
+    -> Graph.Graph msg
+    -> Element msg
+popup msgWrapper context options graph =
     let
         popupMenu =
             case context.clickFeature of
@@ -171,7 +177,7 @@ popup msgWrapper context options =
 
                 ClickNode node ->
                     [ text <| "Place " ++ String.fromInt node ++ "..."
-                    , if Tools.Graph.loopCanBeAdded node options then
+                    , if Tools.Graph.loopCanBeAdded node options.userRoute graph then
                         Input.button []
                             { onPress = Just <| msgWrapper <| AddSelfLoop node
                             , label =
@@ -191,7 +197,7 @@ popup msgWrapper context options =
 
                 ClickEdge edge ->
                     [ text <| "Road " ++ String.fromInt edge ++ "..."
-                    , if Tools.Graph.edgeCanBeAdded edge options then
+                    , if Tools.Graph.edgeCanBeAdded edge options.userRoute graph then
                         Input.button []
                             { onPress = Just <| msgWrapper <| AddTraversal edge
                             , label = text "Add to route"
@@ -203,7 +209,7 @@ popup msgWrapper context options =
                         { onPress = Just <| msgWrapper <| EditRoad edge
                         , label = text "Edit this road"
                         }
-                    , if Tools.Graph.edgeCanBeDeleted edge options then
+                    , if Tools.Graph.edgeCanBeDeleted edge options.userRoute graph then
                         Input.button []
                             { onPress = Just <| msgWrapper <| DeleteRoad edge
                             , label = text "Delete this Road"
@@ -256,16 +262,14 @@ view :
     SystemSettings
     -> GraphContext
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Tools.GraphOptions.Options msg
+    -> Tracks.GraphOptions msg
+    -> Graph.Graph msg
     -> (Msg -> msg)
     -> Element msg
-view settings context ( width, height ) options msgWrapper =
+view settings context ( width, height ) options graph msgWrapper =
     let
         camera =
             deriveCamera context
-
-        graph =
-            options.suggestedNewGraph |> Maybe.withDefault options.graph
 
         -- Defines the shape of the 'screen' that we will be using when
         -- projecting 3D points into 2D
@@ -313,7 +317,7 @@ view settings context ( width, height ) options msgWrapper =
                     )
 
         edgeToHighlight =
-            List.Extra.getAt options.selectedTraversal graph.userRoute
+            List.Extra.getAt options.selectedTraversal options.userRoute
                 |> Maybe.map .edge
                 |> Maybe.withDefault -1
 
@@ -327,7 +331,7 @@ view settings context ( width, height ) options msgWrapper =
             ]
 
         arrowsOnHighlightedEdge =
-            case List.Extra.getAt options.selectedTraversal graph.userRoute of
+            case List.Extra.getAt options.selectedTraversal options.userRoute of
                 Nothing ->
                     []
 
@@ -528,7 +532,7 @@ view settings context ( width, height ) options msgWrapper =
         , Border.color FlatColors.ChinesePalette.peace
         , Background.color FlatColors.FlatUIPalette.silver
         , inFront <| zoomButtons settings msgWrapper context
-        , inFront <| popup msgWrapper context options
+        , inFront <| popup msgWrapper context options graph
         ]
     <|
         Element.html svgElement

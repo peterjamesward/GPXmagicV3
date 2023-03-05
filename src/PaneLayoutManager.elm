@@ -47,6 +47,7 @@ import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.NamedSegmentOptions exposing (NamedSegment)
 import Tools.Tracks
+import Tools.TracksOptions as Tracks
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements
@@ -118,7 +119,6 @@ type Msg
     | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
-      --| SliderTimeout
     | PaneNoOp
 
 
@@ -180,7 +180,7 @@ render :
     ToolsController.Options msg
     -> PaneLayoutOptions
     -> Quantity Int Pixels
-    -> Tools.Tracks.Options msg
+    -> Tracks.Options msg
     -> Dict String PreviewData
     -> PaneLayoutOptions
 render toolSettings options width tracks previews =
@@ -782,7 +782,7 @@ viewPanes :
     SystemSettings
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Tools.GraphOptions.Options msg
+    -> Tracks.Options msg
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> PaneLayoutOptions
@@ -847,7 +847,8 @@ viewPanes settings msgWrapper mTrack graphOptions displayOptions ( w, h ) option
                                 settings
                                 context
                                 ( paneWidth, paneHeight )
-                                graphOptions
+                                graphOptions.graphOptions
+                                graphOptions.graph
                                 (msgWrapper << GraphViewMessage pane.paneId)
 
                         _ ->

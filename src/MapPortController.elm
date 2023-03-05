@@ -21,6 +21,7 @@ import SceneBuilderProfile
 import SystemSettings exposing (SystemSettings)
 import Tools.NamedSegmentOptions
 import Tools.Tracks
+import Tools.TracksOptions as Tracks
 import TrackLoaded exposing (TrackLoaded)
 import ViewProfileChartContext
 
@@ -246,7 +247,7 @@ removeTrackFromMapByName trackName =
             ]
 
 
-addAllTracksToMap : Tools.Tracks.Options msg -> Cmd msg
+addAllTracksToMap : Tracks.Options msg -> Cmd msg
 addAllTracksToMap options =
     let
         addToMap track active =

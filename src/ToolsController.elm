@@ -60,10 +60,7 @@ import Tools.DisplaySettingsOptions
 import Tools.Essentials
 import Tools.Flythrough
 import Tools.GradientProblems
-import Tools.Graph
-import Tools.GraphOptions
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
@@ -96,6 +93,7 @@ import Tools.Timestamp
 import Tools.TimestampOptions
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.Tracks
+import Tools.TracksOptions as Tracks
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (..)
 
@@ -133,7 +131,6 @@ type ToolType
     | ToolSplitAndJoin
     | ToolIntersections
     | ToolStraighten
-    | ToolGraph
     | ToolSettings
     | ToolLandUse
     | ToolSmartSmoother
@@ -184,7 +181,7 @@ type alias Options msg =
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
     , timestampOptions : Tools.TimestampOptions.Options
     , routingOptions : Tools.MapMatchingRouterOptions.Options
-    , tracksOptions : Tools.Tracks.Options msg
+    , tracksOptions : Tracks.Options msg
     }
 
 
@@ -254,7 +251,6 @@ type ToolMsg
     | ToolSplitJoinMsg Tools.SplitAndJoin.Msg
     | ToolIntersectionMsg Tools.Intersections.Msg
     | ToolStraightenMsg Tools.Straightener.Msg
-    | ToolGraphMsg Tools.Graph.Msg
     | ToolLandUseMsg Tools.LandUse.Msg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
     | ToolNamedSegmentMsg Tools.NamedSegment.Msg
@@ -304,7 +300,6 @@ defaultTools =
     , splitAndJoinTool
     , intersectionsTool
     , straightenTool
-    , graphTool
     , landUseTool
     , timestampTool
     , routingTool
@@ -673,20 +668,6 @@ straightenTool =
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
     , categories = [ TcMisc ]
-    }
-
-
-graphTool : ToolEntry
-graphTool =
-    { toolType = ToolGraph
-    , toolId = Tools.Graph.toolId
-    , video = Just "https://youtu.be/90GZbpgZjnw"
-    , state = Contracted
-    , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.amethyst
-    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
-    , isPopupOpen = False
-    , categories = [ TcRoute ]
     }
 
 
@@ -1232,24 +1213,6 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
-        ToolGraphMsg msg ->
-            case isTrack of
-                Just track ->
-                    let
-                        ( newOptions, actions ) =
-                            Tools.Graph.update
-                                msg
-                                options.graphOptions
-                                track
-                                (msgWrapper << ToolGraphMsg)
-                    in
-                    ( { options | graphOptions = newOptions }
-                    , actions
-                    )
-
-                Nothing ->
-                    ( options, [] )
-
         ToolLandUseMsg msg ->
             let
                 ( newOptions, actions ) =
@@ -1646,20 +1609,6 @@ toolStateHasChanged toolType newState isTrack options =
 
         ToolStraighten ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
-
-        ToolGraph ->
-            let
-                ( newGraphOptions, actions ) =
-                    Tools.Graph.toolStateChange
-                        (newState == Expanded)
-                        (getColour toolType options.tools)
-                        options.graphOptions
-                        isTrack
-
-                newOptions =
-                    { options | graphOptions = newGraphOptions }
-            in
-            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolSettings ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
@@ -2232,17 +2181,6 @@ viewToolByType settings msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage settings
 
-            ToolGraph ->
-                case isTrack of
-                    Just _ ->
-                        Tools.Graph.view
-                            settings
-                            (msgWrapper << ToolGraphMsg)
-                            options.graphOptions
-
-                    Nothing ->
-                        noTrackMessage settings
-
             ToolSettings ->
                 viewToolSettings settings options msgWrapper
 
@@ -2385,9 +2323,6 @@ encodeType toolType =
 
         ToolStraighten ->
             "ToolStraighten"
-
-        ToolGraph ->
-            "ToolGraph"
 
         ToolSettings ->
             "ToolSettings"

@@ -87,6 +87,7 @@ import Tools.StravaTools
 import Tools.Timestamp
 import Tools.TrackInfoBox
 import Tools.Tracks
+import Tools.TracksOptions as Tracks
 import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Url)
@@ -713,7 +714,7 @@ update msg model =
                         paneMsg
                         PaneMsg
                         model.activeTrack
-                        model.toolOptions.graphOptions.graph
+                        model.toolOptions.tracksOptions.graph
                         model.contentArea
                         model.paneLayoutOptions
                         model.previews
@@ -936,15 +937,6 @@ adoptTrackInModel track model =
         toolOptions =
             model.toolOptions
 
-        graphOptions =
-            toolOptions.graphOptions
-
-        graphFromTrack =
-            { graphOptions
-                | graph = Tools.Graph.trivialGraph track
-                , analyzed = False
-            }
-
         tracksOptions =
             toolOptions.tracksOptions
 
@@ -953,8 +945,7 @@ adoptTrackInModel track model =
 
         newToolOptions =
             { toolOptions
-                | graphOptions = graphFromTrack
-                , tracksOptions = newTracksOptions
+                | tracksOptions = newTracksOptions
             }
 
         modelWithTrack =
@@ -1175,7 +1166,7 @@ viewPaneArea model =
             model.systemSettings
             PaneMsg
             model.activeTrack
-            model.toolOptions.graphOptions
+            model.toolOptions.tracksOptions
             model.toolOptions.displaySettings
             model.contentArea
             model.paneLayoutOptions
@@ -1884,175 +1875,183 @@ performActionsOnModel actions model =
                         newTrack
                         foldedModel
 
-                ( StartRoutePlanning, Just track ) ->
-                    let
-                        toolOptions =
-                            foldedModel.toolOptions
+                {-
+                   ( StartRoutePlanning, Just track ) ->
+                       let
+                           toolOptions =
+                               foldedModel.toolOptions
 
-                        graphOptions =
-                            toolOptions.graphOptions
+                           graphOptions =
+                               toolOptions.graphOptions
 
-                        newPaneLayout =
-                            PaneLayoutManager.forceRouteView foldedModel.paneLayoutOptions
+                           newPaneLayout =
+                               PaneLayoutManager.forceRouteView foldedModel.paneLayoutOptions
 
-                        ( newGraphOptions, newTree ) =
-                            Tools.Graph.enterRoutePlanningMode graphOptions track
+                           ( newGraphOptions, newTree ) =
+                               Tools.Graph.enterRoutePlanningMode graphOptions track
 
-                        newToolOptions =
-                            { toolOptions | graphOptions = newGraphOptions }
+                           newToolOptions =
+                               { toolOptions | graphOptions = newGraphOptions }
 
-                        newTrack =
-                            { track | trackTree = newTree }
-                    in
-                    updateActiveTrack
-                        newTrack
-                        { foldedModel | paneLayoutOptions = newPaneLayout }
+                           newTrack =
+                               { track | trackTree = newTree }
+                       in
+                       updateActiveTrack
+                           newTrack
+                           { foldedModel | paneLayoutOptions = newPaneLayout }
+                -}
+                {-
+                   ( ExitRoutePlanning, Just _ ) ->
+                       let
+                           toolOptions =
+                               foldedModel.toolOptions
 
-                ( ExitRoutePlanning, Just _ ) ->
-                    let
-                        toolOptions =
-                            foldedModel.toolOptions
+                           newPaneLayout =
+                               PaneLayoutManager.exitRouteView foldedModel.paneLayoutOptions
 
-                        newPaneLayout =
-                            PaneLayoutManager.exitRouteView foldedModel.paneLayoutOptions
+                           newToolOptions =
+                               -- Hack here.
+                               { toolOptions
+                                   | tools =
+                                       List.map
+                                           (ToolsController.setToolState ToolsController.ToolGraph ToolsController.Contracted)
+                                           toolOptions.tools
+                               }
+                       in
+                       { foldedModel
+                           | toolOptions = newToolOptions
+                           , paneLayoutOptions = newPaneLayout
+                       }
+                -}
+                {-
+                   ( AddTraversal edge, Just _ ) ->
+                       let
+                           toolOptions =
+                               foldedModel.toolOptions
 
-                        newToolOptions =
-                            -- Hack here.
-                            { toolOptions
-                                | tools =
-                                    List.map
-                                        (ToolsController.setToolState ToolsController.ToolGraph ToolsController.Contracted)
-                                        toolOptions.tools
-                            }
-                    in
-                    { foldedModel
-                        | toolOptions = newToolOptions
-                        , paneLayoutOptions = newPaneLayout
-                    }
+                           graphOptions =
+                               toolOptions.graphOptions
 
-                ( AddTraversal edge, Just _ ) ->
-                    let
-                        toolOptions =
-                            foldedModel.toolOptions
+                           newGraphOptions =
+                               Tools.Graph.addTraversal edge graphOptions
 
-                        graphOptions =
-                            toolOptions.graphOptions
+                           newToolOptions =
+                               { toolOptions | graphOptions = newGraphOptions }
+                       in
+                       { foldedModel | toolOptions = newToolOptions }
+                -}
+                {-
+                   ( AddSelfLoop node, Just _ ) ->
+                       let
+                           toolOptions =
+                               foldedModel.toolOptions
 
-                        newGraphOptions =
-                            Tools.Graph.addTraversal edge graphOptions
+                           graphOptions =
+                               toolOptions.graphOptions
 
-                        newToolOptions =
-                            { toolOptions | graphOptions = newGraphOptions }
-                    in
-                    { foldedModel | toolOptions = newToolOptions }
+                           newGraphOptions =
+                               Tools.Graph.addSelfLoop node graphOptions
 
-                ( AddSelfLoop node, Just _ ) ->
-                    let
-                        toolOptions =
-                            foldedModel.toolOptions
+                           newToolOptions =
+                               { toolOptions | graphOptions = newGraphOptions }
+                       in
+                       { foldedModel | toolOptions = newToolOptions }
+                -}
+                {-
+                   ( DeleteEdge edge, Just _ ) ->
+                       let
+                           toolOptions =
+                               foldedModel.toolOptions
 
-                        graphOptions =
-                            toolOptions.graphOptions
+                           graphOptions =
+                               toolOptions.graphOptions
 
-                        newGraphOptions =
-                            Tools.Graph.addSelfLoop node graphOptions
+                           newToolOptions =
+                               { toolOptions | graphOptions = Tools.Graph.deleteEdge edge graphOptions }
+                       in
+                       { foldedModel | toolOptions = newToolOptions }
+                -}
+                {-
+                   ( ChangeActiveTrack edge, Just _ ) ->
+                       let
+                           toolOptions =
+                               foldedModel.toolOptions
 
-                        newToolOptions =
-                            { toolOptions | graphOptions = newGraphOptions }
-                    in
-                    { foldedModel | toolOptions = newToolOptions }
+                           graphOptions =
+                               toolOptions.graphOptions
 
-                ( DeleteEdge edge, Just _ ) ->
-                    let
-                        toolOptions =
-                            foldedModel.toolOptions
+                           newGraphOptions =
+                               Tools.Graph.changeActiveTrack edge graphOptions
 
-                        graphOptions =
-                            toolOptions.graphOptions
+                           newToolOptions =
+                               { toolOptions | graphOptions = newGraphOptions }
+                       in
+                       { foldedModel
+                           | toolOptions = newToolOptions
+                           , activeTrack = Tools.Graph.getTrack edge graphOptions
+                           , needsRendering = True
+                       }
+                -}
+                {-
+                   ( MakeRouteFromGraph, Just _ ) ->
+                       let
+                           toolOptions =
+                               foldedModel.toolOptions
 
-                        newToolOptions =
-                            { toolOptions | graphOptions = Tools.Graph.deleteEdge edge graphOptions }
-                    in
-                    { foldedModel | toolOptions = newToolOptions }
+                           graphOptions =
+                               toolOptions.graphOptions
 
-                ( ChangeActiveTrack edge, Just _ ) ->
-                    let
-                        toolOptions =
-                            foldedModel.toolOptions
+                           newGraphOptions =
+                               Tools.Graph.makeNewRoute graphOptions
 
-                        graphOptions =
-                            toolOptions.graphOptions
+                           newToolOptions =
+                               { toolOptions | graphOptions = newGraphOptions }
+                       in
+                       case Tools.Graph.getTrack 0 newGraphOptions of
+                           Just foundNewTrack ->
+                               updateActiveTrack
+                                   foundNewTrack
+                                   { foldedModel | toolOptions = newToolOptions }
 
-                        newGraphOptions =
-                            Tools.Graph.changeActiveTrack edge graphOptions
+                           Nothing ->
+                               foldedModel
+                -}
+                {-
+                   ( CombineNearbyPoints, Just track ) ->
+                       -- Trickier refactor because of extra graph option state.
+                       let
+                           oldToolOptions =
+                               model.toolOptions
 
-                        newToolOptions =
-                            { toolOptions | graphOptions = newGraphOptions }
-                    in
-                    { foldedModel
-                        | toolOptions = newToolOptions
-                        , activeTrack = Tools.Graph.getTrack edge graphOptions
-                        , needsRendering = True
-                    }
+                           oldGraphOptions =
+                               oldToolOptions.graphOptions
 
-                ( MakeRouteFromGraph, Just _ ) ->
-                    let
-                        toolOptions =
-                            foldedModel.toolOptions
+                           ( newGraphOptions, newTree ) =
+                               Tools.Graph.combineNearbyPoints
+                                   oldGraphOptions
+                                   track
 
-                        graphOptions =
-                            toolOptions.graphOptions
+                           newToolOptions =
+                               { oldToolOptions | graphOptions = newGraphOptions }
 
-                        newGraphOptions =
-                            Tools.Graph.makeNewRoute graphOptions
+                           pointerReposition =
+                               --Let's reposition by distance, not uncommon.
+                               DomainModel.preserveDistanceFromStart track.trackTree newTree
 
-                        newToolOptions =
-                            { toolOptions | graphOptions = newGraphOptions }
-                    in
-                    case Tools.Graph.getTrack 0 newGraphOptions of
-                        Just foundNewTrack ->
-                            updateActiveTrack
-                                foundNewTrack
-                                { foldedModel | toolOptions = newToolOptions }
+                           ( newOrange, newPurple ) =
+                               ( pointerReposition track.currentPosition
+                               , Maybe.map pointerReposition track.markerPosition
+                               )
 
-                        Nothing ->
-                            foldedModel
-
-                ( CombineNearbyPoints, Just track ) ->
-                    -- Trickier refactor because of extra graph option state.
-                    let
-                        oldToolOptions =
-                            model.toolOptions
-
-                        oldGraphOptions =
-                            oldToolOptions.graphOptions
-
-                        ( newGraphOptions, newTree ) =
-                            Tools.Graph.combineNearbyPoints
-                                oldGraphOptions
-                                track
-
-                        newToolOptions =
-                            { oldToolOptions | graphOptions = newGraphOptions }
-
-                        pointerReposition =
-                            --Let's reposition by distance, not uncommon.
-                            DomainModel.preserveDistanceFromStart track.trackTree newTree
-
-                        ( newOrange, newPurple ) =
-                            ( pointerReposition track.currentPosition
-                            , Maybe.map pointerReposition track.markerPosition
-                            )
-
-                        newTrack =
-                            { track
-                                | trackTree = newTree
-                                , currentPosition = newOrange
-                                , markerPosition = newPurple
-                            }
-                    in
-                    updateActiveTrack newTrack foldedModel
-
+                           newTrack =
+                               { track
+                                   | trackTree = newTree
+                                   , currentPosition = newOrange
+                                   , markerPosition = newPurple
+                               }
+                       in
+                       updateActiveTrack newTrack foldedModel
+                -}
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
                         ( modelWithNewTrack, _ ) =
@@ -2232,36 +2231,31 @@ performActionsOnModel actions model =
                 ( UndoLastAction, Just track ) ->
                     -- Without massive replumbing, I'm making the "graph walker" undo special.
                     -- We'll see how this goes; a better solution may arise.
-                    let
-                        topUndoAction =
-                            track.undos |> List.head |> Maybe.map .action
-                    in
-                    case topUndoAction of
-                        Just Actions.MakeRouteFromGraph ->
-                            let
-                                toolOptions =
-                                    foldedModel.toolOptions
+                    {-
+                       let
+                           topUndoAction =
+                               track.undos |> List.head |> Maybe.map .action
+                       in
+                       case topUndoAction of
+                           Just Actions.MakeRouteFromGraph ->
+                               let
+                                   toolOptions =
+                                       foldedModel.toolOptions
+                                   newToolOptions =
+                                       { toolOptions | graphOptions = newGraphOptions }
+                               in
+                               case Tools.Graph.getTrack 0 newGraphOptions of
+                                   Just newTrack ->
+                                       updateActiveTrack newTrack foldedModel
 
-                                graphOptions =
-                                    toolOptions.graphOptions
+                                   Nothing ->
+                                       foldedModel
 
-                                newGraphOptions =
-                                    Tools.Graph.undoWalkRoute graphOptions
-
-                                newToolOptions =
-                                    { toolOptions | graphOptions = newGraphOptions }
-                            in
-                            case Tools.Graph.getTrack 0 newGraphOptions of
-                                Just newTrack ->
-                                    updateActiveTrack newTrack foldedModel
-
-                                Nothing ->
-                                    foldedModel
-
-                        _ ->
-                            updateActiveTrack
-                                (TrackLoaded.undoLastAction track)
-                                foldedModel
+                           _ ->
+                    -}
+                    updateActiveTrack
+                        (TrackLoaded.undoLastAction track)
+                        foldedModel
 
                 ( RedoUndoneAction, Just track ) ->
                     case track.redos of
@@ -2553,7 +2547,7 @@ performActionCommands actions model =
     Cmd.batch <| List.map performAction actions
 
 
-showTrackOnMapCentered : Tools.Tracks.Options msg -> Cmd msg
+showTrackOnMapCentered : Tracks.Options msg -> Cmd msg
 showTrackOnMapCentered tracks =
     case Tools.Tracks.getActiveTrack tracks of
         Just activeTrack ->
