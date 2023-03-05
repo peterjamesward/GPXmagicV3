@@ -46,6 +46,7 @@ type alias TrackLoaded msg =
     , landUseData : LandUseDataTypes.LandUseData
     , leafIndex : LeafIndex
     , visible : Bool
+    , namedSegments : List NamedSegment
     }
 
 
@@ -63,6 +64,7 @@ newTrackFromTree refLonLat newTree =
     , landUseData = LandUseDataTypes.emptyLandUse
     , leafIndex = indexLeaves newTree
     , visible = True
+    , namedSegments = []
     }
 
 
@@ -80,7 +82,7 @@ removeAdjacentDuplicates gpxs =
 trackFromSegments :
     String
     -> ( List GPXSource, List ( String, Int, Int ) )
-    -> Maybe ( TrackLoaded msg, List NamedSegment )
+    -> Maybe (TrackLoaded msg)
 trackFromSegments trackName ( allPoints, segments ) =
     let
         baseTrack =
@@ -123,11 +125,12 @@ trackFromSegments trackName ( allPoints, segments ) =
     case baseTrack of
         Just track ->
             Just
-                ( track
-                , segments
-                    |> List.map (convertSegment track)
-                    |> combineContiguousSameNameSegments
-                )
+                { track
+                    | namedSegments =
+                        segments
+                            |> List.map (convertSegment track)
+                            |> combineContiguousSameNameSegments
+                }
 
         Nothing ->
             Nothing
@@ -219,6 +222,7 @@ trackFromPoints trackName gpxTrack =
                 , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
                 , leafIndex = indexLeaves aTree
                 , visible = True
+                , namedSegments = []
                 }
 
         Nothing ->

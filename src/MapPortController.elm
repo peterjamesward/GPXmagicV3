@@ -262,10 +262,9 @@ paintCanvasProfileChart :
     ViewProfileChartContext.ProfileContext
     -> SystemSettings
     -> TrackLoaded msg
-    -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> Cmd msg
-paintCanvasProfileChart profileContext settings track segments previews =
+paintCanvasProfileChart profileContext settings track previews =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Profile" )
@@ -275,7 +274,6 @@ paintCanvasProfileChart profileContext settings track segments previews =
                     profileContext
                     settings
                     track
-                    segments
                     previews
               )
             ]

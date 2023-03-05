@@ -346,12 +346,14 @@ view :
     -> SystemSettings
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
-    -> List NamedSegment
     -> (Msg -> msg)
     -> Dict String PreviewData
     -> Element msg
-view context settings ( givenWidth, givenHeight ) track segments msgWrapper previews =
+view context settings ( givenWidth, givenHeight ) track msgWrapper previews =
     let
+        segments =
+            track.namedSegments
+
         ( altitudeWidth, altitudeHeight ) =
             ( givenWidth
             , givenHeight

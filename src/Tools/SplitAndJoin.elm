@@ -193,7 +193,6 @@ writeOneSection sections options track rgtOptions =
                                 track.trackName
                                 rgtOptions
                                 (processingFunction subTrack)
-                                []
 
                         Nothing ->
                             "failed to make the track section"

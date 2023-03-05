@@ -376,10 +376,10 @@ update msg model =
                             I18N.localisedString model.systemSettings.location "main" "unnamed"
             in
             case TrackLoaded.trackFromSegments trackName gpxSegments of
-                Just ( track, segments ) ->
+                Just track ->
                     let
                         modelWithTrack =
-                            adoptTrackInModel track segments model
+                            adoptTrackInModel track model
                     in
                     ( modelWithTrack
                     , Cmd.batch
@@ -440,7 +440,6 @@ update msg model =
                         model.paneLayoutOptions
                         model.systemSettings
                         track
-                        model.toolOptions.namedSegmentOptions.namedSegments
                         model.previews
                     )
 
@@ -785,7 +784,6 @@ update msg model =
                             track.trackName
                             model.rgtOptions
                             track
-                            model.toolOptions.namedSegmentOptions.namedSegments
                     )
 
                 Nothing ->
@@ -912,11 +910,7 @@ update msg model =
                 Just track ->
                     let
                         newModel =
-                            adoptTrackInModel track
-                                []
-                                { model
-                                    | toolOptions = newToolOptions
-                                }
+                            adoptTrackInModel track { model | toolOptions = newToolOptions }
                     in
                     ( newModel
                     , Cmd.batch
@@ -934,8 +928,8 @@ update msg model =
                     )
 
 
-adoptTrackInModel : TrackLoaded Msg -> List NamedSegment -> Model -> Model
-adoptTrackInModel track segments model =
+adoptTrackInModel : TrackLoaded Msg -> Model -> Model
+adoptTrackInModel track model =
     --If this is not the first track, we must adjust its reference point.
     --That may be inefficient but we can absorb the cost at load time.
     --If not, we (I) will have to change it.
@@ -962,7 +956,6 @@ adoptTrackInModel track segments model =
             { toolOptions
                 | graphOptions = graphFromTrack
                 , tracksOptions = newTracksOptions
-                , namedSegmentOptions = Tools.NamedSegment.initialise segments
             }
 
         modelWithTrack =
@@ -1183,7 +1176,6 @@ viewPaneArea model =
             model.systemSettings
             PaneMsg
             model.activeTrack
-            model.toolOptions.namedSegmentOptions.namedSegments
             model.toolOptions.graphOptions
             model.toolOptions.displaySettings
             model.contentArea
@@ -1631,6 +1623,11 @@ performActionsOnModel actions model =
                         (Tools.Nudge.applyUsingOptions options track)
                         foldedModel
 
+                ( UpdateNamedSegments segments, Just track ) ->
+                    updateActiveTrack
+                        { track | namedSegments = segments }
+                        foldedModel
+
                 ( PasteStravaSegment options, Just track ) ->
                     -- This is like Nudge in that the affected area is given
                     -- by the tool, not by the range markers.
@@ -1638,9 +1635,6 @@ performActionsOnModel actions model =
                         ( newTree, _, ( entry, exit ) ) =
                             -- Need the extra returns for the segment.
                             Tools.StravaTools.paste options track
-
-                        toolOptions =
-                            foldedModel.toolOptions
 
                         namedSegment =
                             case Tools.StravaTools.segmentName options of
@@ -1657,24 +1651,20 @@ performActionsOnModel actions model =
                                 Nothing ->
                                     Nothing
 
-                        newSegmentOptions =
+                        newSegments =
                             case namedSegment of
-                                Just segment ->
-                                    Tools.NamedSegment.addSegment
-                                        segment
-                                        toolOptions.namedSegmentOptions
+                                Just isSegment ->
+                                    Tools.NamedSegment.addSegment isSegment track
 
                                 Nothing ->
-                                    toolOptions.namedSegmentOptions
-
-                        newToolOptions =
-                            { toolOptions | namedSegmentOptions = newSegmentOptions }
+                                    track.namedSegments
 
                         newTrack =
                             TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
-                    updateActiveTrack newTrack foldedModel
-                        |> (\m -> { m | toolOptions = newToolOptions })
+                    updateActiveTrack
+                        { newTrack | namedSegments = newSegments }
+                        foldedModel
 
                 ( ClearStravaSegmentData, _ ) ->
                     let
@@ -1858,7 +1848,7 @@ performActionsOnModel actions model =
                     in
                     case newTrack of
                         Just track ->
-                            adoptTrackInModel track [] foldedModel
+                            adoptTrackInModel track foldedModel
 
                         Nothing ->
                             { foldedModel | modalMessage = Just "nosvg" }
@@ -2058,7 +2048,7 @@ performActionsOnModel actions model =
                     in
                     case newTrack of
                         Just track ->
-                            adoptTrackInModel track [] foldedModel
+                            adoptTrackInModel track foldedModel
 
                         Nothing ->
                             { foldedModel | modalMessage = Just "nosvg" }
@@ -2361,7 +2351,6 @@ performActionCommands actions model =
                             model.paneLayoutOptions
                             model.systemSettings
                             track
-                            model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                         ]
 
@@ -2382,7 +2371,6 @@ performActionCommands actions model =
                             model.paneLayoutOptions
                             model.systemSettings
                             track
-                            model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                         ]
 
@@ -2393,7 +2381,6 @@ performActionCommands actions model =
                             model.paneLayoutOptions
                             model.systemSettings
                             track
-                            model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                         ]
 
@@ -2410,7 +2397,6 @@ performActionCommands actions model =
                             model.paneLayoutOptions
                             model.systemSettings
                             track
-                            model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                         ]
 
@@ -2420,7 +2406,6 @@ performActionCommands actions model =
                             model.paneLayoutOptions
                             model.systemSettings
                             track
-                            model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                             :: MapPortController.addMarkersToMap track
                             :: List.map showPreviewOnMap (Dict.keys model.previews)
@@ -2523,7 +2508,6 @@ performActionCommands actions model =
                             context
                             model.systemSettings
                             track
-                            model.toolOptions.namedSegmentOptions.namedSegments
                             model.previews
                         , MapPortController.paintCanvasGradientChart
                             context

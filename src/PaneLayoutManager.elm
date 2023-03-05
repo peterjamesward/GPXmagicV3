@@ -710,11 +710,13 @@ paintProfileCharts :
     PaneLayoutOptions
     -> SystemSettings
     -> TrackLoaded msg
-    -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> Cmd msg
-paintProfileCharts panes settings track segments previews =
+paintProfileCharts panes settings track previews =
     let
+        segments =
+            track.namedSegments
+
         paintIfProfileVisible pane =
             if pane.activeView == ViewProfileCanvas then
                 case pane.profileContext of
@@ -724,7 +726,6 @@ paintProfileCharts panes settings track segments previews =
                                 context
                                 settings
                                 track
-                                segments
                                 previews
                             , MapPortController.paintCanvasGradientChart
                                 context
@@ -781,7 +782,6 @@ viewPanes :
     SystemSettings
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> List NamedSegment
     -> Tools.GraphOptions.Options msg
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -789,7 +789,7 @@ viewPanes :
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes settings msgWrapper mTrack graphOptions displayOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -872,7 +872,6 @@ viewPanes settings msgWrapper mTrack segments graphOptions displayOptions ( w, h
                                 settings
                                 ( paneWidth, paneHeight )
                                 track
-                                segments
                                 (msgWrapper << ProfileViewMessage pane.paneId)
                                 previews
 

@@ -22,6 +22,7 @@ import Tools.InterpolateOptions
 import Tools.MemoryUsage
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotateOptions
+import Tools.NamedSegmentOptions exposing (NamedSegment)
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
 import Tools.ProfileSmoothOptions
@@ -135,6 +136,7 @@ type
     | GetPointsFromMap
     | FetchMatchingRoute (List (List Float))
     | SetActiveTrack Int
+    | UpdateNamedSegments (List NamedSegment)
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

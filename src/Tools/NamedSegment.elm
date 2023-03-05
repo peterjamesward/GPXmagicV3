@@ -41,7 +41,6 @@ toolId =
 defaultOptions : Options
 defaultOptions =
     { selectedSegment = Nothing
-    , namedSegments = []
     , landUseProximity = Nothing
     , landUsePreferCloser = False
     }
@@ -59,10 +58,9 @@ type Msg
     | DisplayInfo String String
 
 
-initialise : List NamedSegment -> Options
-initialise segments =
-    { namedSegments = segments
-    , selectedSegment = Nothing
+initialise : Options
+initialise =
+    { selectedSegment = Nothing
     , landUseProximity = Nothing
     , landUsePreferCloser = False
     }
@@ -79,7 +77,7 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             ( options
             , [ exclusionZones theTrack
-              , makePreview colour options theTrack
+              , makePreview colour theTrack
               ]
             )
 
@@ -93,7 +91,7 @@ toolStateChange opened colour options track =
             )
 
 
-makePreview colour options track =
+makePreview colour track =
     let
         getStartIndex segment =
             DomainModel.indexFromDistanceRoundedUp segment.startDistance track.trackTree
@@ -106,7 +104,7 @@ makePreview colour options track =
 
         previewPoints =
             TrackLoaded.buildPreview
-                (List.concatMap segmentIndices options.namedSegments)
+                (List.concatMap segmentIndices track.namedSegments)
                 track.trackTree
     in
     Actions.ShowPreview
@@ -209,7 +207,7 @@ view settings wrapper options track =
                         , scrollbarY
                         , spacing 4
                         ]
-                        { data = validated.namedSegments
+                        { data = validated
                         , columns =
                             [ { header = none
                               , width = fillPortion 3
@@ -275,7 +273,7 @@ view settings wrapper options track =
             case options.selectedSegment of
                 Just selected ->
                     -- Should be in list but of course we check
-                    case List.Extra.getAt selected options.namedSegments of
+                    case List.Extra.getAt selected track.namedSegments of
                         Nothing ->
                             paragraph [] [ i18n "select" ]
 
@@ -404,7 +402,7 @@ view settings wrapper options track =
                     (\seg -> seg.startOk && seg.endOk)
 
         overlapWarning =
-            if goodSeparation validated.namedSegments then
+            if goodSeparation validated then
                 none
 
             else
@@ -419,7 +417,7 @@ view settings wrapper options track =
                     ]
 
         duplicateWarning =
-            if List.Extra.allDifferentBy .name options.namedSegments then
+            if List.Extra.allDifferentBy .name track.namedSegments then
                 none
 
             else
@@ -443,17 +441,14 @@ view settings wrapper options track =
         ]
 
 
-addSegment : NamedSegment -> Options -> Options
-addSegment segment options =
-    { options
-        | namedSegments =
-            List.sortBy
-                (.startDistance >> Length.inMeters)
-                (segment :: options.namedSegments)
-    }
+addSegment : NamedSegment -> TrackLoaded msg -> List NamedSegment
+addSegment segment track =
+    List.sortBy
+        (.startDistance >> Length.inMeters)
+        (segment :: track.namedSegments)
 
 
-checkForRuleBreaches : TrackLoaded msg -> Options -> Options
+checkForRuleBreaches : TrackLoaded msg -> Options -> List NamedSegment
 checkForRuleBreaches track options =
     -- Note the list MUST be sorted beforehand!
     let
@@ -496,13 +491,11 @@ checkForRuleBreaches track options =
 
         validated =
             List.map3 validate
-                (dummyFirst :: options.namedSegments)
-                options.namedSegments
-                (List.drop 1 options.namedSegments ++ [ dummyLast ])
+                (dummyFirst :: track.namedSegments)
+                track.namedSegments
+                (List.drop 1 track.namedSegments ++ [ dummyLast ])
     in
-    { options
-        | namedSegments = validated
-    }
+    validated
 
 
 update :
@@ -518,7 +511,7 @@ update msg options track previewColour wrapper =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
         SelectSegment seg ->
-            case List.Extra.getAt seg options.namedSegments of
+            case List.Extra.getAt seg track.namedSegments of
                 Just segment ->
                     let
                         ( startIndex, endIndex ) =
@@ -542,7 +535,7 @@ update msg options track previewColour wrapper =
                     ( { options | selectedSegment = Nothing }, [] )
 
                 Just index ->
-                    case List.Extra.getAt index options.namedSegments of
+                    case List.Extra.getAt index track.namedSegments of
                         Nothing ->
                             ( { options | selectedSegment = Nothing }, [] )
 
@@ -561,17 +554,15 @@ update msg options track previewColour wrapper =
                                         , createMode = ManualSegment
                                     }
 
-                                newOptions =
-                                    { options
-                                        | namedSegments =
-                                            options.namedSegments
-                                                |> List.Extra.updateAt index (always updated)
-                                                |> List.sortBy (.startDistance >> Length.inMeters)
-                                    }
+                                newSegments =
+                                    track.namedSegments
+                                        |> List.Extra.updateAt index (always updated)
+                                        |> List.sortBy (.startDistance >> Length.inMeters)
                             in
-                            ( newOptions
+                            ( options
                             , [ exclusionZones track
-                              , makePreview previewColour newOptions track
+                              , makePreview previewColour track
+                              , Actions.UpdateNamedSegments newSegments
                               ]
                             )
 
@@ -581,38 +572,40 @@ update msg options track previewColour wrapper =
                     ( { options | selectedSegment = Nothing }, [] )
 
                 Just index ->
-                    case List.Extra.getAt index options.namedSegments of
+                    case List.Extra.getAt index track.namedSegments of
                         Nothing ->
                             ( { options | selectedSegment = Nothing }, [] )
 
                         Just _ ->
                             let
+                                newSegments =
+                                    List.Extra.removeAt index track.namedSegments
+
                                 newOptions =
-                                    { options
-                                        | namedSegments = List.Extra.removeAt index options.namedSegments
-                                        , selectedSegment = Nothing
-                                    }
+                                    { options | selectedSegment = Nothing }
                             in
                             ( newOptions
                             , [ exclusionZones track
-                              , makePreview previewColour newOptions track
+                              , makePreview previewColour track
+                              , Actions.UpdateNamedSegments newSegments
                               ]
                             )
 
         ChangeName index newName ->
-            case List.Extra.getAt index options.namedSegments of
+            case List.Extra.getAt index track.namedSegments of
                 Nothing ->
                     ( { options | selectedSegment = Nothing }, [] )
 
                 Just segment ->
                     let
-                        updated =
+                        updatedSegment =
                             { segment | name = newName }
+
+                        newSegments =
+                            List.Extra.updateAt index (always updatedSegment) track.namedSegments
                     in
-                    ( { options
-                        | namedSegments = List.Extra.updateAt index (always updated) options.namedSegments
-                      }
-                    , []
+                    ( options
+                    , [ Actions.UpdateNamedSegments newSegments ]
                     )
 
         CreateSegment ->
@@ -633,12 +626,13 @@ update msg options track previewColour wrapper =
                     , endOk = True
                     }
 
-                newOptions =
-                    addSegment newSegment options
+                newSegments =
+                    addSegment newSegment track
             in
-            ( newOptions
+            ( options
             , [ exclusionZones track
-              , makePreview previewColour newOptions track
+              , makePreview previewColour track
+              , Actions.UpdateNamedSegments newSegments
               ]
             )
 
@@ -646,11 +640,11 @@ update msg options track previewColour wrapper =
             let
                 newOptions =
                     { options | landUseProximity = Just distance }
-                        |> segmentsFromPlaces track
             in
             ( newOptions
             , [ exclusionZones track
-              , makePreview previewColour newOptions track
+              , makePreview previewColour track
+              , Actions.UpdateNamedSegments <| segmentsFromPlaces track options
               ]
             )
 
@@ -659,15 +653,12 @@ update msg options track previewColour wrapper =
             if enabled then
                 let
                     newOptions =
-                        { options
-                            | landUseProximity =
-                                Just <| Length.meters 50
-                        }
-                            |> segmentsFromPlaces track
+                        { options | landUseProximity = Just <| Length.meters 50 }
                 in
                 ( newOptions
                 , [ exclusionZones track
-                  , makePreview previewColour newOptions track
+                  , makePreview previewColour track
+                  , Actions.UpdateNamedSegments <| segmentsFromPlaces track options
                   ]
                 )
 
@@ -675,17 +666,17 @@ update msg options track previewColour wrapper =
                 -- when disabling, do npt clear the iist
                 let
                     newOptions =
-                        { options
-                            | landUseProximity = Nothing
-                            , namedSegments =
-                                options.namedSegments
-                                    |> List.filter
-                                        (\seg -> seg.createMode == ManualSegment)
-                        }
+                        { options | landUseProximity = Nothing }
+
+                    newSegments =
+                        track.namedSegments
+                            |> List.filter
+                                (\seg -> seg.createMode == ManualSegment)
                 in
                 ( newOptions
                 , [ exclusionZones track
-                  , makePreview previewColour newOptions track
+                  , makePreview previewColour track
+                  , Actions.UpdateNamedSegments newSegments
                   ]
                 )
 
@@ -693,11 +684,11 @@ update msg options track previewColour wrapper =
             let
                 newOptions =
                     { options | landUsePreferCloser = bool }
-                        |> segmentsFromPlaces track
             in
             ( newOptions
             , [ exclusionZones track
-              , makePreview previewColour newOptions track
+              , makePreview previewColour track
+              , Actions.UpdateNamedSegments <| segmentsFromPlaces track options
               ]
             )
 
@@ -710,7 +701,7 @@ type alias SegmentCandidate =
     }
 
 
-segmentsFromPlaces : TrackLoaded msg -> Options -> Options
+segmentsFromPlaces : TrackLoaded msg -> Options -> List NamedSegment
 segmentsFromPlaces track options =
     {-
        1. Filter names places within threshold.
@@ -724,7 +715,7 @@ segmentsFromPlaces track options =
     let
         retainedSegments =
             -- Always scrap previously auto-found segments.
-            options.namedSegments
+            track.namedSegments
                 |> List.filter (\seg -> seg.createMode == ManualSegment)
 
         withinThreshold : Length.Length -> SegmentCandidate -> Bool
@@ -833,12 +824,9 @@ segmentsFromPlaces track options =
                 }
                     :: outputs
     in
-    { options
-        | namedSegments =
-            orderedCandidates
-                |> List.foldl addSegmentIfNoConflict retainedSegments
-                |> List.sortBy (.startDistance >> Length.inMeters)
-    }
+    orderedCandidates
+        |> List.foldl addSegmentIfNoConflict retainedSegments
+        |> List.sortBy (.startDistance >> Length.inMeters)
 
 
 

@@ -134,10 +134,13 @@ writeFooter =
     "</trk></gpx>\n"
 
 
-writeGPX : String -> Tools.RGTOptions.Options -> TrackLoaded msg -> List NamedSegment -> String
-writeGPX name options track segments =
+writeGPX : String -> Tools.RGTOptions.Options -> TrackLoaded msg -> String
+writeGPX name options track =
     --May need to consider storage and excessive concatenation, but try obvious first.
     let
+        segments =
+            track.namedSegments
+
         writeSegments segs startFrom =
             case segs of
                 seg :: moreSegs ->

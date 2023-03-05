@@ -256,28 +256,29 @@ profileChart :
     ProfileContext
     -> SystemSettings
     -> TrackLoaded msg
-    -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> E.Value
-profileChart profile settings track segments previews =
+profileChart profile settings track previews =
     if profile.colouredChart then
         profileChartWithColours profile settings track
 
     else
-        profileChartMonochrome profile settings track segments previews
+        profileChartMonochrome profile settings track previews
 
 
 profileChartMonochrome :
     ProfileContext
     -> SystemSettings
     -> TrackLoaded msg
-    -> List Tools.NamedSegmentOptions.NamedSegment
     -> Dict String PreviewData
     -> E.Value
-profileChartMonochrome profile settings track segments previews =
+profileChartMonochrome profile settings track previews =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
+        segments =
+            track.namedSegments
+
         commonInfo =
             commonChartScales settings profile track False
 
