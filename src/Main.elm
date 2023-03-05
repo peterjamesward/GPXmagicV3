@@ -314,26 +314,25 @@ render : Model -> Model
 render model =
     -- This is or should be the one place where rendering for 3D (and similar) happens.
     -- Map is different: it's imperative by nature, and we don't need to retain the json.
-    case ( model.activeTrack, model.needsRendering ) of
-        ( Just activeTrack, True ) ->
-            let
-                paneLayout =
-                    -- This is all the DOM changes, WebGL, SVG.
-                    --TODO: Should `previews` sit with 3D scene, which is in PaneLayout.
-                    PaneLayoutManager.render
-                        model.toolOptions
-                        model.paneLayoutOptions
-                        (Tuple.first model.contentArea)
-                        model.toolOptions.tracksOptions
-                        model.previews
-            in
-            { model
-                | paneLayoutOptions = paneLayout
-                , needsRendering = False
-            }
+    if model.needsRendering then
+        let
+            paneLayout =
+                -- This is all the DOM changes, WebGL, SVG.
+                --TODO: Should `previews` sit with 3D scene, which is in PaneLayout.
+                PaneLayoutManager.render
+                    model.toolOptions
+                    model.paneLayoutOptions
+                    (Tuple.first model.contentArea)
+                    model.toolOptions.tracksOptions
+                    model.previews
+        in
+        { model
+            | paneLayoutOptions = paneLayout
+            , needsRendering = False
+        }
 
-        _ ->
-            model
+    else
+        model
 
 
 updateActiveTrack : TrackLoaded Msg -> Model -> Model
@@ -2285,7 +2284,7 @@ performActionsOnModel actions model =
                                         modelAfterRedo
 
                                 Nothing ->
-                                    -- Not good, live with it.
+                                    -- Not good, but what can we do?
                                     modelAfterRedo
 
                         _ ->

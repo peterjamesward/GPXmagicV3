@@ -179,7 +179,6 @@ type alias Options msg =
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
     , straightenOptions : Tools.Straightener.Options
-    , graphOptions : Tools.GraphOptions.Options msg
     , landUseOptions : Tools.LandUse.Options
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
@@ -216,7 +215,6 @@ defaultOptions =
     , splitAndJoinOptions = Tools.SplitAndJoin.defaultOptions
     , intersectionOptions = Tools.Intersections.defaultOptions
     , straightenOptions = Tools.Straightener.defaultOptions
-    , graphOptions = Tools.Graph.defaultOptions
     , landUseOptions = Tools.LandUse.defaultOptions
     , smartSmootherOptions = Tools.SmartSmoother.defaultOptions
     , namedSegmentOptions = Tools.NamedSegment.defaultOptions

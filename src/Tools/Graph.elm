@@ -1,4 +1,26 @@
-module Tools.Graph exposing (Msg(..), PointIndexEntry, addSelfLoop, addTraversal, changeActiveTrack, combineNearbyPoints, defaultOptions, deleteEdge, edgeCanBeAdded, edgeCanBeDeleted, enterRoutePlanningMode, getTrack, loopCanBeAdded, makeNewRoute, toolId, toolStateChange, trivialGraph, undoWalkRoute, update, view)
+module Tools.Graph exposing
+    ( Msg(..)
+    , PointIndexEntry
+    , addSelfLoop
+    , addTraversal
+    , changeActiveTrack
+    , combineNearbyPoints
+    , defaultOptions
+    , deleteEdge
+    , edgeCanBeAdded
+    , edgeCanBeDeleted
+    , emptyGraph
+    , enterRoutePlanningMode
+    , getTrack
+    , loopCanBeAdded
+    , makeNewRoute
+    , toolId
+    , toolStateChange
+    , trivialGraph
+    , undoWalkRoute
+    , update
+    , view
+    )
 
 -- Attempt to co-locate the logic to do with having a level of indirection
 -- between the road (nodes) and the trackpoints, so we can traverse sections
@@ -65,8 +87,7 @@ toolId =
 
 defaultOptions : Options msg
 defaultOptions =
-    { graph = emptyGraph
-    , matchingTolerance = Length.meters 1.5
+    { matchingTolerance = Length.meters 1.5
     , centreLineOffset = Length.meters 0.0
     , minimumRadiusAtPlaces = Length.meters 3.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
@@ -81,6 +102,7 @@ defaultOptions =
     , suggestedNewTree = Nothing
     , suggestedNewGraph = Nothing
     , graphUndos = []
+    , userRoute = []
     }
 
 
@@ -104,7 +126,6 @@ emptyGraph : Graph msg
 emptyGraph =
     { nodes = Dict.empty
     , edges = Dict.empty
-    , userRoute = []
     , referenceLonLat =
         { latitude = Angle.degrees 0
         , longitude = Direction2d.positiveX
@@ -128,17 +149,17 @@ makeXY earth =
         |> Point2d.toTuple Length.inMeters
 
 
-edgeCanBeAdded : Int -> Options msg -> Bool
-edgeCanBeAdded newEdge options =
+edgeCanBeAdded : Int -> Options msg -> Graph msg -> Bool
+edgeCanBeAdded newEdge options graph =
     -- Edge can be added if either node is same as final node of last traversal,
     -- or if there are no traversals.
     case
-        ( List.Extra.last options.graph.userRoute
-        , Dict.get newEdge options.graph.edges
+        ( List.Extra.last options.userRoute
+        , Dict.get newEdge graph.edges
         )
     of
         ( Just lastTraversal, Just clickedEdge ) ->
-            case Dict.get lastTraversal.edge options.graph.edges of
+            case Dict.get lastTraversal.edge graph.edges of
                 Just currentLastEdge ->
                     let
                         finalNode =
@@ -161,22 +182,24 @@ edgeCanBeAdded newEdge options =
             False
 
 
-edgeCanBeDeleted : Int -> Options msg -> Bool
-edgeCanBeDeleted edge options =
+edgeCanBeDeleted : Int -> Options msg -> Graph msg -> Bool
+edgeCanBeDeleted edge options graph =
     -- Edge can be deleted if it's not the only edge and it's not used in the route.
-    Dict.size options.graph.edges
+    Dict.size graph.edges
         > 1
-        && (not <| List.any (\traversal -> traversal.edge == edge) options.graph.userRoute)
+        && (not <|
+                List.any (\traversal -> traversal.edge == edge) options.userRoute
+           )
 
 
-loopCanBeAdded : Int -> Options msg -> Bool
-loopCanBeAdded node options =
+loopCanBeAdded : Int -> Options msg -> Graph msg -> Bool
+loopCanBeAdded node options graph =
     -- Loop can be added if node is same as final node of last traversal.
     case
-        List.Extra.last options.graph.userRoute
+        List.Extra.last options.userRoute
     of
         Just traversal ->
-            case Dict.get traversal.edge options.graph.edges of
+            case Dict.get traversal.edge graph.edges of
                 Just finalEdge ->
                     let
                         finalNode =
@@ -195,31 +218,20 @@ loopCanBeAdded node options =
             False
 
 
-deleteEdge : Int -> Options msg -> Options msg
-deleteEdge edge options =
+deleteEdge : Int -> Options msg -> Graph msg -> Graph msg
+deleteEdge edge options graph =
     -- Check is not used in route.
     -- Remove edge from dictionary.
     -- If either end node has no other edges, remove them as well.
-    let
-        graph =
-            options.graph
-    in
     case Dict.get edge graph.edges of
         Just edgeInfo ->
-            let
-                newGraph =
-                    { graph | edges = Dict.remove edge graph.edges }
-                        |> pruneOrphanedNodes
-                        |> removeIfRedundantPlace edgeInfo.lowNode
-                        |> removeIfRedundantPlace edgeInfo.highNode
-            in
-            { options
-                | graph = newGraph
-                , graphUndos = graph :: options.graphUndos
-            }
+            { graph | edges = Dict.remove edge graph.edges }
+                |> pruneOrphanedNodes
+                |> removeIfRedundantPlace edgeInfo.lowNode
+                |> removeIfRedundantPlace edgeInfo.highNode
 
         Nothing ->
-            options
+            graph
 
 
 pruneOrphanedNodes : Graph msg -> Graph msg
@@ -435,14 +447,10 @@ combinedEdgesForNode node graph =
     asLow ++ asHigh
 
 
-addTraversal : Int -> Options msg -> Options msg
-addTraversal newEdge options =
-    let
-        graph =
-            options.graph
-    in
+addTraversal : Int -> Options msg -> Graph msg -> Options msg
+addTraversal newEdge options graph =
     case
-        ( List.Extra.last graph.userRoute
+        ( List.Extra.last options.userRoute
         , Dict.get newEdge graph.edges
         )
     of
@@ -469,46 +477,32 @@ addTraversal newEdge options =
 
                                 else
                                     Reverse
-
-                        newGraph =
-                            { graph
-                                | userRoute =
-                                    graph.userRoute ++ [ { edge = newEdge, direction = newEdgeDirection } ]
-                            }
                     in
                     { options
-                        | graph = newGraph
-                        , selectedTraversal = List.length newGraph.userRoute - 1
+                        | userRoute =
+                            options.userRoute
+                                ++ [ { edge = newEdge, direction = newEdgeDirection } ]
+                        , selectedTraversal = List.length options.userRoute
                     }
 
                 Nothing ->
                     options
 
         ( Nothing, Just _ ) ->
-            let
-                newGraph =
-                    { graph
-                        | userRoute =
-                            graph.userRoute ++ [ { edge = newEdge, direction = Natural } ]
-                    }
-            in
             { options
-                | graph = newGraph
-                , selectedTraversal = List.length newGraph.userRoute - 1
+                | userRoute =
+                    options.userRoute ++ [ { edge = newEdge, direction = Natural } ]
+                , selectedTraversal = List.length options.userRoute
             }
 
         _ ->
             options
 
 
-addSelfLoop : Int -> Options msg -> Options msg
-addSelfLoop node options =
-    let
-        graph =
-            options.graph
-    in
+addSelfLoop : Int -> Options msg -> Graph msg -> Graph msg
+addSelfLoop node options graph =
     case
-        List.Extra.last graph.userRoute
+        List.Extra.last options.userRoute
     of
         Just traversal ->
             case Dict.get traversal.edge graph.edges of
@@ -571,106 +565,77 @@ addSelfLoop node options =
                                 newEdgeTrack =
                                     Maybe.map (TrackLoaded.newTrackFromTree edgeInfo.track.referenceLonLat)
                                         newEdgeTree
-
-                                newGraph =
-                                    case newEdgeTrack of
-                                        Just newTrack ->
-                                            let
-                                                newEdgeInfo =
-                                                    { lowNode = node
-                                                    , highNode = node
-                                                    , via = makeXY <| DomainModel.withoutTime loopOpposite
-                                                    }
-
-                                                newEdgeIndex =
-                                                    Dict.size graph.edges
-                                            in
-                                            { graph
-                                                | edges =
-                                                    Dict.insert
-                                                        newEdgeIndex
-                                                        { lowNode = newEdgeInfo.lowNode
-                                                        , highNode = newEdgeInfo.highNode
-                                                        , via = newEdgeInfo.via
-                                                        , track = newTrack
-                                                        , originalDirection = Natural
-                                                        }
-                                                        graph.edges
+                            in
+                            case newEdgeTrack of
+                                Just newTrack ->
+                                    let
+                                        newEdgeInfo =
+                                            { lowNode = node
+                                            , highNode = node
+                                            , via = makeXY <| DomainModel.withoutTime loopOpposite
                                             }
 
-                                        Nothing ->
-                                            graph
-                            in
-                            { options | graph = newGraph }
+                                        newEdgeIndex =
+                                            Dict.size graph.edges
+                                    in
+                                    { graph
+                                        | edges =
+                                            Dict.insert
+                                                newEdgeIndex
+                                                { lowNode = newEdgeInfo.lowNode
+                                                , highNode = newEdgeInfo.highNode
+                                                , via = newEdgeInfo.via
+                                                , track = newTrack
+                                                , originalDirection = Natural
+                                                }
+                                                graph.edges
+                                    }
+
+                                Nothing ->
+                                    graph
 
                         Nothing ->
-                            options
+                            graph
 
                 Nothing ->
-                    options
+                    graph
 
         Nothing ->
-            options
+            graph
 
 
 changeActiveTrack : Int -> Options msg -> Options msg
 changeActiveTrack edge options =
+    --TODO: This is replaced by active track selection.
     { options | editingTrack = edge }
 
 
-getTrack : Int -> Options msg -> Maybe (TrackLoaded msg)
-getTrack edge options =
-    Dict.get edge options.graph.edges
+getTrack : Int -> Graph msg -> Maybe (TrackLoaded msg)
+getTrack edge graph =
+    Dict.get edge graph.edges
         |> Maybe.map .track
 
 
 toolStateChange :
     Bool
-    -> Element.Color
     -> Options msg
-    -> Maybe (TrackLoaded msg)
     -> ( Options msg, List (ToolAction msg) )
-toolStateChange opened colour options track =
-    case ( opened, track ) of
-        ( True, Just theTrack ) ->
-            let
-                graph =
-                    options.graph
+toolStateChange opened options =
+    if opened then
+        --TODO: Subsume into new RouteBuilder
+        ( options, [] )
+        --if not options.analyzed then
+        --    lookForClusters options options.matchingTolerance tracks
+        --
+        --else
+        --    ( options, [ Actions.HidePreview "graph" ] )
 
-                lastTrack =
-                    Dict.get options.editingTrack graph.edges
-
-                newGraph =
-                    -- Graph must always refer to the latest version of the active track.
-                    { graph
-                        | edges =
-                            case lastTrack of
-                                Just edgeInfo ->
-                                    Dict.insert
-                                        options.editingTrack
-                                        { edgeInfo | track = theTrack }
-                                        graph.edges
-
-                                Nothing ->
-                                    graph.edges
-                    }
-
-                newOptions =
-                    { options | graph = newGraph }
-            in
-            if not options.analyzed then
-                lookForClusters newOptions newOptions.matchingTolerance theTrack
-
-            else
-                ( newOptions, [ Actions.HidePreview "graph" ] )
-
-        _ ->
-            -- Hide preview
-            ( options, [ Actions.HidePreview "graph" ] )
+    else
+        ( options, [ Actions.HidePreview "graph" ] )
 
 
-view : SystemSettings -> (Msg -> msg) -> Options msg -> Element msg
-view settings wrapper options =
+view : SystemSettings -> (Msg -> msg) -> Options msg -> Graph msg -> Element msg
+view settings wrapper options graph =
     let
         i18n =
             I18N.text settings.location toolId
@@ -678,11 +643,7 @@ view settings wrapper options =
         traversals : List TraversalDisplay
         traversals =
             -- Display-ready version of the route.
-            let
-                graph =
-                    options.graph
-            in
-            graph.userRoute
+            options.userRoute
                 |> List.map
                     (\traversal ->
                         case Dict.get traversal.edge graph.edges of
@@ -865,7 +826,7 @@ view settings wrapper options =
                 [ useIconWithSize 20 FeatherIcons.info
                 , paragraph [ padding 4 ]
                     [ if options.analyzed then
-                        if List.isEmpty options.graph.userRoute then
+                        if List.isEmpty options.userRoute then
                             i18n "guidanceNoRoute"
 
                         else
@@ -900,7 +861,7 @@ view settings wrapper options =
                         }
 
                 finishButton =
-                    if not <| List.isEmpty options.graph.userRoute then
+                    if not <| List.isEmpty options.userRoute then
                         row [ spacing 3 ]
                             [ infoButton (wrapper <| DisplayInfo "graph" "render")
                             , I.button
@@ -1494,6 +1455,7 @@ update :
     -> (Msg -> msg)
     -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options track wrapper =
+    --TODO: Migrate into new Route Builder.
     let
         undoInfo =
             TrackLoaded.undoInfo Actions.CombineNearbyPoints track

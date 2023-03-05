@@ -961,7 +961,7 @@ please try using the refresh button below.""" )
           )
         , ( "tracks"
           , Dict.fromList
-                [ ( "label", """Tracks Loaded""" )
+                [ ( "label", """Route builder""" )
                 , ( "info", """Manage multiple tracks.""" )
                 , ( "unload", """Remove the active track (no Undo)""" )
                 ]
@@ -969,7 +969,7 @@ please try using the refresh button below.""" )
         , ( "segments"
           , Dict.fromList
                 [ ( "label", """Named segments""" )
-                , ( "info", """Name sections of track. I suspect there'll be a use for this soon.""" )
+                , ( "info", """Name sections of track.""" )
                 , ( "name", """Name""" )
                 , ( "start", """Start""" )
                 , ( "end", """Finish""" )

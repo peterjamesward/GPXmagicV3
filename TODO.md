@@ -15,14 +15,23 @@
 
 Implementation: (RM = existing Route Maker)
 
-7. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
-8. Limited Undo as in RM; use simple state machine across canonicalization & routing.
-9. Tracks become Edges in promoted graph
-10. Snap nearby points and roads from RM.
-11. Canonicalise from RM.
-12. Routing from RM.
-13. New track with offset from RM..
-14. Rename tool: "Many ways", ...?
+1. Routing from RM - make the Route view work with tracks.
+   1. Need to make Tracks into Edges.
+   2. Move GraphOptions into Tracks.Options
+   3. Maintain Graph in Tracks.updateActiveTrack
+   4. Hmm. Think I should bite bullet and merge Graph entirely into Tracks.
+   5. ? _Use track name as edge name_ ?
+   6. View should reflect new tracks added.
+   7. Should be able to make a route, if ends join up.
+2. Limited Undo as in RM; use simple state machine across canonicalization & routing.
+3. Tracks become Edges in promoted graph
+4. Snap nearby points and roads from RM.
+5. Canonicalise from RM.
+6. Consider random words API for edge labelling. Maybe what3words but 10m could be too coarse.
+7. New track with offset from RM..
+8. Rename tool: "Many ways", "Route builder" ?
+9. Check Land Use data being handled correctly.
+10. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
 
 ---
 

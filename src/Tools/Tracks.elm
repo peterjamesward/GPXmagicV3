@@ -22,6 +22,8 @@ import Element.Input as Input
 import FeatherIcons
 import List.Extra
 import SystemSettings exposing (SystemSettings)
+import Tools.Graph as Graph
+import Tools.GraphOptions as GraphOptions
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (neatToolsBorder, useIcon)
@@ -37,6 +39,8 @@ type alias Options msg =
     , tracks : List (TrackLoaded msg)
     , activeTrackIndex : Maybe Int
     , commonReferenceGPX : Maybe GPXSource -- from where we derive (X,Y) by map projection.
+    , graph : GraphOptions.Graph msg
+    , graphOptions : GraphOptions.Options msg
     }
 
 
@@ -46,6 +50,8 @@ defaultOptions =
     , tracks = []
     , activeTrackIndex = Nothing
     , commonReferenceGPX = Nothing
+    , graph = Graph.emptyGraph
+    , graphOptions = Graph.defaultOptions
     }
 
 
@@ -97,6 +103,7 @@ update msg options =
 
 updateActiveTrack : TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
 updateActiveTrack newTrack options =
+    --TODO: Reflect this updated track in its corresponding graph edge.
     case options.activeTrackIndex of
         Just index ->
             ( newTrack
@@ -175,6 +182,7 @@ addTrack track options =
     --If this is not the first track, we must adjust its reference point.
     --That may be inefficient but we can absorb the cost at load time.
     --If not, we (I) will have to change it.
+    --TODO: Reflect with an Edge in the Graph.
     let
         unambiguousName =
             case

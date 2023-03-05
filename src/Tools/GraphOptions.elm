@@ -1,7 +1,20 @@
-module Tools.GraphOptions exposing (ClickDetect(..), Cluster, Direction(..), Edge, Graph, InsertedPointOnLeaf, Options, Traversal, TraversalDisplay, XY)
+module Tools.GraphOptions exposing
+    ( ClickDetect(..)
+    , Cluster
+    , Direction(..)
+    , Edge
+    , Graph
+    , InsertedPointOnLeaf
+    , Options
+    , Traversal
+    , TraversalDisplay
+    , XY
+    )
 
+import Angle
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
+import Direction2d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
@@ -22,8 +35,7 @@ type alias XY =
 
 
 type alias Options msg =
-    { graph : Graph msg
-    , matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
+    { matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
     , centreLineOffset : Length.Length
     , minimumRadiusAtPlaces : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
@@ -38,6 +50,7 @@ type alias Options msg =
     , suggestedNewTree : Maybe PeteTree
     , suggestedNewGraph : Maybe (Graph msg)
     , graphUndos : List (Graph msg)
+    , userRoute : List Traversal
     }
 
 
@@ -55,8 +68,20 @@ type alias Edge msg =
 type alias Graph msg =
     { nodes : Dict Int XY
     , edges : Dict Int (Edge msg)
-    , userRoute : List Traversal
     , referenceLonLat : GPXSource
+    }
+
+
+emptyGraph : Graph msg
+emptyGraph =
+    { nodes = Dict.empty
+    , edges = Dict.empty
+    , referenceLonLat =
+        { latitude = Angle.degrees 0
+        , longitude = Direction2d.positiveX
+        , altitude = Quantity.zero
+        , timestamp = Nothing
+        }
     }
 
 
