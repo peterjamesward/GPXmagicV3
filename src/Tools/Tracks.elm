@@ -315,6 +315,7 @@ updateActiveTrack newTrack options =
             , { options
                 | tracks =
                     List.Extra.setAt index newTrack options.tracks
+                , graph = Graph.updatedEdge newTrack options.graph
               }
             )
 

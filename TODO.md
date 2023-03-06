@@ -18,17 +18,16 @@ Implementation: (RM = existing Route Maker)
    2. ~~Can't use node indices as keys! Maybe stringified (lon,lat) for nodes, sorted pairs for edges.~~
    3. ~~Move GraphOptions into Tracks.Options~~
    4. ~~Implement addEdge when loading a track. Have to start somewhere.~~
-   5. Maintain Graph as edges are edited in Tracks.updateActiveTrack
+   5. ~~Maintain Graph as edges are edited in Tracks.updateActiveTrack !!~~
    6. Remove track must remove edge.
    7. ~~? _Use track name as edge name_ ? -- No, stringify the waypoints.~~
    8. ~~Route View should reflect new tracks added.~~
-   9. Route view drawing mode must update all edges.
    10. Route view mode toggle should change **all** edges.
    11. Should be able to make a route, if ends join up, which they won't, in general.
 2. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
 4. Canonicalize from RM. Might write again, could be clearer.
+5. Use random words list for canonical node & edge labelling. 
 3. Limited Undo as in RM; use simple state machine across canonicalization & routing.
-5. Consider random words API for edge labelling. Maybe what3words but 10m could be too coarse.
 6. New track with offset from RM..
 7. Rename tool: "Many ways", "Route builder" ?
 8. Check Land Use data being handled correctly.

@@ -10,12 +10,13 @@ module Tools.Graph exposing
        --, enterRoutePlanningMode
        --, getTrack
 
-    ,  loopCanBeAdded
-       --, makeNewRoute
-
+    , loopCanBeAdded
     , traversalCanBeAdded
     ,  trivialGraph
        --, undoWalkRoute
+
+    ,  updatedEdge
+       --, makeNewRoute
 
     )
 
@@ -90,6 +91,23 @@ addEdge track graph =
         | nodes = nodeDict
         , edges = edgeDict
     }
+
+
+updatedEdge : TrackLoaded msg -> Graph msg -> Graph msg
+updatedEdge track graph =
+    -- User has edited a track, so the graph must point to the newest version.
+    case Dict.get track.trackName graph.edges of
+        Just staleEdge ->
+            { graph
+                | edges =
+                    Dict.insert
+                        track.trackName
+                        { staleEdge | track = track }
+                        graph.edges
+            }
+
+        Nothing ->
+            graph
 
 
 traversalCanBeAdded : String -> List Traversal -> Graph msg -> Bool
