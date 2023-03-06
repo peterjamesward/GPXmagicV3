@@ -14,17 +14,11 @@
 Implementation: (RM = existing Route Maker)
 
 1. Routing from RM - make the Route view work with tracks.
-   1. ~~Need to make Tracks into Edges.~~
-   2. ~~Can't use node indices as keys! Maybe stringified (lon,lat) for nodes, sorted pairs for edges.~~
-   3. ~~Move GraphOptions into Tracks.Options~~
-   4. ~~Implement addEdge when loading a track. Have to start somewhere.~~
-   5. ~~Maintain Graph as edges are edited in Tracks.updateActiveTrack !!~~
-   6. ~~Remove track must remove edge.~~
-   7. Change track visibility should reflect on Route view (remove from Dict?)
-   8. The route arc view is silly. Fix it.
-   9. ~~? _Use track name as edge name_ ? -- No, stringify the waypoints.~~
-   10. ~~Route View should reflect new tracks added.~~
-   12. Should be able to make a route, if ends join up, which they won't, in general.
+   9. Option to show/hide unused nodes.
+   10. The route arc view is silly. Fix it.
+   11. ~~? _Use track name as edge name_ ? -- No, stringify the waypoints.~~
+   12. ~~Route View should reflect new tracks added.~~
+   13. Should be able to make a route, if ends join up, which they won't, in general.
 2. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
 4. Canonicalize from RM. Might write again, could be clearer.
 5. Use random words list for canonical node & edge labelling. 

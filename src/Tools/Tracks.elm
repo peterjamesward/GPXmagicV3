@@ -131,6 +131,12 @@ update msg options =
                                 index
                                 (always updatedTrack)
                                 options.tracks
+                        , graph =
+                            if updatedTrack.visible then
+                                Graph.addEdge updatedTrack options.graph
+
+                            else
+                                Graph.removeEdge updatedTrack options.graph
                       }
                     , [ Actions.SetActiveTrack <| Maybe.withDefault 0 options.activeTrackIndex ]
                     )
@@ -306,8 +312,8 @@ update msg options =
 -}
 
 
-updateActiveTrack : TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
-updateActiveTrack newTrack options =
+updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
+updateActiveTrack oldTrack newTrack options =
     --TODO: Reflect this updated track in its corresponding graph edge.
     case options.activeTrackIndex of
         Just index ->
@@ -315,7 +321,7 @@ updateActiveTrack newTrack options =
             , { options
                 | tracks =
                     List.Extra.setAt index newTrack options.tracks
-                , graph = Graph.updatedEdge newTrack options.graph
+                , graph = Graph.updatedEdge oldTrack newTrack options.graph
               }
             )
 

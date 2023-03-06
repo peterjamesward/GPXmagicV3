@@ -94,21 +94,11 @@ addEdge track graph =
     }
 
 
-updatedEdge : TrackLoaded msg -> Graph msg -> Graph msg
-updatedEdge track graph =
+updatedEdge : TrackLoaded msg -> TrackLoaded msg -> Graph msg -> Graph msg
+updatedEdge oldTrack newTrack graph =
     -- User has edited a track, so the graph must point to the newest version.
-    case Dict.get track.trackName graph.edges of
-        Just staleEdge ->
-            { graph
-                | edges =
-                    Dict.insert
-                        track.trackName
-                        { staleEdge | track = track }
-                        graph.edges
-            }
-
-        Nothing ->
-            graph
+    -- Easy and safe to remove old track and add new in case name changed.
+    graph |> removeEdge oldTrack |> addEdge newTrack
 
 
 removeEdge : TrackLoaded msg -> Graph msg -> Graph msg

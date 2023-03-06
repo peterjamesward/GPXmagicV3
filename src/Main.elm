@@ -343,17 +343,23 @@ updateActiveTrack newTrack model =
         toolsOptions =
             model.toolOptions
 
-        tracksOptions =
-            toolsOptions.tracksOptions
-
         ( useTrack, newOptions ) =
-            Tools.Tracks.updateActiveTrack newTrack model.toolOptions.tracksOptions
+            case model.activeTrack of
+                Just activeTrack ->
+                    Tuple.mapFirst Just <|
+                        Tools.Tracks.updateActiveTrack
+                            activeTrack
+                            newTrack
+                            model.toolOptions.tracksOptions
+
+                Nothing ->
+                    ( Nothing, model.toolOptions.tracksOptions )
 
         newToolsOptions =
             { toolsOptions | tracksOptions = newOptions }
     in
     { model
-        | activeTrack = Just useTrack
+        | activeTrack = useTrack
         , toolOptions = newToolsOptions
         , needsRendering = True
     }
