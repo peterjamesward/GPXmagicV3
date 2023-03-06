@@ -29,6 +29,7 @@ module DomainModel exposing
     , interpolateTrack
     , leafFromIndex
     , lngLatPair
+    , midPoint
     , nearestToEarthPoint
     , nearestToLonLat
     , nearestToRay
@@ -163,6 +164,13 @@ startPoint treeNode =
 endPoint : PeteTree -> EarthPoint
 endPoint treeNode =
     treeNode |> asRecord |> .endPoint
+
+
+midPoint : PeteTree -> EarthPoint
+midPoint treeNode =
+    earthPointFromIndex
+        (skipCount treeNode // 2)
+        treeNode
 
 
 trueLength : PeteTree -> Quantity Float Meters

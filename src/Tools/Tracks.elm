@@ -803,9 +803,12 @@ addTrack track options =
 
                 Nothing ->
                     track
+
+        trackWithUnambiguousName =
+            { trackWithCommonReference | trackName = unambiguousName }
     in
     { options
-        | tracks = { trackWithCommonReference | trackName = unambiguousName } :: options.tracks
+        | tracks = trackWithUnambiguousName :: options.tracks
         , nextTrackNumber = options.nextTrackNumber + 1
         , activeTrackIndex = Just 0
         , commonReferenceGPX =
@@ -815,7 +818,7 @@ addTrack track options =
 
                 Nothing ->
                     Just <| TrackLoaded.getReferencePoint track
-        , graph = Graph.addEdge track options.graph
+        , graph = Graph.addEdge trackWithUnambiguousName options.graph
     }
 
 

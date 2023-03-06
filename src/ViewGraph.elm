@@ -79,8 +79,6 @@ type Msg
     | PopupHide
     | ToggleEdgeMode
     | AddTraversal Int
-    | DeleteRoad Int
-    | EditRoad Int
     | AddSelfLoop Int
 
 
@@ -440,13 +438,13 @@ view settings context ( width, height ) options graph msgWrapper =
                     edge.track.trackTree
 
                 ( start, mid, end ) =
-                    ( DomainModel.earthPointFromIndex 0 tree
+                    ( DomainModel.startPoint tree
                         |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
-                    , DomainModel.earthPointFromIndex (skipCount tree // 2) tree
+                    , DomainModel.midPoint tree
                         |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
-                    , DomainModel.earthPointFromIndex (skipCount tree) tree
+                    , DomainModel.endPoint tree
                         |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
                     )
@@ -484,29 +482,26 @@ view settings context ( width, height ) options graph msgWrapper =
                    |> Dict.values
         -}
         -- Create text SVG labels beside each projected edge
-        {-
-           edgeLabels =
-               graph.edges
-                   |> Dict.toList
-                   |> List.map
-                       (\( index, edgeInfo ) ->
-                           let
-                               labelAt =
-                                   earthPointFromIndex
-                                       (skipCount edgeInfo.track.trackTree // 2)
-                                       edgeInfo.track.trackTree
-                                       |> .space
-                                       |> Point3d.toScreenSpace camera screenRectangle
-                           in
-                           Svg.text_
-                               (textAttributes labelAt)
-                               [ Svg.text ("Road " ++ String.fromInt index) ]
-                               -- Hack: flip the text upside down since our later
-                               -- 'Svg.relativeTo topLeftFrame' call will flip it
-                               -- back right side up
-                               |> Svg.mirrorAcross (Axis2d.through labelAt Direction2d.x)
-                       )
-        -}
+        edgeLabels =
+            graph.edges
+                |> Dict.toList
+                |> List.map
+                    (\( edgeKey, edgeInfo ) ->
+                        let
+                            labelAt =
+                                DomainModel.midPoint edgeInfo.track.trackTree
+                                    |> .space
+                                    |> Point3d.toScreenSpace camera screenRectangle
+                        in
+                        Svg.text_
+                            (textAttributes labelAt)
+                            [ Svg.text edgeKey ]
+                            -- Hack: flip the text upside down since our later
+                            -- 'Svg.relativeTo topLeftFrame' call will flip it
+                            -- back right side up
+                            |> Svg.mirrorAcross (Axis2d.through labelAt Direction2d.x)
+                    )
+
         -- Used for converting from coordinates relative to the bottom-left
         -- corner of the 2D drawing into coordinates relative to the top-left
         -- corner (which is what SVG natively works in)
@@ -525,8 +520,8 @@ view settings context ( width, height ) options graph msgWrapper =
                     (Svg.g []
                         (svgNodes
                             ++ svgEdges
-                         --++ nodeLabels
-                         --++ edgeLabels
+                            --++ nodeLabels
+                            ++ edgeLabels
                          --++ arrowsOnHighlightedEdge
                         )
                     )
@@ -754,28 +749,6 @@ update msg msgWrapper graph area context =
         AddSelfLoop node ->
             ( { context | clickPoint = Nothing, clickFeature = ClickNone }
             , [ Actions.AddSelfLoop node ]
-            )
-
-        EditRoad edge ->
-            ( { context
-                | clickPoint = Nothing
-                , clickFeature = ClickNone
-                , haveDisplayedEditingReminder = True
-              }
-            , [ Actions.ChangeActiveTrack edge
-              , Actions.TrackHasChanged
-              , Actions.StoreLocally "editmessagedisplayed" (E.bool True)
-              , if context.haveDisplayedEditingReminder then
-                    Actions.NoAction
-
-                else
-                    Actions.DisplayInfo "graph" "edit"
-              ]
-            )
-
-        DeleteRoad edge ->
-            ( { context | clickPoint = Nothing, clickFeature = ClickNone }
-            , [ Actions.DeleteEdge edge ]
             )
 
 

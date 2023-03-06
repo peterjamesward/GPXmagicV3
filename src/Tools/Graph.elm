@@ -39,6 +39,8 @@ import TrackLoaded exposing (TrackLoaded)
 
 edgeKey : Edge msg -> String
 edgeKey edge =
+    --TBC if we want via in the key. I think we do for canonical edges.
+    --For loaded tracks, we can use the track name.
     edge.lowNode ++ edge.highNode ++ edge.via
 
 
@@ -54,8 +56,40 @@ nodeKey point =
 addEdge : TrackLoaded msg -> Graph msg -> Graph msg
 addEdge track graph =
     --Use existing nodes if available.
-    --Do not add if duplicate.
-    graph
+    --Do we add edge if duplicate? Actually yes, else what?
+    --Shall we use track name as edge key?
+    --Shall we decree that a new end within one meter of an existing node is the same point?
+    --No! That's a job for "Consolidate", which is better because it averages, not first-led.
+    let
+        ( edgeStart, edgeEnd, midPoint ) =
+            ( DomainModel.startPoint track.trackTree
+            , DomainModel.endPoint track.trackTree
+            , DomainModel.midPoint track.trackTree
+            )
+
+        ( startKey, endKey ) =
+            ( nodeKey edgeStart, nodeKey edgeEnd )
+
+        nodeDict =
+            graph.nodes
+                |> Dict.insert startKey edgeStart
+                |> Dict.insert endKey edgeEnd
+
+        newEdge =
+            { lowNode = startKey
+            , highNode = endKey
+            , via = nodeKey midPoint
+            , track = track
+            , originalDirection = Natural
+            }
+
+        edgeDict =
+            Dict.insert track.trackName newEdge graph.edges
+    in
+    { graph
+        | nodes = nodeDict
+        , edges = edgeDict
+    }
 
 
 traversalCanBeAdded : String -> List Traversal -> Graph msg -> Bool
