@@ -11,13 +11,14 @@ module Tools.Graph exposing
        --, getTrack
 
     , loopCanBeAdded
+    ,  removeEdge
+       --, makeNewRoute
+
     , traversalCanBeAdded
     ,  trivialGraph
        --, undoWalkRoute
 
-    ,  updatedEdge
-       --, makeNewRoute
-
+    , updatedEdge
     )
 
 -- Attempt to co-locate the logic to do with having a level of indirection
@@ -108,6 +109,12 @@ updatedEdge track graph =
 
         Nothing ->
             graph
+
+
+removeEdge : TrackLoaded msg -> Graph msg -> Graph msg
+removeEdge track graph =
+    -- User has removed a track, so the graph must point to the newest version.
+    { graph | edges = Dict.remove track.trackName graph.edges }
 
 
 traversalCanBeAdded : String -> List Traversal -> Graph msg -> Bool

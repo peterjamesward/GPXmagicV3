@@ -861,11 +861,19 @@ unloadActiveTrack options =
                     { options
                         | tracks = List.Extra.removeAt active options.tracks
                         , activeTrackIndex =
+                            -- Better to let the user see something.
                             if List.length options.tracks > 1 then
                                 Just 0
 
                             else
                                 Nothing
+                        , graph =
+                            case List.Extra.getAt active options.tracks of
+                                Just track ->
+                                    Graph.removeEdge track options.graph
+
+                                Nothing ->
+                                    options.graph
                     }
 
                 newTrack =

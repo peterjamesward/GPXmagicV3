@@ -19,11 +19,12 @@ Implementation: (RM = existing Route Maker)
    3. ~~Move GraphOptions into Tracks.Options~~
    4. ~~Implement addEdge when loading a track. Have to start somewhere.~~
    5. ~~Maintain Graph as edges are edited in Tracks.updateActiveTrack !!~~
-   6. Remove track must remove edge.
-   7. ~~? _Use track name as edge name_ ? -- No, stringify the waypoints.~~
-   8. ~~Route View should reflect new tracks added.~~
-   10. Route view mode toggle should change **all** edges.
-   11. Should be able to make a route, if ends join up, which they won't, in general.
+   6. ~~Remove track must remove edge.~~
+   7. Change track visibility should reflect on Route view (remove from Dict?)
+   8. The route arc view is silly. Fix it.
+   9. ~~? _Use track name as edge name_ ? -- No, stringify the waypoints.~~
+   10. ~~Route View should reflect new tracks added.~~
+   12. Should be able to make a route, if ends join up, which they won't, in general.
 2. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
 4. Canonicalize from RM. Might write again, could be clearer.
 5. Use random words list for canonical node & edge labelling. 
