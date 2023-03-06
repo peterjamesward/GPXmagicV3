@@ -26,11 +26,13 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
+import FlatColors.AmericanPalette
 import FlatColors.FlatUIPalette
 import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Point3d
+import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
@@ -52,7 +54,7 @@ type Msg
     = SelectActiveTrack Int
     | ToggleVisibility Int
     | UnloadActiveTrack
-      --| GraphAnalyse
+    | GraphAnalyse
       --| CentreLineOffset (Quantity Float Meters)
       --| MinimumRadius (Quantity Float Meters)
       --| ConvertFromGraph
@@ -62,9 +64,12 @@ type Msg
       --| FlipDirection Int
       --| ClearRoute
       --| RevertToTrack
-      --| SetTolerance (Quantity Float Meters)
-      --| UndoDeleteRoad
-    | AdoptNewTrack
+    | SetTolerance (Quantity Float Meters)
+
+
+
+--| UndoDeleteRoad
+--| AdoptNewTrack
 
 
 defaultGraphOptions : Options.GraphOptions msg
@@ -72,18 +77,21 @@ defaultGraphOptions =
     { matchingTolerance = Length.meters 1.5
     , centreLineOffset = Length.meters 0.0
     , minimumRadiusAtPlaces = Length.meters 3.0
-    , boundingBox = BoundingBox3d.singleton Point3d.origin
+
+    --, boundingBox = BoundingBox3d.singleton Point3d.origin
     , selectedTraversal = 0
     , analyzed = False
-    , originalTrack = Nothing
-    , editingTrack = 0
-    , undoGraph = Nothing
-    , undoOriginalTrack = Nothing
+
+    --, originalTrack = Nothing
+    --, editingTrack = 0
+    --, undoGraph = Nothing
+    --, undoOriginalTrack = Nothing
     , clustersForPreview = []
-    , perpsForPreview = []
-    , suggestedNewTree = Nothing
-    , suggestedNewGraph = Nothing
-    , graphUndos = []
+
+    --, perpsForPreview = []
+    --, suggestedNewTree = Nothing
+    --, suggestedNewGraph = Nothing
+    --, graphUndos = []
     , userRoute = []
     }
 
@@ -157,14 +165,15 @@ update msg options =
                 Nothing ->
                     ( options, [] )
 
-        AdoptNewTrack ->
-            ( options
-            , [ Actions.WithUndo Actions.CombineNearbyPoints
-              , Actions.CombineNearbyPoints
-              , Actions.TrackHasChanged
-              ]
-            )
-
+        {-
+           AdoptNewTrack ->
+               ( options
+               , [ Actions.WithUndo Actions.CombineNearbyPoints
+                 , Actions.CombineNearbyPoints
+                 , Actions.TrackHasChanged
+                 ]
+               )
+        -}
         {-
            GraphAnalyse ->
                ( options
@@ -253,10 +262,9 @@ update msg options =
                , []
                )
         -}
-        {-
-           SetTolerance tolerance ->
-               lookForClusters options tolerance track
-        -}
+        SetTolerance tolerance ->
+            lookForClusters options.graph tolerance
+
         {-
            CentreLineOffset float ->
                ( { options | centreLineOffset = float }, [] )
@@ -314,7 +322,6 @@ update msg options =
 
 updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
 updateActiveTrack oldTrack newTrack options =
-    --TODO: Reflect this updated track in its corresponding graph edge.
     case options.activeTrackIndex of
         Just index ->
             ( newTrack
@@ -731,28 +738,28 @@ graphView settings wrapper options graph =
                     row [ spacing 5 ]
                         [ none
                         , infoButton (wrapper <| DisplayInfo toolId "tolerance")
-
-                        --, Input.slider
-                        --    commonShortHorizontalSliderStyles
-                        --    { onChange = wrapper << SetTolerance << Length.meters
-                        --    , label =
-                        --        Input.labelBelow [] <|
-                        --            text <|
-                        --                String.Interpolate.interpolate
-                        --                    (I18N.localisedString settings.location toolId "isTolerance")
-                        --                    [ showShortMeasure settings.imperial options.matchingTolerance ]
-                        --    , min = 0.0
-                        --    , max = 5.0
-                        --    , step = Nothing
-                        --    , value = Length.inMeters options.matchingTolerance
-                        --    , thumb = Input.defaultThumb
-                        --    }
+                        , Input.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = wrapper << SetTolerance << Length.meters
+                            , label =
+                                Input.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString settings.location toolId "isTolerance")
+                                            [ showShortMeasure settings.imperial options.matchingTolerance ]
+                            , min = 0.0
+                            , max = 5.0
+                            , step = Nothing
+                            , value = Length.inMeters options.matchingTolerance
+                            , thumb = Input.defaultThumb
+                            }
                         ]
             in
-            wrappedRow [ centerX, width fill, spacing 10 ]
+            column [ centerX, width fill, spacing 10 ]
                 [ toleranceSlider
-                , adoptTrackButton
                 , analyseButton
+
+                --, adoptTrackButton
                 ]
         ]
 
@@ -789,7 +796,6 @@ addTrack track options =
     --If this is not the first track, we must adjust its reference point.
     --That may be inefficient but we can absorb the cost at load time.
     --If not, we (I) will have to change it. POITROAE.
-    --TODO: Reflect with an Edge in the Graph.
     let
         unambiguousName =
             case
@@ -924,3 +930,33 @@ mapOverInvisibleTracks f options =
                     Nothing
             )
         |> List.filterMap identity
+
+
+lookForClusters :
+    GraphOptions msg
+    -> Quantity Float Meters
+    -> ( GraphOptions msg, List (Actions.ToolAction msg) )
+lookForClusters options tolerance =
+    let
+        ( clusters, _ ) =
+            --Return only the clusters. Wait for button click.
+            Graph.identifyPointsToBeMerged tolerance
+
+        newOptions =
+            { options
+                | matchingTolerance = tolerance
+                , clustersForPreview = clusters
+            }
+    in
+    ( newOptions
+    , [ makePreview newOptions track ]
+    )
+
+
+makePreview options track =
+    Actions.ShowPreview
+        { tag = "graph"
+        , shape = PreviewToolSupplied <| showNewPoints options.clustersForPreview track
+        , colour = FlatColors.AmericanPalette.sourLemon
+        , points = []
+        }

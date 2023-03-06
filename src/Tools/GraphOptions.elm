@@ -85,7 +85,8 @@ type alias TraversalDisplay =
 type alias InsertedPointOnLeaf =
     -- for expressing that we need a new point inserted in a leaf, it being the
     -- point closest to a "nearby" point.
-    { sourcePointNumber : Int
+    { trackName : String
+    , sourcePointNumber : Int
     , leafNumber : Int
     , distanceAlong : Quantity Float Meters
     , earthPoint : EarthPoint
@@ -94,5 +95,5 @@ type alias InsertedPointOnLeaf =
 
 type alias Cluster =
     { centroid : Point3d Meters LocalCoords
-    , pointsToAdjust : List Int
+    , pointsToAdjust : List ( String, Int ) -- (track name, point index)
     }

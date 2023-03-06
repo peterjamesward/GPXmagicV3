@@ -432,7 +432,7 @@ view settings context ( width, height ) options graph msgWrapper =
 
         renderEdgeArc : String -> Edge msg -> Svg msg
         renderEdgeArc edgeIndex edge =
-            -- If we can construct an arc, use it, otherwise just two lines.
+            -- If we can construct an arc, use it, otherwise normal track.
             let
                 tree =
                     edge.track.trackTree
@@ -522,7 +522,7 @@ view settings context ( width, height ) options graph msgWrapper =
                             ++ svgEdges
                             --++ nodeLabels
                             ++ edgeLabels
-                         --++ arrowsOnHighlightedEdge
+                            ++ arrowsOnHighlightedEdge
                         )
                     )
                 ]

@@ -464,7 +464,7 @@ makeLandUseSloped :
     -> Plane3d Meters LocalCoords
     -> ( List (Entity LocalCoords), Index )
 makeLandUseSloped landUse index tree groundPlane =
-    --TODO: Appears to be unused.
+    --TODO: Redo with some more care and rigour.
     let
         drawCone :
             Color

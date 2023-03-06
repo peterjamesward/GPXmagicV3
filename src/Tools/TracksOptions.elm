@@ -24,17 +24,20 @@ type alias GraphOptions msg =
     { matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
     , centreLineOffset : Length.Length
     , minimumRadiusAtPlaces : Length.Length
-    , boundingBox : BoundingBox3d Length.Meters LocalCoords
-    , selectedTraversal : Int
+
+    --, boundingBox : BoundingBox3d Length.Meters LocalCoords
+    --, selectedTraversal : Int
     , analyzed : Bool
-    , originalTrack : Maybe (TrackLoaded msg)
-    , editingTrack : Int
-    , undoGraph : Maybe (Graph.Graph msg) -- our private undo stack (of one).
-    , undoOriginalTrack : Maybe (TrackLoaded msg)
+
+    --, originalTrack : Maybe (TrackLoaded msg)
+    --, editingTrack : Int
+    --, undoGraph : Maybe (Graph.Graph msg) -- our private undo stack (of one).
+    --, undoOriginalTrack : Maybe (TrackLoaded msg)
     , clustersForPreview : List Graph.Cluster
-    , perpsForPreview : List Graph.InsertedPointOnLeaf
-    , suggestedNewTree : Maybe PeteTree
-    , suggestedNewGraph : Maybe (Graph.Graph msg)
+
+    --, perpsForPreview : List Graph.InsertedPointOnLeaf
+    --, suggestedNewTree : Maybe PeteTree
+    --, suggestedNewGraph : Maybe (Graph.Graph msg)
     , graphUndos : List (Graph.Graph msg)
     , userRoute : List Graph.Traversal
     }

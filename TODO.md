@@ -13,20 +13,16 @@
 
 Implementation: (RM = existing Route Maker)
 
-1. Routing from RM - make the Route view work with tracks.
-   9. Option to show/hide unused nodes.
-   10. The route arc view is silly. Fix it.
-   11. ~~? _Use track name as edge name_ ? -- No, stringify the waypoints.~~
-   12. ~~Route View should reflect new tracks added.~~
-   13. Should be able to make a route, if ends join up, which they won't, in general.
 2. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
-4. Canonicalize from RM. Might write again, could be clearer.
-5. Use random words list for canonical node & edge labelling. 
-3. Limited Undo as in RM; use simple state machine across canonicalization & routing.
-6. New track with offset from RM..
-7. Rename tool: "Many ways", "Route builder" ?
-8. Check Land Use data being handled correctly.
-9. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
+3. Canonicalize from RM. Might write again, could be clearer.
+4. Use random words list for canonical node & edge labelling. 
+5. Limited Undo as in RM; use simple state machine across canonicalization & routing.
+6. Should be able to make a route, if ends join up, which they won't, in general.
+7. New track with offset from RM..
+8. Rename tool: "Many ways", "Route builder" ?
+9. Option to show/hide unused nodes.
+10. Check Land Use data being handled correctly.
+11. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
 
 ---
 
