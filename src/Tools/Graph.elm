@@ -595,6 +595,16 @@ type alias PointIndex =
     SpatialIndex.SpatialNode PointIndexEntry Length.Meters LocalCoords
 
 
+type alias GlobalLeafIndexEntry =
+    { trackName : String
+    , leafIndex : Int
+    }
+
+
+type alias GlobalLeafIndex =
+    SpatialIndex.SpatialNode GlobalLeafIndexEntry Length.Meters LocalCoords
+
+
 identifyPointsToBeMerged : Length.Length -> Graph msg -> ( List Cluster, List (TrackLoaded msg) )
 identifyPointsToBeMerged tolerance graph =
     {-
@@ -637,9 +647,9 @@ identifyPointsToBeMerged tolerance graph =
 
         pointWithTolerance pt =
             -- We make each point fuzzy for finding nearby points and leaves.
-            addTolerance <|
-                BoundingBox2d.singleton <|
-                    Point3d.projectInto SketchPlane3d.xy pt
+            BoundingBox2d.withDimensions
+                ( Quantity.twice tolerance, Quantity.twice tolerance )
+                (Point3d.projectInto SketchPlane3d.xy pt)
 
         emptyPointIndex : PointIndex
         emptyPointIndex =
@@ -660,13 +670,75 @@ identifyPointsToBeMerged tolerance graph =
                 indexBuild
             )
 
+        globalLeafIndex : GlobalLeafIndex
+        globalLeafIndex =
+            --I suppose the elegant approach here would be to define "addition" for track-level
+            --leaf indexes. Not doing that.
+            let
+                indexEdge edge globalIndex =
+                    -- Really, indexing the track that makes up the edge.
+                    --Copy and pasted code from TrackLoaded. Ugh.
+                    let
+                        indexLeaf : RoadSection -> ( Int, GlobalLeafIndex ) -> ( Int, GlobalLeafIndex )
+                        indexLeaf leaf ( leafNumber, indexBuild ) =
+                            ( leafNumber + 1
+                            , SpatialIndex.add
+                                { content =
+                                    { trackName = edge.track.trackName
+                                    , leafIndex = leafNumber
+                                    }
+                                , box = localBounds leaf
+                                }
+                                indexBuild
+                            )
+
+                        localBounds road =
+                            -- Use to form a query for each leaf.
+                            DomainModel.boundingBox (Leaf road)
+                                |> UtilsForViews.flatBox
+
+                        ( _, newGlobalIndex ) =
+                            -- Pre-pop with first point so the fold can focus on the leaf end points.
+                            DomainModel.foldOverRoute
+                                indexLeaf
+                                edge.track.trackTree
+                                ( 0
+                                , SpatialIndex.add
+                                    { content =
+                                        { trackName = edge.track.trackName
+                                        , leafIndex = 0
+                                        }
+                                    , box = localBounds <| DomainModel.getFirstLeaf edge.track.trackTree
+                                    }
+                                    globalIndex
+                                )
+                    in
+                    newGlobalIndex
+            in
+            List.foldl
+                indexEdge
+                (SpatialIndex.empty growBox (Length.meters 100.0))
+                (Dict.values graph.edges)
+
         {-
            2. For each point, look for leaves within tolerance. (across all edges)
                a. For each such leaf, get distance along leaf and foot of perpendicular.
         -}
+        ----TODO: Fold this over all the tracks.
+        --globallyFindNearbyLeaves : List InsertedPointOnLeaf
+        --globallyFindNearbyLeaves =
+        --    let
+        --        forEachTrack : Edge msg -> List InsertedPointOnLeaf -> List InsertedPointOnLeaf
+        --        forEachTrack edge collect =
+        --            findNearbyLeavesFoldFn road ( ( track, leafNumber ), outputs )
+        --    in
+        --    List.foldl
+        --        forEachTrack
+        --        []
+        --        (Dict.values graph.edges)
         findNearbyLeaves : TrackLoaded msg -> Int -> List InsertedPointOnLeaf
         findNearbyLeaves track pointNumber =
-            -- Use spatial leaf index then refine with geometry.
+            -- Use global leaf index then refine with geometry.
             let
                 pt =
                     DomainModel.earthPointFromIndex pointNumber track.trackTree
@@ -675,15 +747,14 @@ identifyPointsToBeMerged tolerance graph =
                     Point3d.projectInto SketchPlane3d.xy pt.space
 
                 results =
-                    SpatialIndex.query track.leafIndex (pointWithTolerance pt.space)
-                        |> List.map (.content >> .leafIndex)
-                        |> List.Extra.unique
+                    SpatialIndex.query globalLeafIndex (pointWithTolerance pt.space)
+                        |> List.map .content
 
-                isThisLeafClose : Int -> Maybe InsertedPointOnLeaf
-                isThisLeafClose leafNumber =
+                isThisLeafClose : GlobalLeafIndexEntry -> Maybe InsertedPointOnLeaf
+                isThisLeafClose { trackName, leafIndex } =
                     let
                         leaf =
-                            DomainModel.asRecord <| DomainModel.leafFromIndex leafNumber track.trackTree
+                            DomainModel.asRecord <| DomainModel.leafFromIndex leafIndex track.trackTree
 
                         axis2d =
                             Axis2d.through
@@ -711,13 +782,15 @@ identifyPointsToBeMerged tolerance graph =
                             along |> Quantity.lessThan (trueLength (Leaf leaf))
 
                         isNotConnected =
-                            leafNumber /= pointNumber && leafNumber + 1 /= pointNumber
+                            trackName
+                                /= track.trackName
+                                || (leafIndex /= pointNumber && leafIndex + 1 /= pointNumber)
                     in
                     if isNotConnected && isShortPerp && isAfterStart && isBeforeEnd then
                         Just
                             { trackName = track.trackName
                             , sourcePointNumber = pointNumber
-                            , leafNumber = leafNumber
+                            , leafNumber = leafIndex
                             , distanceAlong = along
                             , earthPoint = DomainModel.withoutTime foot
                             }
