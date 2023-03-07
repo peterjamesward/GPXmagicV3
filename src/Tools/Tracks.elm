@@ -16,6 +16,7 @@ module Tools.Tracks exposing
 import Actions
 import Angle
 import BoundingBox3d exposing (BoundingBox3d)
+import Color
 import CommonToolStyles
 import Dict
 import Direction2d
@@ -31,14 +32,17 @@ import FlatColors.FlatUIPalette
 import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
+import Pixels
 import Point3d
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
+import Scene3d exposing (Entity)
+import Scene3d.Material as Material
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.Graph as Graph
-import Tools.GraphOptions as Graph exposing (Direction(..))
+import Tools.GraphOptions as Graph exposing (Cluster, Direction(..))
 import Tools.I18N as I18N
 import Tools.TracksOptions as Options exposing (GraphOptions, Options)
 import TrackLoaded exposing (TrackLoaded)
@@ -79,7 +83,7 @@ defaultGraphOptions =
     , minimumRadiusAtPlaces = Length.meters 3.0
 
     --, boundingBox = BoundingBox3d.singleton Point3d.origin
-    , selectedTraversal = 0
+    --, selectedTraversal = 0
     , analyzed = False
 
     --, originalTrack = Nothing
@@ -91,7 +95,7 @@ defaultGraphOptions =
     --, perpsForPreview = []
     --, suggestedNewTree = Nothing
     --, suggestedNewGraph = Nothing
-    --, graphUndos = []
+    , graphUndos = []
     , userRoute = []
     }
 
@@ -174,21 +178,20 @@ update msg options =
                  ]
                )
         -}
-        {-
-           GraphAnalyse ->
-               ( options
-               , if options.matchingTolerance |> Quantity.greaterThanZero then
-                   [ Actions.CombineNearbyPoints
-                   , Actions.StartRoutePlanning
-                   , Actions.HidePreview "graph"
-                   ]
+        GraphAnalyse ->
+            ( options
+            , if options.graphOptions.matchingTolerance |> Quantity.greaterThanZero then
+                [ Actions.CombineNearbyPoints
+                , Actions.StartRoutePlanning
+                , Actions.HidePreview "graph"
+                ]
 
-                 else
-                   [ Actions.StartRoutePlanning
-                   , Actions.HidePreview "graph"
-                   ]
-               )
-        -}
+              else
+                [ Actions.StartRoutePlanning
+                , Actions.HidePreview "graph"
+                ]
+            )
+
         {-
            RevertToTrack ->
                ( { options
@@ -263,7 +266,7 @@ update msg options =
                )
         -}
         SetTolerance tolerance ->
-            lookForClusters options.graph tolerance
+            lookForClusters options tolerance
 
         {-
            CentreLineOffset float ->
@@ -729,7 +732,7 @@ graphView settings wrapper options graph =
                     row [ spacing 3, width fill ]
                         [ infoButton (wrapper <| DisplayInfo toolId "adoptInfo")
                         , Input.button neatToolsBorder
-                            { onPress = Just (wrapper AdoptNewTrack)
+                            { onPress = Nothing --Just (wrapper AdoptNewTrack)
                             , label = i18n "adopt"
                             }
                         ]
@@ -933,30 +936,48 @@ mapOverInvisibleTracks f options =
 
 
 lookForClusters :
-    GraphOptions msg
+    Options msg
     -> Quantity Float Meters
-    -> ( GraphOptions msg, List (Actions.ToolAction msg) )
+    -> ( Options msg, List (Actions.ToolAction msg) )
 lookForClusters options tolerance =
     let
-        ( clusters, _ ) =
+        ( clusters, enhancedTracks ) =
             --Return only the clusters. Wait for button click.
-            Graph.identifyPointsToBeMerged tolerance
+            Graph.identifyPointsToBeMerged tolerance options.graph
 
-        newOptions =
-            { options
+        graphOptions =
+            options.graphOptions
+
+        newGraphOptions =
+            { graphOptions
                 | matchingTolerance = tolerance
                 , clustersForPreview = clusters
             }
+
+        newOptions =
+            { options | graphOptions = newGraphOptions }
     in
     ( newOptions
-    , [ makePreview newOptions track ]
+    , [ makePreview newGraphOptions ]
     )
 
 
-makePreview options track =
+makePreview : GraphOptions msg -> Actions.ToolAction msg
+makePreview graphOptions =
     Actions.ShowPreview
         { tag = "graph"
-        , shape = PreviewToolSupplied <| showNewPoints options.clustersForPreview track
+        , shape = PreviewToolSupplied <| showNewPoints graphOptions.clustersForPreview
         , colour = FlatColors.AmericanPalette.sourLemon
         , points = []
         }
+
+
+showNewPoints : List Cluster -> List (Entity LocalCoords)
+showNewPoints clusters =
+    let
+        highlightPoint =
+            Scene3d.point
+                { radius = Pixels.pixels 3 }
+                (Material.color Color.white)
+    in
+    List.map (.centroid >> highlightPoint) clusters

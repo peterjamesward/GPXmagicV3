@@ -522,7 +522,7 @@ view settings context ( width, height ) options graph msgWrapper =
                             ++ svgEdges
                             --++ nodeLabels
                             ++ edgeLabels
-                            ++ arrowsOnHighlightedEdge
+                         --++ arrowsOnHighlightedEdge
                         )
                     )
                 ]

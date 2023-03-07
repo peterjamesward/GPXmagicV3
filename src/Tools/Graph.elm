@@ -10,6 +10,7 @@ module Tools.Graph exposing
        --, enterRoutePlanningMode
        --, getTrack
 
+    , identifyPointsToBeMerged
     , loopCanBeAdded
     ,  removeEdge
        --, makeNewRoute
@@ -32,7 +33,6 @@ import BoundingBox2d
 import BoundingBox3d
 import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount, trueLength)
-import FlatColors.AmericanPalette
 import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
@@ -595,7 +595,7 @@ type alias PointIndex =
     SpatialIndex.SpatialNode PointIndexEntry Length.Meters LocalCoords
 
 
-identifyPointsToBeMerged : Length.Length -> Graph msg -> List Cluster
+identifyPointsToBeMerged : Length.Length -> Graph msg -> ( List Cluster, List (TrackLoaded msg) )
 identifyPointsToBeMerged tolerance graph =
     {-
        THIS NOW TO WORK ON ALL VISIBLE TRACKS - i.e. all tracks in the graph.
@@ -802,7 +802,7 @@ identifyPointsToBeMerged tolerance graph =
             let
                 asGPX =
                     List.map
-                        (.earthPoint >> DomainModel.gpxFromPointWithReference track.referenceLonLat)
+                        (.earthPoint >> DomainModel.gpxFromPointWithReference referenceLonLat)
                         newPoints
             in
             DomainModel.insertPointsIntoLeaf
@@ -851,16 +851,21 @@ identifyPointsToBeMerged tolerance graph =
 
         indexTrackPoints : TrackLoaded msg -> PointIndex -> PointIndex
         indexTrackPoints track inputIndex =
-            DomainModel.foldOverRoute
-                indexPoint
-                track.trackTree
-                ( 1
-                , SpatialIndex.add
-                    { content = { pointIndex = 0 }
-                    , box = pointWithTolerance <| .space <| DomainModel.startPoint track.trackTree
-                    }
-                    inputIndex
-                )
+            let
+                ( _, _, index ) =
+                    DomainModel.foldOverRoute
+                        indexPoint
+                        track.trackTree
+                        ( track.trackName
+                        , 1
+                        , SpatialIndex.add
+                            { content = { pointIndex = 0, trackName = track.trackName }
+                            , box = pointWithTolerance <| .space <| DomainModel.startPoint track.trackTree
+                            }
+                            inputIndex
+                        )
+            in
+            index
 
         nearbyPointsAcrossTracks : List ( ( String, Int ), List ( String, Int ) )
         nearbyPointsAcrossTracks =
@@ -881,7 +886,7 @@ identifyPointsToBeMerged tolerance graph =
                             []
 
                         notEmpty ->
-                            [ ( 0, notEmpty ) ]
+                            [ ( ( enhancedTrack.trackName, 0 ), notEmpty ) ]
                     )
 
         pointsNearPointFoldWrapper :
@@ -1019,82 +1024,116 @@ identifyPointsToBeMerged tolerance graph =
             in
             List.map makeProperCluster groupsOfNearbyPoints
 
-        --I feel we should be doing this one track at a time but obviously clusters
-        --aren't currently organised like that. So we'll add that step.
-        groupChangesByTrack : List Cluster -> List ( String, List Cluster )
-        groupChangesBYTrack ungroupedClusters =
-            --Map over the tracks, filtering the cluster list for each.
-            let
-                reduceClustersForTrack : TrackLoaded msg -> ( String, List Cluster )
-                reduceClustersForTrack track =
-                    -- Extract cluster components matching this trackname.
-                    -- Drop any with no affected points (optional since harmless)
-                    let
-                        matchesInCluster : Cluster -> Maybe Cluster
-                        matchesInCluster { centroid, pointsToAdjust } =
-                            case
-                                pointsToAdjust
-                                    |> List.filter
-                                        (\( clusterTrackName, _ ) -> clusterTrackName == track.trackName)
-                            of
-                                [] ->
-                                    Nothing
-
-                                filtered ->
-                                    Just
-                                        { centroid = centroid
-                                        , pointsToAdjust = filtered
-                                        }
-                    in
-                    ( track.trackName
-                    , List.filterMap matchesInCluster ungroupedClusters
-                    )
-            in
-            List.map reduceClustersForTrack enhancedTracks
-
-        {-
-           9. For each point in all clusters, derive mapping to centroid.
-           (Step 9 is merely a restatement of Cluster, so will skip.)
-           10. Apply mappings by updating points (`updatePointByIndexInSitu` perhaps?).
-        -}
-        treeWithCentroidsApplied : PeteTree
-        treeWithCentroidsApplied =
-            let
-                mapCluster : Cluster -> PeteTree -> PeteTree
-                mapCluster cluster outputTree =
-                    --Each move modifies tree so must be a fold.
-                    let
-                        asGPS =
-                            DomainModel.gpxFromPointWithReference
-                                track.referenceLonLat
-                                (DomainModel.withoutTime cluster.centroid)
-                    in
-                    List.foldl
-                        (movePoint asGPS)
-                        outputTree
-                        cluster.pointsToAdjust
-
-                movePoint : GPXSource -> Int -> PeteTree -> PeteTree
-                movePoint centroid pointNumber tree =
-                    DomainModel.updatePointByIndexInSitu
-                        pointNumber
-                        centroid
-                        track.referenceLonLat
-                        tree
-            in
-            List.foldl
-                mapCluster
-                treeWithAddedPoints
-                clustersWithCentroids
-
-        {-
-           Now have tree'' which has adjusted points at cluster centroids.
-           Proof of pudding awaited ...
-        -}
+        --We can finish here for the preview, and keep the clusters for application later.
     in
-    ( clustersWithCentroids
-    , treeWithCentroidsApplied
-    )
+    ( clustersWithCentroids, enhancedTracks )
+
+
+
+{-
+
+   applyPreviouslyFoundClusters : List Cluster -> List (TrackLoaded msg) -> Graph msg -> Graph msg
+   applyPreviouslyFoundClusters savedClusters enhancedTracks graph =
+       let
+           --I feel we should be doing this one track at a time but obviously clusters
+           --aren't currently organised like that. So we'll add that step.
+           groupChangesByTrack : List Cluster -> List ( String, List Cluster )
+           groupChangesByTrack ungroupedClusters =
+               --Map over the tracks, filtering the cluster list for each.
+               let
+                   reduceClustersForTrack : TrackLoaded msg -> ( String, List Cluster )
+                   reduceClustersForTrack track =
+                       -- Extract cluster components matching this trackname.
+                       -- Drop any with no affected points (optional since harmless)
+                       let
+                           matchesInCluster : Cluster -> Maybe Cluster
+                           matchesInCluster { centroid, pointsToAdjust } =
+                               case
+                                   pointsToAdjust
+                                       |> List.filter
+                                           (\( clusterTrackName, _ ) -> clusterTrackName == track.trackName)
+                               of
+                                   [] ->
+                                       Nothing
+
+                                   filtered ->
+                                       Just
+                                           { centroid = centroid
+                                           , pointsToAdjust = filtered
+                                           }
+                       in
+                       ( track.trackName
+                       , List.filterMap matchesInCluster ungroupedClusters
+                       )
+               in
+               List.map reduceClustersForTrack enhancedTracks
+
+           -- We now have a list of point -> centroid mappings for each track.
+           -- Apply each set of changes to the relevant track.
+           -- Create a dict here for application to the track list, since some tracks
+           -- may not have any snapped points and hence not in the cluster list.
+           tracksSnappedToCentroids : Dict String (TrackLoaded msg)
+           tracksSnappedToCentroids =
+               List.foldl
+                   (\( trackName, clusters ) dict ->
+                       case Dict.get trackName graph.edges of
+                           Just edge ->
+                               Dict.insert
+                                   trackName
+                                   (trackWithCentroidsApplied clusters edge.track)
+                                   dict
+
+                           Nothing ->
+                               dict
+                   )
+                   Dict.empty
+                   (groupChangesByTrack savedClusters)
+
+           {-
+              9. For each point in all clusters, derive mapping to centroid.
+              (Step 9 is merely a restatement of Cluster, so will skip.)
+              10. Apply mappings by updating points (`updatePointByIndexInSitu` perhaps?).
+           -}
+           trackWithCentroidsApplied : List Cluster -> TrackLoaded msg -> TrackLoaded msg
+           trackWithCentroidsApplied clusters toTrack =
+               let
+                   mapCluster : Cluster -> PeteTree -> PeteTree
+                   mapCluster cluster outputTree =
+                       --Each move modifies tree so must be a fold.
+                       let
+                           asGPS =
+                               DomainModel.gpxFromPointWithReference
+                                   track.referenceLonLat
+                                   (DomainModel.withoutTime cluster.centroid)
+                       in
+                       List.foldl
+                           (movePoint asGPS)
+                           outputTree
+                           cluster.pointsToAdjust
+
+                   movePoint : GPXSource -> Int -> PeteTree -> PeteTree
+                   movePoint centroid pointNumber tree =
+                       DomainModel.updatePointByIndexInSitu
+                           pointNumber
+                           centroid
+                           track.referenceLonLat
+                           tree
+               in
+               { toTrack
+                   | trackTree =
+                       List.foldl
+                           mapCluster
+                           toTrack.trackTree
+                           clustersWithCentroids
+               }
+
+           {-
+              Now have tree'' which has adjusted points at cluster centroids.
+              Proof of pudding awaited ...
+           -}
+       in
+       tracksSnappedToCentroids
+-}
 
 
 type alias EdgeFinder msg =
@@ -1107,22 +1146,6 @@ type alias EdgeFinder msg =
 
 
 
-{-
-
-   showNewPoints : List Cluster -> TrackLoaded msg -> List (Entity LocalCoords)
-   showNewPoints pointInfo track =
-       let
-           locations =
-               pointInfo |> List.map .centroid
-
-           material =
-               Material.color Color.white
-
-           highlightPoint point =
-               Scene3d.point { radius = Pixels.pixels 3 } material point
-       in
-       List.map highlightPoint locations
--}
 {-
    buildGraph : TrackLoaded msg -> Graph msg
    buildGraph track =
