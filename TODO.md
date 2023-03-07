@@ -13,7 +13,8 @@
 
 Implementation: (RM = existing Route Maker)
 
-2. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
+1. ~~"Arc" option for route view should just traverse with very low depth.~~
+2. (WIP) "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
 3. Canonicalize from RM. Might write again, could be clearer.
 4. Use random words list for canonical node & edge labelling. 
 5. Limited Undo as in RM; use simple state machine across canonicalization & routing.

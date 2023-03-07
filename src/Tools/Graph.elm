@@ -747,7 +747,6 @@ identifyPointsToBeMerged tolerance graph =
         -}
         perpendicularFeetGroupedByLeaf : Dict ( String, Int ) (List InsertedPointOnLeaf)
         perpendicularFeetGroupedByLeaf =
-            --TODO: Work across all edges' tracks.
             let
                 -- Want "nearby" for all points. Our model traverses leaves, so we
                 -- preload the start point and use the end point of each leaf.
@@ -796,11 +795,10 @@ identifyPointsToBeMerged tolerance graph =
             Dict.map sortEachLeafEntries leafDictUnsorted
 
         {-
-           4. Update tree by converting each affected Leaf into a "branch" (in situ perhaps?).
+           4. Update tree by inserting into each affected Leaf.
         -}
-        insertPointsInLeaf : ( String, Int ) -> List InsertedPointOnLeaf -> PeteTree -> PeteTree
-        insertPointsInLeaf ( trackName, leafNumber ) newPoints tree =
-            --TODO: Pan-edge.
+        insertPointsInLeaf : GPXSource -> ( String, Int ) -> List InsertedPointOnLeaf -> PeteTree -> PeteTree
+        insertPointsInLeaf referenceLonLat ( trackName, leafNumber ) newPoints tree =
             let
                 asGPX =
                     List.map
@@ -809,42 +807,105 @@ identifyPointsToBeMerged tolerance graph =
             in
             DomainModel.insertPointsIntoLeaf
                 leafNumber
-                track.referenceLonLat
+                referenceLonLat
                 asGPX
                 tree
 
-        treeWithAddedPoints : PeteTree
-        treeWithAddedPoints =
-            --NOTE: Must add to highest numbered leaf first or leaf numbers confused!
+        trackWithAddedPoints : Dict ( String, Int ) (List InsertedPointOnLeaf) -> TrackLoaded msg -> TrackLoaded msg
+        trackWithAddedPoints insertionsForTrack track =
+            --NOTE: **Must** add to highest numbered leaf first or leaf numbers confused!
             --NOTE: Dict.foldr not doing what I expect.
-            Dict.foldr
-                insertPointsInLeaf
-                track.trackTree
-                perpendicularFeetGroupedByLeaf
+            { track
+                | trackTree =
+                    Dict.foldr
+                        (insertPointsInLeaf track.referenceLonLat)
+                        track.trackTree
+                        insertionsForTrack
+            }
+
+        enhancedTracks : List (TrackLoaded msg)
+        enhancedTracks =
+            -- Gives us all tracks "beefed up" with nearby points projected into each track.
+            let
+                newPointsFilteredByTrack trackName =
+                    Dict.filter
+                        (\( key, _ ) _ -> trackName == key)
+                        perpendicularFeetGroupedByLeaf
+
+                enhancedTrack key edge =
+                    trackWithAddedPoints
+                        (newPointsFilteredByTrack key)
+                        edge.track
+            in
+            Dict.map enhancedTrack graph.edges
+                |> Dict.values
 
         {-
-           Now have tree', enhanced by "virtual points" where leaves are close to points.
+           Now have tracks', enhanced by "virtual points" where leaves are close to points.
            5. For each point, find nearby points within tolerance.
         -}
-        ( _, pointIndex ) =
-            --NOTE: We index the revised tree so we pick up the extra points.
+        globalPointIndex =
+            --NOTE: We index the enhanced trees so we pick up the extra points.
             -- Pre-pop with first point so the fold can focus on the leaf end points.
-            --TODO: Fold over edges.
+            List.foldl indexTrackPoints emptyPointIndex enhancedTracks
+
+        indexTrackPoints : TrackLoaded msg -> PointIndex -> PointIndex
+        indexTrackPoints track inputIndex =
             DomainModel.foldOverRoute
                 indexPoint
-                treeWithAddedPoints
+                track.trackTree
                 ( 1
                 , SpatialIndex.add
                     { content = { pointIndex = 0 }
-                    , box =
-                        pointWithTolerance <|
-                            .space <|
-                                DomainModel.earthPointFromIndex 0 treeWithAddedPoints
+                    , box = pointWithTolerance <| .space <| DomainModel.startPoint track.trackTree
                     }
-                    emptyPointIndex
+                    inputIndex
                 )
 
-        pointsNearPoint : Int -> PeteTree -> List Int
+        nearbyPointsAcrossTracks : List ( ( String, Int ), List ( String, Int ) )
+        nearbyPointsAcrossTracks =
+            List.concatMap nearbyPointsForEachPointByTrack enhancedTracks
+
+        nearbyPointsForEachPointByTrack : TrackLoaded msg -> List ( ( String, Int ), List ( String, Int ) )
+        nearbyPointsForEachPointByTrack enhancedTrack =
+            -- Injecting the point zero case is slightly clumsy.
+            Tuple.second <|
+                DomainModel.foldOverRoute
+                    (pointsNearPointFoldWrapper enhancedTrack)
+                    enhancedTrack.trackTree
+                    ( ( enhancedTrack.trackName, 0 )
+                    , case
+                        pointsNearPoint 0 enhancedTrack.trackTree
+                      of
+                        [] ->
+                            []
+
+                        notEmpty ->
+                            [ ( 0, notEmpty ) ]
+                    )
+
+        pointsNearPointFoldWrapper :
+            TrackLoaded msg
+            -> RoadSection
+            -> ( ( String, Int ), List ( ( String, Int ), List ( String, Int ) ) )
+            -> ( ( String, Int ), List ( ( String, Int ), List ( String, Int ) ) )
+        pointsNearPointFoldWrapper enhancedTrack road ( ( trackName, leafNumber ), collection ) =
+            --The fold is by leaf, not point. This effectively makes it into
+            --a point-wise fold, assuming the first point is pre-loaded.
+            --The tree here is the tree we're folding over.
+            case pointsNearPoint (leafNumber + 1) enhancedTrack.trackTree of
+                [] ->
+                    ( ( trackName, leafNumber + 1 )
+                    , collection
+                    )
+
+                notEmpty ->
+                    ( ( trackName, leafNumber + 1 )
+                    , ( ( trackName, leafNumber + 1 ), notEmpty )
+                        :: collection
+                    )
+
+        pointsNearPoint : Int -> PeteTree -> List ( String, Int )
         pointsNearPoint pointNumber tree =
             -- Prelude to finding clusters of points.
             -- Use spatial point index then refine with geometry.
@@ -860,57 +921,28 @@ identifyPointsToBeMerged tolerance graph =
                     Point3d.projectInto SketchPlane3d.xy pt.space
 
                 results =
-                    SpatialIndex.query pointIndex (pointWithTolerance pt.space)
-                        |> List.map (.content >> .pointIndex)
+                    SpatialIndex.query globalPointIndex (pointWithTolerance pt.space)
+                        |> List.map .content
             in
             results
-                |> List.filter
-                    (\ptidx ->
-                        DomainModel.earthPointFromIndex ptidx tree
-                            |> .space
-                            |> Point3d.projectInto SketchPlane3d.xy
-                            |> Point2d.equalWithin tolerance thisPoint2d
+                |> List.filterMap
+                    (\{ trackName, pointIndex } ->
+                        if
+                            case Dict.get trackName graph.edges of
+                                Just edge ->
+                                    DomainModel.earthPointFromIndex pointIndex edge.track.trackTree
+                                        |> .space
+                                        |> Point3d.projectInto SketchPlane3d.xy
+                                        |> Point2d.equalWithin tolerance thisPoint2d
+
+                                Nothing ->
+                                    False
+                        then
+                            Just ( trackName, pointIndex )
+
+                        else
+                            Nothing
                     )
-
-        {-
-           I thought it would be better to exclude points that are close by dint of being along the route.
-           Turns out this is empirically less pleasing, adding more Nodes to the Graph.
-                          |> List.filter
-                              (\ptidx ->
-                                  DomainModel.distanceFromIndex ptidx tree
-                                      |> Quantity.minus thisPointTrackDistance
-                                      |> Quantity.abs
-                                      |> Quantity.greaterThan tolerance
-                              )
-        -}
-        pointsNearPointFoldWrapper :
-            RoadSection
-            -> ( Int, List ( Int, List Int ) )
-            -> ( Int, List ( Int, List Int ) )
-        pointsNearPointFoldWrapper road ( leafNumber, collection ) =
-            case pointsNearPoint (leafNumber + 1) treeWithAddedPoints of
-                [] ->
-                    ( leafNumber + 1, collection )
-
-                notEmpty ->
-                    ( leafNumber + 1, ( leafNumber + 1, notEmpty ) :: collection )
-
-        --nearbyPointsForEachPoint : List ( Int, List Int )
-        ( _, nearbyPointsForEachPoint ) =
-            -- Injecting the point zero case is slightly clumsy.
-            DomainModel.foldOverRoute
-                pointsNearPointFoldWrapper
-                treeWithAddedPoints
-                ( 0
-                , case
-                    pointsNearPoint 0 treeWithAddedPoints
-                  of
-                    [] ->
-                        []
-
-                    notEmpty ->
-                        [ ( 0, notEmpty ) ]
-                )
 
         {-
            6. Sort "points with vicini" in descending order of vicini count.
@@ -920,16 +952,17 @@ identifyPointsToBeMerged tolerance graph =
         groupsOfNearbyPoints =
             -- This now spans tracks!
             let
+                groupsInDescendingSizeOrder : List (List ( String, Int ))
                 groupsInDescendingSizeOrder =
                     -- Since the queries return DON'T the home point, we don't need the first Int.
-                    nearbyPointsForEachPoint
+                    nearbyPointsAcrossTracks
                         |> List.map (\( home, others ) -> home :: others)
                         |> List.sortBy (List.length >> negate)
 
                 retainUnclaimedGroupMembers :
-                    List Int
-                    -> ( Set Int, List (List Int) )
-                    -> ( Set Int, List (List Int) )
+                    List ( String, Int )
+                    -> ( Set ( String, Int ), List (List ( String, Int )) )
+                    -> ( Set ( String, Int ), List (List ( String, Int )) )
                 retainUnclaimedGroupMembers group ( claimed, retained ) =
                     let
                         remaining =
@@ -954,6 +987,7 @@ identifyPointsToBeMerged tolerance graph =
             in
             groupsWithPriorClaimsRemoved
 
+        --TODO: Converting to multiple tracks.
         {-
            8. For each cluster, derive the centroid.
         -}

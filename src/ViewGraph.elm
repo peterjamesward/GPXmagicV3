@@ -317,7 +317,7 @@ view settings context ( width, height ) options graph msgWrapper =
                                 renderEdgeArc index edgeInfo
 
                             EdgeSketch ->
-                                renderEdge index edgeInfo
+                                renderEdge 8 index edgeInfo
                     )
 
         edgeToHighlight =
@@ -410,14 +410,14 @@ view settings context ( width, height ) options graph msgWrapper =
             Point3d.toScreenSpace camera screenRectangle road.endPoint.space
                 :: outputs
 
-        renderEdge : String -> Edge msg -> Svg msg
-        renderEdge edgeKey edge =
+        renderEdge : Int -> String -> Edge msg -> Svg msg
+        renderEdge depth edgeKey edge =
             let
                 svgPoints =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         0
                         (skipCount edge.track.trackTree)
-                        (always <| Just 8)
+                        (always <| Just depth)
                         0
                         edge.track.trackTree
                         edgeFold
@@ -433,28 +433,28 @@ view settings context ( width, height ) options graph msgWrapper =
         renderEdgeArc : String -> Edge msg -> Svg msg
         renderEdgeArc edgeIndex edge =
             -- If we can construct an arc, use it, otherwise normal track.
-            let
-                tree =
-                    edge.track.trackTree
-
-                ( start, mid, end ) =
-                    ( DomainModel.startPoint tree
-                        |> .space
-                        |> Point3d.toScreenSpace camera screenRectangle
-                    , DomainModel.midPoint tree
-                        |> .space
-                        |> Point3d.toScreenSpace camera screenRectangle
-                    , DomainModel.endPoint tree
-                        |> .space
-                        |> Point3d.toScreenSpace camera screenRectangle
-                    )
-            in
-            case Arc2d.throughPoints start mid end of
-                Just arc ->
-                    arc |> Svg.arc2d (edgeAttributes edgeIndex)
-
-                Nothing ->
-                    renderEdge edgeIndex edge
+            --let
+            --    tree =
+            --        edge.track.trackTree
+            --
+            --    ( start, mid, end ) =
+            --        ( DomainModel.startPoint tree
+            --            |> .space
+            --            |> Point3d.toScreenSpace camera screenRectangle
+            --        , DomainModel.midPoint tree
+            --            |> .space
+            --            |> Point3d.toScreenSpace camera screenRectangle
+            --        , DomainModel.endPoint tree
+            --            |> .space
+            --            |> Point3d.toScreenSpace camera screenRectangle
+            --        )
+            --in
+            --case Arc2d.throughPoints start mid end of
+            --    Just arc ->
+            --        arc |> Svg.arc2d (edgeAttributes edgeIndex)
+            --
+            --    Nothing ->
+            renderEdge 4 edgeIndex edge
 
         textAttributes atPoint =
             [ Svg.Attributes.fill "rgb(250, 250, 250)"
