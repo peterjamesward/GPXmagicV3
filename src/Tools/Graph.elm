@@ -878,7 +878,7 @@ identifyPointsToBeMerged tolerance graph =
                 DomainModel.foldOverRoute
                     (pointsNearPointFoldWrapper enhancedTrack)
                     enhancedTrack.trackTree
-                    ( ( enhancedTrack.trackName, 0 )
+                    ( ( enhancedTrack.trackName, 1 )
                     , case
                         pointsNearPoint (DomainModel.startPoint enhancedTrack.trackTree)
                       of
@@ -894,25 +894,24 @@ identifyPointsToBeMerged tolerance graph =
             -> RoadSection
             -> ( ( String, Int ), List ( ( String, Int ), List ( String, Int ) ) )
             -> ( ( String, Int ), List ( ( String, Int ), List ( String, Int ) ) )
-        pointsNearPointFoldWrapper enhancedTrack road ( ( trackName, leafNumber ), collection ) =
+        pointsNearPointFoldWrapper track road ( ( trackName, pointNumber ), collection ) =
             --The fold is by leaf, not point. This effectively makes it into
             --a point-wise fold, assuming the first point is pre-loaded.
-            --The tree here is the tree we're folding over.
             let
                 notTheSamePoint : ( String, Int ) -> Bool
                 notTheSamePoint ( foundTrack, foundPoint ) =
-                    foundTrack /= trackName && foundPoint /= leafNumber + 1
+                    foundTrack /= track.trackName || foundPoint /= pointNumber
             in
-            case pointsNearPoint road.endPoint of
+            case pointsNearPoint road.endPoint |> List.filter notTheSamePoint of
                 [] ->
-                    ( ( trackName, leafNumber + 1 )
+                    ( ( trackName, pointNumber + 1 )
                     , collection
                     )
 
                 pointsNearby ->
-                    ( ( trackName, leafNumber + 1 )
-                    , ( ( trackName, leafNumber + 1 )
-                      , List.filter notTheSamePoint pointsNearby
+                    ( ( trackName, pointNumber + 1 )
+                    , ( ( trackName, pointNumber )
+                      , pointsNearby
                       )
                         :: collection
                     )
