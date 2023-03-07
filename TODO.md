@@ -14,16 +14,18 @@
 Implementation: (RM = existing Route Maker)
 
 1. ~~"Arc" option for route view should just traverse with very low depth.~~
-2. (WIP) "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
-3. Canonicalize from RM. Might write again, could be clearer.
-4. Use random words list for canonical node & edge labelling. 
-5. Limited Undo as in RM; use simple state machine across canonicalization & routing.
-6. Should be able to make a route, if ends join up, which they won't, in general.
-7. New track with offset from RM..
-8. Rename tool: "Many ways", "Route builder" ?
-9. Option to show/hide unused nodes.
-10. Check Land Use data being handled correctly.
-11. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
+2. Click detect is broken.
+3. Identify clusters <<< WIP
+4. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
+5. Canonicalize from RM. Might write again, could be clearer.
+6. Use random words list for canonical node & edge labelling. 
+7. Limited Undo as in RM; use simple state machine across canonicalization & routing.
+8. Should be able to make a route, if ends join up, which they won't, in general.
+9. New track with offset from RM..
+10. Rename tool: "Many ways", "Route builder" ?
+11. Option to show/hide unused nodes.
+12. Check Land Use data being handled correctly.
+13. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
 
 ---
 
