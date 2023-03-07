@@ -880,7 +880,7 @@ identifyPointsToBeMerged tolerance graph =
                     enhancedTrack.trackTree
                     ( ( enhancedTrack.trackName, 0 )
                     , case
-                        pointsNearPoint 0 enhancedTrack.trackTree
+                        pointsNearPoint (DomainModel.startPoint enhancedTrack.trackTree)
                       of
                         [] ->
                             []
@@ -898,20 +898,27 @@ identifyPointsToBeMerged tolerance graph =
             --The fold is by leaf, not point. This effectively makes it into
             --a point-wise fold, assuming the first point is pre-loaded.
             --The tree here is the tree we're folding over.
-            case pointsNearPoint (leafNumber + 1) enhancedTrack.trackTree of
+            let
+                notTheSamePoint : ( String, Int ) -> Bool
+                notTheSamePoint ( foundTrack, foundPoint ) =
+                    foundTrack /= trackName && foundPoint /= leafNumber + 1
+            in
+            case pointsNearPoint road.endPoint of
                 [] ->
                     ( ( trackName, leafNumber + 1 )
                     , collection
                     )
 
-                notEmpty ->
+                pointsNearby ->
                     ( ( trackName, leafNumber + 1 )
-                    , ( ( trackName, leafNumber + 1 ), notEmpty )
+                    , ( ( trackName, leafNumber + 1 )
+                      , List.filter notTheSamePoint pointsNearby
+                      )
                         :: collection
                     )
 
-        pointsNearPoint : Int -> PeteTree -> List ( String, Int )
-        pointsNearPoint pointNumber tree =
+        pointsNearPoint : EarthPoint -> List ( String, Int )
+        pointsNearPoint p =
             -- Prelude to finding clusters of points.
             -- Use spatial point index then refine with geometry.
             --NOTE: This will NOW NOT include the query point.
@@ -919,14 +926,11 @@ identifyPointsToBeMerged tolerance graph =
             -- intent is to find points separated along the track but close in space.
             --Hence we can filter using this.
             let
-                pt =
-                    DomainModel.earthPointFromIndex pointNumber tree
-
                 thisPoint2d =
-                    Point3d.projectInto SketchPlane3d.xy pt.space
+                    Point3d.projectInto SketchPlane3d.xy p.space
 
                 results =
-                    SpatialIndex.query globalPointIndex (pointWithTolerance pt.space)
+                    SpatialIndex.query globalPointIndex (pointWithTolerance p.space)
                         |> List.map .content
             in
             results
