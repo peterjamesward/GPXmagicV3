@@ -987,33 +987,70 @@ identifyPointsToBeMerged tolerance graph =
             in
             groupsWithPriorClaimsRemoved
 
-        --TODO: Converting to multiple tracks.
         {-
            8. For each cluster, derive the centroid.
         -}
+        earthPointFromPair : ( String, Int ) -> Point3d.Point3d Meters LocalCoords
+        earthPointFromPair ( trackName, pointIndex ) =
+            --TODO: The lookup could be avoided by storing the point when we find it!
+            case Dict.get trackName graph.edges of
+                Just edge ->
+                    DomainModel.earthPointFromIndex pointIndex edge.track.trackTree
+                        |> .space
+
+                Nothing ->
+                    Point3d.origin
+
         clustersWithCentroids : List Cluster
         clustersWithCentroids =
             let
-                makeProperCluster : List Int -> Cluster
-                makeProperCluster pointNumbers =
+                makeProperCluster : List ( String, Int ) -> Cluster
+                makeProperCluster pointReferences =
                     { centroid =
-                        case
-                            pointNumbers
-                                |> List.map
-                                    (\pt ->
-                                        DomainModel.earthPointFromIndex pt treeWithAddedPoints
-                                    )
-                        of
+                        case List.map earthPointFromPair pointReferences of
                             [] ->
                                 --We already know this is a non-empty list.
                                 Point3d.origin
 
                             pt1 :: more ->
-                                Point3d.centroid pt1.space (List.map .space more)
-                    , pointsToAdjust = pointNumbers
+                                Point3d.centroid pt1 more
+                    , pointsToAdjust = pointReferences
                     }
             in
             List.map makeProperCluster groupsOfNearbyPoints
+
+        --I feel we should be doing this one track at a time but obviously clusters
+        --aren't currently organised like that. So we'll add that step.
+        groupChangesByTrack : List Cluster -> List ( String, List Cluster )
+        groupChangesBYTrack ungroupedClusters =
+            --Map over the tracks, filtering the cluster list for each.
+            let
+                reduceClustersForTrack : TrackLoaded msg -> ( String, List Cluster )
+                reduceClustersForTrack track =
+                    -- Extract cluster components matching this trackname.
+                    -- Drop any with no affected points (optional since harmless)
+                    let
+                        matchesInCluster : Cluster -> Maybe Cluster
+                        matchesInCluster { centroid, pointsToAdjust } =
+                            case
+                                pointsToAdjust
+                                    |> List.filter
+                                        (\( clusterTrackName, _ ) -> clusterTrackName == track.trackName)
+                            of
+                                [] ->
+                                    Nothing
+
+                                filtered ->
+                                    Just
+                                        { centroid = centroid
+                                        , pointsToAdjust = filtered
+                                        }
+                    in
+                    ( track.trackName
+                    , List.filterMap matchesInCluster ungroupedClusters
+                    )
+            in
+            List.map reduceClustersForTrack enhancedTracks
 
         {-
            9. For each point in all clusters, derive mapping to centroid.
