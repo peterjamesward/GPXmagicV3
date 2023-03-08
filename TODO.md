@@ -11,23 +11,26 @@
 
 ## Promote Graph
 
-Implementation: (RM = existing Route Maker)
+Fetch elevation data iffy -- would be good to sort this out.
 
-1. ~~"Arc" option for route view should just traverse with very low depth.~~
-2. Click detect is broken.
-3. Fetch elevation data iffy.
-4. Identify clusters not very good. 
-> Index contains point numbers greater than number of points on route. Oops. 
-5. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
-6. Canonicalize from RM. Might write again, could be clearer.
-7. Use random words list for canonical node & edge labelling. 
-8. Limited Undo as in RM; use simple state machine across canonicalization & routing.
-9. Should be able to make a route, if ends join up, which they won't, in general.
-10. New track with offset from RM..
-11. Rename tool: "Many ways", "Route builder" ?
-12. Option to show/hide unused nodes.
-13. Check Land Use data being handled correctly.
-14. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
+Click detect is broken.
+
+### Implementation: (RM = existing Route Maker)
+
+1. Identify clusters not very good. 
+> Will (largely) rewrite this. It will be clearer. E.g. do a "map over all leaves in all tracks" function.
+> Point in more than one cluster -- nearest, not biggest, should win?
+> Wonder if the first phase should just insert points at perp feet as it finds them. Whatever is clearest!
+2. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
+3. Canonicalize from RM. Might write again, could be clearer.
+4. Use random words list for canonical node & edge labelling. 
+5. Limited Undo as in RM; use simple state machine across canonicalization & routing.
+6. Should be able to make a route, if ends join up, which they won't, in general.
+7. New track with offset from RM..
+8. Rename tool: "Many ways", "Route builder" ?
+9. Option to show/hide unused nodes.
+10. Check Land Use data being handled correctly.
+11. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
 
 ---
 

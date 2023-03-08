@@ -10,7 +10,6 @@ module Tools.Graph exposing
        --, enterRoutePlanningMode
        --, getTrack
 
-    , identifyPointsToBeMerged
     , loopCanBeAdded
     ,  removeEdge
        --, makeNewRoute
@@ -27,24 +26,17 @@ module Tools.Graph exposing
 -- of track points multiple times and in each direction.
 
 import Arc3d exposing (Arc3d)
-import Axis2d
-import Axis3d
-import BoundingBox2d
-import BoundingBox3d
 import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount, trueLength)
 import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
-import Point2d
 import Point3d
 import Quantity exposing (Quantity)
 import Set exposing (Set)
-import SketchPlane3d
 import SpatialIndex
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews
 
 
 edgeKey : Edge msg -> String
@@ -585,30 +577,19 @@ reverseTrack track =
 
 
 type alias PointIndexEntry =
-    --By the wonders of immutable data, and sharing thereof, this does not duplicate the names.
-    { trackName : String
-    , pointIndex : Int
-    }
+    { pointIndex : Int }
 
 
 type alias PointIndex =
     SpatialIndex.SpatialNode PointIndexEntry Length.Meters LocalCoords
 
 
-type alias GlobalLeafIndexEntry =
-    { trackName : String
-    , leafIndex : Int
-    }
 
+{-
 
-type alias GlobalLeafIndex =
-    SpatialIndex.SpatialNode GlobalLeafIndexEntry Length.Meters LocalCoords
-
-
-identifyPointsToBeMerged : Length.Length -> Graph msg -> ( List Cluster, List (TrackLoaded msg) )
-identifyPointsToBeMerged tolerance graph =
-    {-
-       THIS NOW TO WORK ON ALL VISIBLE TRACKS - i.e. all tracks in the graph.
+   identifyPointsToBeMerged : Length.Length -> TrackLoaded msg -> ( List Cluster, PeteTree )
+   identifyPointsToBeMerged tolerance track =
+       {-
           Data flow outline.
           1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
           2. For each point, look for leaves within tolerance.
@@ -624,554 +605,361 @@ identifyPointsToBeMerged tolerance graph =
           10. Apply mappings by updating points (in situ perhaps?).
           Now have tree'' which has adjusted points at cluster centroids.
           Proof of pudding awaited ...
-    -}
-    let
-        addTolerance box =
-            BoundingBox2d.expandBy tolerance box
-
-        flatBox =
-            -- Basis for our spatial index, union of track bounding boxes
-            graph.edges
-                |> Dict.foldl
-                    (\_ edge acc ->
-                        BoundingBox3d.union
-                            acc
-                            (DomainModel.boundingBox edge.track.trackTree)
-                    )
-                    (BoundingBox3d.singleton Point3d.origin)
-                |> UtilsForViews.flatBox
-
-        growBox =
-            -- We just make our index area slightly larger but I forget why.
-            addTolerance flatBox
-
-        pointWithTolerance pt =
-            -- We make each point fuzzy for finding nearby points and leaves.
-            BoundingBox2d.withDimensions
-                ( Quantity.twice tolerance, Quantity.twice tolerance )
-                (Point3d.projectInto SketchPlane3d.xy pt)
-
-        emptyPointIndex : PointIndex
-        emptyPointIndex =
-            -- The last parameter here is not the quality, it
-            -- only affects the index efficiency.
-            SpatialIndex.empty growBox (Length.meters 100.0)
-
-        indexPoint : RoadSection -> ( String, Int, PointIndex ) -> ( String, Int, PointIndex )
-        indexPoint leaf ( trackName, pointNumber, indexBuild ) =
-            ( trackName
-            , pointNumber + 1
-            , SpatialIndex.add
-                { content = { trackName = trackName, pointIndex = pointNumber }
-                , box =
-                    BoundingBox2d.singleton <|
-                        Point3d.projectInto SketchPlane3d.xy leaf.endPoint.space
-                }
-                indexBuild
-            )
-
-        globalLeafIndex : GlobalLeafIndex
-        globalLeafIndex =
-            --I suppose the elegant approach here would be to define "addition" for track-level
-            --leaf indexes. Not doing that.
-            let
-                indexEdge edge globalIndex =
-                    -- Really, indexing the track that makes up the edge.
-                    --Copy and pasted code from TrackLoaded. Ugh.
-                    let
-                        indexLeaf : RoadSection -> ( Int, GlobalLeafIndex ) -> ( Int, GlobalLeafIndex )
-                        indexLeaf leaf ( leafNumber, indexBuild ) =
-                            ( leafNumber + 1
-                            , SpatialIndex.add
-                                { content =
-                                    { trackName = edge.track.trackName
-                                    , leafIndex = leafNumber
-                                    }
-                                , box = localBounds leaf
-                                }
-                                indexBuild
-                            )
-
-                        localBounds road =
-                            -- Use to form a query for each leaf.
-                            DomainModel.boundingBox (Leaf road)
-                                |> UtilsForViews.flatBox
-
-                        ( _, newGlobalIndex ) =
-                            -- Pre-pop with first point so the fold can focus on the leaf end points.
-                            DomainModel.foldOverRoute
-                                indexLeaf
-                                edge.track.trackTree
-                                ( 0
-                                , SpatialIndex.add
-                                    { content =
-                                        { trackName = edge.track.trackName
-                                        , leafIndex = 0
-                                        }
-                                    , box = localBounds <| DomainModel.getFirstLeaf edge.track.trackTree
-                                    }
-                                    globalIndex
-                                )
-                    in
-                    newGlobalIndex
-            in
-            List.foldl
-                indexEdge
-                (SpatialIndex.empty growBox (Length.meters 100.0))
-                (Dict.values graph.edges)
-
-        {-
-           2. For each point, look for leaves within tolerance. (across all edges)
-               a. For each such leaf, get distance along leaf and foot of perpendicular.
-        -}
-        ----TODO: Fold this over all the tracks.
-        --globallyFindNearbyLeaves : List InsertedPointOnLeaf
-        --globallyFindNearbyLeaves =
-        --    let
-        --        forEachTrack : Edge msg -> List InsertedPointOnLeaf -> List InsertedPointOnLeaf
-        --        forEachTrack edge collect =
-        --            findNearbyLeavesFoldFn road ( ( track, leafNumber ), outputs )
-        --    in
-        --    List.foldl
-        --        forEachTrack
-        --        []
-        --        (Dict.values graph.edges)
-        findNearbyLeaves : TrackLoaded msg -> Int -> List InsertedPointOnLeaf
-        findNearbyLeaves track pointNumber =
-            -- Use global leaf index then refine with geometry.
-            let
-                pt =
-                    DomainModel.earthPointFromIndex pointNumber track.trackTree
-
-                thisPoint2d =
-                    Point3d.projectInto SketchPlane3d.xy pt.space
-
-                results =
-                    SpatialIndex.query globalLeafIndex (pointWithTolerance pt.space)
-                        |> List.map .content
-
-                isThisLeafClose : GlobalLeafIndexEntry -> Maybe InsertedPointOnLeaf
-                isThisLeafClose { trackName, leafIndex } =
-                    let
-                        leaf =
-                            DomainModel.asRecord <| DomainModel.leafFromIndex leafIndex track.trackTree
-
-                        axis2d =
-                            Axis2d.through
-                                (leaf.startPoint.space |> Point3d.projectInto SketchPlane3d.xy)
-                                leaf.directionAtStart
-
-                        axis3d =
-                            Axis3d.throughPoints leaf.startPoint.space leaf.endPoint.space
-                                |> Maybe.withDefault Axis3d.z
-
-                        ( along, from, foot ) =
-                            -- Proximity test in 2D as altitudes may vary greatly.
-                            ( pt.space |> Point3d.signedDistanceAlong axis3d
-                            , thisPoint2d |> Point2d.signedDistanceFrom axis2d |> Quantity.abs
-                            , pt.space |> Point3d.projectOntoAxis axis3d
-                            )
-
-                        isShortPerp =
-                            from |> Quantity.lessThanOrEqualTo tolerance
-
-                        isAfterStart =
-                            along |> Quantity.greaterThanZero
-
-                        isBeforeEnd =
-                            along |> Quantity.lessThan (trueLength (Leaf leaf))
-
-                        isNotConnected =
-                            trackName
-                                /= track.trackName
-                                || (leafIndex /= pointNumber && leafIndex + 1 /= pointNumber)
-                    in
-                    if isNotConnected && isShortPerp && isAfterStart && isBeforeEnd then
-                        Just
-                            { trackName = track.trackName
-                            , sourcePointNumber = pointNumber
-                            , leafNumber = leafIndex
-                            , distanceAlong = along
-                            , earthPoint = DomainModel.withoutTime foot
-                            }
-
-                    else
-                        Nothing
-            in
-            results |> List.filterMap isThisLeafClose
-
-        findNearbyLeavesFoldFn :
-            RoadSection
-            -> ( ( TrackLoaded msg, Int ), List InsertedPointOnLeaf )
-            -> ( ( TrackLoaded msg, Int ), List InsertedPointOnLeaf )
-        findNearbyLeavesFoldFn road ( ( track, leafNumber ), outputs ) =
-            ( ( track, leafNumber + 1 )
-            , case findNearbyLeaves track (leafNumber + 1) of
-                [] ->
-                    outputs
-
-                nearby ->
-                    nearby ++ outputs
-            )
-
-        {-
-           We have the feet of the perpendiculars to nearby leaves.
-           3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
-        -}
-        perpendicularFeetGroupedByLeaf : Dict ( String, Int ) (List InsertedPointOnLeaf)
-        perpendicularFeetGroupedByLeaf =
-            let
-                -- Want "nearby" for all points. Our model traverses leaves, so we
-                -- preload the start point and use the end point of each leaf.
-                findAllNearbyLeaves =
-                    graph.edges
-                        |> Dict.foldl
-                            (\_ edge accum ->
-                                findNearbyForTrack edge.track ++ accum
-                            )
-                            []
-
-                findNearbyForTrack track =
-                    DomainModel.foldOverRoute
-                        findNearbyLeavesFoldFn
-                        track.trackTree
-                        ( ( track, 0 ), findNearbyLeaves track 0 )
-                        |> Tuple.second
-
-                addToLeafDict newEntry dict =
-                    case Dict.get ( newEntry.trackName, newEntry.leafNumber ) dict of
-                        Just prevEntries ->
-                            Dict.insert
-                                ( newEntry.trackName, newEntry.leafNumber )
-                                (newEntry :: prevEntries)
-                                dict
-
-                        Nothing ->
-                            Dict.insert
-                                ( newEntry.trackName, newEntry.leafNumber )
-                                [ newEntry ]
-                                dict
-
-                leafDictUnsorted : Dict ( String, Int ) (List InsertedPointOnLeaf)
-                leafDictUnsorted =
-                    List.foldl
-                        addToLeafDict
-                        Dict.empty
-                        findAllNearbyLeaves
-
-                sortEachLeafEntries : ( String, Int ) -> List InsertedPointOnLeaf -> List InsertedPointOnLeaf
-                sortEachLeafEntries ( trackName, leafIndex ) unsorted =
-                    unsorted
-                        |> List.Extra.uniqueBy (.distanceAlong >> Length.inMeters)
-                        |> List.sortBy (.distanceAlong >> Length.inMeters)
-            in
-            Dict.map sortEachLeafEntries leafDictUnsorted
-
-        {-
-           4. Update tree by inserting into each affected Leaf.
-        -}
-        insertPointsInLeaf : GPXSource -> ( String, Int ) -> List InsertedPointOnLeaf -> PeteTree -> PeteTree
-        insertPointsInLeaf referenceLonLat ( trackName, leafNumber ) newPoints tree =
-            let
-                asGPX =
-                    List.map
-                        (.earthPoint >> DomainModel.gpxFromPointWithReference referenceLonLat)
-                        newPoints
-            in
-            DomainModel.insertPointsIntoLeaf
-                leafNumber
-                referenceLonLat
-                asGPX
-                tree
-
-        trackWithAddedPoints : Dict ( String, Int ) (List InsertedPointOnLeaf) -> TrackLoaded msg -> TrackLoaded msg
-        trackWithAddedPoints insertionsForTrack track =
-            --NOTE: **Must** add to highest numbered leaf first or leaf numbers confused!
-            --NOTE: Dict.foldr not doing what I expect.
-            { track
-                | trackTree =
-                    Dict.foldr
-                        (insertPointsInLeaf track.referenceLonLat)
-                        track.trackTree
-                        insertionsForTrack
-            }
-
-        enhancedTracks : List (TrackLoaded msg)
-        enhancedTracks =
-            -- Gives us all tracks "beefed up" with nearby points projected into each track.
-            let
-                newPointsFilteredByTrack trackName =
-                    Dict.filter
-                        (\( key, _ ) _ -> trackName == key)
-                        perpendicularFeetGroupedByLeaf
-
-                enhancedTrack key edge =
-                    trackWithAddedPoints
-                        (newPointsFilteredByTrack key)
-                        edge.track
-            in
-            Dict.map enhancedTrack graph.edges
-                |> Dict.values
-
-        {-
-           Now have tracks', enhanced by "virtual points" where leaves are close to points.
-           5. For each point, find nearby points within tolerance.
-        -}
-        globalPointIndex =
-            --NOTE: We index the enhanced trees so we pick up the extra points.
-            -- Pre-pop with first point so the fold can focus on the leaf end points.
-            List.foldl indexTrackPoints emptyPointIndex enhancedTracks
-
-        indexTrackPoints : TrackLoaded msg -> PointIndex -> PointIndex
-        indexTrackPoints track inputIndex =
-            let
-                ( _, _, index ) =
-                    DomainModel.foldOverRoute
-                        indexPoint
-                        track.trackTree
-                        ( track.trackName
-                        , 1
-                        , SpatialIndex.add
-                            { content = { pointIndex = 0, trackName = track.trackName }
-                            , box = pointWithTolerance <| .space <| DomainModel.startPoint track.trackTree
-                            }
-                            inputIndex
-                        )
-            in
-            index
-
-        nearbyPointsAcrossTracks : List ( ( String, Int ), List ( String, Int ) )
-        nearbyPointsAcrossTracks =
-            List.concatMap nearbyPointsForEachPointByTrack enhancedTracks
-
-        nearbyPointsForEachPointByTrack : TrackLoaded msg -> List ( ( String, Int ), List ( String, Int ) )
-        nearbyPointsForEachPointByTrack enhancedTrack =
-            -- Injecting the point zero case is slightly clumsy.
-            Tuple.second <|
-                DomainModel.foldOverRoute
-                    (pointsNearPointFoldWrapper enhancedTrack)
-                    enhancedTrack.trackTree
-                    ( ( enhancedTrack.trackName, 1 )
-                    , case
-                        pointsNearPoint (DomainModel.startPoint enhancedTrack.trackTree)
-                      of
-                        [] ->
-                            []
-
-                        notEmpty ->
-                            [ ( ( enhancedTrack.trackName, 0 ), notEmpty ) ]
-                    )
-
-        pointsNearPointFoldWrapper :
-            TrackLoaded msg
-            -> RoadSection
-            -> ( ( String, Int ), List ( ( String, Int ), List ( String, Int ) ) )
-            -> ( ( String, Int ), List ( ( String, Int ), List ( String, Int ) ) )
-        pointsNearPointFoldWrapper track road ( ( trackName, pointNumber ), collection ) =
-            --The fold is by leaf, not point. This effectively makes it into
-            --a point-wise fold, assuming the first point is pre-loaded.
-            let
-                notTheSamePoint : ( String, Int ) -> Bool
-                notTheSamePoint ( foundTrack, foundPoint ) =
-                    foundTrack /= track.trackName || foundPoint /= pointNumber
-            in
-            case pointsNearPoint road.endPoint |> List.filter notTheSamePoint of
-                [] ->
-                    ( ( trackName, pointNumber + 1 )
-                    , collection
-                    )
-
-                pointsNearby ->
-                    ( ( trackName, pointNumber + 1 )
-                    , ( ( trackName, pointNumber )
-                      , pointsNearby
-                      )
-                        :: collection
-                    )
-
-        pointsNearPoint : EarthPoint -> List ( String, Int )
-        pointsNearPoint p =
-            -- Prelude to finding clusters of points.
-            -- Use spatial point index then refine with geometry.
-            --NOTE: This will NOW NOT include the query point.
-            --NOTE: This MUST NOT include points that are merely close along the track; the
-            -- intent is to find points separated along the track but close in space.
-            --Hence we can filter using this.
-            let
-                thisPoint2d =
-                    Point3d.projectInto SketchPlane3d.xy p.space
-
-                results =
-                    SpatialIndex.query globalPointIndex (pointWithTolerance p.space)
-                        |> List.map .content
-            in
-            results
-                |> List.filterMap
-                    (\{ trackName, pointIndex } ->
-                        if
-                            case Dict.get trackName graph.edges of
-                                Just edge ->
-                                    DomainModel.earthPointFromIndex pointIndex edge.track.trackTree
-                                        |> .space
-                                        |> Point3d.projectInto SketchPlane3d.xy
-                                        |> Point2d.equalWithin tolerance thisPoint2d
-
-                                Nothing ->
-                                    False
-                        then
-                            Just ( trackName, pointIndex )
-
-                        else
-                            Nothing
-                    )
-
-        {-
-           6. Sort "points with vicini" in descending order of vicini count.
-           7. Work through this sorted list, forming groups (a set of previously unclaimed vicini).
-        -}
-        groupsOfNearbyPoints : List (List ( String, Int ))
-        groupsOfNearbyPoints =
-            -- This now spans tracks!
-            let
-                groupsInDescendingSizeOrder : List (List ( String, Int ))
-                groupsInDescendingSizeOrder =
-                    -- Since the queries return DON'T the home point, we don't need the first Int.
-                    nearbyPointsAcrossTracks
-                        |> List.map (\( home, others ) -> home :: others)
-                        |> List.sortBy (List.length >> negate)
-
-                retainUnclaimedGroupMembers :
-                    List ( String, Int )
-                    -> ( Set ( String, Int ), List (List ( String, Int )) )
-                    -> ( Set ( String, Int ), List (List ( String, Int )) )
-                retainUnclaimedGroupMembers group ( claimed, retained ) =
-                    let
-                        remaining =
-                            group |> List.filter (\i -> not <| Set.member i claimed)
-                    in
-                    case remaining of
-                        -- Nothing left here, drop it.
-                        _ :: _ :: _ ->
-                            -- Only interested if not empty and not singleton
-                            ( Set.fromList remaining |> Set.union claimed
-                            , remaining :: retained
-                            )
-
-                        _ ->
-                            ( claimed, retained )
-
-                ( _, groupsWithPriorClaimsRemoved ) =
-                    List.foldl
-                        retainUnclaimedGroupMembers
-                        ( Set.empty, [] )
-                        groupsInDescendingSizeOrder
-            in
-            groupsWithPriorClaimsRemoved
-
-        {-
-           8. For each cluster, derive the centroid.
-        -}
-        earthPointFromPair : ( String, Int ) -> Point3d.Point3d Meters LocalCoords
-        earthPointFromPair ( trackName, pointIndex ) =
-            --TODO: The lookup could be avoided by storing the point when we find it!
-            case Dict.get trackName graph.edges of
-                Just edge ->
-                    DomainModel.earthPointFromIndex pointIndex edge.track.trackTree
-                        |> .space
-
-                Nothing ->
-                    Point3d.origin
-
-        clustersWithCentroids : List Cluster
-        clustersWithCentroids =
-            let
-                makeProperCluster : List ( String, Int ) -> Cluster
-                makeProperCluster pointReferences =
-                    { centroid =
-                        case List.map earthPointFromPair pointReferences of
-                            [] ->
-                                --We already know this is a non-empty list.
-                                Point3d.origin
-
-                            pt1 :: more ->
-                                Point3d.centroid pt1 more
-                    , pointsToAdjust = pointReferences
-                    }
-            in
-            List.map makeProperCluster groupsOfNearbyPoints
-
-        --We can finish here for the preview, and keep the clusters for application later.
-    in
-    ( clustersWithCentroids, enhancedTracks )
-
-
-
-{-
-
-   applyPreviouslyFoundClusters : List Cluster -> List (TrackLoaded msg) -> Graph msg -> Graph msg
-   applyPreviouslyFoundClusters savedClusters enhancedTracks graph =
+       -}
        let
-           --I feel we should be doing this one track at a time but obviously clusters
-           --aren't currently organised like that. So we'll add that step.
-           groupChangesByTrack : List Cluster -> List ( String, List Cluster )
-           groupChangesByTrack ungroupedClusters =
-               --Map over the tracks, filtering the cluster list for each.
+           addTolerance box =
+               BoundingBox2d.expandBy tolerance box
+
+           growBox =
+               -- We just make our index area slightly larger but I forget why.
+               addTolerance <|
+                   flatBox <|
+                       DomainModel.boundingBox track.trackTree
+
+           pointWithTolerance pt =
+               addTolerance <|
+                   BoundingBox2d.singleton <|
+                       Point3d.projectInto SketchPlane3d.xy pt
+
+           emptyPointIndex : PointIndex
+           emptyPointIndex =
+               -- The last parameter here is not the quality, it
+               -- only affects the index efficiency.
+               SpatialIndex.empty growBox (Length.meters 100.0)
+
+           indexPoint : RoadSection -> ( Int, PointIndex ) -> ( Int, PointIndex )
+           indexPoint leaf ( pointNumber, indexBuild ) =
+               ( pointNumber + 1
+               , SpatialIndex.add
+                   { content = { pointIndex = pointNumber }
+                   , box =
+                       BoundingBox2d.singleton <|
+                           Point3d.projectInto SketchPlane3d.xy leaf.endPoint.space
+                   }
+                   indexBuild
+               )
+
+           {-
+              2. For each point, look for leaves within tolerance.
+                  a. For each such leaf, get distance along leaf and foot of perpendicular.
+           -}
+           findNearbyLeaves : Int -> List InsertedPointOnLeaf
+           findNearbyLeaves pointNumber =
+               -- Use spatial leaf index then refine with geometry.
                let
-                   reduceClustersForTrack : TrackLoaded msg -> ( String, List Cluster )
-                   reduceClustersForTrack track =
-                       -- Extract cluster components matching this trackname.
-                       -- Drop any with no affected points (optional since harmless)
+                   pt =
+                       DomainModel.earthPointFromIndex pointNumber track.trackTree
+
+                   thisPoint2d =
+                       Point3d.projectInto SketchPlane3d.xy pt.space
+
+                   results =
+                       SpatialIndex.query track.leafIndex (pointWithTolerance pt.space)
+                           |> List.map (.content >> .leafIndex)
+                           |> List.Extra.unique
+
+                   isThisLeafClose : Int -> Maybe InsertedPointOnLeaf
+                   isThisLeafClose leafNumber =
                        let
-                           matchesInCluster : Cluster -> Maybe Cluster
-                           matchesInCluster { centroid, pointsToAdjust } =
-                               case
-                                   pointsToAdjust
-                                       |> List.filter
-                                           (\( clusterTrackName, _ ) -> clusterTrackName == track.trackName)
-                               of
-                                   [] ->
-                                       Nothing
+                           leaf =
+                               asRecord <|
+                                   DomainModel.leafFromIndex leafNumber track.trackTree
 
-                                   filtered ->
-                                       Just
-                                           { centroid = centroid
-                                           , pointsToAdjust = filtered
-                                           }
+                           axis2d =
+                               Axis2d.through
+                                   (leaf.startPoint.space |> Point3d.projectInto SketchPlane3d.xy)
+                                   leaf.directionAtStart
+
+                           axis3d =
+                               Axis3d.throughPoints leaf.startPoint.space leaf.endPoint.space
+                                   |> Maybe.withDefault Axis3d.z
+
+                           ( along, from, foot ) =
+                               -- Proximity test in 2D as altitudes may vary greatly.
+                               ( pt.space |> Point3d.signedDistanceAlong axis3d
+                               , thisPoint2d |> Point2d.signedDistanceFrom axis2d |> Quantity.abs
+                               , pt.space |> Point3d.projectOntoAxis axis3d
+                               )
+
+                           isShortPerp =
+                               from |> Quantity.lessThanOrEqualTo tolerance
+
+                           isAfterStart =
+                               along |> Quantity.greaterThanZero
+
+                           isBeforeEnd =
+                               along |> Quantity.lessThan (trueLength (Leaf leaf))
+
+                           isNotConnected =
+                               leafNumber /= pointNumber && leafNumber + 1 /= pointNumber
                        in
-                       ( track.trackName
-                       , List.filterMap matchesInCluster ungroupedClusters
-                       )
-               in
-               List.map reduceClustersForTrack enhancedTracks
+                       if isNotConnected && isShortPerp && isAfterStart && isBeforeEnd then
+                           Just
+                               { sourcePointNumber = pointNumber
+                               , leafNumber = leafNumber
+                               , distanceAlong = along
+                               , earthPoint = DomainModel.withoutTime foot
+                               }
 
-           -- We now have a list of point -> centroid mappings for each track.
-           -- Apply each set of changes to the relevant track.
-           -- Create a dict here for application to the track list, since some tracks
-           -- may not have any snapped points and hence not in the cluster list.
-           tracksSnappedToCentroids : Dict String (TrackLoaded msg)
-           tracksSnappedToCentroids =
-               List.foldl
-                   (\( trackName, clusters ) dict ->
-                       case Dict.get trackName graph.edges of
-                           Just edge ->
+                       else
+                           Nothing
+               in
+               results |> List.filterMap isThisLeafClose
+
+           --|> List.Extra.uniqueBy .leafNumber
+           findNearbyLeavesFoldFn :
+               RoadSection
+               -> ( Int, List InsertedPointOnLeaf )
+               -> ( Int, List InsertedPointOnLeaf )
+           findNearbyLeavesFoldFn road ( leafNumber, outputs ) =
+               ( leafNumber + 1
+               , case findNearbyLeaves (leafNumber + 1) of
+                   [] ->
+                       outputs
+
+                   nearby ->
+                       nearby ++ outputs
+               )
+
+           --findAllNearbyLeaves : ( Int, List ( Int, List InsertedPointOnLeaf ) )
+           --_ =
+           --    Debug.log "LEAVES" findAllNearbyLeaves
+           {-
+              We have the feet of the perpendiculars to nearby leaves.
+              3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
+           -}
+           perpendicularFeetGroupedByLeaf : Dict Int (List InsertedPointOnLeaf)
+           perpendicularFeetGroupedByLeaf =
+               -- Can't see a suitable function in List.Extra, so do it by hand.
+               let
+                   ( _, findAllNearbyLeaves ) =
+                       -- Want "nearby" for all points. Our model traverses leaves, so we
+                       -- preload the start point and use the end point of each leaf.
+                       DomainModel.foldOverRoute
+                           findNearbyLeavesFoldFn
+                           track.trackTree
+                           ( 0
+                           , findNearbyLeaves 0
+                           )
+
+                   addToLeafDict newEntry dict =
+                       case Dict.get newEntry.leafNumber dict of
+                           Just prevEntries ->
                                Dict.insert
-                                   trackName
-                                   (trackWithCentroidsApplied clusters edge.track)
+                                   newEntry.leafNumber
+                                   (newEntry :: prevEntries)
                                    dict
 
                            Nothing ->
-                               dict
+                               Dict.insert
+                                   newEntry.leafNumber
+                                   [ newEntry ]
+                                   dict
+
+                   leafDictUnsorted =
+                       List.foldl
+                           addToLeafDict
+                           Dict.empty
+                           findAllNearbyLeaves
+
+                   sortEachLeafEntries : Int -> List InsertedPointOnLeaf -> List InsertedPointOnLeaf
+                   sortEachLeafEntries _ unsorted =
+                       unsorted
+                           |> List.Extra.uniqueBy (.distanceAlong >> Length.inMeters)
+                           |> List.sortBy (.distanceAlong >> Length.inMeters)
+               in
+               Dict.map sortEachLeafEntries leafDictUnsorted
+
+           {-
+              4. Update tree by converting each affected Leaf into a "branch" (in situ perhaps?).
+           -}
+           insertPointsInLeaf : Int -> List InsertedPointOnLeaf -> PeteTree -> PeteTree
+           insertPointsInLeaf leafNumber newPoints tree =
+               let
+                   asGPX =
+                       List.map
+                           (.earthPoint >> DomainModel.gpxFromPointWithReference track.referenceLonLat)
+                           newPoints
+               in
+               DomainModel.insertPointsIntoLeaf
+                   leafNumber
+                   track.referenceLonLat
+                   asGPX
+                   tree
+
+           treeWithAddedPoints : PeteTree
+           treeWithAddedPoints =
+               --NOTE: Must add to highest numbered leaf first or leaf numbers confused!
+               --NOTE: Dict.foldr not doing what I expect.
+               Dict.foldr
+                   insertPointsInLeaf
+                   track.trackTree
+                   perpendicularFeetGroupedByLeaf
+
+           {-
+              Now have tree', enhanced by "virtual points" where leaves are close to points.
+              5. For each point, find nearby points within tolerance.
+           -}
+           ( _, pointIndex ) =
+               --NOTE: We index the revised tree so we pick up the extra points.
+               -- Pre-pop with first point so the fold can focus on the leaf end points.
+               DomainModel.foldOverRoute
+                   indexPoint
+                   treeWithAddedPoints
+                   ( 1
+                   , SpatialIndex.add
+                       { content = { pointIndex = 0 }
+                       , box =
+                           pointWithTolerance <|
+                               .space <|
+                                   DomainModel.earthPointFromIndex 0 treeWithAddedPoints
+                       }
+                       emptyPointIndex
                    )
-                   Dict.empty
-                   (groupChangesByTrack savedClusters)
+
+           pointsNearPoint : Int -> PeteTree -> List Int
+           pointsNearPoint pointNumber tree =
+               -- Prelude to finding clusters of points.
+               -- Use spatial point index then refine with geometry.
+               --NOTE: This will NOW NOT include the query point.
+               --NOTE: This MUST NOT include points that are merely close along the track; the
+               -- intent is to find points separated along the track but close in space.
+               --Hence we can filter using this.
+               let
+                   pt =
+                       DomainModel.earthPointFromIndex pointNumber tree
+
+                   thisPoint2d =
+                       Point3d.projectInto SketchPlane3d.xy pt.space
+
+                   results =
+                       SpatialIndex.query pointIndex (pointWithTolerance pt.space)
+                           |> List.map (.content >> .pointIndex)
+               in
+               results
+                   |> List.filter
+                       (\ptidx ->
+                           DomainModel.earthPointFromIndex ptidx tree
+                               |> .space
+                               |> Point3d.projectInto SketchPlane3d.xy
+                               |> Point2d.equalWithin tolerance thisPoint2d
+                       )
+
+           {-
+              I thought it would be better to exclude points that are close by dint of being along the route.
+              Turns out this is empirically less pleasing, adding more Nodes to the Graph.
+                             |> List.filter
+                                 (\ptidx ->
+                                     DomainModel.distanceFromIndex ptidx tree
+                                         |> Quantity.minus thisPointTrackDistance
+                                         |> Quantity.abs
+                                         |> Quantity.greaterThan tolerance
+                                 )
+           -}
+           pointsNearPointFoldWrapper :
+               RoadSection
+               -> ( Int, List ( Int, List Int ) )
+               -> ( Int, List ( Int, List Int ) )
+           pointsNearPointFoldWrapper road ( leafNumber, collection ) =
+               case pointsNearPoint (leafNumber + 1) treeWithAddedPoints of
+                   [] ->
+                       ( leafNumber + 1, collection )
+
+                   notEmpty ->
+                       ( leafNumber + 1, ( leafNumber + 1, notEmpty ) :: collection )
+
+           --nearbyPointsForEachPoint : List ( Int, List Int )
+           ( _, nearbyPointsForEachPoint ) =
+               -- Injecting the point zero case is slightly clumsy.
+               DomainModel.foldOverRoute
+                   pointsNearPointFoldWrapper
+                   treeWithAddedPoints
+                   ( 0
+                   , case
+                       pointsNearPoint 0 treeWithAddedPoints
+                     of
+                       [] ->
+                           []
+
+                       notEmpty ->
+                           [ ( 0, notEmpty ) ]
+                   )
+
+           {-
+              6. Sort "points with vicini" in descending order of vicini count.
+              7. Work through this sorted list, forming groups (a set of previously unclaimed vicini).
+           -}
+           groupsOfNearbyPoints : List (List Int)
+           groupsOfNearbyPoints =
+               let
+                   groupsInDescendingSizeOrder =
+                       -- Since the queries return DON'T the home point, we don't need the first Int.
+                       nearbyPointsForEachPoint
+                           |> List.map (\( home, others ) -> home :: others)
+                           |> List.sortBy (List.length >> negate)
+
+                   retainUnclaimedGroupMembers :
+                       List Int
+                       -> ( Set Int, List (List Int) )
+                       -> ( Set Int, List (List Int) )
+                   retainUnclaimedGroupMembers group ( claimed, retained ) =
+                       let
+                           remaining =
+                               group |> List.filter (\i -> not <| Set.member i claimed)
+                       in
+                       case remaining of
+                           -- Nothing left here, drop it.
+                           _ :: _ :: _ ->
+                               -- Only interested if not empty and not singleton
+                               ( Set.fromList remaining |> Set.union claimed
+                               , remaining :: retained
+                               )
+
+                           _ ->
+                               ( claimed, retained )
+
+                   ( _, groupsWithPriorClaimsRemoved ) =
+                       List.foldl
+                           retainUnclaimedGroupMembers
+                           ( Set.empty, [] )
+                           groupsInDescendingSizeOrder
+               in
+               groupsWithPriorClaimsRemoved
+
+           {-
+              8. For each cluster, derive the centroid.
+           -}
+           clustersWithCentroids : List Cluster
+           clustersWithCentroids =
+               let
+                   makeProperCluster : List Int -> Cluster
+                   makeProperCluster pointNumbers =
+                       { centroid =
+                           case
+                               pointNumbers
+                                   |> List.map
+                                       (\pt ->
+                                           DomainModel.earthPointFromIndex pt treeWithAddedPoints
+                                       )
+                           of
+                               [] ->
+                                   --We already know this is a non-empty list.
+                                   Point3d.origin
+
+                               pt1 :: more ->
+                                   Point3d.centroid pt1.space (List.map .space more)
+                       , pointsToAdjust = pointNumbers
+                       }
+               in
+               List.map makeProperCluster groupsOfNearbyPoints
 
            {-
               9. For each point in all clusters, derive mapping to centroid.
               (Step 9 is merely a restatement of Cluster, so will skip.)
               10. Apply mappings by updating points (`updatePointByIndexInSitu` perhaps?).
            -}
-           trackWithCentroidsApplied : List Cluster -> TrackLoaded msg -> TrackLoaded msg
-           trackWithCentroidsApplied clusters toTrack =
+           treeWithCentroidsApplied : PeteTree
+           treeWithCentroidsApplied =
                let
                    mapCluster : Cluster -> PeteTree -> PeteTree
                    mapCluster cluster outputTree =
@@ -1195,20 +983,65 @@ identifyPointsToBeMerged tolerance graph =
                            track.referenceLonLat
                            tree
                in
-               { toTrack
-                   | trackTree =
-                       List.foldl
-                           mapCluster
-                           toTrack.trackTree
-                           clustersWithCentroids
-               }
+               List.foldl
+                   mapCluster
+                   treeWithAddedPoints
+                   clustersWithCentroids
 
            {-
               Now have tree'' which has adjusted points at cluster centroids.
               Proof of pudding awaited ...
            -}
        in
-       tracksSnappedToCentroids
+       ( clustersWithCentroids
+       , treeWithCentroidsApplied
+       )
+-}
+{-
+
+   makePreview options track =
+       Actions.ShowPreview
+           { tag = "graph"
+           , shape = PreviewToolSupplied <| showNewPoints options.clustersForPreview track
+           , colour = FlatColors.AmericanPalette.sourLemon
+           , points = []
+           }
+
+-}
+{-
+
+   lookForClusters :
+       Options msg
+       -> Quantity Float Meters
+       -> TrackLoaded msg
+       -> ( Options msg, List (ToolAction msg) )
+   lookForClusters options tolerance track =
+       let
+           ( clusters, suggestedNewTree ) =
+               identifyPointsToBeMerged tolerance track
+
+           suggestedNewTrack =
+               { track
+                   | trackTree =
+                       --Absurd but experimenting.
+                       suggestedNewTree
+                           |> DomainModel.getAllGPXPointsInNaturalOrder
+                           |> TrackLoaded.removeAdjacentDuplicates
+                           |> DomainModel.treeFromSourcesWithExistingReference track.referenceLonLat
+                           |> Maybe.withDefault suggestedNewTree
+               }
+
+           newOptions =
+               { options
+                   | matchingTolerance = tolerance
+                   , clustersForPreview = clusters
+                   , suggestedNewTree = Just suggestedNewTree
+                   , suggestedNewGraph = Just <| buildGraph suggestedNewTrack
+               }
+       in
+       ( newOptions
+       , [ makePreview newOptions track ]
+       )
 -}
 
 
@@ -1222,6 +1055,22 @@ type alias EdgeFinder msg =
 
 
 
+{-
+
+   showNewPoints : List Cluster -> TrackLoaded msg -> List (Entity LocalCoords)
+   showNewPoints pointInfo track =
+       let
+           locations =
+               pointInfo |> List.map .centroid
+
+           material =
+               Material.color Color.white
+
+           highlightPoint point =
+               Scene3d.point { radius = Pixels.pixels 3 } material point
+       in
+       List.map highlightPoint locations
+-}
 {-
    buildGraph : TrackLoaded msg -> Graph msg
    buildGraph track =
