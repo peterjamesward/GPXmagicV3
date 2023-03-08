@@ -42,6 +42,7 @@ import SketchPlane3d
 import SpatialIndex
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
+import Utils
 import UtilsForViews
 
 
@@ -585,6 +586,7 @@ reverseTrack track =
 type alias PointIndexEntry =
     { trackName : String
     , pointIndex : Int
+    , point : Point3d.Point3d Meters LocalCoords
     }
 
 
@@ -665,10 +667,34 @@ identifyPointsToBeMerged tolerance graph =
 
         globalPointIndex : PointIndex
         globalPointIndex =
+            -- This is an index of points base and projected.
+            -- It's used to find clusters of points than may be combined.
             Dict.foldl
                 (\k v -> addTrackPointsToIndex v)
                 (SpatialIndex.empty globalBoundingBox (Length.meters 100.0))
-                graph.edges
+                edgesWithProjectedPoints
+
+        allNearbyPointPairs : List PointNearbyPoint
+        allNearbyPointPairs =
+            -- Think of is an source-destination mapping table.
+            -- Is input to cluster finding.
+            edgesWithProjectedPoints
+                |> Dict.values
+                |> List.concatMap nearbyPointsForTrack
+                |> deduplicateNearbyPoints
+
+        clustersFromPointPairs : List Cluster
+        clustersFromPointPairs =
+            -- Change to clustering.
+            -- Find closest pair, find centroid,
+            -- If any "nearby" points are within tolerance of centroid, add to cluster.
+            -- Repeat until all clusters found.
+            case List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs of
+                pair1 :: morePairs ->
+                    growClusterFromSeed pair1 morePairs
+
+                [] ->
+                    []
 
         -- Lower level functions follow.
         addTrackLeavesToIndex : Edge msg -> LeafIndex -> LeafIndex
@@ -879,30 +905,19 @@ identifyPointsToBeMerged tolerance graph =
                 asGPX
                 tree
 
-        {-
-           Now have tree', enhanced by "virtual points" where leaves are close to points.
-           5. For each point, find nearby points within tolerance.
-        -}
-        ( _, pointIndex ) =
-            --TODO: Try a "traverse all routes" outer fold to build global index.
-            --NOTE: We index the revised tree so we pick up the extra points.
-            -- Pre-pop with first point so the fold can focus on the leaf end points.
-            DomainModel.foldOverRoute
-                indexPoint
-                treeWithAddedPoints
-                ( 1
-                , SpatialIndex.add
-                    { content = { pointIndex = 0 }
-                    , box =
-                        pointWithTolerance <|
-                            .space <|
-                                DomainModel.earthPointFromIndex 0 treeWithAddedPoints
-                    }
-                    (SpatialIndex.empty globalBoundingBox (Length.meters 100.0))
-                )
+        nearbyPointsForTrack : Edge msg -> List PointNearbyPoint
+        nearbyPointsForTrack edge =
+            DomainModel.foldOverEarthPoints
+                (pointsNearPoint edge.track.trackName)
+                edge.track
+                ( 0, [] )
 
-        pointsNearPoint : Int -> PeteTree -> List Int
-        pointsNearPoint pointNumber tree =
+        pointsNearPoint :
+            String
+            -> EarthPoint
+            -> ( Int, List PointNearbyPoint )
+            -> ( Int, List PointNearbyPoint )
+        pointsNearPoint searchTrack searchPoint ( searchIndex, collector ) =
             -- Prelude to finding clusters of points.
             -- Use spatial point index then refine with geometry.
             --NOTE: This will NOW NOT include the query point.
@@ -910,101 +925,154 @@ identifyPointsToBeMerged tolerance graph =
             -- intent is to find points separated along the track but close in space.
             --Hence we can filter using this.
             let
-                pt =
-                    DomainModel.earthPointFromIndex pointNumber tree
-
                 thisPoint2d =
-                    Point3d.projectInto SketchPlane3d.xy pt.space
+                    Point3d.projectInto SketchPlane3d.xy searchPoint.space
 
                 results =
-                    SpatialIndex.query pointIndex (pointWithTolerance pt.space)
-                        |> List.map (.content >> .pointIndex)
+                    SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
+                        |> List.map .content
+                        |> List.filter
+                            --ignore if too far away
+                            (\{ trackName, pointIndex, point } ->
+                                point
+                                    |> Point3d.distanceFrom searchPoint.space
+                                    |> Quantity.lessThanOrEqualTo tolerance
+                            )
+                        |> List.filter
+                            --ignore if found ourself, as we should
+                            (\{ trackName, pointIndex, point } ->
+                                trackName /= searchTrack || pointIndex /= searchIndex
+                            )
             in
-            results
-                |> List.filter
-                    (\ptidx ->
-                        DomainModel.earthPointFromIndex ptidx tree
-                            |> .space
-                            |> Point3d.projectInto SketchPlane3d.xy
-                            |> Point2d.equalWithin tolerance thisPoint2d
+            ( searchIndex + 1
+            , results
+                |> List.map
+                    (\{ trackName, pointIndex, point } ->
+                        { aTrack = searchTrack
+                        , aPointIndex = searchIndex
+                        , aPoint = searchPoint.space
+                        , bTrack = trackName
+                        , bPointIndex = pointIndex
+                        , bPoint = point
+                        , separation = point |> Point3d.distanceFrom searchPoint.space
+                        }
                     )
+            )
 
-        {-
-           I thought it would be better to exclude points that are close by dint of being along the route.
-           Turns out this is empirically less pleasing, adding more Nodes to the Graph.
-                          |> List.filter
-                              (\ptidx ->
-                                  DomainModel.distanceFromIndex ptidx tree
-                                      |> Quantity.minus thisPointTrackDistance
-                                      |> Quantity.abs
-                                      |> Quantity.greaterThan tolerance
-                              )
-        -}
-        pointsNearPointFoldWrapper :
-            RoadSection
-            -> ( Int, List ( Int, List Int ) )
-            -> ( Int, List ( Int, List Int ) )
-        pointsNearPointFoldWrapper road ( leafNumber, collection ) =
-            case pointsNearPoint (leafNumber + 1) treeWithAddedPoints of
-                [] ->
-                    ( leafNumber + 1, collection )
-
-                notEmpty ->
-                    ( leafNumber + 1, ( leafNumber + 1, notEmpty ) :: collection )
-
-        --nearbyPointsForEachPoint : List ( Int, List Int )
-        ( _, nearbyPointsForEachPoint ) =
-            -- Injecting the point zero case is slightly clumsy.
-            DomainModel.foldOverRoute
-                pointsNearPointFoldWrapper
-                treeWithAddedPoints
-                ( 0
-                , case
-                    pointsNearPoint 0 treeWithAddedPoints
-                  of
-                    [] ->
-                        []
-
-                    notEmpty ->
-                        [ ( 0, notEmpty ) ]
-                )
-
-        {-
-           6. Sort "points with vicini" in descending order of vicini count.
-           7. Work through this sorted list, forming groups (a set of previously unclaimed vicini).
-        -}
-        groupsOfNearbyPoints : List (List Int)
-        groupsOfNearbyPoints =
-            []
-
-        {-
-           8. For each cluster, derive the centroid.
-        -}
-        clustersWithCentroids : List Cluster
-        clustersWithCentroids =
+        deduplicateNearbyPoints : List PointNearbyPoint -> List PointNearbyPoint
+        deduplicateNearbyPoints nearbys =
+            -- List will have A -> B and B -> A.
+            -- Logically entries are symmetric so we can flip A and B based on natural sort order,
+            -- then sort and "trivially" deduplicate.
             let
-                makeProperCluster : List Int -> Cluster
-                makeProperCluster pointNumbers =
-                    { centroid =
-                        case
-                            pointNumbers
-                                |> List.map
-                                    (\pt ->
-                                        DomainModel.earthPointFromIndex pt treeWithAddedPoints
-                                    )
-                        of
-                            [] ->
-                                --We already know this is a non-empty list.
-                                Point3d.origin
+                normalise nearby =
+                    if nearby.aTrack <= nearby.bTrack && nearby.aPointIndex <= nearby.bPointIndex then
+                        nearby
 
-                            pt1 :: more ->
-                                Point3d.centroid pt1.space (List.map .space more)
-                    , pointsToAdjust = pointNumbers
-                    }
+                    else
+                        { aTrack = nearby.bTrack
+                        , aPointIndex = nearby.bPointIndex
+                        , aPoint = nearby.bPoint
+                        , bTrack = nearby.aPoint
+                        , bPointIndex = nearby.aPointIndex
+                        , bPoint = nearby.aPoint
+                        , separation = nearby.separation
+                        }
             in
-            List.map makeProperCluster groupsOfNearbyPoints
+            List.map normalise nearbys
+                |> Utils.deDupe (==)
+
+        growClusterFromSeed :
+            PointNearbyPoint
+            -> List PointNearbyPoint
+            -> ( Cluster, List PointNearbyPoint )
+        growClusterFromSeed pair1 morePairs =
+            -- If any "nearby" points are within tolerance of centroid, add to cluster.
+            -- Return cluster and unused pairs.
+            let
+                centroid =
+                    Point3d.centroid pair1.aPoint [ pair1.bPoint ]
+
+                seedCluster : Cluster
+                seedCluster =
+                    { centroid = centroid
+                    , pointsToAdjust =
+                        [ ( pair1.aTrackName, pair1.aPointIndex )
+                        , ( pair1.bTrackName, pair1.bPointIndex )
+                        ]
+                    }
+
+                matchAnyEnds other =
+                    -- Clunky. Clear.
+                    matchAA other || matchAB other || matchBA other || matchBB other
+
+                matchAA other =
+                    other.aTrackName
+                        == pair1.aTrackName
+                        && other.aPointIndex
+                        == pair1.aPointIndex
+                        && other.aPoint
+                        |> Point3d.distanceFrom centroid
+                        |> Quantity.lessThanOrEqualTo tolerance
+
+                matchAB other =
+                    other.bTrackName
+                        == pair1.aTrackName
+                        && other.bPointIndex
+                        == pair1.aPointIndex
+                        && other.bPoint
+                        |> Point3d.distanceFrom centroid
+                        |> Quantity.lessThanOrEqualTo tolerance
+
+                matchBA other =
+                    other.aTrackName
+                        == pair1.bTrackName
+                        && other.aPointIndex
+                        == pair1.bPointIndex
+                        && other.aPoint
+                        |> Point3d.distanceFrom centroid
+                        |> Quantity.lessThanOrEqualTo tolerance
+
+                matchBB other =
+                    other.bTrackName
+                        == pair1.bTrackName
+                        && other.bPointIndex
+                        == pair1.bPointIndex
+                        && other.bPoint
+                        |> Point3d.distanceFrom centroid
+                        |> Quantity.lessThanOrEqualTo tolerance
+
+                ( matchingEnd, notMatching ) =
+                    -- Need to look at both sides as pairs are normalised.
+                    -- Grab any pairs that are linked and the opposite point is within tolerance of centroid.
+                    -- This also checks for the other end being close to centroid.
+                    List.partition matchAnyEnds morePairs
+
+                extendedCluster =
+                    extendCluster seedCluster matchingEnd
+            in
+            ( extendedCluster, notMatching )
+
+        extendCluster : Cluster -> List PointNearbyPoint -> Cluster
+        extendCluster cluster newPairs =
+            let
+                newPoints =
+                    -- Damn, Need to find the "other" end.
+                    -- Or, add both and de-dupe!
+                    List.map something newPairs
+                        ++ cluster.pointsToAdjust
+
+                newCentroid =
+                    newPoints
+                        |> List.map getthepoint
+                        |> Point3d.centroidN
+                        |> Maybe.withDefault cluster.centroid
+            in
+            { centroid = newCentroid
+            , pointsToAdjust = newPoints
+            }
     in
-    clustersWithCentroids
+    clustersFromPointPairs
 
 
 
