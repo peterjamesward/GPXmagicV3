@@ -11,17 +11,24 @@
 
 ## Promote Graph
 
-Implementation: (RM = existing Route Maker)
+BUG: Fetch elevation data iffy.
 
-1. ~~"Arc" option for route view should just traverse with very low depth.~~
-2. (WIP) "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
+BUG: Click detect is broken.
+
+1. Identify clusters not very good, needs careful review.
+   1. Global leaf index.
+   2. Put query results in Dict <track> (List <points>) for clarity and avoid shuffling. 
+   3. Cluster detection does only that. Not a problem if we do it again on button press.
+   4. Point in more than one cluster -- nearest, not biggest, should win?
+   5. Adopting clusters shall update all tracks, with graph level Undo.
+2. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
 3. Canonicalize from RM. Might write again, could be clearer.
 4. Use random words list for canonical node & edge labelling. 
 5. Limited Undo as in RM; use simple state machine across canonicalization & routing.
 6. Should be able to make a route, if ends join up, which they won't, in general.
-7. New track with offset from RM..
-8. Rename tool: "Many ways", "Route builder" ?
-9. Option to show/hide unused nodes.
+7. New track with offset, from RM.. creates a new track.
+8. Option to remove all bar the active track (with confirmation).
+9. Option to show/hide/remove unused nodes.
 10. Check Land Use data being handled correctly.
 11. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
 
