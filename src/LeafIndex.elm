@@ -5,6 +5,12 @@ import LocalCoords exposing (LocalCoords)
 import SpatialIndex
 
 
+
+--Note this is local to track and is used primarily for click detection.
+--There is a global (pan-track) leaf index in the Graph module also.
+--Don't confuse them.
+
+
 type alias LeafIndexEntry =
     { leafIndex : Int }
 

@@ -942,9 +942,10 @@ lookForClusters :
 lookForClusters options tolerance =
     let
         ( clusters, enhancedTracks ) =
-            --Return only the clusters. Wait for button click.
-            Graph.identifyPointsToBeMerged tolerance options.graph
+            ( [], [] )
 
+        --Return only the clusters. Wait for button click.
+        --Graph.identifyPointsToBeMerged tolerance options.graph
         graphOptions =
             options.graphOptions
 
