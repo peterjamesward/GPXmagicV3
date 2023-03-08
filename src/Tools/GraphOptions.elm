@@ -4,7 +4,9 @@ module Tools.GraphOptions exposing
     , Direction(..)
     , Edge
     , Graph
-    , InsertedPointOnLeaf
+    , PointNearbyLeaf
+    , PointNearbyPoint
+    , ProjectedPointOnLeaf
     , Traversal
     , TraversalDisplay
     )
@@ -69,7 +71,7 @@ type ClickDetect
 
 
 type alias Traversal =
-    { edge : Int -- Canonical index of edge
+    { edge : String
     , direction : Direction
     }
 
@@ -82,14 +84,40 @@ type alias TraversalDisplay =
     }
 
 
-type alias InsertedPointOnLeaf =
+
+-- Following structures reflect a more SQL-like declarative formulation for finding the clusters.
+-- Efficiency is secondary, though not mutually exclusive from clarity.
+
+
+type alias PointNearbyLeaf =
+    { fromTrack : String
+    , fromPoint : Int
+    , toTrack : String
+    , toLeaf : Int
+    }
+
+
+type alias ProjectedPointOnLeaf =
     -- for expressing that we need a new point inserted in a leaf, it being the
-    -- point closest to a "nearby" point.
-    { trackName : String
-    , sourcePointNumber : Int
-    , leafNumber : Int
+    -- point on the leaf closest to a "nearby" point.
+    { fromTrack : String
+    , fromPoint : Int
+    , toTrack : String
+    , toLeaf : Int
     , distanceAlong : Quantity Float Meters
-    , earthPoint : EarthPoint
+    , projectedPoint : Point3d.Point3d Meters LocalCoords
+    }
+
+
+type alias PointNearbyPoint =
+    -- Preliminary to clustering, from index queries.
+    { aTrack : String
+    , aPointIndex : Int
+    , aPoint : Point3d.Point3d Meters LocalCoords
+    , bTrack : String
+    , bPointIndex : Int
+    , bPoint : Point3d.Point3d Meters LocalCoords
+    , separation : Quantity Float Meters
     }
 
 

@@ -11,6 +11,7 @@ module DomainModel exposing
     , endPoint
     , estimateTimeAtDistance
     , extractPointsInRange
+    , foldOverEarthPoints
     , foldOverRoute
     , foldOverRouteRL
     , getAllGPXPointsInDict
@@ -960,6 +961,20 @@ foldOverRouteRL foldFn treeNode accum =
             accum
                 |> foldOverRouteRL foldFn node.right
                 |> foldOverRouteRL foldFn node.left
+
+
+foldOverEarthPoints : (EarthPoint -> a -> a) -> PeteTree -> a -> a
+foldOverEarthPoints foldFn tree accum =
+    -- Why did I not write this a year ago?
+    let
+        applyToEndPointOfEachSection : RoadSection -> a -> a
+        applyToEndPointOfEachSection road a =
+            foldFn road.endPoint a
+    in
+    foldOverRoute
+        applyToEndPointOfEachSection
+        tree
+        (foldFn (startPoint tree) accum)
 
 
 getAllGPXPointsInNaturalOrder : PeteTree -> List GPXSource
