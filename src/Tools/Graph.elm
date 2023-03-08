@@ -681,17 +681,20 @@ identifyPointsToBeMerged tolerance graph =
             edgesWithProjectedPoints
                 |> Dict.values
                 |> List.concatMap nearbyPointsForTrack
-                |> deduplicateNearbyPoints
 
-        clustersFromPointPairs : List Cluster
-        clustersFromPointPairs =
+        clustersFromPointPairs : List PointNearbyPoint -> List Cluster
+        clustersFromPointPairs pairs =
             -- Change to clustering.
             -- Find closest pair, find centroid,
             -- If any "nearby" points are within tolerance of centroid, add to cluster.
             -- Repeat until all clusters found.
             case List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs of
                 pair1 :: morePairs ->
-                    growClusterFromSeed pair1 morePairs
+                    let
+                        ( cluster, unusedPairs ) =
+                            growClusterFromSeed pair1 morePairs
+                    in
+                    cluster :: clustersFromPointPairs unusedPairs
 
                 [] ->
                     []
@@ -964,6 +967,7 @@ identifyPointsToBeMerged tolerance graph =
             -- List will have A -> B and B -> A.
             -- Logically entries are symmetric so we can flip A and B based on natural sort order,
             -- then sort and "trivially" deduplicate.
+            -- TURNS OUT it's really handy to have both entries, when we build clusters.
             let
                 normalise nearby =
                     if nearby.aTrack <= nearby.bTrack && nearby.aPointIndex <= nearby.bPointIndex then
@@ -1002,43 +1006,12 @@ identifyPointsToBeMerged tolerance graph =
                         ]
                     }
 
-                matchAnyEnds other =
-                    -- Clunky. Clear.
-                    matchAA other || matchAB other || matchBA other || matchBB other
-
-                matchAA other =
+                matchAEnds other =
                     other.aTrackName
                         == pair1.aTrackName
                         && other.aPointIndex
                         == pair1.aPointIndex
                         && other.aPoint
-                        |> Point3d.distanceFrom centroid
-                        |> Quantity.lessThanOrEqualTo tolerance
-
-                matchAB other =
-                    other.bTrackName
-                        == pair1.aTrackName
-                        && other.bPointIndex
-                        == pair1.aPointIndex
-                        && other.bPoint
-                        |> Point3d.distanceFrom centroid
-                        |> Quantity.lessThanOrEqualTo tolerance
-
-                matchBA other =
-                    other.aTrackName
-                        == pair1.bTrackName
-                        && other.aPointIndex
-                        == pair1.bPointIndex
-                        && other.aPoint
-                        |> Point3d.distanceFrom centroid
-                        |> Quantity.lessThanOrEqualTo tolerance
-
-                matchBB other =
-                    other.bTrackName
-                        == pair1.bTrackName
-                        && other.bPointIndex
-                        == pair1.bPointIndex
-                        && other.bPoint
                         |> Point3d.distanceFrom centroid
                         |> Quantity.lessThanOrEqualTo tolerance
 
@@ -1046,7 +1019,7 @@ identifyPointsToBeMerged tolerance graph =
                     -- Need to look at both sides as pairs are normalised.
                     -- Grab any pairs that are linked and the opposite point is within tolerance of centroid.
                     -- This also checks for the other end being close to centroid.
-                    List.partition matchAnyEnds morePairs
+                    List.partition matchAEnds morePairs
 
                 extendedCluster =
                     extendCluster seedCluster matchingEnd
@@ -1059,12 +1032,14 @@ identifyPointsToBeMerged tolerance graph =
                 newPoints =
                     -- Damn, Need to find the "other" end.
                     -- Or, add both and de-dupe!
-                    List.map something newPairs
+                    List.map otherEndOfPair newPairs
                         ++ cluster.pointsToAdjust
+
+                otherEndOfPair pair =
+                    ( pair.bTrack, pair.bPointIndex )
 
                 newCentroid =
                     newPoints
-                        |> List.map getthepoint
                         |> Point3d.centroidN
                         |> Maybe.withDefault cluster.centroid
             in
@@ -1072,7 +1047,7 @@ identifyPointsToBeMerged tolerance graph =
             , pointsToAdjust = newPoints
             }
     in
-    clustersFromPointPairs
+    clustersFromPointPairs allNearbyPointPairs
 
 
 
