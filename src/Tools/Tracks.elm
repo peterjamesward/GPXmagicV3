@@ -69,11 +69,8 @@ type Msg
       --| ClearRoute
       --| RevertToTrack
     | SetTolerance (Quantity Float Meters)
-
-
-
---| UndoDeleteRoad
---| AdoptNewTrack
+      --| UndoDeleteRoad
+    | SnapToNearby
 
 
 defaultGraphOptions : Options.GraphOptions msg
@@ -169,20 +166,34 @@ update msg options =
                 Nothing ->
                     ( options, [] )
 
-        {-
-           AdoptNewTrack ->
-               ( options
-               , [ Actions.WithUndo Actions.CombineNearbyPoints
-                 , Actions.CombineNearbyPoints
-                 , Actions.TrackHasChanged
-                 ]
-               )
-        -}
+        SnapToNearby ->
+            -- All tracks update as the snap to the clusters we have found.
+            -- We delegate to graph, then pull back the updated tracks.
+            let
+                graph =
+                    options.graph
+
+                newGraph =
+                    Graph.snapToClusters options.graphOptions.matchingTolerance graph
+
+                newTracks =
+                    Dict.values newGraph.edges
+                        |> List.map .track
+            in
+            ( { options
+                | graph = newGraph
+                , tracks = newTracks
+              }
+            , [ Actions.TrackHasChanged
+              , Actions.HidePreview "graph"
+              ]
+            )
+
         GraphAnalyse ->
+            --TODO: Force a "snap" operation.
             ( options
             , if options.graphOptions.matchingTolerance |> Quantity.greaterThanZero then
-                [ Actions.CombineNearbyPoints
-                , Actions.StartRoutePlanning
+                [ Actions.StartRoutePlanning
                 , Actions.HidePreview "graph"
                 ]
 
@@ -369,12 +380,12 @@ view settings wrapper options =
         column [ spacing 5 ]
             [ listOfTracks
             , unloadButton
-            , graphView settings wrapper options.graphOptions options.graph
+            , viewGraph settings wrapper options.graphOptions options.graph
             ]
 
 
-graphView : SystemSettings -> (Msg -> msg) -> GraphOptions msg -> Graph.Graph msg -> Element msg
-graphView settings wrapper options graph =
+viewGraph : SystemSettings -> (Msg -> msg) -> GraphOptions msg -> Graph.Graph msg -> Element msg
+viewGraph settings wrapper options graph =
     let
         i18n =
             I18N.text settings.location toolId
@@ -728,11 +739,11 @@ graphView settings wrapper options graph =
                             }
                         ]
 
-                adoptTrackButton =
+                snapToNearbyButton =
                     row [ spacing 3, width fill ]
                         [ infoButton (wrapper <| DisplayInfo toolId "adoptInfo")
                         , Input.button neatToolsBorder
-                            { onPress = Nothing --Just (wrapper AdoptNewTrack)
+                            { onPress = Just (wrapper SnapToNearby)
                             , label = i18n "adopt"
                             }
                         ]
@@ -760,9 +771,9 @@ graphView settings wrapper options graph =
             in
             column [ centerX, width fill, spacing 10 ]
                 [ toleranceSlider
-                , analyseButton
+                , snapToNearbyButton
 
-                --, adoptTrackButton
+                --, analyseButton
                 ]
         ]
 

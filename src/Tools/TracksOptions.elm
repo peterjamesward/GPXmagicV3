@@ -1,10 +1,7 @@
 module Tools.TracksOptions exposing (..)
 
-import BoundingBox3d exposing (BoundingBox3d)
 import DomainModel exposing (GPXSource, PeteTree)
 import Length
-import LocalCoords exposing (LocalCoords)
-import Tools.Graph as Graph
 import Tools.GraphOptions as Graph
 import TrackLoaded exposing (TrackLoaded)
 

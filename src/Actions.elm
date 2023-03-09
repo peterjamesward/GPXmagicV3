@@ -124,7 +124,7 @@ type
     | ExitRoutePlanning
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
-    | CombineNearbyPoints
+      --| CombineNearbyPoints
     | WidenBend (List Int) (Quantity Float Meters)
     | AdjustTimes Tools.TimestampOptions.Options
     | SetTimeTicks Int
@@ -228,9 +228,6 @@ actionTextForUndo location action =
 
             SmartSmootherApplyWithOptions _ ->
                 "smart"
-
-            CombineNearbyPoints ->
-                "combine"
 
             AdjustTimes _ ->
                 "adjusttimes"

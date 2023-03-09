@@ -17,18 +17,10 @@ BUG: Click detect is broken.
 
 BUG: Is writing GPX dropping a point ??
 
-1. Identify clusters not very good, needs careful review.
-> Doing this. But cluster finder needs to change.
-> Must look recursively at all ends of cluster to find new candidates.
-> Must stop searching when a search yields none.
-> Also, as we use list with "dupes", must stop before we duplicate all clusters.
-> (Important but tricky test, this.)
-   1. Global leaf index.
-   2. Put query results in Dict <track> (List <points>) for clarity and avoid shuffling. 
-   3. Cluster detection does only that. Not a problem if we do it again on button press.
-   4. Point in more than one cluster -- nearest, not biggest, should win?
-   5. Adopting clusters shall update all tracks, with graph level Undo.
-3. "Snap" (consolidate) nearby points and roads from RM. ( Inverse is XY -> (Track, Offset) )
+BUG: Active view not restored on reload.
+
+3. "Snap" (consolidate) nearby points
+> Is breaking the track.
 4. Canonicalize from RM. Might write again, could be clearer.
 5. Use random words list for canonical node & edge labelling. 
 6. Limited Undo as in RM; use simple state machine across canonicalization & routing.

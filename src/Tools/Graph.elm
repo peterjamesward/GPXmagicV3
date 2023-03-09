@@ -15,10 +15,11 @@ module Tools.Graph exposing
        --, makeNewRoute
 
     , removeEdge
-    , traversalCanBeAdded
-    ,  trivialGraph
+    ,  snapToClusters
        --, undoWalkRoute
 
+    , traversalCanBeAdded
+    , trivialGraph
     , updatedEdge
     )
 
@@ -1150,55 +1151,73 @@ identifyPointsToBeMerged tolerance graph =
     clustersFromPointPairs allNearbyPointPairs
 
 
+snapToClusters : Quantity Float Meters -> Graph msg -> Graph msg
+snapToClusters tolerance graph =
+    let
+        clusters =
+            identifyPointsToBeMerged tolerance graph
 
-{-
-   applyCentroidsToTracks : : Length.Length -> Graph msg -> Graph msg
-   applyCentroidsToTracks tolerance graphs =
-              {-
-                 9. For each point in all clusters, derive mapping to centroid.
-                 (Step 9 is merely a restatement of Cluster, so will skip.)
-                 10. Apply mappings by updating points (`updatePointByIndexInSitu` perhaps?).
-              -}
-          let
-              treeWithCentroidsApplied : PeteTree
-              treeWithCentroidsApplied =
-                  let
-                      mapCluster : Cluster -> PeteTree -> PeteTree
-                      mapCluster cluster outputTree =
-                          --Each move modifies tree so must be a fold.
-                          let
-                              asGPS =
-                                  DomainModel.gpxFromPointWithReference
-                                      track.referenceLonLat
-                                      (DomainModel.withoutTime cluster.centroid)
-                          in
-                          List.foldl
-                              (movePoint asGPS)
-                              outputTree
-                              cluster.pointsToAdjust
+        newEdges =
+            Dict.map
+                (\key edge ->
+                    { edge
+                        | track =
+                            snapTrackToClusters clusters edge.track
+                    }
+                )
+                graph.edges
+    in
+    { graph | edges = newEdges }
 
-                      movePoint : GPXSource -> Int -> PeteTree -> PeteTree
-                      movePoint centroid pointNumber tree =
-                          DomainModel.updatePointByIndexInSitu
-                              pointNumber
-                              centroid
-                              track.referenceLonLat
-                              tree
-                  in
-                  List.foldl
-                      mapCluster
-                      treeWithAddedPoints
-                      clustersWithCentroids
 
-              {-
-                 Now have tree'' which has adjusted points at cluster centroids.
-                 Proof of pudding awaited ...
-              -}
-          in
-          (
-          treeWithCentroidsApplied
-          )
--}
+snapTrackToClusters : List Cluster -> TrackLoaded msg -> TrackLoaded msg
+snapTrackToClusters clusters track =
+    let
+        treeWithCentroidsApplied : PeteTree
+        treeWithCentroidsApplied =
+            let
+                mapCluster : Cluster -> PeteTree -> PeteTree
+                mapCluster cluster outputTree =
+                    --Each move modifies tree so must be a fold.
+                    let
+                        asGPS =
+                            DomainModel.gpxFromPointWithReference
+                                track.referenceLonLat
+                                (DomainModel.withoutTime cluster.centroid)
+
+                        pointsInThisTrack =
+                            cluster.pointsToAdjust
+                                |> List.filterMap
+                                    (\( trackName, pointIndex, _ ) ->
+                                        if trackName == track.trackName then
+                                            Just pointIndex
+
+                                        else
+                                            Nothing
+                                    )
+                                |> List.sortBy negate
+
+                        -- Start at end or indices meaningless!
+                    in
+                    List.foldl
+                        (movePoint asGPS)
+                        outputTree
+                        pointsInThisTrack
+
+                movePoint : GPXSource -> Int -> PeteTree -> PeteTree
+                movePoint centroid pointNumber tree =
+                    DomainModel.updatePointByIndexInSitu
+                        pointNumber
+                        centroid
+                        track.referenceLonLat
+                        tree
+            in
+            List.foldl
+                mapCluster
+                track.trackTree
+                clusters
+    in
+    { track | trackTree = treeWithCentroidsApplied }
 
 
 type alias EdgeFinder msg =
