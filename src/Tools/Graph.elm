@@ -1171,53 +1171,45 @@ snapToClusters tolerance graph =
 
 
 snapTrackToClusters : List Cluster -> TrackLoaded msg -> TrackLoaded msg
-snapTrackToClusters clusters track =
+snapTrackToClusters clusters updatingTrack =
     let
         treeWithCentroidsApplied : PeteTree
         treeWithCentroidsApplied =
             let
                 mapCluster : Cluster -> PeteTree -> PeteTree
-                mapCluster cluster outputTree =
+                mapCluster cluster treeFoldedOverClusters =
                     --Each move modifies tree so must be a fold.
                     let
-                        asGPS =
+                        centroidGPX =
                             DomainModel.gpxFromPointWithReference
-                                track.referenceLonLat
+                                updatingTrack.referenceLonLat
                                 (DomainModel.withoutTime cluster.centroid)
 
                         pointsInThisTrack =
                             cluster.pointsToAdjust
-                                |> List.filterMap
-                                    (\( trackName, pointIndex, _ ) ->
-                                        if trackName == track.trackName then
-                                            Just pointIndex
+                                |> List.filter
+                                    (\( trackName, _, _ ) -> trackName == updatingTrack.trackName)
+                                |> List.map Tuple3.second
 
-                                        else
-                                            Nothing
-                                    )
-                                |> List.sortBy negate
-
-                        -- Start at end or indices meaningless!
+                        movePoint : Int -> PeteTree -> PeteTree
+                        movePoint pointNumber treeFoldedOverPointsInCluster =
+                            DomainModel.updatePointByIndexInSitu
+                                pointNumber
+                                centroidGPX
+                                updatingTrack.referenceLonLat
+                                treeFoldedOverPointsInCluster
                     in
                     List.foldl
-                        (movePoint asGPS)
-                        outputTree
+                        movePoint
+                        treeFoldedOverClusters
                         pointsInThisTrack
-
-                movePoint : GPXSource -> Int -> PeteTree -> PeteTree
-                movePoint centroid pointNumber tree =
-                    DomainModel.updatePointByIndexInSitu
-                        pointNumber
-                        centroid
-                        track.referenceLonLat
-                        tree
             in
             List.foldl
                 mapCluster
-                track.trackTree
+                updatingTrack.trackTree
                 clusters
     in
-    { track | trackTree = treeWithCentroidsApplied }
+    { updatingTrack | trackTree = treeWithCentroidsApplied }
 
 
 type alias EdgeFinder msg =

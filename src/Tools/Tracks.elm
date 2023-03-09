@@ -184,7 +184,7 @@ update msg options =
                 | graph = newGraph
                 , tracks = newTracks
               }
-            , [ Actions.TrackHasChanged
+            , [ Actions.SetActiveTrack 0
               , Actions.HidePreview "graph"
               ]
             )
