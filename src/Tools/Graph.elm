@@ -702,10 +702,9 @@ identifyPointsToBeMerged tolerance graph =
         justAB pair =
             ( pair.aPointIndex, pair.bPointIndex )
 
-        _ =
-            Debug.log "allNearbyPointPairs" <|
-                List.map justAB allNearbyPointPairs
-
+        --_ =
+        --    Debug.log "allNearbyPointPairs" <|
+        --        List.map justAB allNearbyPointPairs
         clustersFromPointPairs : List PointNearbyPoint -> ( List Cluster, Dict String (Edge msg) )
         clustersFromPointPairs pairs =
             -- Change to clustering.
@@ -840,8 +839,8 @@ identifyPointsToBeMerged tolerance graph =
                                     if
                                         isNotConnected
                                             && isShortPerp
-                                            --&& isNotNearStart
-                                            --&& isNotNearEnd
+                                            && isNotNearStart
+                                            && isNotNearEnd
                                             && isNotBeyondEndPoints
                                     then
                                         Just
@@ -1174,9 +1173,8 @@ snapTrackToClusters clusters updatingTrack =
                                 |> List.sort
                                 |> UtilsForViews.deDupe (==)
 
-                        _ =
-                            Debug.log "MOVING" pointsInThisTrack
-
+                        --_ =
+                        --    Debug.log "MOVING" pointsInThisTrack
                         movePoint : Int -> PeteTree -> PeteTree
                         movePoint pointNumber treeFoldedOverPointsInCluster =
                             DomainModel.updatePointByIndexInSitu

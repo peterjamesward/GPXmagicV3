@@ -21,6 +21,7 @@ BUG: Active view not restored on reload.
 
 3. "Snap" (consolidate) nearby points
 > Some points are going to Ghana. That ain't right.
+> That's the default centroid. Should not be happening.
 > 
 4. Canonicalize from RM. Might write again, could be clearer.
 5. Use random words list for canonical node & edge labelling. 
