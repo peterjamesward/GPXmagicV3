@@ -658,6 +658,8 @@ identifyPointsToBeMerged tolerance graph =
                 findAllLeavesNearAllPointsOnTrack
                 (Dict.values graph.edges)
 
+        --_ =
+        --    Debug.log "projections" pointsProjectedOntoNearbyLeaves
         edgesWithProjectedPoints : Dict String (Edge msg)
         edgesWithProjectedPoints =
             let
@@ -673,6 +675,11 @@ identifyPointsToBeMerged tolerance graph =
                 )
                 graph.edges
 
+        --_ =
+        --    Debug.log "edgesWithProjectedPoints" <|
+        --        Dict.map
+        --            (\k edge -> skipCount edge.track.trackTree)
+        --            edgesWithProjectedPoints
         globalPointIndex : PointIndex
         globalPointIndex =
             -- This is an index of points base and projected.
@@ -684,12 +691,14 @@ identifyPointsToBeMerged tolerance graph =
 
         allNearbyPointPairs : List PointNearbyPoint
         allNearbyPointPairs =
-            -- Think of is an source-destination mapping table.
+            -- Think of is a source-destination mapping table.
             -- Is input to cluster finding.
             edgesWithProjectedPoints
                 |> Dict.values
                 |> List.concatMap nearbyPointsForTrack
 
+        --_ =
+        --    Debug.log "allNearbyPointPairs" allNearbyPointPairs
         clustersFromPointPairs : List PointNearbyPoint -> List Cluster
         clustersFromPointPairs pairs =
             -- Change to clustering.
@@ -792,7 +801,11 @@ identifyPointsToBeMerged tolerance graph =
                                         isShortPerp =
                                             from |> Quantity.lessThanOrEqualTo tolerance
 
-                                        ( isAfterStart, isBeforeEnd ) =
+                                        isNotBeyondEndPoints =
+                                            Quantity.greaterThanZero along
+                                                && (along |> Quantity.lessThan toLeaf.trueLength)
+
+                                        ( isNotNearStart, isNotNearEnd ) =
                                             -- Ignore points sufficiently close to ends that clustering will mop them up.
                                             ( pt.space
                                                 |> Point3d.distanceFrom toLeaf.startPoint.space
@@ -802,13 +815,26 @@ identifyPointsToBeMerged tolerance graph =
                                                 |> Quantity.greaterThan tolerance
                                             )
 
+                                        --_ =
+                                        --    Debug.log "tests"
+                                        --        { isShortPerp = isShortPerp
+                                        --        , isAfterStart = isAfterStart
+                                        --        , isBeforeEnd = isBeforeEnd
+                                        --        , isNotConnected = isNotConnected
+                                        --        }
                                         isNotConnected =
                                             -- Exclude leaves on the source track that neighbour source point.
                                             trackName
                                                 /= edge.track.trackName
                                                 || (leafIndex /= pointIndex && leafIndex + 1 /= pointIndex)
                                     in
-                                    if isNotConnected && isShortPerp && isAfterStart && isBeforeEnd then
+                                    if
+                                        isNotConnected
+                                            && isShortPerp
+                                            --&& isNotNearStart
+                                            --&& isNotNearEnd
+                                            && isNotBeyondEndPoints
+                                    then
                                         Just
                                             { fromTrack = edge.track.trackName
                                             , fromPoint = pointIndex
@@ -832,7 +858,7 @@ identifyPointsToBeMerged tolerance graph =
             DomainModel.foldOverEarthPoints
                 findAllLeavesNearPointOnTrack
                 edge.track.trackTree
-                (findAllLeavesNearPointOnTrack (DomainModel.startPoint edge.track.trackTree) ( 0, [] ))
+                ( 0, [] )
                 |> Tuple.second
 
         addProjectedPointsIntoTrack : List ProjectedPointOnLeaf -> Edge msg -> Edge msg
@@ -926,22 +952,27 @@ identifyPointsToBeMerged tolerance graph =
         pointsNearPoint searchTrack searchPoint ( searchIndex, collector ) =
             -- Prelude to finding clusters of points.
             -- Use spatial point index then refine with geometry.
-            --NOTE: This will NOW NOT include the query point.
-            --NOTE: This MUST NOT include points that are merely close along the track; the
-            -- intent is to find points separated along the track but close in space.
-            --Hence we can filter using this.
             let
-                thisPoint2d =
+                searchLocus2d =
                     Point3d.projectInto SketchPlane3d.xy searchPoint.space
 
-                results =
+                resultsUnfiltered =
+                    --TODO: Pushing query into search would be efficient, once it's right.
                     SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
                         |> List.map .content
+
+                --_ =
+                --    Debug.log "UNFILTERED" resultsUnfiltered
+                --_ =
+                --    Debug.log "FILTERED" results
+                results =
+                    resultsUnfiltered
                         |> List.filter
-                            --ignore if too far away
+                            --ignore if too far away horizontally.
                             (\{ trackName, pointIndex, point } ->
                                 point
-                                    |> Point3d.distanceFrom searchPoint.space
+                                    |> Point3d.projectInto SketchPlane3d.xy
+                                    |> Point2d.distanceFrom searchLocus2d
                                     |> Quantity.lessThanOrEqualTo tolerance
                             )
                         |> List.filter
@@ -949,20 +980,23 @@ identifyPointsToBeMerged tolerance graph =
                             (\{ trackName, pointIndex, point } ->
                                 trackName /= searchTrack || pointIndex /= searchIndex
                             )
+
+                resultsAsRecords =
+                    results
+                        |> List.map
+                            (\{ trackName, pointIndex, point } ->
+                                { aTrack = searchTrack
+                                , aPointIndex = searchIndex
+                                , aPoint = searchPoint.space
+                                , bTrack = trackName
+                                , bPointIndex = pointIndex
+                                , bPoint = point
+                                , separation = point |> Point3d.distanceFrom searchPoint.space
+                                }
+                            )
             in
             ( searchIndex + 1
-            , results
-                |> List.map
-                    (\{ trackName, pointIndex, point } ->
-                        { aTrack = searchTrack
-                        , aPointIndex = searchIndex
-                        , aPoint = searchPoint.space
-                        , bTrack = trackName
-                        , bPointIndex = pointIndex
-                        , bPoint = point
-                        , separation = point |> Point3d.distanceFrom searchPoint.space
-                        }
-                    )
+            , resultsAsRecords ++ collector
             )
 
         deduplicateNearbyPoints : List PointNearbyPoint -> List PointNearbyPoint

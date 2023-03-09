@@ -15,6 +15,8 @@ BUG: Fetch elevation data iffy.
 
 BUG: Click detect is broken.
 
+BUG: Is writing GPX dropping a point ??
+
 1. Identify clusters not very good, needs careful review.
 > Doing this. But cluster finder needs to change.
 > Must look recursively at all ends of cluster to find new candidates.
