@@ -5,12 +5,12 @@ module Tools.Graph exposing
        --, combineNearbyPoints
 
     , addEdge
-    , deleteEdgeTraversal
-    ,  edgeCanBeDeleted
+    ,  deleteEdgeTraversal
+       --,  edgeCanBeDeleted
        --, enterRoutePlanningMode
        --, getTrack
+       --, loopCanBeAdded
 
-    , loopCanBeAdded
     ,  removeEdge
        --, makeNewRoute
 
@@ -29,6 +29,7 @@ import Arc3d exposing (Arc3d)
 import Axis2d
 import Axis3d
 import BoundingBox2d
+import BoundingBox3d
 import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount, trueLength)
 import Length exposing (Meters)
@@ -42,6 +43,7 @@ import SketchPlane3d
 import SpatialIndex
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
+import Tuple3
 import Utils
 import UtilsForViews
 
@@ -151,24 +153,22 @@ traversalCanBeAdded newEdge userRoute graph =
        _ ->
            False
 -}
+{-
+
+   edgeCanBeDeleted : Int -> List Traversal -> Graph msg -> Bool
+   edgeCanBeDeleted edge userRoute graph =
+       -- Edge can be deleted if it's not the only edge and it's not used in the route.
+       Dict.size graph.edges
+           > 1
+           && (not <|
+                   List.any (\traversal -> traversal.edge == edge) userRoute
+              )
 
 
-edgeCanBeDeleted : Int -> List Traversal -> Graph msg -> Bool
-edgeCanBeDeleted edge userRoute graph =
-    -- Edge can be deleted if it's not the only edge and it's not used in the route.
-    Dict.size graph.edges
-        > 1
-        && (not <|
-                List.any (\traversal -> traversal.edge == edge) userRoute
-           )
-
-
-loopCanBeAdded : Int -> List Traversal -> Graph msg -> Bool
-loopCanBeAdded node userRoute graph =
-    False
-
-
-
+   loopCanBeAdded : Int -> List Traversal -> Graph msg -> Bool
+   loopCanBeAdded node userRoute graph =
+       False
+-}
 {-
    -- Loop can be added if node is same as final node of last traversal.
    case
@@ -704,32 +704,38 @@ identifyPointsToBeMerged tolerance graph =
         addTrackLeavesToIndex edge index =
             DomainModel.foldOverRoute
                 (addRoadSectionToIndex edge.track.trackName)
-                edge.track
+                edge.track.trackTree
                 ( 0, index )
+                |> Tuple.second
 
-        addRoadSectionToIndex : String -> PeteTree -> ( Int, LeafIndex ) -> ( Int, LeafIndex )
+        addRoadSectionToIndex : String -> RoadSection -> ( Int, LeafIndex ) -> ( Int, LeafIndex )
         addRoadSectionToIndex trackName road ( thisLeafIndex, index ) =
             ( thisLeafIndex + 1
             , SpatialIndex.add
                 { content = { trackName = trackName, leafIndex = thisLeafIndex }
-                , box = UtilsForViews.flatBox <| DomainModel.boundingBox road
+                , box = UtilsForViews.flatBox road.boundingBox
                 }
                 index
             )
 
         addTrackPointsToIndex : Edge msg -> PointIndex -> PointIndex
         addTrackPointsToIndex edge index =
-            DomainModel.foldOverRoute
+            DomainModel.foldOverEarthPoints
                 (addTrackPointToIndex edge.track.trackName)
-                edge.track
+                edge.track.trackTree
                 ( 0, index )
+                |> Tuple.second
 
-        addTrackPointToIndex : String -> PeteTree -> ( Int, PointIndex ) -> ( Int, PointIndex )
-        addTrackPointToIndex trackName trackPoint ( thisPointIndex, index ) =
+        addTrackPointToIndex : String -> EarthPoint -> ( Int, PointIndex ) -> ( Int, PointIndex )
+        addTrackPointToIndex trackName earthPoint ( thisPointIndex, index ) =
             ( thisPointIndex + 1
             , SpatialIndex.add
-                { content = { trackName = trackName, pointIndex = thisPointIndex }
-                , box = UtilsForViews.flatBox <| DomainModel.boundingBox road
+                { content =
+                    { trackName = trackName
+                    , pointIndex = thisPointIndex
+                    , point = earthPoint.space
+                    }
+                , box = UtilsForViews.flatBox <| BoundingBox3d.singleton earthPoint.space
                 }
                 index
             )
@@ -737,27 +743,15 @@ identifyPointsToBeMerged tolerance graph =
         findAllLeavesNearAllPointsOnTrack : Edge msg -> List ProjectedPointOnLeaf
         findAllLeavesNearAllPointsOnTrack edge =
             let
-                findNearbyLeavesFoldFn :
-                    TrackLoaded msg
-                    -> RoadSection
+                findAllLeavesNearPointOnTrack :
+                    EarthPoint
                     -> ( Int, List ProjectedPointOnLeaf )
                     -> ( Int, List ProjectedPointOnLeaf )
-                findNearbyLeavesFoldFn fromTrack road ( leafNumber, outputs ) =
-                    ( leafNumber + 1
-                    , case findAllLeavesNearPointOnTrack fromTrack (leafNumber + 1) of
-                        [] ->
-                            outputs
-
-                        nearby ->
-                            nearby ++ outputs
-                    )
-
-                findAllLeavesNearPointOnTrack : TrackLoaded msg -> Int -> List ProjectedPointOnLeaf
-                findAllLeavesNearPointOnTrack fromTrack fromPointIndex =
+                findAllLeavesNearPointOnTrack earthPoint ( pointIndex, collect ) =
                     -- Use spatial leaf index then refine with geometry. Exclude contiguous.
                     let
                         pt =
-                            DomainModel.earthPointFromIndex fromPointIndex fromTrack.trackTree
+                            earthPoint
 
                         thisPoint2d =
                             Point3d.projectInto SketchPlane3d.xy pt.space
@@ -807,13 +801,13 @@ identifyPointsToBeMerged tolerance graph =
                                         isNotConnected =
                                             -- Exclude leaves on the source track that neighbour source point.
                                             trackName
-                                                /= fromTrack.trackName
-                                                || (leafIndex /= fromPointIndex && leafIndex + 1 /= fromPointIndex)
+                                                /= edge.track.trackName
+                                                || (leafIndex /= pointIndex && leafIndex + 1 /= pointIndex)
                                     in
                                     if isNotConnected && isShortPerp && isAfterStart && isBeforeEnd then
                                         Just
-                                            { fromTrack = fromTrack.trackName
-                                            , fromPoint = fromPointIndex
+                                            { fromTrack = edge.track.trackName
+                                            , fromPoint = pointIndex
                                             , toTrack = trackName
                                             , toLeaf = leafIndex
                                             , distanceAlong = along
@@ -827,14 +821,15 @@ identifyPointsToBeMerged tolerance graph =
                                     --No edge?
                                     Nothing
                     in
-                    results |> List.filterMap isThisLeafClose
+                    ( pointIndex + 1
+                    , (results |> List.filterMap isThisLeafClose) ++ collect
+                    )
             in
-            DomainModel.foldOverRoute
-                (findNearbyLeavesFoldFn edge.track)
+            DomainModel.foldOverEarthPoints
+                findAllLeavesNearPointOnTrack
                 edge.track.trackTree
-                ( 0
-                , findAllLeavesNearPointOnTrack 0
-                )
+                (findAllLeavesNearPointOnTrack (DomainModel.startPoint edge.track.trackTree) ( 0, [] ))
+                |> Tuple.second
 
         addProjectedPointsIntoTrack : List ProjectedPointOnLeaf -> Edge msg -> Edge msg
         addProjectedPointsIntoTrack projections toEdge =
@@ -842,13 +837,16 @@ identifyPointsToBeMerged tolerance graph =
                 track =
                     toEdge.track
 
-                updatedTrack =
+                updatedTree =
                     --NOTE: Must add to highest numbered leaf first or leaf numbers confused!
                     --NOTE: Dict.foldr not doing what I expect.
                     Dict.foldr
                         insertPointsInLeaf
                         track.trackTree
                         (perpendicularFeetGroupedByLeaf projections)
+
+                updatedTrack =
+                    { track | trackTree = updatedTree }
             in
             { toEdge | track = updatedTrack }
 
@@ -912,8 +910,9 @@ identifyPointsToBeMerged tolerance graph =
         nearbyPointsForTrack edge =
             DomainModel.foldOverEarthPoints
                 (pointsNearPoint edge.track.trackName)
-                edge.track
+                edge.track.trackTree
                 ( 0, [] )
+                |> Tuple.second
 
         pointsNearPoint :
             String
@@ -977,7 +976,7 @@ identifyPointsToBeMerged tolerance graph =
                         { aTrack = nearby.bTrack
                         , aPointIndex = nearby.bPointIndex
                         , aPoint = nearby.bPoint
-                        , bTrack = nearby.aPoint
+                        , bTrack = nearby.aTrack
                         , bPointIndex = nearby.aPointIndex
                         , bPoint = nearby.aPoint
                         , separation = nearby.separation
@@ -1001,19 +1000,20 @@ identifyPointsToBeMerged tolerance graph =
                 seedCluster =
                     { centroid = centroid
                     , pointsToAdjust =
-                        [ ( pair1.aTrackName, pair1.aPointIndex )
-                        , ( pair1.bTrackName, pair1.bPointIndex )
+                        [ ( pair1.aTrack, pair1.aPointIndex, pair1.aPoint )
+                        , ( pair1.bTrack, pair1.bPointIndex, pair1.bPoint )
                         ]
                     }
 
                 matchAEnds other =
-                    other.aTrackName
-                        == pair1.aTrackName
+                    other.aTrack
+                        == pair1.aTrack
                         && other.aPointIndex
                         == pair1.aPointIndex
-                        && other.aPoint
-                        |> Point3d.distanceFrom centroid
-                        |> Quantity.lessThanOrEqualTo tolerance
+                        && (other.bPoint
+                                |> Point3d.distanceFrom centroid
+                                |> Quantity.lessThanOrEqualTo tolerance
+                           )
 
                 ( matchingEnd, notMatching ) =
                     -- Need to look at both sides as pairs are normalised.
@@ -1029,22 +1029,22 @@ identifyPointsToBeMerged tolerance graph =
         extendCluster : Cluster -> List PointNearbyPoint -> Cluster
         extendCluster cluster newPairs =
             let
-                newPoints =
+                newPointsInfo =
                     -- Damn, Need to find the "other" end.
                     -- Or, add both and de-dupe!
-                    List.map otherEndOfPair newPairs
-                        ++ cluster.pointsToAdjust
+                    List.map otherEndOfPair newPairs ++ cluster.pointsToAdjust
 
                 otherEndOfPair pair =
-                    ( pair.bTrack, pair.bPointIndex )
+                    ( pair.bTrack, pair.bPointIndex, pair.bPoint )
 
                 newCentroid =
-                    newPoints
+                    newPointsInfo
+                        |> List.map Tuple3.third
                         |> Point3d.centroidN
                         |> Maybe.withDefault cluster.centroid
             in
             { centroid = newCentroid
-            , pointsToAdjust = newPoints
+            , pointsToAdjust = newPointsInfo
             }
     in
     clustersFromPointPairs allNearbyPointPairs

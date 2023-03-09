@@ -7,6 +7,7 @@
     "dependencies": {
         "direct": {
             "JohnBugner/elm-loop": "2.1.0",
+            "TSFoster/elm-tuple-extra": "2.0.0",
             "ThinkAlexandria/elm-pretty-print-json": "1.0.1",
             "andrewMacmurray/elm-delay": "4.0.0",
             "avh4/elm-color": "1.0.0",

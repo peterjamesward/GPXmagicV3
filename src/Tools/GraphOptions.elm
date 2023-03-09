@@ -123,5 +123,5 @@ type alias PointNearbyPoint =
 
 type alias Cluster =
     { centroid : Point3d Meters LocalCoords
-    , pointsToAdjust : List ( String, Int ) -- (track name, point index)
+    , pointsToAdjust : List ( String, Int, Point3d.Point3d Meters LocalCoords ) -- (track name, point index)
     }
