@@ -161,11 +161,12 @@ resetMapAfterDrawing =
             [ ( "Cmd", E.string "StopPlanning" ) ]
 
 
-requestElevations : Cmd msg
-requestElevations =
+requestElevations : String -> Cmd msg
+requestElevations trackName =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Elev" )
+            , ( "label", E.string trackName )
             ]
 
 
@@ -458,6 +459,10 @@ processMapPortMessage lastState mTrack json =
         Ok "elevations" ->
             case elevations of
                 Ok mapElevations ->
+                    let
+                        _ =
+                            Debug.log "elevations" mapElevations
+                    in
                     ( lastState, [ ApplyMapElevations mapElevations ] )
 
                 _ ->

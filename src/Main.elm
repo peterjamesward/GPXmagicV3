@@ -125,7 +125,7 @@ type Msg
     | FilenameChange String
     | TimeToUpdateMemory
     | OneClickMsg Tools.OneClickQuickFix.Msg
-    | FetchElevationsFromMap
+    | FetchElevationsFromMap String
     | ReplaceTrackOnMapAfterStyleChange
     | SvgMsg SvgPathExtractor.Msg
     | FlythroughTick Time.Posix
@@ -823,10 +823,10 @@ update msg model =
             , performActionCommands actions modelAfterActions
             )
 
-        FetchElevationsFromMap ->
+        FetchElevationsFromMap trackName ->
             -- We have added the full track so that we can then ask
             -- the map for elevation data. Let's do that.
-            ( model, MapPortController.requestElevations )
+            ( model, MapPortController.requestElevations trackName )
 
         ReplaceTrackOnMapAfterStyleChange ->
             -- We have added the full track so that we can then ask
@@ -923,7 +923,7 @@ update msg model =
                         [ MapPortController.resetMapAfterDrawing
                         , MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
                         , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
-                        , Delay.after 1000 FetchElevationsFromMap -- async to allow map to quiesce.
+                        , Delay.after 1000 <| FetchElevationsFromMap track.trackName -- async to allow map to quiesce.
                         , Delay.after 1000 ProfilePaint -- async, seems to help
                         ]
                     )
@@ -2446,11 +2446,11 @@ performActionCommands actions model =
                     -- Deliberate pause here seems to allow map to quiesce.
                     Cmd.batch
                         [ MapPortController.addFullTrackToMap track
-                        , Delay.after 100 FetchElevationsFromMap
+                        , Delay.after 100 <| FetchElevationsFromMap track.trackName
                         ]
 
-                ( FetchMapElevations, _ ) ->
-                    MapPortController.requestElevations
+                ( FetchMapElevations, Just track ) ->
+                    MapPortController.requestElevations track.trackName
 
                 ( SetMapStyle url, _ ) ->
                     -- Deliberate pause here seems to allow map to quiesce.

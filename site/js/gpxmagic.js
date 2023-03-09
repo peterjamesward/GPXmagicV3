@@ -233,7 +233,7 @@ function mapMessageHandler(msg) {
         case 'Elev':
             //console.log('Elm asked for route elevations')
             if (isMapCreated) {
-                const source = map.getSource('route');
+                const source = map.getSource('line:' + msg.label);
                 if (isSet(source)) {
                     const elevations =
                         source._data.geometry.coordinates.map(

@@ -5,36 +5,30 @@
 
 **Delete** Delete should display "Sorry" message unless one leaf remains.
 
+BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
+
 --- 
 
 # WIP
 
 ## Promote Graph
 
-BUG: Fetch elevation data iffy. 
-> Is this not updating track properly in new structures?
-
 BUG: Active view not restored on reload.
 
-BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this? 
+BUG: Just drawn route does not show on map until you select it.
 
 BUG: Route hiding not working on map. (Needs Actions?)
 
-BUG: `underground`: Takes several rounds to snap obviously vertical points.
-> Why is centroid of 8 and 22 not halfway between them??
-> Getting many (0,0) centroids on `round and round`!
-> No, centroids OK so guess point editing is wrong.
-> I think pointindex in cluster still +1 off.
-
-4. Canonicalize from RM. Might write again, could be clearer.
-5. Use random words list for canonical node & edge labelling. 
-6. Limited Undo as in RM; use simple state machine across canonicalization & routing.
-7. Should be able to make a route, if ends join up, which they won't, in general.
-8. New track with offset, from RM.. creates a new track.
-9. Option to remove all bar the active track (with confirmation).
-10. Option to show/hide/remove unused nodes.
-11. Check Land Use data being handled correctly.
-12. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
+4. Do the neighbour counting.
+5. Canonicalize gives Nodes, Edges, canonical route. Might rewrite; could be clearer.
+6. Use random words list for canonical node & edge labelling. 
+7. Limited Undo as in RM; use simple state machine across canonicalization & routing.
+8. Should be able to make a route, if ends join up, which they won't, in general.
+9. New track with offset, from RM.. creates a new track.
+10. Option to remove all bar the active track (with confirmation).
+11. Option to show/hide/remove unused nodes.
+12. Check Land Use data being handled correctly.
+13. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
 
 ---
 

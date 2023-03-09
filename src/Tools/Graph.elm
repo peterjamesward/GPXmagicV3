@@ -827,13 +827,6 @@ identifyPointsToBeMerged tolerance graph =
                                                 |> Quantity.greaterThan tolerance
                                             )
 
-                                        --_ =
-                                        --    Debug.log "tests"
-                                        --        { isShortPerp = isShortPerp
-                                        --        , isAfterStart = isAfterStart
-                                        --        , isBeforeEnd = isBeforeEnd
-                                        --        , isNotConnected = isNotConnected
-                                        --        }
                                         isNotConnected =
                                             -- Exclude leaves on the source track that neighbour source point.
                                             trackName

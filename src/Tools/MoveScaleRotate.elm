@@ -170,10 +170,7 @@ applyMapElevations elevations track =
             adjustedPoints
     of
         Just isTree ->
-            { track
-                | trackTree = isTree
-                , referenceLonLat = DomainModel.gpxPointFromIndex 0 isTree
-            }
+            { track | trackTree = isTree }
 
         Nothing ->
             track
