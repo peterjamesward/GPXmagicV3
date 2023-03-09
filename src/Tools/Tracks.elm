@@ -952,7 +952,7 @@ lookForClusters :
     -> ( Options msg, List (Actions.ToolAction msg) )
 lookForClusters options tolerance =
     let
-        clusters =
+        ( clusters, _ ) =
             Graph.identifyPointsToBeMerged tolerance options.graph
 
         --Return only the clusters. Wait for button click.

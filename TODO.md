@@ -20,7 +20,8 @@ BUG: Is writing GPX dropping a point ??
 BUG: Active view not restored on reload.
 
 3. "Snap" (consolidate) nearby points
-> Clearly not hitting the right points, see `underground` or `round and round`!
+> Some points are going to Ghana. That ain't right.
+> 
 4. Canonicalize from RM. Might write again, could be clearer.
 5. Use random words list for canonical node & edge labelling. 
 6. Limited Undo as in RM; use simple state machine across canonicalization & routing.

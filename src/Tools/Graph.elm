@@ -613,7 +613,7 @@ type alias Clustering =
     }
 
 
-identifyPointsToBeMerged : Length.Length -> Graph msg -> List Cluster
+identifyPointsToBeMerged : Length.Length -> Graph msg -> ( List Cluster, Dict String (Edge msg) )
 identifyPointsToBeMerged tolerance graph =
     {-
        Data flow outline.
@@ -698,20 +698,28 @@ identifyPointsToBeMerged tolerance graph =
                 |> Dict.values
                 |> List.concatMap nearbyPointsForTrack
 
-        --_ =
-        --    Debug.log "allNearbyPointPairs" allNearbyPointPairs
-        clustersFromPointPairs : List PointNearbyPoint -> List Cluster
+        justAB : PointNearbyPoint -> ( Int, Int )
+        justAB pair =
+            ( pair.aPointIndex, pair.bPointIndex )
+
+        _ =
+            Debug.log "allNearbyPointPairs" <|
+                List.map justAB allNearbyPointPairs
+
+        clustersFromPointPairs : List PointNearbyPoint -> ( List Cluster, Dict String (Edge msg) )
         clustersFromPointPairs pairs =
             -- Change to clustering.
             -- Find closest pair, find centroid,
             -- If any "nearby" points are within tolerance of centroid, add to cluster.
             -- Repeat until all clusters found.
-            findClusters
+            ( findClusters
                 { pairs = List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs
                 , clusters = []
                 , usedPoints = Set.empty
                 }
                 |> .clusters
+            , edgesWithProjectedPoints
+            )
 
         -- Lower level functions follow.
         addTrackLeavesToIndex : Edge msg -> LeafIndex -> LeafIndex
@@ -1130,7 +1138,7 @@ identifyPointsToBeMerged tolerance graph =
 snapToClusters : Quantity Float Meters -> Graph msg -> Graph msg
 snapToClusters tolerance graph =
     let
-        clusters =
+        ( clusters, enhancedEdges ) =
             identifyPointsToBeMerged tolerance graph
 
         newEdges =
@@ -1138,7 +1146,7 @@ snapToClusters tolerance graph =
                 (\key edge ->
                     { edge | track = snapTrackToClusters clusters edge.track }
                 )
-                graph.edges
+                enhancedEdges
     in
     { graph | edges = newEdges }
 
