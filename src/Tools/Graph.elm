@@ -46,7 +46,7 @@ import SpatialIndex
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Tuple3
-import Utils
+import Utils as UtilsForViews
 import UtilsForViews
 
 
@@ -1000,30 +1000,6 @@ identifyPointsToBeMerged tolerance graph =
             , resultsAsRecords ++ collector
             )
 
-        deduplicateNearbyPoints : List PointNearbyPoint -> List PointNearbyPoint
-        deduplicateNearbyPoints nearbys =
-            -- List will have A -> B and B -> A.
-            -- Logically entries are symmetric so we can flip A and B based on natural sort order,
-            -- then sort and "trivially" deduplicate.
-            -- TURNS OUT it's really handy to have both entries, when we build clusters.
-            let
-                normalise nearby =
-                    if nearby.aTrack <= nearby.bTrack && nearby.aPointIndex <= nearby.bPointIndex then
-                        nearby
-
-                    else
-                        { aTrack = nearby.bTrack
-                        , aPointIndex = nearby.bPointIndex
-                        , aPoint = nearby.bPoint
-                        , bTrack = nearby.aTrack
-                        , bPointIndex = nearby.aPointIndex
-                        , bPoint = nearby.aPoint
-                        , separation = nearby.separation
-                        }
-            in
-            List.map normalise nearbys
-                |> Utils.deDupe (==)
-
         findClusters : Clustering -> Clustering
         findClusters clustersInfo =
             -- If first pair has two free points, start a new cluster.
@@ -1160,10 +1136,7 @@ snapToClusters tolerance graph =
         newEdges =
             Dict.map
                 (\key edge ->
-                    { edge
-                        | track =
-                            snapTrackToClusters clusters edge.track
-                    }
+                    { edge | track = snapTrackToClusters clusters edge.track }
                 )
                 graph.edges
     in
@@ -1190,6 +1163,11 @@ snapTrackToClusters clusters updatingTrack =
                                 |> List.filter
                                     (\( trackName, _, _ ) -> trackName == updatingTrack.trackName)
                                 |> List.map Tuple3.second
+                                |> List.sort
+                                |> UtilsForViews.deDupe (==)
+
+                        _ =
+                            Debug.log "MOVING" pointsInThisTrack
 
                         movePoint : Int -> PeteTree -> PeteTree
                         movePoint pointNumber treeFoldedOverPointsInCluster =

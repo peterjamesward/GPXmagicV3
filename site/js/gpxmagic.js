@@ -562,7 +562,7 @@ function safelyRemoveLayer(layer) {
 function addLineToMap(label, data, points) {
 
     lineLabel = "line:" + label;
-    console.log('Adding ', lineLabel);
+//    console.log('Adding ', lineLabel);
 
     // Attempt idempotency.
     safelyRemoveLayer(lineLabel);
@@ -620,7 +620,7 @@ function addInactiveToMap(label, data) {
 
     lineLabel = "line:" + label;
 
-    console.log('Inactive ', label);
+//    console.log('Inactive ', label);
     removeTrack(label);
 
     //console.log('adding geojson data');
@@ -651,7 +651,7 @@ function setClickMode(label, newMode, points) {
 
     pointsLabel = "points:" + label;
 
-    console.log('Set click mode ', label);
+//    console.log('Set click mode ', label);
 
     clickToDrag = newMode;
 
