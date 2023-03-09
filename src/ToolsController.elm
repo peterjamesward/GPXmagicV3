@@ -1648,7 +1648,16 @@ toolStateHasChanged toolType newState isTrack options =
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolTracks ->
-            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
+            let
+                ( newToolOptions, actions ) =
+                    Tools.Tracks.toolStateChange
+                        (newState == Expanded)
+                        options.tracksOptions
+
+                newOptions =
+                    { options | tracksOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
 
 

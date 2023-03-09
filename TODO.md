@@ -11,18 +11,21 @@
 
 ## Promote Graph
 
-BUG: Fetch elevation data iffy.
-
-BUG: Click detect is broken.
-
-BUG: Is writing GPX dropping a point ??
+BUG: Fetch elevation data iffy. 
+> Is this not updating track properly in new structures?
 
 BUG: Active view not restored on reload.
 
-3. "Snap" (consolidate) nearby points
-> Some points are going to Ghana. That ain't right.
-> That's the default centroid. Should not be happening.
-> 
+BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this? 
+
+BUG: Route hiding not working on map. (Needs Actions?)
+
+BUG: `underground`: Takes several rounds to snap obviously vertical points.
+> Why is centroid of 8 and 22 not halfway between them??
+> Getting many (0,0) centroids on `round and round`!
+> No, centroids OK so guess point editing is wrong.
+> I think pointindex in cluster still +1 off.
+
 4. Canonicalize from RM. Might write again, could be clearer.
 5. Use random words list for canonical node & edge labelling. 
 6. Limited Undo as in RM; use simple state machine across canonicalization & routing.

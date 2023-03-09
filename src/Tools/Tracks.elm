@@ -7,6 +7,7 @@ module Tools.Tracks exposing
     , mapOverVisibleTracks
     , setTrack
     , toolId
+    , toolStateChange
     , unloadActiveTrack
     , update
     , updateActiveTrack
@@ -121,6 +122,19 @@ emptyGraph =
     }
 
 
+toolStateChange :
+    Bool
+    -> Options msg
+    -> ( Options msg, List (Actions.ToolAction msg) )
+toolStateChange opened options =
+    if opened then
+        update (SetTolerance options.graphOptions.matchingTolerance) options
+
+    else
+        -- Hide preview
+        ( options, [ Actions.HidePreview "ridge" ] )
+
+
 update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options =
     case msg of
@@ -147,7 +161,10 @@ update msg options =
                             else
                                 Graph.removeEdge updatedTrack options.graph
                       }
-                    , [ Actions.SetActiveTrack <| Maybe.withDefault 0 options.activeTrackIndex ]
+                    , [ Actions.SetActiveTrack <| Maybe.withDefault 0 options.activeTrackIndex
+
+                      --TODO: Show hide on graph
+                      ]
                     )
 
                 Nothing ->
@@ -761,9 +778,9 @@ viewGraph settings wrapper options graph =
                                         String.Interpolate.interpolate
                                             (I18N.localisedString settings.location toolId "isTolerance")
                                             [ showShortMeasure settings.imperial options.matchingTolerance ]
-                            , min = 0.0
+                            , min = 0.5
                             , max = 5.0
-                            , step = Nothing
+                            , step = Just 0.1
                             , value = Length.inMeters options.matchingTolerance
                             , thumb = Input.defaultThumb
                             }

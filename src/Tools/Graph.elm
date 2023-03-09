@@ -640,6 +640,13 @@ identifyPointsToBeMerged tolerance graph =
                 |> Maybe.withDefault (BoundingBox2d.singleton Point2d.origin)
                 |> BoundingBox2d.expandBy tolerance
 
+        _ =
+            Debug.log "BOXES"
+                (graph.edges
+                    |> Dict.values
+                    |> List.map (.track >> .trackTree >> DomainModel.boundingBox >> UtilsForViews.flatBox)
+                )
+
         pointWithTolerance pt =
             BoundingBox2d.withDimensions
                 ( Quantity.twice tolerance, Quantity.twice tolerance )
@@ -698,13 +705,6 @@ identifyPointsToBeMerged tolerance graph =
                 |> Dict.values
                 |> List.concatMap nearbyPointsForTrack
 
-        justAB : PointNearbyPoint -> ( Int, Int )
-        justAB pair =
-            ( pair.aPointIndex, pair.bPointIndex )
-
-        --_ =
-        --    Debug.log "allNearbyPointPairs" <|
-        --        List.map justAB allNearbyPointPairs
         clustersFromPointPairs : List PointNearbyPoint -> ( List Cluster, Dict String (Edge msg) )
         clustersFromPointPairs pairs =
             -- Change to clustering.
@@ -816,10 +816,14 @@ identifyPointsToBeMerged tolerance graph =
                                         ( isNotNearStart, isNotNearEnd ) =
                                             -- Ignore points sufficiently close to ends that clustering will mop them up.
                                             ( pt.space
-                                                |> Point3d.distanceFrom toLeaf.startPoint.space
+                                                |> Point3d.projectInto SketchPlane3d.xy
+                                                |> Point2d.distanceFrom
+                                                    (Point3d.projectInto SketchPlane3d.xy toLeaf.startPoint.space)
                                                 |> Quantity.greaterThan tolerance
                                             , pt.space
-                                                |> Point3d.distanceFrom toLeaf.endPoint.space
+                                                |> Point3d.projectInto SketchPlane3d.xy
+                                                |> Point2d.distanceFrom
+                                                    (Point3d.projectInto SketchPlane3d.xy toLeaf.endPoint.space)
                                                 |> Quantity.greaterThan tolerance
                                             )
 
@@ -969,10 +973,12 @@ identifyPointsToBeMerged tolerance graph =
                     SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
                         |> List.map .content
 
-                --_ =
-                --    Debug.log "UNFILTERED" resultsUnfiltered
-                --_ =
-                --    Debug.log "FILTERED" results
+                _ =
+                    Debug.log "UNFILTERED" ( searchIndex, resultsUnfiltered )
+
+                _ =
+                    Debug.log "FILTERED" ( searchIndex, results )
+
                 results =
                     resultsUnfiltered
                         |> List.filter
@@ -999,7 +1005,10 @@ identifyPointsToBeMerged tolerance graph =
                                 , bTrack = trackName
                                 , bPointIndex = pointIndex
                                 , bPoint = point
-                                , separation = point |> Point3d.distanceFrom searchPoint.space
+                                , separation =
+                                    point
+                                        |> Point3d.projectInto SketchPlane3d.xy
+                                        |> Point2d.distanceFrom searchLocus2d
                                 }
                             )
             in
@@ -1066,6 +1075,9 @@ identifyPointsToBeMerged tolerance graph =
         extendCluster : Cluster -> Clustering -> Clustering
         extendCluster cluster clustersInfo =
             let
+                centroid2d =
+                    Point3d.projectInto SketchPlane3d.xy cluster.centroid
+
                 currentClusterMembers =
                     List.map
                         (\triplet -> ( Tuple3.first triplet, Tuple3.second triplet ))
@@ -1089,7 +1101,8 @@ identifyPointsToBeMerged tolerance graph =
                         |> List.filter
                             (\pair ->
                                 pair.bPoint
-                                    |> Point3d.distanceFrom cluster.centroid
+                                    |> Point3d.projectInto SketchPlane3d.xy
+                                    |> Point2d.distanceFrom centroid2d
                                     |> Quantity.lessThanOrEqualTo tolerance
                             )
             in
@@ -1114,6 +1127,13 @@ identifyPointsToBeMerged tolerance graph =
                     newPointsInfo =
                         possibleExtensions
                             |> List.map (\new -> ( new.bTrack, new.bPointIndex, new.bPoint ))
+                            |> List.Extra.unique
+
+                    _ =
+                        Debug.log "CURRENT" <| List.map Tuple3.second cluster.pointsToAdjust
+
+                    _ =
+                        Debug.log "ADDING" newPointsInfo
 
                     extendedCluster =
                         { cluster
@@ -1164,6 +1184,9 @@ snapTrackToClusters clusters updatingTrack =
                             DomainModel.gpxFromPointWithReference
                                 updatingTrack.referenceLonLat
                                 (DomainModel.withoutTime cluster.centroid)
+
+                        _ =
+                            Debug.log "CENTROID" centroidGPX
 
                         pointsInThisTrack =
                             cluster.pointsToAdjust

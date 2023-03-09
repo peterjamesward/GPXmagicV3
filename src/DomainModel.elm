@@ -1022,7 +1022,14 @@ traverseTreeBetween :
     -> a
     -> a
 traverseTreeBetween startingAt endingAt someNode foldFn accum =
-    traverseTreeBetweenLimitsToDepth startingAt endingAt (always Nothing) 0 someNode foldFn accum
+    traverseTreeBetweenLimitsToDepth
+        startingAt
+        endingAt
+        (always Nothing)
+        0
+        someNode
+        foldFn
+        accum
 
 
 traverseTreeBetweenLimitsToDepth :
