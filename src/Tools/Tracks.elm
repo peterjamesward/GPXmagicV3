@@ -941,8 +941,8 @@ lookForClusters :
     -> ( Options msg, List (Actions.ToolAction msg) )
 lookForClusters options tolerance =
     let
-        ( clusters, enhancedTracks ) =
-            ( [], [] )
+        clusters =
+            Graph.identifyPointsToBeMerged tolerance options.graph
 
         --Return only the clusters. Wait for button click.
         --Graph.identifyPointsToBeMerged tolerance options.graph

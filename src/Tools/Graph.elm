@@ -11,9 +11,10 @@ module Tools.Graph exposing
        --, getTrack
        --, loopCanBeAdded
 
-    ,  removeEdge
+    ,  identifyPointsToBeMerged
        --, makeNewRoute
 
+    , removeEdge
     , traversalCanBeAdded
     ,  trivialGraph
        --, undoWalkRoute
