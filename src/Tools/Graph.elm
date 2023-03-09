@@ -604,6 +604,13 @@ type alias LeafIndex =
     SpatialIndex.SpatialNode LeafIndexEntry Length.Meters LocalCoords
 
 
+type alias Clustering =
+    { pairs : List PointNearbyPoint
+    , clusters : List Cluster
+    , usedPoints : Set ( String, Int )
+    }
+
+
 identifyPointsToBeMerged : Length.Length -> Graph msg -> List Cluster
 identifyPointsToBeMerged tolerance graph =
     {-
@@ -688,16 +695,12 @@ identifyPointsToBeMerged tolerance graph =
             -- Find closest pair, find centroid,
             -- If any "nearby" points are within tolerance of centroid, add to cluster.
             -- Repeat until all clusters found.
-            case List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs of
-                pair1 :: morePairs ->
-                    let
-                        ( cluster, unusedPairs ) =
-                            growClusterFromSeed pair1 morePairs
-                    in
-                    cluster :: clustersFromPointPairs unusedPairs
-
-                [] ->
-                    []
+            findClusters
+                { pairs = List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs
+                , clusters = []
+                , usedPoints = Set.empty
+                }
+                |> .clusters
 
         -- Lower level functions follow.
         addTrackLeavesToIndex : Edge msg -> LeafIndex -> LeafIndex
@@ -985,12 +988,39 @@ identifyPointsToBeMerged tolerance graph =
             List.map normalise nearbys
                 |> Utils.deDupe (==)
 
+        findClusters : Clustering -> Clustering
+        findClusters clustersInfo =
+            -- If first pair has two free points, start a new cluster.
+            -- If first pair does not, discard and recurse.
+            -- If list empty, return.
+            case clustersInfo.pairs of
+                pair1 :: morePairs ->
+                    let
+                        ( pointA, pointB ) =
+                            ( ( pair1.aTrack, pair1.aPointIndex )
+                            , ( pair1.bTrack, pair1.bPointIndex )
+                            )
+                    in
+                    if
+                        Set.member pointA clustersInfo.usedPoints
+                            || Set.member pointB clustersInfo.usedPoints
+                    then
+                        findClusters { clustersInfo | pairs = morePairs }
+
+                    else
+                        { clustersInfo | pairs = morePairs }
+                            |> growClusterFromSeed pair1
+                            |> findClusters
+
+                [] ->
+                    clustersInfo
+
         growClusterFromSeed :
             PointNearbyPoint
-            -> List PointNearbyPoint
-            -> ( Cluster, List PointNearbyPoint )
-        growClusterFromSeed pair1 morePairs =
-            -- If any "nearby" points are within tolerance of centroid, add to cluster.
+            -> Clustering
+            -> Clustering
+        growClusterFromSeed pair1 clustersInfo =
+            -- If any "nearby" unused points are within tolerance of centroid, add to cluster.
             -- Return cluster and unused pairs.
             let
                 centroid =
@@ -1004,48 +1034,83 @@ identifyPointsToBeMerged tolerance graph =
                         , ( pair1.bTrack, pair1.bPointIndex, pair1.bPoint )
                         ]
                     }
-
-                matchAEnds other =
-                    other.aTrack
-                        == pair1.aTrack
-                        && other.aPointIndex
-                        == pair1.aPointIndex
-                        && (other.bPoint
-                                |> Point3d.distanceFrom centroid
-                                |> Quantity.lessThanOrEqualTo tolerance
-                           )
-
-                ( matchingEnd, notMatching ) =
-                    -- Need to look at both sides as pairs are normalised.
-                    -- Grab any pairs that are linked and the opposite point is within tolerance of centroid.
-                    -- This also checks for the other end being close to centroid.
-                    List.partition matchAEnds morePairs
-
-                extendedCluster =
-                    extendCluster seedCluster matchingEnd
             in
-            ( extendedCluster, notMatching )
+            extendCluster
+                seedCluster
+                { clustersInfo
+                    | usedPoints =
+                        clustersInfo.usedPoints
+                            |> Set.insert ( pair1.aTrack, pair1.aPointIndex )
+                            |> Set.insert ( pair1.bTrack, pair1.bPointIndex )
+                }
 
-        extendCluster : Cluster -> List PointNearbyPoint -> Cluster
-        extendCluster cluster newPairs =
+        extendCluster : Cluster -> Clustering -> Clustering
+        extendCluster cluster clustersInfo =
             let
-                newPointsInfo =
-                    -- Damn, Need to find the "other" end.
-                    -- Or, add both and de-dupe!
-                    List.map otherEndOfPair newPairs ++ cluster.pointsToAdjust
+                currentClusterMembers =
+                    List.map
+                        (\triplet -> ( Tuple3.first triplet, Tuple3.second triplet ))
+                        cluster.pointsToAdjust
+                        |> Set.fromList
 
-                otherEndOfPair pair =
-                    ( pair.bTrack, pair.bPointIndex, pair.bPoint )
-
-                newCentroid =
-                    newPointsInfo
-                        |> List.map Tuple3.third
-                        |> Point3d.centroidN
-                        |> Maybe.withDefault cluster.centroid
+                possibleExtensions =
+                    -- Any pairs that begin with any member of this cluster
+                    -- and far point is unused
+                    -- and far point is close enough to centroid
+                    clustersInfo.pairs
+                        |> List.filter
+                            (\pair ->
+                                Set.member ( pair.aTrack, pair.aPointIndex ) currentClusterMembers
+                            )
+                        |> List.filter
+                            (\pair ->
+                                not <|
+                                    Set.member ( pair.bTrack, pair.bPointIndex ) clustersInfo.usedPoints
+                            )
+                        |> List.filter
+                            (\pair ->
+                                pair.bPoint
+                                    |> Point3d.distanceFrom cluster.centroid
+                                    |> Quantity.lessThanOrEqualTo tolerance
+                            )
             in
-            { centroid = newCentroid
-            , pointsToAdjust = newPointsInfo
-            }
+            if possibleExtensions == [] then
+                --We're done
+                { clustersInfo | clusters = cluster :: clustersInfo.clusters }
+
+            else
+                --Keep going
+                let
+                    curentClusterPoints =
+                        List.map Tuple3.third cluster.pointsToAdjust
+
+                    pointsToAddToCentroid =
+                        List.map .bPoint possibleExtensions
+
+                    newCentroid =
+                        (curentClusterPoints ++ pointsToAddToCentroid)
+                            |> Point3d.centroidN
+                            |> Maybe.withDefault cluster.centroid
+
+                    newPointsInfo =
+                        possibleExtensions
+                            |> List.map (\new -> ( new.bTrack, new.bPointIndex, new.bPoint ))
+
+                    extendedCluster =
+                        { cluster
+                            | centroid = newCentroid
+                            , pointsToAdjust = newPointsInfo ++ cluster.pointsToAdjust
+                        }
+                in
+                extendCluster
+                    extendedCluster
+                    { clustersInfo
+                        | usedPoints =
+                            possibleExtensions
+                                |> List.foldl
+                                    (\new -> Set.insert ( new.bTrack, new.bPointIndex ))
+                                    clustersInfo.usedPoints
+                    }
     in
     clustersFromPointPairs allNearbyPointPairs
 

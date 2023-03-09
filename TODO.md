@@ -19,6 +19,8 @@ BUG: Click detect is broken.
 > Doing this. But cluster finder needs to change.
 > Must look recursively at all ends of cluster to find new candidates.
 > Must stop searching when a search yields none.
+> Also, as we use list with "dupes", must stop before we duplicate all clusters.
+> (Important but tricky test, this.)
    1. Global leaf index.
    2. Put query results in Dict <track> (List <points>) for clarity and avoid shuffling. 
    3. Cluster detection does only that. Not a problem if we do it again on button press.
