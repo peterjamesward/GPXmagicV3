@@ -962,31 +962,28 @@ identifyPointsToBeMerged tolerance graph =
                     SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
                         |> List.map .content
 
+                isCloseEnough : PointIndexEntry -> Bool
+                isCloseEnough { trackName, pointIndex, point } =
+                    point
+                        |> Point3d.projectInto SketchPlane3d.xy
+                        |> Point2d.distanceFrom searchLocus2d
+                        |> Quantity.lessThanOrEqualTo tolerance
+
+                isNotSameOrAdjacent : PointIndexEntry -> Bool
+                isNotSameOrAdjacent { trackName, pointIndex, point } =
+                    trackName
+                        /= searchTrack
+                        || pointIndex
+                        < searchIndex
+                        - 1
+                        || pointIndex
+                        > searchIndex
+                        + 1
+
                 results =
                     resultsUnfiltered
                         |> List.filter
-                            --ignore if too far away horizontally.
-                            (\{ trackName, pointIndex, point } ->
-                                point
-                                    |> Point3d.projectInto SketchPlane3d.xy
-                                    |> Point2d.distanceFrom searchLocus2d
-                                    |> Quantity.lessThanOrEqualTo tolerance
-                            )
-                        |> List.filter
-                            --ignore if found ourself, as we should
-                            (\{ trackName, pointIndex, point } ->
-                                trackName /= searchTrack || pointIndex /= searchIndex
-                            )
-                        |> List.filter
-                            --ignore if found adjacent point on same track
-                            (\{ trackName, pointIndex, point } ->
-                                trackName /= searchTrack || pointIndex /= searchIndex + 1
-                            )
-                        |> List.filter
-                            --ignore if found adjacent point on same track
-                            (\{ trackName, pointIndex, point } ->
-                                trackName /= searchTrack || pointIndex /= searchIndex - 1
-                            )
+                            (\entry -> isCloseEnough entry && isNotSameOrAdjacent entry)
 
                 resultsAsRecords =
                     results
