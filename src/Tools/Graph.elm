@@ -81,7 +81,11 @@ addEdgeFromTrack track graph =
             )
 
         ( startKey, endKey ) =
-            ( "start", "end" )
+            if edgeStart == edgeEnd then
+                ( "S/F", "S/F" )
+
+            else
+                ( "S", "F" )
 
         nodeDict =
             graph.nodes
@@ -640,13 +644,6 @@ identifyPointsToBeMerged tolerance graph =
                 |> Maybe.withDefault (BoundingBox2d.singleton Point2d.origin)
                 |> BoundingBox2d.expandBy tolerance
 
-        _ =
-            Debug.log "BOXES"
-                (graph.edges
-                    |> Dict.values
-                    |> List.map (.track >> .trackTree >> DomainModel.boundingBox >> UtilsForViews.flatBox)
-                )
-
         pointWithTolerance pt =
             BoundingBox2d.withDimensions
                 ( Quantity.twice tolerance, Quantity.twice tolerance )
@@ -666,8 +663,6 @@ identifyPointsToBeMerged tolerance graph =
                 findAllLeavesNearAllPointsOnTrack
                 (Dict.values graph.edges)
 
-        --_ =
-        --    Debug.log "projections" pointsProjectedOntoNearbyLeaves
         edgesWithProjectedPoints : Dict String (Edge msg)
         edgesWithProjectedPoints =
             let
@@ -683,15 +678,12 @@ identifyPointsToBeMerged tolerance graph =
                 )
                 graph.edges
 
-        --_ =
-        --    Debug.log "edgesWithProjectedPoints" <|
-        --        Dict.map
-        --            (\k edge -> skipCount edge.track.trackTree)
-        --            edgesWithProjectedPoints
         globalPointIndex : PointIndex
         globalPointIndex =
-            -- This is an index of points base and projected.
-            -- It's used to find clusters of points than may be combined.
+            {-
+               This is an index of points base and projected.
+               It's used to find clusters of points than may be combined.
+            -}
             Dict.foldl
                 (\k v -> addTrackPointsToIndex v)
                 (SpatialIndex.empty globalBoundingBox (Length.meters 100.0))
@@ -699,23 +691,27 @@ identifyPointsToBeMerged tolerance graph =
 
         allNearbyPointPairs : List PointNearbyPoint
         allNearbyPointPairs =
-            -- Think of is a source-destination mapping table.
-            -- Is input to cluster finding.
+            {-
+               Think of is a source-destination mapping table.
+               Is input to cluster finding.
+            -}
             edgesWithProjectedPoints
                 |> Dict.values
                 |> List.concatMap nearbyPointsForTrack
 
         clustersFromPointPairs : List PointNearbyPoint -> ( List Cluster, Dict String (Edge msg) )
         clustersFromPointPairs pairs =
-            -- Change to clustering.
-            -- Find closest pair, find centroid,
-            -- If any "nearby" points are within tolerance of centroid, add to cluster.
-            -- Repeat until all clusters found.
-            ( findClusters
-                { pairs = List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs
-                , clusters = []
-                , usedPoints = Set.empty
-                }
+            {-
+               Change to clustering.
+               Find closest pair, find centroid,
+               If any "nearby" points are within tolerance of centroid, add to cluster.
+               Repeat until all clusters found.
+            -}
+            ( { pairs = List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs
+              , clusters = []
+              , usedPoints = Set.empty
+              }
+                |> findClusters
                 |> .clusters
             , edgesWithProjectedPoints
             )
@@ -966,12 +962,6 @@ identifyPointsToBeMerged tolerance graph =
                     SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
                         |> List.map .content
 
-                _ =
-                    Debug.log "UNFILTERED" ( searchIndex, resultsUnfiltered )
-
-                _ =
-                    Debug.log "FILTERED" ( searchIndex, results )
-
                 results =
                     resultsUnfiltered
                         |> List.filter
@@ -986,6 +976,16 @@ identifyPointsToBeMerged tolerance graph =
                             --ignore if found ourself, as we should
                             (\{ trackName, pointIndex, point } ->
                                 trackName /= searchTrack || pointIndex /= searchIndex
+                            )
+                        |> List.filter
+                            --ignore if found adjacent point on same track
+                            (\{ trackName, pointIndex, point } ->
+                                trackName /= searchTrack || pointIndex /= searchIndex + 1
+                            )
+                        |> List.filter
+                            --ignore if found adjacent point on same track
+                            (\{ trackName, pointIndex, point } ->
+                                trackName /= searchTrack || pointIndex /= searchIndex - 1
                             )
 
                 resultsAsRecords =

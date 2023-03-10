@@ -17,13 +17,14 @@ BUG: Some combinations of routes still yield (0,0) centroids.
 > This may be "vertical" road sections from projections.
 > Whatever, shouldn't happen.
 
-10. Any change to tracks must invalidate nodes.
-11. Another button to canonicalize (replace tracks with edges).
-12. Undo analyze.
-13. Undo canonocalize.
-14. Route making, largely unchanged editing of traversals.
-16. New track with offset, creates a new track from route.
-17. Undo for create new track from route.
+1. Only shpw preview for snap points when in that state.
+2. Any change to tracks must invalidate nodes.
+3. Another button to canonicalize (replace tracks with edges).
+4. Undo analyze.
+5. Undo canonocalize.
+6. Route making, largely unchanged editing of traversals.
+7. New track with offset, creates a new track from route.
+8. Undo for create new track from route.
 
 ---
 
