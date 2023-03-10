@@ -5,6 +5,7 @@ module SceneBuilder3D exposing
     , TerrainFoldState
     , render3dView
     , renderInactiveView
+    , renderKeyPlaces
     , renderPreviews
     )
 
@@ -716,6 +717,11 @@ renderPreviews previews =
                     []
     in
     previews |> Dict.values |> List.concatMap onePreview
+
+
+renderKeyPlaces : List (Point3d.Point3d Meters LocalCoords) -> List (Entity msg)
+renderKeyPlaces places =
+    []
 
 
 previewAsLine : Element.Color -> List EarthPoint -> List (Entity LocalCoords)

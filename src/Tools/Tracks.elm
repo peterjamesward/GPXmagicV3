@@ -3,6 +3,7 @@ module Tools.Tracks exposing
     , addTrack
     , defaultOptions
     , getActiveTrack
+    , getKeyPlaces
     , mapOverInvisibleTracks
     , mapOverVisibleTracks
     , setTrack
@@ -16,7 +17,6 @@ module Tools.Tracks exposing
 
 import Actions
 import Angle
-import BoundingBox3d exposing (BoundingBox3d)
 import Color
 import CommonToolStyles
 import Dict
@@ -41,7 +41,6 @@ import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
-import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.Graph as Graph
 import Tools.GraphOptions as Graph exposing (Cluster, Direction(..))
 import Tools.I18N as I18N
@@ -882,3 +881,8 @@ showNewPoints clusters =
                 (Material.color Color.white)
     in
     List.map (.centroid >> highlightPoint) clusters
+
+
+getKeyPlaces : Options msg -> List (Point3d.Point3d Meters LocalCoords)
+getKeyPlaces options =
+    []

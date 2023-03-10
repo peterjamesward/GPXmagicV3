@@ -199,10 +199,11 @@ render toolSettings options width tracks previews =
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews previews
-                ++ (tracks
-                        |> Tools.Tracks.mapOverVisibleTracks renderTrack
-                        |> List.concat
+                ++ (List.concat <|
+                        Tools.Tracks.mapOverVisibleTracks renderTrack <|
+                            tracks
                    )
+                ++ (SceneBuilder3D.renderKeyPlaces <| Tools.Tracks.getKeyPlaces tracks)
     }
 
 

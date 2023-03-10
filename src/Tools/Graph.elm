@@ -1222,92 +1222,119 @@ type alias EdgeFinder msg =
     }
 
 
+pointAsComparable : EarthPoint -> ( Float, Float )
+pointAsComparable earthPoint =
+    let
+        ( x, y, z ) =
+            Point3d.toTuple Length.inMeters earthPoint.space
+    in
+    ( x, y )
+
+
 analyzeTracksAsGraph : Graph msg -> Graph msg
 analyzeTracksAsGraph graph =
+    {-
+       As in v1 & 2, the only way I know is to see which track points have more than two neighbours.
+       Hence build a Dict using XY and the entries being a list of points that share the location.
+
+       Partial re-write, put outline code at top here and supporting functions below.
+    -}
     let
-        ( clusters, enhancedEdges ) =
-            identifyPointsToBeMerged tolerance graph
+        neighboursForEachPoint : Dict ( Float, Float ) (Set ( Float, Float ))
+        neighboursForEachPoint =
+            -- What neighbours hath each track point?
+            -- Output is dictionary where each point has a set of neighbours across all tracks
+            -- where the points are simply an XY coordinate pair.
+            let
+                addNeighboursFromTrack :
+                    String
+                    -> Edge msg
+                    -> Dict ( Float, Float ) (Set ( Float, Float ))
+                    -> Dict ( Float, Float ) (Set ( Float, Float ))
+                addNeighboursFromTrack _ edge inputDict =
+                    DomainModel.foldOverRouteRL
+                        accumulateNeighbours
+                        edge.track.trackTree
+                        inputDict
+            in
+            Dict.foldl
+                addNeighboursFromTrack
+                Dict.empty
+                graph.edges
 
-        newEdges =
-            Dict.map
-                (\key edge ->
-                    { edge | track = snapTrackToClusters clusters edge.track }
+        nodeLocationsXY : Dict ( Float, Float ) (Set ( Float, Float ))
+        nodeLocationsXY =
+            -- Two neighbours is just an edge point, anything else is a node.
+            -- But make sure the endpoints are there, as loops can cause a problem here.
+            Dict.union
+                startAndEndPointsForAllTracks
+                (neighboursForEachPoint
+                    |> Dict.filter (\pt neighbours -> Set.size neighbours /= 2)
                 )
-                enhancedEdges
-    in
-    { graph | edges = newEdges }
 
+        {-
+           Above this line, the top level. Below this line, supporting functions.
+        -}
+        startAndEndPointsForAllTracks : Dict ( Float, Float ) (Set ( Float, Float ))
+        startAndEndPointsForAllTracks =
+            let
+                ( starts, ends ) =
+                    Dict.foldl
+                        (\_ edge ( startDict, endDict ) ->
+                            let
+                                ( startXY, endXY ) =
+                                    ( pointAsComparable <| DomainModel.startPoint edge.track.trackTree
+                                    , pointAsComparable <| DomainModel.endPoint edge.track.trackTree
+                                    )
+                            in
+                            ( Dict.insert startXY Set.empty startDict
+                            , Dict.insert endXY Set.empty endDict
+                            )
+                        )
+                        ( Dict.empty, Dict.empty )
+                        graph.edges
+            in
+            Dict.union starts ends
 
+        earthPointFromXY ( x, y ) =
+            { space = Point3d.xyz (Length.meters x) (Length.meters y) Quantity.zero
+            , time = Nothing
+            }
 
-{-
-   buildGraph : TrackLoaded msg -> Graph msg
-   buildGraph track =
-       {-
-          As in v1 & 2, the only way I know is to see which track points have more than two neighbours.
-          Hence build a Dict using XY and the entries being a list of points that share the location.
-       -}
-       let
-           countNeighbours : RoadSection -> Dict String (Set String) -> Dict String (Set String)
-           countNeighbours road countDict =
-               -- Nicer than v2 thanks to use of road segments.
-               -- Note we are interested in neighbours with distinct XYs.
-               let
-                   ( startXY, endXY ) =
-                       ( nodeKey road.startPoint
-                       , nodeKey road.endPoint
-                       )
+        makeNamedNodes : Dict ( Float, Float ) any -> Dict String EarthPoint
+        makeNamedNodes rawNodes =
+            Dict.keys rawNodes
+                |> List.indexedMap
+                    (\i key ->
+                        ( "Place " ++ String.fromInt i
+                        , earthPointFromXY key
+                        )
+                    )
+                |> Dict.fromList
 
-                   ( startNeighbours, endNeighbours ) =
-                       ( Dict.get startXY countDict |> Maybe.withDefault Set.empty
-                       , Dict.get endXY countDict |> Maybe.withDefault Set.empty
-                       )
-               in
-               countDict
-                   |> Dict.insert startXY (Set.insert endXY startNeighbours)
-                   |> Dict.insert endXY (Set.insert startXY endNeighbours)
+        accumulateNeighbours :
+            RoadSection
+            -> Dict ( Float, Float ) (Set ( Float, Float ))
+            -> Dict ( Float, Float ) (Set ( Float, Float ))
+        accumulateNeighbours road countDict =
+            -- Nicer than v2 thanks to use of road segments.
+            -- Note we are interested in neighbours with distinct XYs.
+            let
+                ( startXY, endXY ) =
+                    ( pointAsComparable road.startPoint
+                    , pointAsComparable road.endPoint
+                    )
 
-           pointNeighbours : Dict String (Set String)
-           pointNeighbours =
-               -- What neighbours hath each track point?
-               -- Note that the List.head will be earliest in the route, hence preferred.
-               DomainModel.foldOverRouteRL
-                   countNeighbours
-                   track.trackTree
-                   Dict.empty
+                ( startNeighbours, endNeighbours ) =
+                    ( Dict.get startXY countDict |> Maybe.withDefault Set.empty
+                    , Dict.get endXY countDict |> Maybe.withDefault Set.empty
+                    )
+            in
+            countDict
+                |> Dict.insert startXY (Set.insert endXY startNeighbours)
+                |> Dict.insert endXY (Set.insert startXY endNeighbours)
 
-           ( trackStartXY, trackEndXY ) =
-               ( nodeKey <| DomainModel.earthPointFromIndex 0 track.trackTree
-               , nodeKey <| DomainModel.earthPointFromIndex (skipCount track.trackTree) track.trackTree
-               )
-
-           nodes =
-               -- Two neighbours is just an edge point, anything else is a node.
-               -- But make sure the endpoints are there, as loops can cause a problem here.
-               pointNeighbours
-                   |> Dict.filter
-                       (\pt neighbours ->
-                           Set.size neighbours
-                               /= 2
-                               || pt
-                               == trackStartXY
-                               || pt
-                               == trackEndXY
-                       )
-                   |> Dict.keys
-                   |> List.indexedMap Tuple.pair
-                   |> Dict.fromList
-
-           swap ( a, b ) =
-               ( b, a )
-
-           inverseNodes : Dict String String
-           inverseNodes =
-               -- We need to lookup each point to see if it's a node.
-               nodes |> Dict.toList |> List.map swap |> Dict.fromList
-
-           ( firstPoint, firstGpx ) =
-               DomainModel.getDualCoords track.trackTree 0
-
+        {-
            finalEdgeFinder : EdgeFinder msg
            finalEdgeFinder =
                {-
@@ -1474,14 +1501,11 @@ analyzeTracksAsGraph graph =
                                        inputState.edgesDict
                                , traversals = traversal :: inputState.traversals
                                }
-       in
-       { nodes = nodes
-       , edges = finalEdgeFinder.edgesDict
-
-       --, userRoute = List.reverse finalEdgeFinder.traversals
-       , referenceLonLat = track.referenceLonLat
-       }
--}
+        -}
+    in
+    { graph
+        | nodes = makeNamedNodes nodeLocationsXY
+    }
 
 
 trivialGraph : TrackLoaded msg -> Graph msg
