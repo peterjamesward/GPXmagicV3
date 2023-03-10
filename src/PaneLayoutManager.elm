@@ -1068,17 +1068,16 @@ restoreStoredValues : PaneLayoutOptions -> D.Value -> PaneLayoutOptions
 restoreStoredValues options values =
     case D.decodeValue paneStateDecoder values of
         Ok fromStorage ->
-            --TODO: Reinstate, currently interferes with map load.
-            --{ defaultOptions
-            --    | paneLayout = decodePanesLayout fromStorage.layoutName
-            --    , popupVisible = False
-            --    , pane1 = applyStoredPaneDetails fromStorage.pane1
-            --    , pane2 = applyStoredPaneDetails fromStorage.pane2
-            --    , pane3 = applyStoredPaneDetails fromStorage.pane3
-            --    , pane4 = applyStoredPaneDetails fromStorage.pane4
-            --}
-            options
+            { defaultOptions
+                | paneLayout = decodePanesLayout fromStorage.layoutName
+                , popupVisible = False
+                , pane1 = applyStoredPaneDetails fromStorage.pane1
+                , pane2 = applyStoredPaneDetails fromStorage.pane2
+                , pane3 = applyStoredPaneDetails fromStorage.pane3
+                , pane4 = applyStoredPaneDetails fromStorage.pane4
+            }
 
+        --options
         Err _ ->
             options
 

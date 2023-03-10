@@ -102,7 +102,7 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
                 [ ( "label", """Route builder""" )
                 , ( "info", """Manage multiple tracks.""" )
                 , ( "unload", """Remove the active track (no Undo)""" )
-                , ( "find", """Enter Route maker mode""" )
+                , ( "find", """Find key Places and Roads""" )
                 , ( "adopt", """Merge nearby points""" )
                 , ( "adoptInfo", """You may want to "snap" multiple passes of the track
 together to remove discrepancies, but you're content with the original route and don't
@@ -143,9 +143,6 @@ Place to other (or the same Place).
 
 Once we've done that, you'll be able to change the route you take between places.
 Use the **Route** view to help construct a new route.
-
-You can also select a single road for editing using (most of) the normal tools. Any changes
-you make here will be reflected in the resulting route so all the altitudes will agree.
 """ )
                 , ( "tolerance", """
 Distance within which nearby points will be seen as on the same road.

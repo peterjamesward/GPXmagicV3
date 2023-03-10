@@ -13,15 +13,17 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
-BUG: Active view not restored on reload.
-
-BUG: Just drawn route does not show on map until you select it.
+BUG: Just-drawn route does not show on map until you select it.
 
 BUG: Route hiding not working on map. (Needs Actions?)
 
-4. Do the neighbour counting.
-5. Canonicalize gives Nodes, Edges, canonical route. Might rewrite; could be clearer.
-6. Use random words list for canonical node & edge labelling. 
+4. Add an Undo! for the Snap operation (save Graph). 
+5. Clean up the Tracks.view function to make it more navigable.
+6. State machine to help with showing elements.
+7. Do the neighbour counting.
+8. Get random words list for canonical node & edge labelling. (see other apps for usage)
+9. Canonicalize gives Nodes, Edges, canonical route. Might rewrite; could be clearer.
+> (Canonical route doesn't make sense for > 1 track.)
 7. Limited Undo as in RM; use simple state machine across canonicalization & routing.
 8. Should be able to make a route, if ends join up, which they won't, in general.
 9. New track with offset, from RM.. creates a new track.

@@ -789,8 +789,7 @@ viewGraph settings wrapper options graph =
             column [ centerX, width fill, spacing 10 ]
                 [ toleranceSlider
                 , snapToNearbyButton
-
-                --, analyseButton
+                , analyseButton
                 ]
         ]
 
