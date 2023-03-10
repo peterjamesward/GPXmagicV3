@@ -20,7 +20,6 @@ module Tools.Graph exposing
        --, undoWalkRoute
 
     , traversalCanBeAdded
-    , trivialGraph
     , updatedEdge
     )
 
@@ -1222,13 +1221,22 @@ type alias EdgeFinder msg =
     }
 
 
-pointAsComparable : EarthPoint -> ( Float, Float )
+pointAsComparable : EarthPoint -> NodeXY
 pointAsComparable earthPoint =
     let
         ( x, y, z ) =
             Point3d.toTuple Length.inMeters earthPoint.space
     in
     ( x, y )
+
+
+type alias NodeXY =
+    ( Float, Float )
+
+
+type alias NodeFinderDict =
+    -- Include altitude with each node, for rendering.
+    Dict NodeXY ( Set NodeXY, Quantity Float Meters )
 
 
 analyzeTracksAsGraph : Graph msg -> Graph msg
@@ -1240,7 +1248,7 @@ analyzeTracksAsGraph graph =
        Partial re-write, put outline code at top here and supporting functions below.
     -}
     let
-        neighboursForEachPoint : Dict ( Float, Float ) (Set ( Float, Float ))
+        neighboursForEachPoint : NodeFinderDict
         neighboursForEachPoint =
             -- What neighbours hath each track point?
             -- Output is dictionary where each point has a set of neighbours across all tracks
@@ -1249,8 +1257,8 @@ analyzeTracksAsGraph graph =
                 addNeighboursFromTrack :
                     String
                     -> Edge msg
-                    -> Dict ( Float, Float ) (Set ( Float, Float ))
-                    -> Dict ( Float, Float ) (Set ( Float, Float ))
+                    -> NodeFinderDict
+                    -> NodeFinderDict
                 addNeighboursFromTrack _ edge inputDict =
                     DomainModel.foldOverRouteRL
                         accumulateNeighbours
@@ -1262,33 +1270,38 @@ analyzeTracksAsGraph graph =
                 Dict.empty
                 graph.edges
 
-        nodeLocationsXY : Dict ( Float, Float ) (Set ( Float, Float ))
+        nodeLocationsXY : NodeFinderDict
         nodeLocationsXY =
             -- Two neighbours is just an edge point, anything else is a node.
             -- But make sure the endpoints are there, as loops can cause a problem here.
             Dict.union
                 startAndEndPointsForAllTracks
                 (neighboursForEachPoint
-                    |> Dict.filter (\pt neighbours -> Set.size neighbours /= 2)
+                    |> Dict.filter (\pt ( neighbours, altitude ) -> Set.size neighbours /= 2)
                 )
 
         {-
            Above this line, the top level. Below this line, supporting functions.
         -}
-        startAndEndPointsForAllTracks : Dict ( Float, Float ) (Set ( Float, Float ))
+        startAndEndPointsForAllTracks : NodeFinderDict
         startAndEndPointsForAllTracks =
             let
                 ( starts, ends ) =
                     Dict.foldl
                         (\_ edge ( startDict, endDict ) ->
                             let
+                                ( start, end ) =
+                                    ( DomainModel.startPoint edge.track.trackTree
+                                    , DomainModel.endPoint edge.track.trackTree
+                                    )
+
                                 ( startXY, endXY ) =
-                                    ( pointAsComparable <| DomainModel.startPoint edge.track.trackTree
-                                    , pointAsComparable <| DomainModel.endPoint edge.track.trackTree
+                                    ( pointAsComparable start
+                                    , pointAsComparable end
                                     )
                             in
-                            ( Dict.insert startXY Set.empty startDict
-                            , Dict.insert endXY Set.empty endDict
+                            ( Dict.insert startXY ( Set.empty, Point3d.zCoordinate start.space ) startDict
+                            , Dict.insert endXY ( Set.empty, Point3d.zCoordinate end.space ) endDict
                             )
                         )
                         ( Dict.empty, Dict.empty )
@@ -1296,26 +1309,31 @@ analyzeTracksAsGraph graph =
             in
             Dict.union starts ends
 
-        earthPointFromXY ( x, y ) =
-            { space = Point3d.xyz (Length.meters x) (Length.meters y) Quantity.zero
+        earthPointFromXY : NodeXY -> Quantity Float Meters -> EarthPoint
+        earthPointFromXY ( x, y ) alt =
+            { space = Point3d.xyz (Length.meters x) (Length.meters y) alt
             , time = Nothing
             }
 
-        makeNamedNodes : Dict ( Float, Float ) any -> Dict String EarthPoint
+        makeNamedNodes : NodeFinderDict -> Dict String EarthPoint
         makeNamedNodes rawNodes =
-            Dict.keys rawNodes
-                |> List.indexedMap
-                    (\i key ->
-                        ( "Place " ++ String.fromInt i
-                        , earthPointFromXY key
-                        )
+            Dict.foldl
+                (\key ( nodeXY, altitude ) ( index, newDict ) ->
+                    ( index + 1
+                    , Dict.insert
+                        ("Place " ++ String.fromInt index)
+                        (earthPointFromXY key altitude)
+                        newDict
                     )
-                |> Dict.fromList
+                )
+                ( 0, Dict.empty )
+                rawNodes
+                |> Tuple.second
 
         accumulateNeighbours :
             RoadSection
-            -> Dict ( Float, Float ) (Set ( Float, Float ))
-            -> Dict ( Float, Float ) (Set ( Float, Float ))
+            -> NodeFinderDict
+            -> NodeFinderDict
         accumulateNeighbours road countDict =
             -- Nicer than v2 thanks to use of road segments.
             -- Note we are interested in neighbours with distinct XYs.
@@ -1325,228 +1343,39 @@ analyzeTracksAsGraph graph =
                     , pointAsComparable road.endPoint
                     )
 
-                ( startNeighbours, endNeighbours ) =
-                    ( Dict.get startXY countDict |> Maybe.withDefault Set.empty
-                    , Dict.get endXY countDict |> Maybe.withDefault Set.empty
+                ( ( startNeighbours, _ ), ( endNeighbours, _ ) ) =
+                    ( Dict.get startXY countDict |> Maybe.withDefault ( Set.empty, Quantity.zero )
+                    , Dict.get endXY countDict |> Maybe.withDefault ( Set.empty, Quantity.zero )
                     )
             in
             countDict
-                |> Dict.insert startXY (Set.insert endXY startNeighbours)
-                |> Dict.insert endXY (Set.insert startXY endNeighbours)
-
-        {-
-           finalEdgeFinder : EdgeFinder msg
-           finalEdgeFinder =
-               {-
-                  Walk the route again, but check each point against node index.
-                  If not a node, accrue a possible new edge.
-                  If a node, look into edge dict to see if we have already an Edge
-                  for the node pair, but note that that is not unique.
-                  The real test for an edge is whether all (or sample) of trackpoints
-                  coincide, forwards or backward. We can reduce the testing to one-way
-                  by convention of always putting lower node index first in dict lookup.
-               -}
-               DomainModel.foldOverRoute
-                   splitIntoEdges
-                   track.trackTree
-                   initialEdgeFinder
-
-           initialEdgeFinder : EdgeFinder msg
-           initialEdgeFinder =
-               { startNodeIndex = Dict.get (nodeKey firstPoint) inverseNodes |> Maybe.withDefault 0
-               , currentEdge = [ ( firstPoint, firstGpx ) ]
-               , edgeResolverDict = Dict.empty
-               , edgesDict = Dict.empty
-               , traversals = []
-               }
-
-           splitIntoEdges :
-               RoadSection
-               -> EdgeFinder msg
-               -> EdgeFinder msg
-           splitIntoEdges road inputState =
-               let
-                   pointXY =
-                       nodeKey road.endPoint
-
-                   pointGpx =
-                       Tuple.second road.sourceData
-               in
-               case Dict.get pointXY inverseNodes of
-                   Nothing ->
-                       -- Not a node, just add to current edge.
-                       { inputState | currentEdge = ( road.endPoint, pointGpx ) :: inputState.currentEdge }
-
-                   Just nodeIndex ->
-                       -- At a node, completed an edge, but have we encountered this edge before?
-                       let
-                           newEdge : List ( EarthPoint, GPXSource )
-                           newEdge =
-                               ( road.endPoint, pointGpx ) :: inputState.currentEdge
-
-                           orientedEdgeCouldBeLeaf : List ( EarthPoint, GPXSource )
-                           orientedEdgeCouldBeLeaf =
-                               if nodeIndex >= inputState.startNodeIndex then
-                                   -- Conventional order, good, but must flip the edge
-                                   List.reverse newEdge
-
-                               else
-                                   newEdge
-
-                           orientedEdge : List ( EarthPoint, GPXSource )
-                           orientedEdge =
-                               -- Not good if no midpoints, as can't select.
-                               case orientedEdgeCouldBeLeaf of
-                                   [ ( startEarth, startGpx ), ( endEarth, endGpx ) ] ->
-                                       let
-                                           midEarth =
-                                               DomainModel.withoutTime <|
-                                                   Point3d.midpoint startEarth.space endEarth.space
-
-                                           midGpx =
-                                               DomainModel.gpxFromPointWithReference
-                                                   track.referenceLonLat
-                                                   midEarth
-                                       in
-                                       [ ( startEarth, startGpx )
-                                       , ( midEarth, midGpx )
-                                       , ( endEarth, endGpx )
-                                       ]
-
-                                   _ ->
-                                       orientedEdgeCouldBeLeaf
-
-                           discriminator : String
-                           discriminator =
-                               -- As there can be more than one edge 'tween  two nodes,
-                               -- we take the index 1 point to discriminate. That's why
-                               -- the edge orientation matters.
-                               orientedEdge
-                                   |> List.Extra.getAt 1
-                                   |> Maybe.map Tuple.first
-                                   |> Maybe.map nodeKey
-                                   |> Maybe.withDefault pointXY
-
-                           ( lowNode, highNode ) =
-                               ( min inputState.startNodeIndex nodeIndex
-                               , max inputState.startNodeIndex nodeIndex
-                               )
-                       in
-                       case Dict.get ( lowNode, highNode, discriminator ) inputState.edgeResolverDict of
-                           Just ( edgeIndex, _ ) ->
-                               -- So, we don't add this edge
-                               -- but we record the traversal
-                               let
-                                   traversal =
-                                       { edge = edgeIndex
-                                       , direction =
-                                           if lowNode == inputState.startNodeIndex then
-                                               Natural
-
-                                           else
-                                               Reverse
-                                       }
-                               in
-                               { inputState
-                                   | startNodeIndex = nodeIndex
-                                   , currentEdge = [ ( road.endPoint, pointGpx ) ]
-                                   , traversals = traversal :: inputState.traversals
-                               }
-
-                           Nothing ->
-                               -- We put this into the resolver dictionary to check for reuse,
-                               -- and into the outputs dictionary,
-                               -- _and_ we record the traversal.
-                               let
-                                   newEdgeTree =
-                                       DomainModel.treeFromSourcesWithExistingReference
-                                           track.referenceLonLat
-                                           (List.map Tuple.second orientedEdge)
-                                           |> Maybe.withDefault (Leaf road)
-
-                                   newEdgeTrack =
-                                       TrackLoaded.newTrackFromTree
-                                           track.referenceLonLat
-                                           newEdgeTree
-
-                                   newEdgeIndex =
-                                       Dict.size inputState.edgesDict
-
-                                   traversal =
-                                       { edge = newEdgeIndex
-                                       , direction =
-                                           if lowNode == inputState.startNodeIndex then
-                                               Natural
-
-                                           else
-                                               Reverse
-                                       }
-                               in
-                               { startNodeIndex = nodeIndex
-                               , currentEdge = [ ( road.endPoint, pointGpx ) ]
-                               , edgeResolverDict =
-                                   Dict.insert
-                                       ( lowNode, highNode, discriminator )
-                                       ( newEdgeIndex, newEdgeTree )
-                                       inputState.edgeResolverDict
-                               , edgesDict =
-                                   Dict.insert
-                                       newEdgeIndex
-                                       { lowNode = lowNode
-                                       , highNode = highNode
-                                       , via = discriminator
-                                       , track = newEdgeTrack
-                                       , originalDirection = traversal.direction
-                                       }
-                                       inputState.edgesDict
-                               , traversals = traversal :: inputState.traversals
-                               }
-        -}
+                |> Dict.insert startXY
+                    ( Set.insert endXY startNeighbours
+                    , Point3d.zCoordinate road.startPoint.space
+                    )
+                |> Dict.insert endXY
+                    ( Set.insert startXY endNeighbours
+                    , Point3d.zCoordinate road.endPoint.space
+                    )
     in
     { graph
         | nodes = makeNamedNodes nodeLocationsXY
     }
 
 
-trivialGraph : TrackLoaded msg -> Graph msg
-trivialGraph track =
+decomposeTracksIntoEdges : Graph msg -> Graph msg
+decomposeTracksIntoEdges graph =
     {-
-       This just gives us the start and end points, maybe one node if track is looped.
-       It's a good place to start and means we can then start visualising.
+       Edge finding is a second walk along all the tracks, now we know where all the nodes are.
+       Add node-node intervals to edge dict using (lowNode, highNode, via) as key where the node
+       names in string sort order, via is (Float, Float).
+       Use midpoint as via (but that may not be unique).
     -}
     let
-        ( startNode, endNode, discriminator ) =
-            ( DomainModel.earthPointFromIndex 0 track.trackTree
-            , DomainModel.earthPointFromIndex (skipCount track.trackTree) track.trackTree
-            , DomainModel.earthPointFromIndex 1 track.trackTree
-            )
-
-        nodes =
-            Dict.fromList
-                [ ( nodeKey startNode, startNode ), ( nodeKey endNode, endNode ) ]
-
-        edge =
-            { lowNode = nodeKey startNode
-            , highNode = nodeKey endNode
-            , via = nodeKey discriminator
-            , track = track
-            , originalDirection = Natural
-            }
-
         edges =
-            Dict.fromList
-                [ ( edgeKey edge
-                  , edge
-                  )
-                ]
-
-        traversal =
-            { edge = 0, direction = Natural }
+            graph.edges
     in
-    { nodes = nodes
-    , edges = edges
-    , referenceLonLat = track.referenceLonLat
-    }
+    { graph | edges = edges }
 
 
 type alias Junction =

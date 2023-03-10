@@ -20,14 +20,13 @@ BUG: Some combinations of routes still yield (0,0) centroids.
 5. ~~State machine to help with showing elements.~~
 6. ~~Snap option should not appear with no tracks loaded.~~
 7. ~~Do the neighbour counting.~~
-8. Show nodes in 3D views and Route view.
-9. ?? Get random words list for canonical node & edge labelling. (see other apps for usage)
-10. Canonicalize gives Nodes, Edges, canonical route. Might rewrite; could be clearer.
-> (Canonical route doesn't make sense for > 1 track.)
-7. Undo analyze.
-8. Should be able to make a route, if ends join up, which they won't, in general.
-9. New track with offset, from RM.. creates a new track from route.
-10. Undo for create new track from route.
+8. Give Nodes some altitude, so they render better.
+9. Show nodes in 3D views and Route view.
+10. Canonicalize gives Nodes, Edges, ~~canonical route~~. Might rewrite; could be clearer.
+11. Undo analyze.
+12. Should be able to make a route, if ends join up, which they won't, in general.
+13. New track with offset, from RM.. creates a new track from route.
+14. Undo for create new track from route.
 
 ---
 
