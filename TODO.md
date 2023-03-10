@@ -16,18 +16,14 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 BUG: Some combinations of routes still yield (0,0) centroids. 
 > This may be "vertical" road sections from projections.
 > Whatever, shouldn't happen.
-4. ~~Add an Undo! for the Snap operation (save Graph).~~ 
-5. ~~State machine to help with showing elements.~~
-6. ~~Snap option should not appear with no tracks loaded.~~
-7. ~~Do the neighbour counting.~~
-8. ~~Give Nodes some altitude, so they render better.~~
-9. ~~Show nodes in ~~3D views~~ and Route view.~~
-10. Another button to canonicalise (replace tracks with edges).
-11. Canonicalize gives Nodes, Edges, ~~canonical route~~. ~~Might rewrite; could be clearer.~~
+
+10. Any change to tracks must invalidate nodes.
+11. Another button to canonicalize (replace tracks with edges).
 12. Undo analyze.
-13. Should be able to make a route, if ends join up, which they won't, in general.
-14. New track with offset, from RM.. creates a new track from route.
-15. Undo for create new track from route.
+13. Undo canonocalize.
+14. Route making, largely unchanged editing of traversals.
+16. New track with offset, creates a new track from route.
+17. Undo for create new track from route.
 
 ---
 
