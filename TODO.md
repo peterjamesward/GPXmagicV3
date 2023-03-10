@@ -15,7 +15,7 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 4. ~~Add an Undo! for the Snap operation (save Graph).~~ 
 5. ~~State machine to help with showing elements.~~
-6. Snap option should not appear with no tracks loaded.
+6. ~~Snap option should not appear with no tracks loaded.~~
 7. Do the neighbour counting.
 8. Get random words list for canonical node & edge labelling. (see other apps for usage)
 9. Canonicalize gives Nodes, Edges, canonical route. Might rewrite; could be clearer.
