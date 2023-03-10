@@ -4,7 +4,7 @@ module Tools.Graph exposing
        --, addTraversal
        --, combineNearbyPoints
 
-    , addEdge
+    , addEdgeFromTrack
     , analyzeTracksAsGraph
     ,  deleteEdgeTraversal
        --,  edgeCanBeDeleted
@@ -66,8 +66,8 @@ nodeKey point =
     String.fromFloat x ++ String.fromFloat y
 
 
-addEdge : TrackLoaded msg -> Graph msg -> Graph msg
-addEdge track graph =
+addEdgeFromTrack : TrackLoaded msg -> Graph msg -> Graph msg
+addEdgeFromTrack track graph =
     --Use existing nodes if available.
     --Do we add edge if duplicate? Actually yes, else what?
     --Shall we use track name as edge key?
@@ -81,7 +81,7 @@ addEdge track graph =
             )
 
         ( startKey, endKey ) =
-            ( nodeKey edgeStart, nodeKey edgeEnd )
+            ( "start", "end" )
 
         nodeDict =
             graph.nodes
@@ -109,7 +109,7 @@ updatedEdge : TrackLoaded msg -> TrackLoaded msg -> Graph msg -> Graph msg
 updatedEdge oldTrack newTrack graph =
     -- User has edited a track, so the graph must point to the newest version.
     -- Easy and safe to remove old track and add new in case name changed.
-    graph |> removeEdge oldTrack |> addEdge newTrack
+    graph |> removeEdge oldTrack |> addEdgeFromTrack newTrack
 
 
 removeEdge : TrackLoaded msg -> Graph msg -> Graph msg

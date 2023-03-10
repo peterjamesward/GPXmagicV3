@@ -314,7 +314,7 @@ view settings context ( width, height ) options graph msgWrapper =
                     (\( index, edgeInfo ) ->
                         case context.edgeMode of
                             EdgeArc ->
-                                renderEdgeArc index edgeInfo
+                                renderEdgeLoFi index edgeInfo
 
                             EdgeSketch ->
                                 renderEdge 8 index edgeInfo
@@ -430,30 +430,8 @@ view settings context ( width, height ) options graph msgWrapper =
             in
             svgPoints |> pointsAsPolyline edgeKey
 
-        renderEdgeArc : String -> Edge msg -> Svg msg
-        renderEdgeArc edgeIndex edge =
-            -- If we can construct an arc, use it, otherwise normal track.
-            --let
-            --    tree =
-            --        edge.track.trackTree
-            --
-            --    ( start, mid, end ) =
-            --        ( DomainModel.startPoint tree
-            --            |> .space
-            --            |> Point3d.toScreenSpace camera screenRectangle
-            --        , DomainModel.midPoint tree
-            --            |> .space
-            --            |> Point3d.toScreenSpace camera screenRectangle
-            --        , DomainModel.endPoint tree
-            --            |> .space
-            --            |> Point3d.toScreenSpace camera screenRectangle
-            --        )
-            --in
-            --case Arc2d.throughPoints start mid end of
-            --    Just arc ->
-            --        arc |> Svg.arc2d (edgeAttributes edgeIndex)
-            --
-            --    Nothing ->
+        renderEdgeLoFi : String -> Edge msg -> Svg msg
+        renderEdgeLoFi edgeIndex edge =
             renderEdge 4 edgeIndex edge
 
         textAttributes atPoint =
@@ -466,21 +444,20 @@ view settings context ( width, height ) options graph msgWrapper =
             ]
 
         -- Create text SVG labels beside each projected 2D point
-        {-
-           nodeLabels =
-               nodes2d
-                   |> Dict.map
-                       (\index vertex ->
-                           Svg.text_
-                               (textAttributes vertex)
-                               [ Svg.text ("Place " ++ String.fromInt index) ]
-                               -- Hack: flip the text upside down since our later
-                               -- 'Svg.relativeTo topLeftFrame' call will flip it
-                               -- back right side up
-                               |> Svg.mirrorAcross (Axis2d.through vertex Direction2d.x)
-                       )
-                   |> Dict.values
-        -}
+        nodeLabels =
+            nodes2d
+                |> Dict.map
+                    (\index vertex ->
+                        Svg.text_
+                            (textAttributes vertex)
+                            [ Svg.text index ]
+                            -- Hack: flip the text upside down since our later
+                            -- 'Svg.relativeTo topLeftFrame' call will flip it
+                            -- back right side up
+                            |> Svg.mirrorAcross (Axis2d.through vertex Direction2d.x)
+                    )
+                |> Dict.values
+
         -- Create text SVG labels beside each projected edge
         edgeLabels =
             graph.edges
@@ -520,7 +497,7 @@ view settings context ( width, height ) options graph msgWrapper =
                     (Svg.g []
                         (svgNodes
                             ++ svgEdges
-                            --++ nodeLabels
+                            ++ nodeLabels
                             ++ edgeLabels
                          --++ arrowsOnHighlightedEdge
                         )

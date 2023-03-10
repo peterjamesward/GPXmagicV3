@@ -157,7 +157,7 @@ update msg options =
                                 options.tracks
                         , graph =
                             if updatedTrack.visible then
-                                Graph.addEdge updatedTrack options.graph
+                                Graph.addEdgeFromTrack updatedTrack options.graph
 
                             else
                                 Graph.removeEdge updatedTrack options.graph
@@ -726,7 +726,7 @@ addTrack track options =
 
                 Nothing ->
                     Just <| TrackLoaded.getReferencePoint track
-        , graph = Graph.addEdge trackWithUnambiguousName options.graph
+        , graph = Graph.addEdgeFromTrack trackWithUnambiguousName options.graph
         , graphState = GraphOriginalTracks
     }
 
