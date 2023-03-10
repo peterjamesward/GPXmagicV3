@@ -120,8 +120,8 @@ type
     | AddTraversal Int
     | AddSelfLoop Int
     | DeleteEdge Int
-    | StartRoutePlanning
-    | ExitRoutePlanning
+      --| StartRoutePlanning
+      --| ExitRoutePlanning
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
       --| CombineNearbyPoints

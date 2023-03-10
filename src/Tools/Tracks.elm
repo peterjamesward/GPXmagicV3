@@ -186,11 +186,10 @@ update msg options =
             -- All tracks update as the snap to the clusters we have found.
             -- We delegate to graph, then pull back the updated tracks.
             let
-                graph =
-                    options.graph
-
                 newGraph =
-                    Graph.snapToClusters options.graphOptions.matchingTolerance graph
+                    Graph.snapToClusters
+                        options.graphOptions.matchingTolerance
+                        options.graph
 
                 newTracks =
                     Dict.values newGraph.edges
@@ -199,7 +198,7 @@ update msg options =
             ( { options
                 | graph = newGraph
                 , tracks = newTracks
-                , graphState = GraphSnapped graph
+                , graphState = GraphSnapped options.graph
               }
             , [ Actions.SetActiveTrack 0
               , Actions.HidePreview "graph"
@@ -207,17 +206,27 @@ update msg options =
             )
 
         GraphAnalyse ->
-            --TODO: Force a "snap" operation.
-            ( options
-            , if options.graphOptions.matchingTolerance |> Quantity.greaterThanZero then
-                [ Actions.StartRoutePlanning
-                , Actions.HidePreview "graph"
-                ]
+            -- Note that the state rules here mean that the tracks have been "snapped".
+            -- We may safely proceed with neighbour counting to find nodes and edges.
+            -- The found edges become the new tracks.
+            -- We delegate to graph, then pull back the updated tracks.
+            -- Save the previous graph for simple reversion.
+            let
+                newGraph =
+                    Graph.analyzeTracksAsGraph options.graph
 
-              else
-                [ Actions.StartRoutePlanning
-                , Actions.HidePreview "graph"
-                ]
+                newTracks =
+                    Dict.values newGraph.edges
+                        |> List.map .track
+            in
+            ( { options
+                | graph = newGraph
+                , tracks = newTracks
+                , graphState = GraphAnalyzed options.graph
+              }
+            , [ Actions.SetActiveTrack 0
+              , Actions.HidePreview "graph"
+              ]
             )
 
         {-
@@ -465,6 +474,68 @@ viewGraph settings wrapper options graphOptions graph =
             GraphNoTracks ->
                 none
 
+            GraphOriginalTracks ->
+                let
+                    snapToNearbyButton =
+                        row [ spacing 3, width fill ]
+                            [ infoButton (wrapper <| DisplayInfo toolId "adoptInfo")
+                            , Input.button neatToolsBorder
+                                { onPress = Just (wrapper SnapToNearby)
+                                , label = i18n "adopt"
+                                }
+                            ]
+
+                    toleranceSlider =
+                        row [ spacing 5 ]
+                            [ none
+                            , infoButton (wrapper <| DisplayInfo toolId "tolerance")
+                            , Input.slider
+                                commonShortHorizontalSliderStyles
+                                { onChange = wrapper << SetTolerance << Length.meters
+                                , label =
+                                    Input.labelBelow [] <|
+                                        text <|
+                                            String.Interpolate.interpolate
+                                                (I18N.localisedString settings.location toolId "isTolerance")
+                                                [ showShortMeasure settings.imperial graphOptions.matchingTolerance ]
+                                , min = 0.5
+                                , max = 5.0
+                                , step = Just 0.1
+                                , value = Length.inMeters graphOptions.matchingTolerance
+                                , thumb = Input.defaultThumb
+                                }
+                            ]
+                in
+                column [ centerX, width fill, spacing 10 ]
+                    [ toleranceSlider
+                    , snapToNearbyButton
+                    ]
+
+            GraphSnapped _ ->
+                let
+                    analyseButton =
+                        row [ spacing 3, width fill ]
+                            [ infoButton (wrapper <| DisplayInfo toolId "info")
+                            , Input.button neatToolsBorder
+                                { onPress = Just (wrapper GraphAnalyse)
+                                , label = i18n "find"
+                                }
+                            ]
+
+                    undoButton =
+                        row [ spacing 3 ]
+                            [ Input.button
+                                neatToolsBorder
+                                { onPress = Just <| wrapper UndoSnap
+                                , label = i18n "undoSnap"
+                                }
+                            ]
+                in
+                column [ centerX, width fill, spacing 10 ]
+                    [ undoButton
+                    , analyseButton
+                    ]
+
             GraphAnalyzed snappedGraph ->
                 let
                     offset =
@@ -585,68 +656,6 @@ viewGraph settings wrapper options graphOptions graph =
                     --, traversalsTable
                     , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
                     , finishButton
-                    ]
-
-            GraphOriginalTracks ->
-                let
-                    snapToNearbyButton =
-                        row [ spacing 3, width fill ]
-                            [ infoButton (wrapper <| DisplayInfo toolId "adoptInfo")
-                            , Input.button neatToolsBorder
-                                { onPress = Just (wrapper SnapToNearby)
-                                , label = i18n "adopt"
-                                }
-                            ]
-
-                    toleranceSlider =
-                        row [ spacing 5 ]
-                            [ none
-                            , infoButton (wrapper <| DisplayInfo toolId "tolerance")
-                            , Input.slider
-                                commonShortHorizontalSliderStyles
-                                { onChange = wrapper << SetTolerance << Length.meters
-                                , label =
-                                    Input.labelBelow [] <|
-                                        text <|
-                                            String.Interpolate.interpolate
-                                                (I18N.localisedString settings.location toolId "isTolerance")
-                                                [ showShortMeasure settings.imperial graphOptions.matchingTolerance ]
-                                , min = 0.5
-                                , max = 5.0
-                                , step = Just 0.1
-                                , value = Length.inMeters graphOptions.matchingTolerance
-                                , thumb = Input.defaultThumb
-                                }
-                            ]
-                in
-                column [ centerX, width fill, spacing 10 ]
-                    [ toleranceSlider
-                    , snapToNearbyButton
-                    ]
-
-            GraphSnapped originalGraph ->
-                let
-                    analyseButton =
-                        row [ spacing 3, width fill ]
-                            [ infoButton (wrapper <| DisplayInfo toolId "info")
-                            , Input.button neatToolsBorder
-                                { onPress = Nothing --Just (wrapper GraphAnalyse)
-                                , label = i18n "find"
-                                }
-                            ]
-
-                    undoButton =
-                        row [ spacing 3 ]
-                            [ Input.button
-                                neatToolsBorder
-                                { onPress = Just <| wrapper UndoSnap
-                                , label = i18n "undoSnap"
-                                }
-                            ]
-                in
-                column [ centerX, width fill, spacing 10 ]
-                    [ undoButton
-                    , analyseButton
                     ]
         ]
 

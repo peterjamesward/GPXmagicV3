@@ -5,6 +5,7 @@ module Tools.Graph exposing
        --, combineNearbyPoints
 
     , addEdge
+    , analyzeTracksAsGraph
     ,  deleteEdgeTraversal
        --,  edgeCanBeDeleted
        --, enterRoutePlanningMode
@@ -1219,6 +1220,22 @@ type alias EdgeFinder msg =
     , edgesDict : Dict String (Edge msg)
     , traversals : List Traversal
     }
+
+
+analyzeTracksAsGraph : Graph msg -> Graph msg
+analyzeTracksAsGraph graph =
+    let
+        ( clusters, enhancedEdges ) =
+            identifyPointsToBeMerged tolerance graph
+
+        newEdges =
+            Dict.map
+                (\key edge ->
+                    { edge | track = snapTrackToClusters clusters edge.track }
+                )
+                enhancedEdges
+    in
+    { graph | edges = newEdges }
 
 
 

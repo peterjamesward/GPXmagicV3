@@ -20,13 +20,10 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 8. Get random words list for canonical node & edge labelling. (see other apps for usage)
 9. Canonicalize gives Nodes, Edges, canonical route. Might rewrite; could be clearer.
 > (Canonical route doesn't make sense for > 1 track.)
-7. Limited Undo as in RM; use simple state machine across canonicalization & routing.
+7. Undo analyze.
 8. Should be able to make a route, if ends join up, which they won't, in general.
-9. New track with offset, from RM.. creates a new track.
-10. Option to remove all bar the active track (with confirmation).
-11. Option to show/hide/remove unused nodes.
-12. Check Land Use data being handled correctly.
-13. (Optimise loading from GPX/Strava to avoid having to rebuild tree. -- Nah.)
+9. New track with offset, from RM.. creates a new track from route.
+10. Undo for create new track from route.
 
 ---
 
