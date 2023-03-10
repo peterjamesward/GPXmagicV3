@@ -921,7 +921,7 @@ update msg model =
                     ( newModel
                     , Cmd.batch
                         [ MapPortController.resetMapAfterDrawing
-                        , MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
+                        , MapPortController.addAllTracksToMap newModel.toolOptions.tracksOptions
                         , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
                         , Delay.after 1000 <| FetchElevationsFromMap track.trackName -- async to allow map to quiesce.
                         , Delay.after 1000 ProfilePaint -- async, seems to help

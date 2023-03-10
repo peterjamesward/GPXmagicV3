@@ -13,8 +13,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
-BUG: Just-drawn route does not show on map until you select it.
-
 BUG: Route hiding not working on map. (Needs Actions?)
 
 4. Add an Undo! for the Snap operation (save Graph). 
