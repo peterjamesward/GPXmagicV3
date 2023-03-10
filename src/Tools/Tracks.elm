@@ -883,6 +883,6 @@ showNewPoints clusters =
     List.map (.centroid >> highlightPoint) clusters
 
 
-getKeyPlaces : Options msg -> List (Point3d.Point3d Meters LocalCoords)
+getKeyPlaces : Options msg -> List DomainModel.EarthPoint
 getKeyPlaces options =
-    []
+    Dict.values options.graph.nodes

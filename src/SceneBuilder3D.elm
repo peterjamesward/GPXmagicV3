@@ -719,9 +719,9 @@ renderPreviews previews =
     previews |> Dict.values |> List.concatMap onePreview
 
 
-renderKeyPlaces : List (Point3d.Point3d Meters LocalCoords) -> List (Entity msg)
+renderKeyPlaces : List EarthPoint -> List (Entity LocalCoords)
 renderKeyPlaces places =
-    []
+    previewAsPoints FlatColors.FlatUIPalette.wisteria places
 
 
 previewAsLine : Element.Color -> List EarthPoint -> List (Entity LocalCoords)
