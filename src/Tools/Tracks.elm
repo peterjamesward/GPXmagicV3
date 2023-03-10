@@ -107,7 +107,7 @@ defaultOptions =
     , commonReferenceGPX = Nothing
     , graph = emptyGraph
     , graphOptions = defaultGraphOptions
-    , graphState = GraphOriginalTracks
+    , graphState = GraphNoTracks
     }
 
 
@@ -444,6 +444,9 @@ viewGraph settings wrapper options graphOptions graph =
                 [ useIconWithSize 20 FeatherIcons.info
                 , paragraph [ padding 4 ]
                     [ case options.graphState of
+                        GraphNoTracks ->
+                            i18n "graphNone"
+
                         GraphOriginalTracks ->
                             i18n "graphOriginal"
 
@@ -459,6 +462,9 @@ viewGraph settings wrapper options graphOptions graph =
         (CommonToolStyles.toolContentBoxStyle settings)
         [ guidanceText
         , case options.graphState of
+            GraphNoTracks ->
+                none
+
             GraphAnalyzed snappedGraph ->
                 let
                     offset =
@@ -713,6 +719,7 @@ addTrack track options =
                 Nothing ->
                     Just <| TrackLoaded.getReferencePoint track
         , graph = Graph.addEdge trackWithUnambiguousName options.graph
+        , graphState = GraphOriginalTracks
     }
 
 
@@ -767,6 +774,12 @@ unloadActiveTrack options =
 
                                 Nothing ->
                                     options.graph
+                        , graphState =
+                            if List.length options.tracks > 1 then
+                                GraphOriginalTracks
+
+                            else
+                                GraphNoTracks
                     }
 
                 newTrack =

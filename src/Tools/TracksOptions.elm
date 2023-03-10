@@ -19,7 +19,8 @@ type alias Options msg =
 
 
 type GraphState msg
-    = GraphOriginalTracks
+    = GraphNoTracks
+    | GraphOriginalTracks
     | GraphSnapped (Graph.Graph msg)
     | GraphAnalyzed (Graph.Graph msg)
 
