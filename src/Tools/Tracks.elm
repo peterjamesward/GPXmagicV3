@@ -72,6 +72,7 @@ type Msg
     | SetTolerance (Quantity Float Meters)
       --| UndoDeleteRoad
     | SnapToNearby
+    | UndoSnap
 
 
 defaultGraphOptions : Options.GraphOptions msg
@@ -162,10 +163,7 @@ update msg options =
                             else
                                 Graph.removeEdge updatedTrack options.graph
                       }
-                    , [ Actions.SetActiveTrack <| Maybe.withDefault 0 options.activeTrackIndex
-
-                      --TODO: Show hide on graph
-                      ]
+                    , [ Actions.SetActiveTrack <| Maybe.withDefault 0 options.activeTrackIndex ]
                     )
 
                 Nothing ->
@@ -318,6 +316,28 @@ update msg options =
         -}
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
+
+        UndoSnap ->
+            case options.graphState of
+                GraphSnapped previous ->
+                    let
+                        graph =
+                            options.graph
+
+                        newTracks =
+                            Dict.values previous.edges
+                                |> List.map .track
+                    in
+                    ( { options
+                        | graph = previous
+                        , tracks = newTracks
+                        , graphState = GraphOriginalTracks
+                      }
+                    , [ Actions.SetActiveTrack 0 ]
+                    )
+
+                _ ->
+                    ( { options | graphState = GraphOriginalTracks }, [] )
 
 
 
@@ -613,7 +633,7 @@ viewGraph settings wrapper options graphOptions graph =
                         row [ spacing 3 ]
                             [ Input.button
                                 neatToolsBorder
-                                { onPress = Nothing --Just (wrapper UndoDeleteRoad)
+                                { onPress = Just <| wrapper UndoSnap
                                 , label = i18n "undoSnap"
                                 }
                             ]

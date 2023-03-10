@@ -14,7 +14,7 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 ## Promote Graph
 
 4. Add an Undo! for the Snap operation (save Graph). 
-6. State machine to help with showing elements.
+6. ~~State machine to help with showing elements.~~
 7. Do the neighbour counting.
 8. Get random words list for canonical node & edge labelling. (see other apps for usage)
 9. Canonicalize gives Nodes, Edges, canonical route. Might rewrite; could be clearer.
@@ -30,6 +30,10 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 ---
 
 # BACKLOG
+
+## Tools summary
+
+Order alphabetically. Ability to jump into tool directly.
 
 ## Refactor Main -> Tools
 
