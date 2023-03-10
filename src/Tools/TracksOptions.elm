@@ -14,7 +14,14 @@ type alias Options msg =
     , commonReferenceGPX : Maybe GPXSource -- from where we derive (X,Y) by map projection.
     , graph : Graph.Graph msg
     , graphOptions : GraphOptions msg
+    , graphState : GraphState msg
     }
+
+
+type GraphState msg
+    = GraphOriginalTracks
+    | GraphSnapped (Graph.Graph msg)
+    | GraphAnalyzed (Graph.Graph msg)
 
 
 type alias GraphOptions msg =

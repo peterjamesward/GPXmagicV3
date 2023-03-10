@@ -13,10 +13,7 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
-BUG: Route hiding not working on map. (Needs Actions?)
-
 4. Add an Undo! for the Snap operation (save Graph). 
-5. Clean up the Tracks.view function to make it more navigable.
 6. State machine to help with showing elements.
 7. Do the neighbour counting.
 8. Get random words list for canonical node & edge labelling. (see other apps for usage)

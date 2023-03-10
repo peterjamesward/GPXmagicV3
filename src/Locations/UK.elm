@@ -126,16 +126,10 @@ want to use the other features of Route maker to define your own route.""" )
                 , ( "place1", """Place {0}""" )
                 , ( "place2", """place {0}""" )
                 , ( "road", """road {0}""" )
-                , ( "guidanceNotAnalyzed", """Route maker partitions the track into sections
- of Road between key Places.
-Switch to the Route view to see a preview.
-Use the tolerance slider to ensure key Places are correctly positioned.""" )
-                , ( "guidanceAnalyzed", """You can now change the route and
-edit individual sections. Click on a Road or Place to see available actions.
-You can clear the route completely, and remove unwanted Roads.
-When ready, make a complete new track with optional offset.""" )
-                , ( "guidanceNoRoute", """To build your route, click on a road and select "Add to route".
- Always check the direction of loops and reverse if necessary in the route list.""" )
+                , ( "undoSnap", """Revert to original tracks""" )
+                , ( "graphOriginal", """ORIGINAL""" )
+                , ( "graphSnapped", """SNAPPED""" )
+                , ( "graphAnalyzed", """ANALYZED""" )
                 , ( "info", """
 We follow the route looking for places and road sections that are used more than once.
 This allows us to divide the route into a list of Roads, where each Road goes from from one

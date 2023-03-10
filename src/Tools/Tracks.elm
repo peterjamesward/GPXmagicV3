@@ -45,7 +45,7 @@ import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.Graph as Graph
 import Tools.GraphOptions as Graph exposing (Cluster, Direction(..))
 import Tools.I18N as I18N
-import Tools.TracksOptions as Options exposing (GraphOptions, Options)
+import Tools.TracksOptions as Options exposing (GraphOptions, GraphState(..), Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon, useIconWithSize)
@@ -106,6 +106,7 @@ defaultOptions =
     , commonReferenceGPX = Nothing
     , graph = emptyGraph
     , graphOptions = defaultGraphOptions
+    , graphState = GraphOriginalTracks
     }
 
 
@@ -200,6 +201,7 @@ update msg options =
             ( { options
                 | graph = newGraph
                 , tracks = newTracks
+                , graphState = GraphSnapped graph
               }
             , [ Actions.SetActiveTrack 0
               , Actions.HidePreview "graph"
@@ -397,195 +399,22 @@ view settings wrapper options =
         column [ spacing 5 ]
             [ listOfTracks
             , unloadButton
-            , viewGraph settings wrapper options.graphOptions options.graph
+            , viewGraph settings wrapper options options.graphOptions options.graph
             ]
 
 
-viewGraph : SystemSettings -> (Msg -> msg) -> GraphOptions msg -> Graph.Graph msg -> Element msg
-viewGraph settings wrapper options graph =
+viewGraph :
+    SystemSettings
+    -> (Msg -> msg)
+    -> Options msg
+    -> GraphOptions msg
+    -> Graph.Graph msg
+    -> Element msg
+viewGraph settings wrapper options graphOptions graph =
     let
         i18n =
             I18N.text settings.location toolId
 
-        {-
-           traversals : List Graph.TraversalDisplay
-           traversals =
-               -- Display-ready version of the route.
-               options.userRoute
-                   |> List.map
-                       (\traversal ->
-                           case Dict.get traversal.edge graph.edges of
-                               Nothing ->
-                                   { startPlace = -1
-                                   , road = -1
-                                   , endPlace = -1
-                                   , length = Quantity.zero
-                                   }
-
-                               Just edgeInfo ->
-                                   case traversal.direction of
-                                       Natural ->
-                                           { startPlace = edgeInfo.lowNode
-                                           , road = traversal.edge
-                                           , endPlace = edgeInfo.highNode
-                                           , length = trueLength edgeInfo.track.trackTree
-                                           }
-
-                                       Reverse ->
-                                           { startPlace = edgeInfo.highNode
-                                           , road = traversal.edge
-                                           , endPlace = edgeInfo.lowNode
-                                           , length = trueLength edgeInfo.track.trackTree
-                                           }
-                       )
-        -}
-        dataStyles selected =
-            if selected then
-                [ Font.bold
-                , padding 2
-                ]
-
-            else
-                [ padding 2 ]
-
-        {-
-           traversalsTable : Element msg
-           traversalsTable =
-               let
-                   totalLength =
-                       traversals |> List.map .length |> Quantity.sum
-
-                   headerAttrs =
-                       [ Font.bold
-                       , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
-                       , Border.color FlatColors.FlatUIPalette.concrete
-                       ]
-
-                   footerAttrs =
-                       [ Font.bold
-                       , Border.widthEach { bottom = 0, top = 2, left = 0, right = 0 }
-                       , Border.color FlatColors.FlatUIPalette.concrete
-                       ]
-               in
-               column
-                   [ width <| maximum 500 fill
-                   , height <| px 300
-                   , spacing 10
-                   , padding 5
-                   , Border.width 2
-                   , Border.rounded 6
-                   , Border.color FlatColors.FlatUIPalette.concrete
-                   ]
-                   [ row [ width fill ]
-                       [ el ((width <| fillPortion 1) :: headerAttrs) <| i18n "blank"
-                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "from"
-                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "to"
-                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "along"
-                       , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "distance"
-                       ]
-
-                   -- workaround for a bug: it's necessary to wrap `table` in an `el`
-                   -- to get table height attribute to apply
-                   , el [ width fill ] <|
-                       indexedTable
-                           [ width fill
-                           , height <| px 220
-                           , scrollbarY
-                           , spacing 4
-                           ]
-                           { data = traversals
-                           , columns =
-                               [ { header = none
-                                 , width = fillPortion 1
-                                 , view =
-                                       \i t ->
-                                           row
-                                               [ spacing 2 ]
-                                               [ if i + 1 == List.length traversals then
-                                                   Input.button
-                                                       [ alignRight
-                                                       , tooltip below (localisedTooltip settings.location toolId "remove")
-                                                       ]
-                                                       { onPress = Nothing --Just <| wrapper RemoveLastTraversal
-                                                       , label = useIcon FeatherIcons.delete
-                                                       }
-
-                                                 else
-                                                   none
-                                               , if
-                                                   List.length traversals
-                                                       == 1
-                                                       || t.startPlace
-                                                       == t.endPlace
-                                                 then
-                                                   Input.button
-                                                       [ alignRight
-                                                       , tooltip below (localisedTooltip settings.location toolId "reverse")
-                                                       ]
-                                                       { onPress = Nothing --Just <| wrapper <| FlipDirection i
-                                                       , label = useIcon FeatherIcons.refreshCw
-                                                       }
-
-                                                 else
-                                                   none
-                                               , Input.button
-                                                   [ alignRight ]
-                                                   { onPress = Nothing --Just <| wrapper <| HighlightTraversal i
-                                                   , label = useIcon FeatherIcons.eye
-                                                   }
-                                               ]
-                                 }
-                               , { header = none
-                                 , width = fillPortion 2
-                                 , view =
-                                       \i t ->
-                                           el (dataStyles (i == options.selectedTraversal)) <|
-                                               text <|
-                                                   String.Interpolate.interpolate
-                                                       (I18N.localisedString settings.location toolId "place1")
-                                                       [ String.fromInt t.startPlace ]
-                                 }
-                               , { header = none
-                                 , width = fillPortion 2
-                                 , view =
-                                       \i t ->
-                                           el (dataStyles (i == options.selectedTraversal)) <|
-                                               text <|
-                                                   String.Interpolate.interpolate
-                                                       (I18N.localisedString settings.location toolId "place2")
-                                                       [ String.fromInt t.endPlace ]
-                                 }
-                               , { header = none
-                                 , width = fillPortion 2
-                                 , view =
-                                       \i t ->
-                                           el (dataStyles (i == options.selectedTraversal)) <|
-                                               text <|
-                                                   String.Interpolate.interpolate
-                                                       (I18N.localisedString settings.location toolId "road")
-                                                       [ String.fromInt t.road ]
-                                 }
-                               , { header = none
-                                 , width = fillPortion 2
-                                 , view =
-                                       \i t ->
-                                           el (dataStyles (i == options.selectedTraversal)) <|
-                                               text <|
-                                                   showLongMeasure False t.length
-                                 }
-                               ]
-                           }
-                   , row [ width fill ]
-                       [ el ((width <| fillPortion 1) :: footerAttrs) <| text " "
-                       , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
-                       , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
-                       , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
-                       , el ((width <| fillPortion 2) :: footerAttrs) <|
-                           text <|
-                               showLongMeasure False totalLength
-                       ]
-                   ]
-        -}
         guidanceText =
             row
                 [ Background.color FlatColors.FlatUIPalette.turquoise
@@ -594,203 +423,205 @@ viewGraph settings wrapper options graph =
                 ]
                 [ useIconWithSize 20 FeatherIcons.info
                 , paragraph [ padding 4 ]
-                    [ if options.analyzed then
-                        if List.isEmpty options.userRoute then
-                            i18n "guidanceNoRoute"
+                    [ case options.graphState of
+                        GraphOriginalTracks ->
+                            i18n "graphOriginal"
 
-                        else
-                            i18n "guidanceAnalyzed"
+                        GraphSnapped _ ->
+                            i18n "graphSnapped"
 
-                      else
-                        i18n "guidanceNotAnalyzed"
+                        GraphAnalyzed _ ->
+                            i18n "graphAnalyzed"
                     ]
                 ]
     in
     column
         (CommonToolStyles.toolContentBoxStyle settings)
         [ guidanceText
-        , if options.analyzed then
-            let
-                offset =
-                    Length.inMeters options.centreLineOffset
+        , case options.graphState of
+            GraphAnalyzed snappedGraph ->
+                let
+                    offset =
+                        Length.inMeters graphOptions.centreLineOffset
 
-                radius =
-                    Length.inMeters options.minimumRadiusAtPlaces
+                    radius =
+                        Length.inMeters graphOptions.minimumRadiusAtPlaces
 
-                clearRouteButton =
-                    Input.button neatToolsBorder
-                        { onPress = Nothing --Just (wrapper ClearRoute)
-                        , label = i18n "clear"
-                        }
+                    clearRouteButton =
+                        Input.button neatToolsBorder
+                            { onPress = Nothing --Just (wrapper ClearRoute)
+                            , label = i18n "clear"
+                            }
 
-                revertButton =
-                    Input.button neatToolsBorder
-                        { onPress = Nothing --Just (wrapper RevertToTrack)
-                        , label = i18n "revert"
-                        }
+                    revertButton =
+                        Input.button neatToolsBorder
+                            { onPress = Nothing --Just (wrapper RevertToTrack)
+                            , label = i18n "revert"
+                            }
 
-                finishButton =
-                    if not <| List.isEmpty options.userRoute then
-                        row [ spacing 3 ]
-                            [ infoButton (wrapper <| DisplayInfo toolId "render")
-                            , Input.button
-                                neatToolsBorder
-                                { onPress = Nothing --Just (wrapper ConvertFromGraph)
-                                , label = i18n "convert"
+                    finishButton =
+                        if not <| List.isEmpty graphOptions.userRoute then
+                            row [ spacing 3 ]
+                                [ infoButton (wrapper <| DisplayInfo toolId "render")
+                                , Input.button
+                                    neatToolsBorder
+                                    { onPress = Nothing --Just (wrapper ConvertFromGraph)
+                                    , label = i18n "convert"
+                                    }
+                                ]
+
+                        else
+                            none
+
+                    offsetSlider =
+                        row [ spacing 5 ]
+                            [ none
+                            , infoButton (wrapper <| DisplayInfo toolId "offset")
+
+                            --, Input.slider
+                            --    commonShortHorizontalSliderStyles
+                            --    { onChange = wrapper << CentreLineOffset << Length.meters
+                            --    , label =
+                            --        Input.labelBelow [] <|
+                            --            text <|
+                            --                String.Interpolate.interpolate
+                            --                    (I18N.localisedString settings.location toolId "isOffset")
+                            --                    [ showDecimal2 <| abs offset
+                            --                    , if offset < 0.0 then
+                            --                        I18N.localisedString settings.location toolId "left"
+                            --
+                            --                      else if offset > 0.0 then
+                            --                        I18N.localisedString settings.location toolId "right"
+                            --
+                            --                      else
+                            --                        ""
+                            --                    ]
+                            --    , min = -5.0
+                            --    , max = 5.0
+                            --    , step = Just 0.25
+                            --    , value = offset
+                            --    , thumb = Input.defaultThumb
+                            --    }
+                            ]
+
+                    minRadiusSlider =
+                        row [ spacing 5 ]
+                            [ none
+                            , infoButton (wrapper <| DisplayInfo toolId "radius")
+
+                            --, Input.slider
+                            --    commonShortHorizontalSliderStyles
+                            --    { onChange = wrapper << MinimumRadius << Length.meters
+                            --    , label =
+                            --        Input.labelBelow [] <|
+                            --            text <|
+                            --                String.Interpolate.interpolate
+                            --                    (I18N.localisedString settings.location toolId "isRadius")
+                            --                    [ showDecimal2 <| abs radius ]
+                            --    , min = 1.0
+                            --    , max = 15.0
+                            --    , step = Just 1.0
+                            --    , value = radius
+                            --    , thumb = Input.defaultThumb
+                            --    }
+                            ]
+
+                    traversalNext =
+                        Input.button neatToolsBorder
+                            { onPress = Nothing
+
+                            --Just <|
+                            --    wrapper <|
+                            --        HighlightTraversal <|
+                            --            min (List.length traversals - 1) (options.selectedTraversal + 1)
+                            , label = useIconWithSize 16 FeatherIcons.chevronRight
+                            }
+
+                    traversalPrevious =
+                        Input.button neatToolsBorder
+                            { onPress = Nothing
+
+                            --Just <|
+                            --    wrapper <|
+                            --        HighlightTraversal <|
+                            --            max 0 (options.selectedTraversal - 1)
+                            , label = useIconWithSize 16 FeatherIcons.chevronLeft
+                            }
+                in
+                column [ width fill, padding 4, spacing 10 ]
+                    [ row [ centerX, width fill, spacing 10 ]
+                        [ traversalPrevious
+                        , traversalNext
+                        , clearRouteButton
+                        , revertButton
+                        ]
+
+                    --, traversalsTable
+                    , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
+                    , finishButton
+                    ]
+
+            GraphOriginalTracks ->
+                let
+                    snapToNearbyButton =
+                        row [ spacing 3, width fill ]
+                            [ infoButton (wrapper <| DisplayInfo toolId "adoptInfo")
+                            , Input.button neatToolsBorder
+                                { onPress = Just (wrapper SnapToNearby)
+                                , label = i18n "adopt"
                                 }
                             ]
 
-                    else
-                        none
+                    toleranceSlider =
+                        row [ spacing 5 ]
+                            [ none
+                            , infoButton (wrapper <| DisplayInfo toolId "tolerance")
+                            , Input.slider
+                                commonShortHorizontalSliderStyles
+                                { onChange = wrapper << SetTolerance << Length.meters
+                                , label =
+                                    Input.labelBelow [] <|
+                                        text <|
+                                            String.Interpolate.interpolate
+                                                (I18N.localisedString settings.location toolId "isTolerance")
+                                                [ showShortMeasure settings.imperial graphOptions.matchingTolerance ]
+                                , min = 0.5
+                                , max = 5.0
+                                , step = Just 0.1
+                                , value = Length.inMeters graphOptions.matchingTolerance
+                                , thumb = Input.defaultThumb
+                                }
+                            ]
+                in
+                column [ centerX, width fill, spacing 10 ]
+                    [ toleranceSlider
+                    , snapToNearbyButton
+                    ]
 
-                undoButton =
-                    if not <| List.isEmpty options.graphUndos then
+            GraphSnapped originalGraph ->
+                let
+                    analyseButton =
+                        row [ spacing 3, width fill ]
+                            [ infoButton (wrapper <| DisplayInfo toolId "info")
+                            , Input.button neatToolsBorder
+                                { onPress = Nothing --Just (wrapper GraphAnalyse)
+                                , label = i18n "find"
+                                }
+                            ]
+
+                    undoButton =
                         row [ spacing 3 ]
                             [ Input.button
                                 neatToolsBorder
                                 { onPress = Nothing --Just (wrapper UndoDeleteRoad)
-                                , label = i18n "undo"
+                                , label = i18n "undoSnap"
                                 }
                             ]
-
-                    else
-                        none
-
-                offsetSlider =
-                    row [ spacing 5 ]
-                        [ none
-                        , infoButton (wrapper <| DisplayInfo toolId "offset")
-
-                        --, Input.slider
-                        --    commonShortHorizontalSliderStyles
-                        --    { onChange = wrapper << CentreLineOffset << Length.meters
-                        --    , label =
-                        --        Input.labelBelow [] <|
-                        --            text <|
-                        --                String.Interpolate.interpolate
-                        --                    (I18N.localisedString settings.location toolId "isOffset")
-                        --                    [ showDecimal2 <| abs offset
-                        --                    , if offset < 0.0 then
-                        --                        I18N.localisedString settings.location toolId "left"
-                        --
-                        --                      else if offset > 0.0 then
-                        --                        I18N.localisedString settings.location toolId "right"
-                        --
-                        --                      else
-                        --                        ""
-                        --                    ]
-                        --    , min = -5.0
-                        --    , max = 5.0
-                        --    , step = Just 0.25
-                        --    , value = offset
-                        --    , thumb = Input.defaultThumb
-                        --    }
-                        ]
-
-                minRadiusSlider =
-                    row [ spacing 5 ]
-                        [ none
-                        , infoButton (wrapper <| DisplayInfo toolId "radius")
-
-                        --, Input.slider
-                        --    commonShortHorizontalSliderStyles
-                        --    { onChange = wrapper << MinimumRadius << Length.meters
-                        --    , label =
-                        --        Input.labelBelow [] <|
-                        --            text <|
-                        --                String.Interpolate.interpolate
-                        --                    (I18N.localisedString settings.location toolId "isRadius")
-                        --                    [ showDecimal2 <| abs radius ]
-                        --    , min = 1.0
-                        --    , max = 15.0
-                        --    , step = Just 1.0
-                        --    , value = radius
-                        --    , thumb = Input.defaultThumb
-                        --    }
-                        ]
-
-                traversalNext =
-                    Input.button neatToolsBorder
-                        { onPress = Nothing
-
-                        --Just <|
-                        --    wrapper <|
-                        --        HighlightTraversal <|
-                        --            min (List.length traversals - 1) (options.selectedTraversal + 1)
-                        , label = useIconWithSize 16 FeatherIcons.chevronRight
-                        }
-
-                traversalPrevious =
-                    Input.button neatToolsBorder
-                        { onPress = Nothing
-
-                        --Just <|
-                        --    wrapper <|
-                        --        HighlightTraversal <|
-                        --            max 0 (options.selectedTraversal - 1)
-                        , label = useIconWithSize 16 FeatherIcons.chevronLeft
-                        }
-            in
-            column [ width fill, padding 4, spacing 10 ]
-                [ row [ centerX, width fill, spacing 10 ]
-                    [ traversalPrevious
-                    , traversalNext
-                    , clearRouteButton
-                    , revertButton
+                in
+                column [ centerX, width fill, spacing 10 ]
+                    [ undoButton
+                    , analyseButton
                     ]
-
-                --, traversalsTable
-                , undoButton
-                , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
-                , finishButton
-                ]
-
-          else
-            let
-                analyseButton =
-                    row [ spacing 3, width fill ]
-                        [ infoButton (wrapper <| DisplayInfo toolId "info")
-                        , Input.button neatToolsBorder
-                            { onPress = Nothing --Just (wrapper GraphAnalyse)
-                            , label = i18n "find"
-                            }
-                        ]
-
-                snapToNearbyButton =
-                    row [ spacing 3, width fill ]
-                        [ infoButton (wrapper <| DisplayInfo toolId "adoptInfo")
-                        , Input.button neatToolsBorder
-                            { onPress = Just (wrapper SnapToNearby)
-                            , label = i18n "adopt"
-                            }
-                        ]
-
-                toleranceSlider =
-                    row [ spacing 5 ]
-                        [ none
-                        , infoButton (wrapper <| DisplayInfo toolId "tolerance")
-                        , Input.slider
-                            commonShortHorizontalSliderStyles
-                            { onChange = wrapper << SetTolerance << Length.meters
-                            , label =
-                                Input.labelBelow [] <|
-                                    text <|
-                                        String.Interpolate.interpolate
-                                            (I18N.localisedString settings.location toolId "isTolerance")
-                                            [ showShortMeasure settings.imperial options.matchingTolerance ]
-                            , min = 0.5
-                            , max = 5.0
-                            , step = Just 0.1
-                            , value = Length.inMeters options.matchingTolerance
-                            , thumb = Input.defaultThumb
-                            }
-                        ]
-            in
-            column [ centerX, width fill, spacing 10 ]
-                [ toleranceSlider
-                , snapToNearbyButton
-                , analyseButton
-                ]
         ]
 
 
