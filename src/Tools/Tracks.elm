@@ -714,18 +714,20 @@ addTrack track options =
 
         trackWithUnambiguousName =
             { trackWithCommonReference | trackName = unambiguousName }
-    in
-    { options
-        | tracks = trackWithUnambiguousName :: options.tracks
-        , nextTrackNumber = options.nextTrackNumber + 1
-        , activeTrackIndex = Just 0
-        , commonReferenceGPX =
+
+        newReferenceGPX =
             case options.commonReferenceGPX of
                 Just common ->
                     Just common
 
                 Nothing ->
                     Just <| TrackLoaded.getReferencePoint track
+    in
+    { options
+        | tracks = trackWithUnambiguousName :: options.tracks
+        , nextTrackNumber = options.nextTrackNumber + 1
+        , activeTrackIndex = Just 0
+        , commonReferenceGPX = newReferenceGPX
         , graph = Graph.addEdgeFromTrack trackWithUnambiguousName options.graph
         , graphState = GraphOriginalTracks
     }

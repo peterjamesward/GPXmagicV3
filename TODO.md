@@ -13,11 +13,9 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
-BUG: Some combinations of routes still yield (0,0) centroids. 
-> This may be "vertical" road sections from projections.
-> Whatever, shouldn't happen.
+BUG: MUST FIX NOW. One track point being dropped when output written.
 
-1. Only shpw preview for snap points when in that state.
+1. Only show preview for snap points when in that state.
 2. Any change to tracks must invalidate nodes.
 3. Another button to canonicalize (replace tracks with edges).
 4. Undo analyze.

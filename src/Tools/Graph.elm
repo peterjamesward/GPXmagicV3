@@ -106,6 +106,7 @@ addEdgeFromTrack track graph =
     { graph
         | nodes = nodeDict
         , edges = edgeDict
+        , referenceLonLat = track.referenceLonLat
     }
 
 
@@ -634,514 +635,535 @@ identifyPointsToBeMerged tolerance graph =
        10. Apply mappings by updating points.
        Now have tree'' which has adjusted points at cluster centroids.
     -}
-    let
-        globalBoundingBox =
-            -- We just make our index area slightly larger because we inflate all the contents.
-            graph.edges
-                |> Dict.values
-                |> List.map (.track >> .trackTree >> DomainModel.boundingBox >> UtilsForViews.flatBox)
-                |> BoundingBox2d.aggregateN
-                |> Maybe.withDefault (BoundingBox2d.singleton Point2d.origin)
-                |> BoundingBox2d.expandBy tolerance
+    case
+        graph.edges
+            |> Dict.values
+            |> List.map (.track >> .trackTree >> DomainModel.boundingBox >> UtilsForViews.flatBox)
+            |> BoundingBox2d.aggregateN
+    of
+        Nothing ->
+            ( [], Dict.empty )
 
-        pointWithTolerance pt =
-            BoundingBox2d.withDimensions
-                ( Quantity.twice tolerance, Quantity.twice tolerance )
-                (Point3d.projectInto SketchPlane3d.xy pt)
-
-        -- Try to keep all the top level code here for a quick overview.
-        globalLeafIndex : LeafIndex
-        globalLeafIndex =
-            Dict.foldl
-                (\k v -> addTrackLeavesToIndex v)
-                (SpatialIndex.empty globalBoundingBox (Length.meters 100.0))
-                graph.edges
-
-        pointsProjectedOntoNearbyLeaves : List ProjectedPointOnLeaf
-        pointsProjectedOntoNearbyLeaves =
-            List.concatMap
-                findAllLeavesNearAllPointsOnTrack
-                (Dict.values graph.edges)
-
-        edgesWithProjectedPoints : Dict String (Edge msg)
-        edgesWithProjectedPoints =
+        Just commonBox ->
             let
-                projectionsOnto trackName =
-                    pointsProjectedOntoNearbyLeaves
-                        |> List.filter (\projection -> projection.toTrack == trackName)
-            in
-            Dict.map
-                (\k edge ->
-                    addProjectedPointsIntoTrack
-                        (projectionsOnto edge.track.trackName)
-                        edge
-                )
-                graph.edges
+                globalBoundingBox =
+                    commonBox |> BoundingBox2d.expandBy tolerance
 
-        globalPointIndex : PointIndex
-        globalPointIndex =
-            {-
-               This is an index of points base and projected.
-               It's used to find clusters of points than may be combined.
-            -}
-            Dict.foldl
-                (\k v -> addTrackPointsToIndex v)
-                (SpatialIndex.empty globalBoundingBox (Length.meters 100.0))
-                edgesWithProjectedPoints
+                pointWithTolerance pt =
+                    BoundingBox2d.withDimensions
+                        ( Quantity.twice tolerance, Quantity.twice tolerance )
+                        (Point3d.projectInto SketchPlane3d.xy pt)
 
-        allNearbyPointPairs : List PointNearbyPoint
-        allNearbyPointPairs =
-            {-
-               Think of is a source-destination mapping table.
-               Is input to cluster finding.
-            -}
-            edgesWithProjectedPoints
-                |> Dict.values
-                |> List.concatMap nearbyPointsForTrack
+                -- Try to keep all the top level code here for a quick overview.
+                globalLeafIndex : LeafIndex
+                globalLeafIndex =
+                    Dict.foldl
+                        (\k v -> addTrackLeavesToIndex v)
+                        (SpatialIndex.empty globalBoundingBox (Length.meters 100.0))
+                        graph.edges
 
-        clustersFromPointPairs : List PointNearbyPoint -> ( List Cluster, Dict String (Edge msg) )
-        clustersFromPointPairs pairs =
-            {-
-               Change to clustering.
-               Find closest pair, find centroid,
-               If any "nearby" points are within tolerance of centroid, add to cluster.
-               Repeat until all clusters found.
-            -}
-            ( { pairs = List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs
-              , clusters = []
-              , usedPoints = Set.empty
-              }
-                |> findClusters
-                |> .clusters
-            , edgesWithProjectedPoints
-            )
+                pointsProjectedOntoNearbyLeaves : List ProjectedPointOnLeaf
+                pointsProjectedOntoNearbyLeaves =
+                    List.concatMap
+                        findAllLeavesNearAllPointsOnTrack
+                        (Dict.values graph.edges)
 
-        -- Lower level functions follow.
-        addTrackLeavesToIndex : Edge msg -> LeafIndex -> LeafIndex
-        addTrackLeavesToIndex edge index =
-            DomainModel.foldOverRoute
-                (addRoadSectionToIndex edge.track.trackName)
-                edge.track.trackTree
-                ( 0, index )
-                |> Tuple.second
+                _ =
+                    Debug.log "pointsProjectedOntoNearbyLeaves" pointsProjectedOntoNearbyLeaves
 
-        addRoadSectionToIndex : String -> RoadSection -> ( Int, LeafIndex ) -> ( Int, LeafIndex )
-        addRoadSectionToIndex trackName road ( thisLeafIndex, index ) =
-            ( thisLeafIndex + 1
-            , SpatialIndex.add
-                { content = { trackName = trackName, leafIndex = thisLeafIndex }
-                , box = UtilsForViews.flatBox road.boundingBox
-                }
-                index
-            )
-
-        addTrackPointsToIndex : Edge msg -> PointIndex -> PointIndex
-        addTrackPointsToIndex edge index =
-            DomainModel.foldOverEarthPoints
-                (addTrackPointToIndex edge.track.trackName)
-                edge.track.trackTree
-                ( 0, index )
-                |> Tuple.second
-
-        addTrackPointToIndex : String -> EarthPoint -> ( Int, PointIndex ) -> ( Int, PointIndex )
-        addTrackPointToIndex trackName earthPoint ( thisPointIndex, index ) =
-            ( thisPointIndex + 1
-            , SpatialIndex.add
-                { content =
-                    { trackName = trackName
-                    , pointIndex = thisPointIndex
-                    , point = earthPoint.space
-                    }
-                , box = UtilsForViews.flatBox <| BoundingBox3d.singleton earthPoint.space
-                }
-                index
-            )
-
-        findAllLeavesNearAllPointsOnTrack : Edge msg -> List ProjectedPointOnLeaf
-        findAllLeavesNearAllPointsOnTrack edge =
-            let
-                findAllLeavesNearPointOnTrack :
-                    EarthPoint
-                    -> ( Int, List ProjectedPointOnLeaf )
-                    -> ( Int, List ProjectedPointOnLeaf )
-                findAllLeavesNearPointOnTrack earthPoint ( pointIndex, collect ) =
-                    -- Use spatial leaf index then refine with geometry. Exclude contiguous.
+                edgesWithProjectedPoints : Dict String (Edge msg)
+                edgesWithProjectedPoints =
                     let
-                        pt =
-                            earthPoint
+                        projectionsOnto trackName =
+                            pointsProjectedOntoNearbyLeaves
+                                |> List.filter (\projection -> projection.toTrack == trackName)
+                    in
+                    Dict.map
+                        (\k edge ->
+                            addProjectedPointsIntoTrack
+                                (projectionsOnto edge.track.trackName)
+                                edge
+                        )
+                        graph.edges
 
-                        thisPoint2d =
-                            Point3d.projectInto SketchPlane3d.xy pt.space
+                globalPointIndex : PointIndex
+                globalPointIndex =
+                    {-
+                       This is an index of points base and projected.
+                       It's used to find clusters of points than may be combined.
+                    -}
+                    Dict.foldl
+                        (\k v -> addTrackPointsToIndex v)
+                        (SpatialIndex.empty globalBoundingBox (Length.meters 100.0))
+                        edgesWithProjectedPoints
 
-                        results =
-                            SpatialIndex.query globalLeafIndex (pointWithTolerance pt.space)
-                                |> List.map .content
+                allNearbyPointPairs : List PointNearbyPoint
+                allNearbyPointPairs =
+                    {-
+                       Think of is a source-destination mapping table.
+                       Is input to cluster finding.
+                    -}
+                    edgesWithProjectedPoints
+                        |> Dict.values
+                        |> List.concatMap nearbyPointsForTrack
 
-                        isThisLeafClose : LeafIndexEntry -> Maybe ProjectedPointOnLeaf
-                        isThisLeafClose { trackName, leafIndex } =
-                            case Dict.get trackName graph.edges of
-                                Just toEdge ->
-                                    let
-                                        toLeaf =
-                                            DomainModel.asRecord <|
-                                                DomainModel.leafFromIndex leafIndex toEdge.track.trackTree
+                _ =
+                    Debug.log "allNearbyPointPairs" allNearbyPointPairs
 
-                                        axis2d =
-                                            Axis2d.through
-                                                (toLeaf.startPoint.space |> Point3d.projectInto SketchPlane3d.xy)
-                                                toLeaf.directionAtStart
+                clustersFromPointPairs : List PointNearbyPoint -> ( List Cluster, Dict String (Edge msg) )
+                clustersFromPointPairs pairs =
+                    {-
+                       Change to clustering.
+                       Find closest pair, find centroid,
+                       If any "nearby" points are within tolerance of centroid, add to cluster.
+                       Repeat until all clusters found.
+                    -}
+                    ( { pairs = List.sortBy (.separation >> Length.inMeters) allNearbyPointPairs
+                      , clusters = []
+                      , usedPoints = Set.empty
+                      }
+                        |> findClusters
+                        |> .clusters
+                    , edgesWithProjectedPoints
+                    )
 
-                                        axis3d =
-                                            Axis3d.throughPoints toLeaf.startPoint.space toLeaf.endPoint.space
-                                                |> Maybe.withDefault Axis3d.z
+                -- Lower level functions follow.
+                addTrackLeavesToIndex : Edge msg -> LeafIndex -> LeafIndex
+                addTrackLeavesToIndex edge index =
+                    DomainModel.foldOverRoute
+                        (addRoadSectionToIndex edge.track.trackName)
+                        edge.track.trackTree
+                        ( 0, index )
+                        |> Tuple.second
 
-                                        ( along, from, foot ) =
-                                            -- Proximity test in 2D as altitudes may vary greatly.
-                                            ( pt.space |> Point3d.signedDistanceAlong axis3d
-                                            , thisPoint2d |> Point2d.signedDistanceFrom axis2d |> Quantity.abs
-                                            , pt.space |> Point3d.projectOntoAxis axis3d
-                                            )
+                addRoadSectionToIndex : String -> RoadSection -> ( Int, LeafIndex ) -> ( Int, LeafIndex )
+                addRoadSectionToIndex trackName road ( thisLeafIndex, index ) =
+                    ( thisLeafIndex + 1
+                    , SpatialIndex.add
+                        { content = { trackName = trackName, leafIndex = thisLeafIndex }
+                        , box = UtilsForViews.flatBox road.boundingBox
+                        }
+                        index
+                    )
 
-                                        isShortPerp =
-                                            from |> Quantity.lessThanOrEqualTo tolerance
+                addTrackPointsToIndex : Edge msg -> PointIndex -> PointIndex
+                addTrackPointsToIndex edge index =
+                    DomainModel.foldOverEarthPoints
+                        (addTrackPointToIndex edge.track.trackName)
+                        edge.track.trackTree
+                        ( 0, index )
+                        |> Tuple.second
 
-                                        isNotBeyondEndPoints =
-                                            Quantity.greaterThanZero along
-                                                && (along |> Quantity.lessThan toLeaf.trueLength)
+                addTrackPointToIndex : String -> EarthPoint -> ( Int, PointIndex ) -> ( Int, PointIndex )
+                addTrackPointToIndex trackName earthPoint ( thisPointIndex, index ) =
+                    ( thisPointIndex + 1
+                    , SpatialIndex.add
+                        { content =
+                            { trackName = trackName
+                            , pointIndex = thisPointIndex
+                            , point = earthPoint.space
+                            }
+                        , box = UtilsForViews.flatBox <| BoundingBox3d.singleton earthPoint.space
+                        }
+                        index
+                    )
 
-                                        ( isNotNearStart, isNotNearEnd ) =
-                                            -- Ignore points sufficiently close to ends that clustering will mop them up.
-                                            ( pt.space
-                                                |> Point3d.projectInto SketchPlane3d.xy
-                                                |> Point2d.distanceFrom
-                                                    (Point3d.projectInto SketchPlane3d.xy toLeaf.startPoint.space)
-                                                |> Quantity.greaterThan tolerance
-                                            , pt.space
-                                                |> Point3d.projectInto SketchPlane3d.xy
-                                                |> Point2d.distanceFrom
-                                                    (Point3d.projectInto SketchPlane3d.xy toLeaf.endPoint.space)
-                                                |> Quantity.greaterThan tolerance
-                                            )
+                findAllLeavesNearAllPointsOnTrack : Edge msg -> List ProjectedPointOnLeaf
+                findAllLeavesNearAllPointsOnTrack edge =
+                    let
+                        findAllLeavesNearPointOnTrack :
+                            EarthPoint
+                            -> ( Int, List ProjectedPointOnLeaf )
+                            -> ( Int, List ProjectedPointOnLeaf )
+                        findAllLeavesNearPointOnTrack earthPoint ( pointIndex, collect ) =
+                            -- Use spatial leaf index then refine with geometry. Exclude contiguous.
+                            let
+                                pt =
+                                    earthPoint
 
-                                        isNotConnected =
-                                            -- Exclude leaves on the source track that neighbour source point.
-                                            trackName
-                                                /= edge.track.trackName
-                                                || (leafIndex /= pointIndex && leafIndex + 1 /= pointIndex)
-                                    in
-                                    if
-                                        isNotConnected
-                                            && isShortPerp
-                                            && isNotNearStart
-                                            && isNotNearEnd
-                                            && isNotBeyondEndPoints
-                                    then
-                                        Just
-                                            { fromTrack = edge.track.trackName
-                                            , fromPoint = pointIndex
-                                            , toTrack = trackName
-                                            , toLeaf = leafIndex
-                                            , distanceAlong = along
-                                            , projectedPoint = foot
-                                            }
+                                thisPoint2d =
+                                    Point3d.projectInto SketchPlane3d.xy pt.space
 
-                                    else
-                                        Nothing
+                                results =
+                                    SpatialIndex.query globalLeafIndex (pointWithTolerance pt.space)
+                                        |> List.map .content
+
+                                isThisLeafClose : LeafIndexEntry -> Maybe ProjectedPointOnLeaf
+                                isThisLeafClose { trackName, leafIndex } =
+                                    case Dict.get trackName graph.edges of
+                                        Just toEdge ->
+                                            let
+                                                toLeaf =
+                                                    DomainModel.asRecord <|
+                                                        DomainModel.leafFromIndex leafIndex toEdge.track.trackTree
+
+                                                axis2d =
+                                                    Axis2d.through
+                                                        (toLeaf.startPoint.space |> Point3d.projectInto SketchPlane3d.xy)
+                                                        toLeaf.directionAtStart
+
+                                                axis3d =
+                                                    Axis3d.throughPoints toLeaf.startPoint.space toLeaf.endPoint.space
+                                            in
+                                            case axis3d of
+                                                Just foundAxis ->
+                                                    let
+                                                        ( along, from, foot ) =
+                                                            -- Proximity test in 2D as altitudes may vary greatly.
+                                                            ( pt.space |> Point3d.signedDistanceAlong foundAxis
+                                                            , thisPoint2d |> Point2d.signedDistanceFrom axis2d |> Quantity.abs
+                                                            , pt.space |> Point3d.projectOntoAxis foundAxis
+                                                            )
+
+                                                        isShortPerp =
+                                                            from |> Quantity.lessThanOrEqualTo tolerance
+
+                                                        isNotBeyondEndPoints =
+                                                            Quantity.greaterThanZero along
+                                                                && (along |> Quantity.lessThan toLeaf.trueLength)
+
+                                                        ( isNotNearStart, isNotNearEnd ) =
+                                                            -- Ignore points sufficiently close to ends that clustering will mop them up.
+                                                            ( pt.space
+                                                                |> Point3d.projectInto SketchPlane3d.xy
+                                                                |> Point2d.distanceFrom
+                                                                    (Point3d.projectInto SketchPlane3d.xy toLeaf.startPoint.space)
+                                                                |> Quantity.greaterThan tolerance
+                                                            , pt.space
+                                                                |> Point3d.projectInto SketchPlane3d.xy
+                                                                |> Point2d.distanceFrom
+                                                                    (Point3d.projectInto SketchPlane3d.xy toLeaf.endPoint.space)
+                                                                |> Quantity.greaterThan tolerance
+                                                            )
+
+                                                        isNotConnected =
+                                                            -- Exclude leaves on the source track that neighbour source point.
+                                                            trackName
+                                                                /= edge.track.trackName
+                                                                || (leafIndex /= pointIndex && leafIndex + 1 /= pointIndex)
+                                                    in
+                                                    if
+                                                        isNotConnected
+                                                            && isShortPerp
+                                                            && isNotNearStart
+                                                            && isNotNearEnd
+                                                            && isNotBeyondEndPoints
+                                                    then
+                                                        Just
+                                                            { fromTrack = edge.track.trackName
+                                                            , fromPoint = pointIndex
+                                                            , toTrack = trackName
+                                                            , toLeaf = leafIndex
+                                                            , distanceAlong = along
+                                                            , projectedPoint = foot
+                                                            }
+
+                                                    else
+                                                        Nothing
+
+                                                Nothing ->
+                                                    Nothing
+
+                                        Nothing ->
+                                            --No edge?
+                                            Nothing
+                            in
+                            ( pointIndex + 1
+                            , (results |> List.filterMap isThisLeafClose) ++ collect
+                            )
+                    in
+                    DomainModel.foldOverEarthPoints
+                        findAllLeavesNearPointOnTrack
+                        edge.track.trackTree
+                        ( 0, [] )
+                        |> Tuple.second
+
+                addProjectedPointsIntoTrack : List ProjectedPointOnLeaf -> Edge msg -> Edge msg
+                addProjectedPointsIntoTrack projections toEdge =
+                    let
+                        track =
+                            toEdge.track
+
+                        updatedTree =
+                            --NOTE: Must add to highest numbered leaf first or leaf numbers confused!
+                            --NOTE: Dict.foldr not doing what I expect.
+                            Dict.foldr
+                                insertPointsInLeaf
+                                track.trackTree
+                                (perpendicularFeetGroupedByLeaf projections)
+
+                        updatedTrack =
+                            { track | trackTree = updatedTree }
+                    in
+                    { toEdge | track = updatedTrack }
+
+                {-
+                   We have the feet of the perpendiculars to nearby leaves.
+                   3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
+                -}
+                perpendicularFeetGroupedByLeaf : List ProjectedPointOnLeaf -> Dict Int (List ProjectedPointOnLeaf)
+                perpendicularFeetGroupedByLeaf projections =
+                    -- Can't see a suitable function in List.Extra, so do it by hand.
+                    let
+                        addToLeafDict newEntry dict =
+                            case Dict.get newEntry.toLeaf dict of
+                                Just prevEntries ->
+                                    Dict.insert
+                                        newEntry.toLeaf
+                                        (newEntry :: prevEntries)
+                                        dict
 
                                 Nothing ->
-                                    --No edge?
-                                    Nothing
+                                    Dict.insert
+                                        newEntry.toLeaf
+                                        [ newEntry ]
+                                        dict
+
+                        leafDictUnsorted =
+                            List.foldl
+                                addToLeafDict
+                                Dict.empty
+                                projections
+
+                        sortEachLeafEntries : Int -> List ProjectedPointOnLeaf -> List ProjectedPointOnLeaf
+                        sortEachLeafEntries _ unsorted =
+                            unsorted
+                                |> List.Extra.uniqueBy (.distanceAlong >> Length.inMeters)
+                                |> List.sortBy (.distanceAlong >> Length.inMeters)
                     in
-                    ( pointIndex + 1
-                    , (results |> List.filterMap isThisLeafClose) ++ collect
-                    )
-            in
-            DomainModel.foldOverEarthPoints
-                findAllLeavesNearPointOnTrack
-                edge.track.trackTree
-                ( 0, [] )
-                |> Tuple.second
+                    Dict.map sortEachLeafEntries leafDictUnsorted
 
-        addProjectedPointsIntoTrack : List ProjectedPointOnLeaf -> Edge msg -> Edge msg
-        addProjectedPointsIntoTrack projections toEdge =
-            let
-                track =
-                    toEdge.track
-
-                updatedTree =
-                    --NOTE: Must add to highest numbered leaf first or leaf numbers confused!
-                    --NOTE: Dict.foldr not doing what I expect.
-                    Dict.foldr
-                        insertPointsInLeaf
-                        track.trackTree
-                        (perpendicularFeetGroupedByLeaf projections)
-
-                updatedTrack =
-                    { track | trackTree = updatedTree }
-            in
-            { toEdge | track = updatedTrack }
-
-        {-
-           We have the feet of the perpendiculars to nearby leaves.
-           3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
-        -}
-        perpendicularFeetGroupedByLeaf : List ProjectedPointOnLeaf -> Dict Int (List ProjectedPointOnLeaf)
-        perpendicularFeetGroupedByLeaf projections =
-            -- Can't see a suitable function in List.Extra, so do it by hand.
-            let
-                addToLeafDict newEntry dict =
-                    case Dict.get newEntry.toLeaf dict of
-                        Just prevEntries ->
-                            Dict.insert
-                                newEntry.toLeaf
-                                (newEntry :: prevEntries)
-                                dict
-
-                        Nothing ->
-                            Dict.insert
-                                newEntry.toLeaf
-                                [ newEntry ]
-                                dict
-
-                leafDictUnsorted =
-                    List.foldl
-                        addToLeafDict
-                        Dict.empty
-                        projections
-
-                sortEachLeafEntries : Int -> List ProjectedPointOnLeaf -> List ProjectedPointOnLeaf
-                sortEachLeafEntries _ unsorted =
-                    unsorted
-                        |> List.Extra.uniqueBy (.distanceAlong >> Length.inMeters)
-                        |> List.sortBy (.distanceAlong >> Length.inMeters)
-            in
-            Dict.map sortEachLeafEntries leafDictUnsorted
-
-        {-
-           4. Update tree by converting each affected Leaf into a "branch" (in situ perhaps?).
-        -}
-        insertPointsInLeaf : Int -> List ProjectedPointOnLeaf -> PeteTree -> PeteTree
-        insertPointsInLeaf leafNumber newPoints tree =
-            let
-                asGPX =
-                    List.map
-                        (.projectedPoint
-                            >> DomainModel.withoutTime
-                            >> DomainModel.gpxFromPointWithReference graph.referenceLonLat
-                        )
-                        newPoints
-            in
-            DomainModel.insertPointsIntoLeaf
-                leafNumber
-                graph.referenceLonLat
-                asGPX
-                tree
-
-        nearbyPointsForTrack : Edge msg -> List PointNearbyPoint
-        nearbyPointsForTrack edge =
-            DomainModel.foldOverEarthPoints
-                (pointsNearPoint edge.track.trackName)
-                edge.track.trackTree
-                ( 0, [] )
-                |> Tuple.second
-
-        pointsNearPoint :
-            String
-            -> EarthPoint
-            -> ( Int, List PointNearbyPoint )
-            -> ( Int, List PointNearbyPoint )
-        pointsNearPoint searchTrack searchPoint ( searchIndex, collector ) =
-            -- Prelude to finding clusters of points.
-            -- Use spatial point index then refine with geometry.
-            let
-                searchLocus2d =
-                    Point3d.projectInto SketchPlane3d.xy searchPoint.space
-
-                resultsUnfiltered =
-                    --TODO: Pushing query into search would be efficient, once it's right.
-                    SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
-                        |> List.map .content
-
-                isCloseEnough : PointIndexEntry -> Bool
-                isCloseEnough { trackName, pointIndex, point } =
-                    point
-                        |> Point3d.projectInto SketchPlane3d.xy
-                        |> Point2d.distanceFrom searchLocus2d
-                        |> Quantity.lessThanOrEqualTo tolerance
-
-                isNotSameOrAdjacent : PointIndexEntry -> Bool
-                isNotSameOrAdjacent { trackName, pointIndex, point } =
-                    trackName
-                        /= searchTrack
-                        || pointIndex
-                        < searchIndex
-                        - 1
-                        || pointIndex
-                        > searchIndex
-                        + 1
-
-                results =
-                    resultsUnfiltered
-                        |> List.filter
-                            (\entry -> isCloseEnough entry && isNotSameOrAdjacent entry)
-
-                resultsAsRecords =
-                    results
-                        |> List.map
-                            (\{ trackName, pointIndex, point } ->
-                                { aTrack = searchTrack
-                                , aPointIndex = searchIndex
-                                , aPoint = searchPoint.space
-                                , bTrack = trackName
-                                , bPointIndex = pointIndex
-                                , bPoint = point
-                                , separation =
-                                    point
-                                        |> Point3d.projectInto SketchPlane3d.xy
-                                        |> Point2d.distanceFrom searchLocus2d
-                                }
-                            )
-            in
-            ( searchIndex + 1
-            , resultsAsRecords ++ collector
-            )
-
-        findClusters : Clustering -> Clustering
-        findClusters clustersInfo =
-            -- If first pair has two free points, start a new cluster.
-            -- If first pair does not, discard and recurse.
-            -- If list empty, return.
-            case clustersInfo.pairs of
-                pair1 :: morePairs ->
+                {-
+                   4. Update tree by converting each affected Leaf into a "branch" (in situ perhaps?).
+                -}
+                insertPointsInLeaf : Int -> List ProjectedPointOnLeaf -> PeteTree -> PeteTree
+                insertPointsInLeaf leafNumber newPoints tree =
                     let
-                        ( pointA, pointB ) =
-                            ( ( pair1.aTrack, pair1.aPointIndex )
-                            , ( pair1.bTrack, pair1.bPointIndex )
-                            )
+                        _ =
+                            Debug.log "asGPX" asGPX
+
+                        _ =
+                            Debug.log "graph.referenceLonLat" graph.referenceLonLat
+
+                        asGPX =
+                            List.map
+                                (.projectedPoint
+                                    >> DomainModel.withoutTime
+                                    >> DomainModel.gpxFromPointWithReference graph.referenceLonLat
+                                )
+                                newPoints
                     in
-                    if
-                        Set.member pointA clustersInfo.usedPoints
-                            || Set.member pointB clustersInfo.usedPoints
-                    then
-                        findClusters { clustersInfo | pairs = morePairs }
+                    DomainModel.insertPointsIntoLeaf
+                        leafNumber
+                        graph.referenceLonLat
+                        asGPX
+                        tree
+
+                nearbyPointsForTrack : Edge msg -> List PointNearbyPoint
+                nearbyPointsForTrack edge =
+                    DomainModel.foldOverEarthPoints
+                        (pointsNearPoint edge.track.trackName)
+                        edge.track.trackTree
+                        ( 0, [] )
+                        |> Tuple.second
+
+                pointsNearPoint :
+                    String
+                    -> EarthPoint
+                    -> ( Int, List PointNearbyPoint )
+                    -> ( Int, List PointNearbyPoint )
+                pointsNearPoint searchTrack searchPoint ( searchIndex, collector ) =
+                    -- Prelude to finding clusters of points.
+                    -- Use spatial point index then refine with geometry.
+                    let
+                        searchLocus2d =
+                            Point3d.projectInto SketchPlane3d.xy searchPoint.space
+
+                        resultsUnfiltered =
+                            --TODO: Pushing query into search would be efficient, once it's right.
+                            SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
+                                |> List.map .content
+
+                        isCloseEnough : PointIndexEntry -> Bool
+                        isCloseEnough { trackName, pointIndex, point } =
+                            point
+                                |> Point3d.projectInto SketchPlane3d.xy
+                                |> Point2d.distanceFrom searchLocus2d
+                                |> Quantity.lessThanOrEqualTo tolerance
+
+                        isNotSameOrAdjacent : PointIndexEntry -> Bool
+                        isNotSameOrAdjacent { trackName, pointIndex, point } =
+                            trackName
+                                /= searchTrack
+                                || pointIndex
+                                < searchIndex
+                                - 1
+                                || pointIndex
+                                > searchIndex
+                                + 1
+
+                        results =
+                            resultsUnfiltered
+                                |> List.filter
+                                    (\entry -> isCloseEnough entry && isNotSameOrAdjacent entry)
+
+                        resultsAsRecords =
+                            results
+                                |> List.map
+                                    (\{ trackName, pointIndex, point } ->
+                                        { aTrack = searchTrack
+                                        , aPointIndex = searchIndex
+                                        , aPoint = searchPoint.space
+                                        , bTrack = trackName
+                                        , bPointIndex = pointIndex
+                                        , bPoint = point
+                                        , separation =
+                                            point
+                                                |> Point3d.projectInto SketchPlane3d.xy
+                                                |> Point2d.distanceFrom searchLocus2d
+                                        }
+                                    )
+                    in
+                    ( searchIndex + 1
+                    , resultsAsRecords ++ collector
+                    )
+
+                findClusters : Clustering -> Clustering
+                findClusters clustersInfo =
+                    -- If first pair has two free points, start a new cluster.
+                    -- If first pair does not, discard and recurse.
+                    -- If list empty, return.
+                    case clustersInfo.pairs of
+                        pair1 :: morePairs ->
+                            let
+                                ( pointA, pointB ) =
+                                    ( ( pair1.aTrack, pair1.aPointIndex )
+                                    , ( pair1.bTrack, pair1.bPointIndex )
+                                    )
+                            in
+                            if
+                                Set.member pointA clustersInfo.usedPoints
+                                    || Set.member pointB clustersInfo.usedPoints
+                            then
+                                findClusters { clustersInfo | pairs = morePairs }
+
+                            else
+                                { clustersInfo | pairs = morePairs }
+                                    |> growClusterFromSeed pair1
+                                    |> findClusters
+
+                        [] ->
+                            clustersInfo
+
+                growClusterFromSeed :
+                    PointNearbyPoint
+                    -> Clustering
+                    -> Clustering
+                growClusterFromSeed pair1 clustersInfo =
+                    -- If any "nearby" unused points are within tolerance of centroid, add to cluster.
+                    -- Return cluster and unused pairs.
+                    let
+                        centroid =
+                            Point3d.centroid pair1.aPoint [ pair1.bPoint ]
+
+                        seedCluster : Cluster
+                        seedCluster =
+                            { centroid = centroid
+                            , pointsToAdjust =
+                                [ ( pair1.aTrack, pair1.aPointIndex, pair1.aPoint )
+                                , ( pair1.bTrack, pair1.bPointIndex, pair1.bPoint )
+                                ]
+                            }
+                    in
+                    extendCluster
+                        seedCluster
+                        { clustersInfo
+                            | usedPoints =
+                                clustersInfo.usedPoints
+                                    |> Set.insert ( pair1.aTrack, pair1.aPointIndex )
+                                    |> Set.insert ( pair1.bTrack, pair1.bPointIndex )
+                        }
+
+                extendCluster : Cluster -> Clustering -> Clustering
+                extendCluster cluster clustersInfo =
+                    let
+                        centroid2d =
+                            Point3d.projectInto SketchPlane3d.xy cluster.centroid
+
+                        currentClusterMembers =
+                            List.map
+                                (\triplet -> ( Tuple3.first triplet, Tuple3.second triplet ))
+                                cluster.pointsToAdjust
+                                |> Set.fromList
+
+                        possibleExtensions =
+                            -- Any pairs that begin with any member of this cluster
+                            -- and far point is unused
+                            -- and far point is close enough to centroid
+                            clustersInfo.pairs
+                                |> List.filter
+                                    (\pair ->
+                                        Set.member ( pair.aTrack, pair.aPointIndex ) currentClusterMembers
+                                    )
+                                |> List.filter
+                                    (\pair ->
+                                        not <|
+                                            Set.member ( pair.bTrack, pair.bPointIndex ) clustersInfo.usedPoints
+                                    )
+                                |> List.filter
+                                    (\pair ->
+                                        pair.bPoint
+                                            |> Point3d.projectInto SketchPlane3d.xy
+                                            |> Point2d.distanceFrom centroid2d
+                                            |> Quantity.lessThanOrEqualTo tolerance
+                                    )
+                    in
+                    if possibleExtensions == [] then
+                        --We're done
+                        { clustersInfo | clusters = cluster :: clustersInfo.clusters }
 
                     else
-                        { clustersInfo | pairs = morePairs }
-                            |> growClusterFromSeed pair1
-                            |> findClusters
+                        --Keep going
+                        let
+                            curentClusterPoints =
+                                List.map Tuple3.third cluster.pointsToAdjust
 
-                [] ->
-                    clustersInfo
+                            pointsToAddToCentroid =
+                                List.map .bPoint possibleExtensions
 
-        growClusterFromSeed :
-            PointNearbyPoint
-            -> Clustering
-            -> Clustering
-        growClusterFromSeed pair1 clustersInfo =
-            -- If any "nearby" unused points are within tolerance of centroid, add to cluster.
-            -- Return cluster and unused pairs.
-            let
-                centroid =
-                    Point3d.centroid pair1.aPoint [ pair1.bPoint ]
+                            newCentroid =
+                                (curentClusterPoints ++ pointsToAddToCentroid)
+                                    |> Point3d.centroidN
+                                    |> Maybe.withDefault cluster.centroid
 
-                seedCluster : Cluster
-                seedCluster =
-                    { centroid = centroid
-                    , pointsToAdjust =
-                        [ ( pair1.aTrack, pair1.aPointIndex, pair1.aPoint )
-                        , ( pair1.bTrack, pair1.bPointIndex, pair1.bPoint )
-                        ]
-                    }
+                            newPointsInfo =
+                                possibleExtensions
+                                    |> List.map (\new -> ( new.bTrack, new.bPointIndex, new.bPoint ))
+                                    |> List.Extra.unique
+
+                            _ =
+                                Debug.log "CURRENT" <| List.map Tuple3.second cluster.pointsToAdjust
+
+                            _ =
+                                Debug.log "ADDING" newPointsInfo
+
+                            extendedCluster =
+                                { cluster
+                                    | centroid = newCentroid
+                                    , pointsToAdjust = newPointsInfo ++ cluster.pointsToAdjust
+                                }
+                        in
+                        extendCluster
+                            extendedCluster
+                            { clustersInfo
+                                | usedPoints =
+                                    possibleExtensions
+                                        |> List.foldl
+                                            (\new -> Set.insert ( new.bTrack, new.bPointIndex ))
+                                            clustersInfo.usedPoints
+                            }
             in
-            extendCluster
-                seedCluster
-                { clustersInfo
-                    | usedPoints =
-                        clustersInfo.usedPoints
-                            |> Set.insert ( pair1.aTrack, pair1.aPointIndex )
-                            |> Set.insert ( pair1.bTrack, pair1.bPointIndex )
-                }
-
-        extendCluster : Cluster -> Clustering -> Clustering
-        extendCluster cluster clustersInfo =
-            let
-                centroid2d =
-                    Point3d.projectInto SketchPlane3d.xy cluster.centroid
-
-                currentClusterMembers =
-                    List.map
-                        (\triplet -> ( Tuple3.first triplet, Tuple3.second triplet ))
-                        cluster.pointsToAdjust
-                        |> Set.fromList
-
-                possibleExtensions =
-                    -- Any pairs that begin with any member of this cluster
-                    -- and far point is unused
-                    -- and far point is close enough to centroid
-                    clustersInfo.pairs
-                        |> List.filter
-                            (\pair ->
-                                Set.member ( pair.aTrack, pair.aPointIndex ) currentClusterMembers
-                            )
-                        |> List.filter
-                            (\pair ->
-                                not <|
-                                    Set.member ( pair.bTrack, pair.bPointIndex ) clustersInfo.usedPoints
-                            )
-                        |> List.filter
-                            (\pair ->
-                                pair.bPoint
-                                    |> Point3d.projectInto SketchPlane3d.xy
-                                    |> Point2d.distanceFrom centroid2d
-                                    |> Quantity.lessThanOrEqualTo tolerance
-                            )
-            in
-            if possibleExtensions == [] then
-                --We're done
-                { clustersInfo | clusters = cluster :: clustersInfo.clusters }
-
-            else
-                --Keep going
-                let
-                    curentClusterPoints =
-                        List.map Tuple3.third cluster.pointsToAdjust
-
-                    pointsToAddToCentroid =
-                        List.map .bPoint possibleExtensions
-
-                    newCentroid =
-                        (curentClusterPoints ++ pointsToAddToCentroid)
-                            |> Point3d.centroidN
-                            |> Maybe.withDefault cluster.centroid
-
-                    newPointsInfo =
-                        possibleExtensions
-                            |> List.map (\new -> ( new.bTrack, new.bPointIndex, new.bPoint ))
-                            |> List.Extra.unique
-
-                    _ =
-                        Debug.log "CURRENT" <| List.map Tuple3.second cluster.pointsToAdjust
-
-                    _ =
-                        Debug.log "ADDING" newPointsInfo
-
-                    extendedCluster =
-                        { cluster
-                            | centroid = newCentroid
-                            , pointsToAdjust = newPointsInfo ++ cluster.pointsToAdjust
-                        }
-                in
-                extendCluster
-                    extendedCluster
-                    { clustersInfo
-                        | usedPoints =
-                            possibleExtensions
-                                |> List.foldl
-                                    (\new -> Set.insert ( new.bTrack, new.bPointIndex ))
-                                    clustersInfo.usedPoints
-                    }
-    in
-    clustersFromPointPairs allNearbyPointPairs
+            clustersFromPointPairs allNearbyPointPairs
 
 
 snapToClusters : Quantity Float Meters -> Graph msg -> Graph msg
