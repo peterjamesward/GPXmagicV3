@@ -172,7 +172,7 @@ writeGPX name options track =
                     writeSegment Nothing <|
                         List.map Tuple.second <|
                             DomainModel.extractPointsInRange
-                                (startFrom + 1)
+                                startFrom
                                 0
                                 track.trackTree
     in

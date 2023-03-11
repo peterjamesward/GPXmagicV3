@@ -13,8 +13,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
-BUG: MUST FIX NOW. One track point being dropped when output written.
-
 1. Only show preview for snap points when in that state.
 2. Any change to tracks must invalidate nodes.
 3. Another button to canonicalize (replace tracks with edges).
