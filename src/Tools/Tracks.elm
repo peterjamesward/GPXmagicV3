@@ -129,11 +129,16 @@ toolStateChange :
     -> ( Options msg, List (Actions.ToolAction msg) )
 toolStateChange opened options =
     if opened then
-        update (SetTolerance options.graphOptions.matchingTolerance) options
+        case options.graphState of
+            GraphOriginalTracks ->
+                update (SetTolerance options.graphOptions.matchingTolerance) options
+
+            _ ->
+                ( options, [] )
 
     else
         -- Hide preview
-        ( options, [ Actions.HidePreview "ridge" ] )
+        ( options, [ Actions.HidePreview "graph" ] )
 
 
 update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
@@ -166,7 +171,13 @@ update msg options =
                     )
 
                 Nothing ->
-                    ( options, [] )
+                    ( options
+                    , if Just index == options.activeTrackIndex then
+                        [ Actions.HidePreview "graph" ]
+
+                      else
+                        []
+                    )
 
         UnloadActiveTrack ->
             case options.activeTrackIndex of
@@ -176,7 +187,7 @@ update msg options =
                             ( options, [ Actions.UnloadActiveTrack track.trackName ] )
 
                         Nothing ->
-                            ( options, [] )
+                            ( options, [ Actions.HidePreview "graph" ] )
 
                 Nothing ->
                     ( options, [] )
