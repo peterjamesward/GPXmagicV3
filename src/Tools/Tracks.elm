@@ -72,6 +72,7 @@ type Msg
       --| UndoDeleteRoad
     | SnapToNearby
     | UndoSnap
+    | Canonicalise
 
 
 defaultGraphOptions : Options.GraphOptions msg
@@ -357,6 +358,27 @@ update msg options =
                 _ ->
                     ( { options | graphState = GraphOriginalTracks }, [] )
 
+        Canonicalise ->
+            case options.graphState of
+                GraphWithNodes beforeNodes beforeSnap ->
+                    let
+                        graph =
+                            options.graph
+
+                        newGraph =
+                            Graph.canonicalise graph
+                    in
+                    ( { options
+                        | graph = newGraph
+                        , tracks = List.map .track <| Dict.values newGraph.edges
+                        , graphState = GraphWithEdges options.graph beforeNodes beforeSnap
+                      }
+                    , [ Actions.SetActiveTrack 0 ]
+                    )
+
+                _ ->
+                    ( { options | graphState = GraphOriginalTracks }, [] )
+
 
 
 {-
@@ -558,7 +580,7 @@ viewGraph settings wrapper options graphOptions graph =
 
                     convertButton =
                         Input.button neatToolsBorder
-                            { onPress = Nothing -- Just (wrapper UndoAnalyze)
+                            { onPress = Just (wrapper Canonicalise)
                             , label = i18n "canonicalise"
                             }
                 in

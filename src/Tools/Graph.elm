@@ -6,6 +6,7 @@ module Tools.Graph exposing
 
     , addEdgeFromTrack
     , analyzeTracksAsGraph
+    , canonicalise
     ,  deleteEdgeTraversal
        --,  edgeCanBeDeleted
        --, enterRoutePlanningMode
@@ -1385,8 +1386,21 @@ analyzeTracksAsGraph graph =
     }
 
 
-decomposeTracksIntoEdges : Graph msg -> Graph msg
-decomposeTracksIntoEdges graph =
+type alias PutativeEdge =
+    { startNode : String
+    , endNode : String
+    , pointsIncludingNodes : List EarthPoint
+    }
+
+
+type alias PutativeEdgeFold =
+    { currentEdge : Maybe PutativeEdge
+    , foundEdges : List PutativeEdge
+    }
+
+
+canonicalise : Graph msg -> Graph msg
+canonicalise graph =
     {-
        Edge finding is a second walk along all the tracks, now we know where all the nodes are.
        Add node-node intervals to edge dict using (lowNode, highNode, via) as key where the node
@@ -1394,8 +1408,132 @@ decomposeTracksIntoEdges graph =
        Use midpoint as via (but that may not be unique).
     -}
     let
-        edges =
+        allEdgeInstances : PutativeEdgeFold
+        allEdgeInstances =
+            {-
+               This gives all edges, but not uniquely and some may be reversed.
+               Also, keep in mind that two end points do not uniquely identify an edge.
+            -}
             graph.edges
+                |> Dict.values
+                |> List.foldl
+                    walkEdgeSplittingAtNodes
+                    { currentEdge = Nothing, foundEdges = [] }
+
+        edgesWithConsistentEndNodes : List PutativeEdge
+        edgesWithConsistentEndNodes =
+            -- Just make sure that the start nodekey <= end nodekey, flippin edge if needed.
+            let
+                flipAsNeeded : PutativeEdge -> PutativeEdge
+                flipAsNeeded edge =
+                    if edge.startNode <= edge.endNode then
+                        edge
+
+                    else
+                        { startNode = edge.endNode
+                        , endNode = edge.startNode
+                        , pointsIncludingNodes = List.reverse edge.pointsIncludingNodes
+                        }
+            in
+            List.map flipAsNeeded allEdgeInstances.foundEdges
+
+        edges : Dict String (Edge msg)
+        edges =
+            let
+                putEdgeInDictionary : PutativeEdge -> Dict String (Edge msg) -> Dict String (Edge msg)
+                putEdgeInDictionary putative dict =
+                    let
+                        via =
+                            List.Extra.getAt
+                                (List.length putative.pointsIncludingNodes // 2)
+                                putative.pointsIncludingNodes
+                                |> Maybe.withDefault
+                                    (DomainModel.withoutTime Point3d.origin)
+
+                        newKey =
+                            putative.startNode ++ nodeKey via ++ putative.endNode
+
+                        trackFromEarthPoints : List EarthPoint -> Maybe (TrackLoaded msg)
+                        trackFromEarthPoints points =
+                            let
+                                trackName =
+                                    "Edge " ++ String.fromInt (Dict.size dict)
+                            in
+                            points
+                                |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
+                                |> TrackLoaded.trackFromPoints trackName
+                    in
+                    case trackFromEarthPoints putative.pointsIncludingNodes of
+                        Just newTrack ->
+                            Dict.insert
+                                newKey
+                                { lowNode = putative.startNode
+                                , highNode = putative.endNode
+                                , via = nodeKey via
+                                , track = newTrack
+                                , originalDirection = Natural -- not sure this is relevant.
+                                }
+                                dict
+
+                        Nothing ->
+                            dict
+            in
+            List.foldl putEdgeInDictionary Dict.empty edgesWithConsistentEndNodes
+
+        {-
+           Essential algorithm above this line, support functions below.
+        -}
+        walkEdgeSplittingAtNodes : Edge msg -> PutativeEdgeFold -> PutativeEdgeFold
+        walkEdgeSplittingAtNodes edge collectEdges =
+            DomainModel.foldOverEarthPoints
+                lookAtPoint
+                edge.track.trackTree
+                collectEdges
+
+        lookAtPoint : EarthPoint -> PutativeEdgeFold -> PutativeEdgeFold
+        lookAtPoint point foldState =
+            let
+                pointIsNode =
+                    Dict.member (nodeKey point) graph.nodes
+
+                startNewEdgeWith pt =
+                    { startNode = nodeKey pt
+                    , endNode = ""
+                    , pointsIncludingNodes = [ pt ]
+                    }
+            in
+            case ( pointIsNode, foldState.currentEdge ) of
+                ( True, Nothing ) ->
+                    -- Start situation.
+                    { foldState | currentEdge = Just <| startNewEdgeWith point }
+
+                ( True, Just currentEdge ) ->
+                    -- End this edge and start a new one.
+                    let
+                        completedEdge =
+                            { currentEdge
+                                | endNode = nodeKey point
+                                , pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
+                            }
+                    in
+                    { foldState
+                        | currentEdge = Just <| startNewEdgeWith point
+                        , foundEdges = completedEdge :: foldState.foundEdges
+                    }
+
+                ( False, Just currentEdge ) ->
+                    -- Add non-node point to current
+                    let
+                        newCurrent =
+                            { currentEdge
+                                | pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
+                            }
+                    in
+                    { foldState | currentEdge = Just newCurrent }
+
+                ( False, Nothing ) ->
+                    -- Something went wrong!
+                    foldState
     in
     { graph | edges = edges }
 
