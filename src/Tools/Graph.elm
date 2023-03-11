@@ -1420,6 +1420,9 @@ canonicalise graph =
                     walkEdgeSplittingAtNodes
                     { currentEdge = Nothing, foundEdges = [] }
 
+        _ =
+            Debug.log "allEdgeInstances" allEdgeInstances
+
         edgesWithConsistentEndNodes : List PutativeEdge
         edgesWithConsistentEndNodes =
             -- Just make sure that the start nodekey <= end nodekey, flippin edge if needed.
@@ -1436,6 +1439,12 @@ canonicalise graph =
                         }
             in
             List.map flipAsNeeded allEdgeInstances.foundEdges
+
+        _ =
+            Debug.log "edgesWithConsistentEndNodes" edgesWithConsistentEndNodes
+
+        _ =
+            Debug.log "edges" edges
 
         edges : Dict String (Edge msg)
         edges =
@@ -1483,6 +1492,20 @@ canonicalise graph =
         {-
            Essential algorithm above this line, support functions below.
         -}
+        nodeXyLookup : Dict ( Float, Float ) String
+        nodeXyLookup =
+            let
+                invertNodeEntry key point invertDict =
+                    Dict.insert
+                        (pointAsComparable point)
+                        key
+                        invertDict
+            in
+            Dict.foldl
+                invertNodeEntry
+                Dict.empty
+                graph.nodes
+
         walkEdgeSplittingAtNodes : Edge msg -> PutativeEdgeFold -> PutativeEdgeFold
         walkEdgeSplittingAtNodes edge collectEdges =
             DomainModel.foldOverEarthPoints
@@ -1494,7 +1517,7 @@ canonicalise graph =
         lookAtPoint point foldState =
             let
                 pointIsNode =
-                    Dict.member (nodeKey point) graph.nodes
+                    Dict.member (pointAsComparable point) nodeXyLookup
 
                 startNewEdgeWith pt =
                     { startNode = nodeKey pt
