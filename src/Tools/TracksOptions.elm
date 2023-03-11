@@ -22,7 +22,7 @@ type GraphState msg
     = GraphNoTracks
     | GraphOriginalTracks
     | GraphSnapped (Graph.Graph msg)
-    | GraphAnalyzed (Graph.Graph msg)
+    | GraphAnalyzed (Graph.Graph msg) (Graph.Graph msg)
 
 
 type alias GraphOptions msg =

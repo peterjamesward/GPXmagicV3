@@ -67,7 +67,7 @@ type Msg
     | DisplayInfo String String
       --| FlipDirection Int
       --| ClearRoute
-      --| RevertToTrack
+    | UndoAnalyze
     | SetTolerance (Quantity Float Meters)
       --| UndoDeleteRoad
     | SnapToNearby
@@ -221,43 +221,42 @@ update msg options =
             -- The found edges become the new tracks.
             -- We delegate to graph, then pull back the updated tracks.
             -- Save the previous graph for simple reversion.
-            let
-                newGraph =
-                    Graph.analyzeTracksAsGraph options.graph
+            case options.graphState of
+                GraphSnapped preSnapGraph ->
+                    let
+                        newGraph =
+                            Graph.analyzeTracksAsGraph options.graph
 
-                newTracks =
-                    Dict.values newGraph.edges
-                        |> List.map .track
-            in
-            ( { options
-                | graph = newGraph
-                , tracks = newTracks
-                , graphState = GraphAnalyzed options.graph
-              }
-            , [ Actions.SetActiveTrack 0
-              , Actions.HidePreview "graph"
-              ]
-            )
+                        newTracks =
+                            Dict.values newGraph.edges
+                                |> List.map .track
+                    in
+                    ( { options
+                        | graph = newGraph
+                        , tracks = newTracks
+                        , graphState = GraphAnalyzed options.graph preSnapGraph
+                      }
+                    , [ Actions.SetActiveTrack 0
+                      , Actions.HidePreview "graph"
+                      ]
+                    )
 
-        {-
-           RevertToTrack ->
-               ( { options
-                   | graph =
-                       case options.originalTrack of
-                           Just original ->
-                               trivialGraph original
+                _ ->
+                    ( options, [] )
 
-                           Nothing ->
-                               -- Oh dear!
-                               options.graph
-                   , analyzed = False
-                   , originalTrack = Nothing
-                   , editingTrack = 0
-                   , selectedTraversal = 0
-                 }
-               , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
-               )
-        -}
+        UndoAnalyze ->
+            case options.graphState of
+                GraphAnalyzed preAnalyze preSnap ->
+                    ( { options
+                        | graph = preAnalyze
+                        , graphState = GraphSnapped preSnap
+                      }
+                    , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
+                    )
+
+                _ ->
+                    ( options, [] )
+
         {-
            HighlightTraversal traversal ->
                ( { options | selectedTraversal = traversal }, [] )
@@ -472,7 +471,7 @@ viewGraph settings wrapper options graphOptions graph =
                         GraphSnapped _ ->
                             i18n "graphSnapped"
 
-                        GraphAnalyzed _ ->
+                        GraphAnalyzed _ _ ->
                             i18n "graphAnalyzed"
                     ]
                 ]
@@ -546,7 +545,7 @@ viewGraph settings wrapper options graphOptions graph =
                     , analyseButton
                     ]
 
-            GraphAnalyzed snappedGraph ->
+            GraphAnalyzed snappedGraph originalGraph ->
                 let
                     offset =
                         Length.inMeters graphOptions.centreLineOffset
@@ -562,7 +561,7 @@ viewGraph settings wrapper options graphOptions graph =
 
                     revertButton =
                         Input.button neatToolsBorder
-                            { onPress = Nothing --Just (wrapper RevertToTrack)
+                            { onPress = Just (wrapper UndoAnalyze)
                             , label = i18n "revert"
                             }
 
@@ -656,15 +655,16 @@ viewGraph settings wrapper options graphOptions graph =
                             }
                 in
                 column [ width fill, padding 4, spacing 10 ]
-                    [ row [ centerX, width fill, spacing 10 ]
+                    [ revertButton
+                    , row [ centerX, width fill, spacing 10 ]
                         [ traversalPrevious
                         , traversalNext
                         , clearRouteButton
-                        , revertButton
                         ]
 
                     --, traversalsTable
-                    , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
+                    , offsetSlider
+                    , minRadiusSlider
                     , finishButton
                     ]
         ]
