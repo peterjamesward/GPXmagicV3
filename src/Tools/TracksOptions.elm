@@ -22,7 +22,8 @@ type GraphState msg
     = GraphNoTracks
     | GraphOriginalTracks
     | GraphSnapped (Graph.Graph msg)
-    | GraphAnalyzed (Graph.Graph msg) (Graph.Graph msg)
+    | GraphWithNodes (Graph.Graph msg) (Graph.Graph msg)
+    | GraphWithEdges (Graph.Graph msg) (Graph.Graph msg) (Graph.Graph msg)
 
 
 type alias GraphOptions msg =
@@ -30,19 +31,9 @@ type alias GraphOptions msg =
     , centreLineOffset : Length.Length
     , minimumRadiusAtPlaces : Length.Length
 
-    --, boundingBox : BoundingBox3d Length.Meters LocalCoords
     --, selectedTraversal : Int
     , analyzed : Bool
-
-    --, originalTrack : Maybe (TrackLoaded msg)
-    --, editingTrack : Int
-    --, undoGraph : Maybe (Graph.Graph msg) -- our private undo stack (of one).
-    --, undoOriginalTrack : Maybe (TrackLoaded msg)
     , clustersForPreview : List Graph.Cluster
-
-    --, perpsForPreview : List Graph.InsertedPointOnLeaf
-    --, suggestedNewTree : Maybe PeteTree
-    --, suggestedNewGraph : Maybe (Graph.Graph msg)
     , graphUndos : List (Graph.Graph msg)
     , userRoute : List Graph.Traversal
     }

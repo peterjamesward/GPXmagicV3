@@ -234,7 +234,7 @@ update msg options =
                     ( { options
                         | graph = newGraph
                         , tracks = newTracks
-                        , graphState = GraphAnalyzed options.graph preSnapGraph
+                        , graphState = GraphWithNodes options.graph preSnapGraph
                       }
                     , [ Actions.SetActiveTrack 0
                       , Actions.HidePreview "graph"
@@ -246,7 +246,7 @@ update msg options =
 
         UndoAnalyze ->
             case options.graphState of
-                GraphAnalyzed preAnalyze preSnap ->
+                GraphWithNodes preAnalyze preSnap ->
                     ( { options
                         | graph = preAnalyze
                         , graphState = GraphSnapped preSnap
@@ -471,8 +471,11 @@ viewGraph settings wrapper options graphOptions graph =
                         GraphSnapped _ ->
                             i18n "graphSnapped"
 
-                        GraphAnalyzed _ _ ->
+                        GraphWithNodes _ _ ->
                             i18n "graphAnalyzed"
+
+                        GraphWithEdges _ _ _ ->
+                            i18n "graphConverted"
                     ]
                 ]
     in
@@ -545,7 +548,26 @@ viewGraph settings wrapper options graphOptions graph =
                     , analyseButton
                     ]
 
-            GraphAnalyzed snappedGraph originalGraph ->
+            GraphWithNodes snappedGraph originalGraph ->
+                let
+                    revertButton =
+                        Input.button neatToolsBorder
+                            { onPress = Just (wrapper UndoAnalyze)
+                            , label = i18n "undoAnalyze"
+                            }
+
+                    convertButton =
+                        Input.button neatToolsBorder
+                            { onPress = Nothing -- Just (wrapper UndoAnalyze)
+                            , label = i18n "canonicalise"
+                            }
+                in
+                column [ width fill, padding 4, spacing 10 ]
+                    [ revertButton
+                    , convertButton
+                    ]
+
+            GraphWithEdges _ _ _ ->
                 let
                     offset =
                         Length.inMeters graphOptions.centreLineOffset
@@ -553,16 +575,16 @@ viewGraph settings wrapper options graphOptions graph =
                     radius =
                         Length.inMeters graphOptions.minimumRadiusAtPlaces
 
-                    clearRouteButton =
-                        Input.button neatToolsBorder
-                            { onPress = Nothing --Just (wrapper ClearRoute)
-                            , label = i18n "clear"
-                            }
-
                     revertButton =
                         Input.button neatToolsBorder
                             { onPress = Just (wrapper UndoAnalyze)
                             , label = i18n "undoAnalyze"
+                            }
+
+                    clearRouteButton =
+                        Input.button neatToolsBorder
+                            { onPress = Nothing --Just (wrapper ClearRoute)
+                            , label = i18n "clear"
                             }
 
                     finishButton =
