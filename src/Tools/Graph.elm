@@ -668,9 +668,8 @@ identifyPointsToBeMerged tolerance graph =
                         findAllLeavesNearAllPointsOnTrack
                         (Dict.values graph.edges)
 
-                _ =
-                    Debug.log "pointsProjectedOntoNearbyLeaves" pointsProjectedOntoNearbyLeaves
-
+                --_ =
+                --    Debug.log "pointsProjectedOntoNearbyLeaves" pointsProjectedOntoNearbyLeaves
                 edgesWithProjectedPoints : Dict String (Edge msg)
                 edgesWithProjectedPoints =
                     let
@@ -707,9 +706,8 @@ identifyPointsToBeMerged tolerance graph =
                         |> Dict.values
                         |> List.concatMap nearbyPointsForTrack
 
-                _ =
-                    Debug.log "allNearbyPointPairs" allNearbyPointPairs
-
+                --_ =
+                --    Debug.log "allNearbyPointPairs" allNearbyPointPairs
                 clustersFromPointPairs : List PointNearbyPoint -> ( List Cluster, Dict String (Edge msg) )
                 clustersFromPointPairs pairs =
                     {-
@@ -939,12 +937,11 @@ identifyPointsToBeMerged tolerance graph =
                 insertPointsInLeaf : Int -> List ProjectedPointOnLeaf -> PeteTree -> PeteTree
                 insertPointsInLeaf leafNumber newPoints tree =
                     let
-                        _ =
-                            Debug.log "asGPX" asGPX
-
-                        _ =
-                            Debug.log "graph.referenceLonLat" graph.referenceLonLat
-
+                        --_ =
+                        --    Debug.log "asGPX" asGPX
+                        --
+                        --_ =
+                        --    Debug.log "graph.referenceLonLat" graph.referenceLonLat
                         asGPX =
                             List.map
                                 (.projectedPoint
@@ -1141,12 +1138,11 @@ identifyPointsToBeMerged tolerance graph =
                                     |> List.map (\new -> ( new.bTrack, new.bPointIndex, new.bPoint ))
                                     |> List.Extra.unique
 
-                            _ =
-                                Debug.log "CURRENT" <| List.map Tuple3.second cluster.pointsToAdjust
-
-                            _ =
-                                Debug.log "ADDING" newPointsInfo
-
+                            --_ =
+                            --    Debug.log "CURRENT" <| List.map Tuple3.second cluster.pointsToAdjust
+                            --
+                            --_ =
+                            --    Debug.log "ADDING" newPointsInfo
                             extendedCluster =
                                 { cluster
                                     | centroid = newCentroid
@@ -1197,9 +1193,8 @@ snapTrackToClusters clusters updatingTrack =
                                 updatingTrack.referenceLonLat
                                 (DomainModel.withoutTime cluster.centroid)
 
-                        _ =
-                            Debug.log "CENTROID" centroidGPX
-
+                        --_ =
+                        --    Debug.log "CENTROID" centroidGPX
                         pointsInThisTrack =
                             cluster.pointsToAdjust
                                 |> List.filter
