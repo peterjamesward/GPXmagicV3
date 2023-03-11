@@ -7,6 +7,8 @@
 
 BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
 
+BUG? Writing segments duplicates points at start and end. Should not.
+
 --- 
 
 # WIP

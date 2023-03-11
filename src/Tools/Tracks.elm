@@ -562,7 +562,7 @@ viewGraph settings wrapper options graphOptions graph =
                     revertButton =
                         Input.button neatToolsBorder
                             { onPress = Just (wrapper UndoAnalyze)
-                            , label = i18n "revert"
+                            , label = i18n "undoAnalyze"
                             }
 
                     finishButton =
