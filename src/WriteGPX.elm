@@ -2,10 +2,11 @@ module WriteGPX exposing (writeGPX)
 
 import Angle
 import Direction2d
-import DomainModel exposing (GPXSource)
+import DomainModel exposing (GPXSource, RoadSection)
 import ElmEscapeHtml
 import Iso8601
-import Length
+import Length exposing (Meters)
+import Quantity exposing (Quantity)
 import String.Interpolate
 import Tools.NamedSegmentOptions exposing (NamedSegment)
 import Tools.RGTOptions
@@ -111,22 +112,22 @@ writeTrackPoint gpx =
                 ]
 
 
+namePart segmentName =
+    case segmentName of
+        Just name ->
+            "<extensions><rgt:namedSegment>"
+                ++ ElmEscapeHtml.escape name
+                ++ "</rgt:namedSegment></extensions>"
+
+        Nothing ->
+            ""
+
+
 writeSegment : Maybe String -> List GPXSource -> String
 writeSegment segmentName trackPoints =
-    let
-        namePart =
-            case segmentName of
-                Just name ->
-                    "<extensions><rgt:namedSegment>"
-                        ++ ElmEscapeHtml.escape name
-                        ++ "</rgt:namedSegment></extensions>"
-
-                Nothing ->
-                    ""
-    in
     "\n<trkseg>\n"
         ++ String.concat (List.map writeTrackPoint trackPoints)
-        ++ namePart
+        ++ namePart segmentName
         ++ "</trkseg>\n"
 
 
@@ -146,8 +147,8 @@ writeGPX name options track =
                 seg :: moreSegs ->
                     let
                         ( segStartIndex, segEndIndex ) =
-                            ( DomainModel.indexFromDistance seg.startDistance track.trackTree
-                            , DomainModel.indexFromDistance seg.endDistance track.trackTree
+                            ( DomainModel.indexFromDistanceRoundedUp seg.startDistance track.trackTree
+                            , DomainModel.indexFromDistanceRoundedDown seg.endDistance track.trackTree
                             )
 
                         precedingPoints =
@@ -166,7 +167,7 @@ writeGPX name options track =
                     in
                     writeSegment Nothing precedingPoints
                         ++ writeSegment (Just seg.name) segmentPoints
-                        ++ writeSegments moreSegs segEndIndex
+                        ++ writeSegments moreSegs (segEndIndex + 1)
 
                 _ ->
                     writeSegment Nothing <|
