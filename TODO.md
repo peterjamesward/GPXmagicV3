@@ -7,22 +7,21 @@
 
 BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
 
-BUG? Writing segments duplicates points at start and end. Should not.
-
 --- 
 
 # WIP
 
 ## Promote Graph
 
-1. Another button to canonicalize (replace tracks with edges).
-2. ~~Undo analyze.~~
-3. Undo canonocalize.
-4. Route making, largely unchanged editing of traversals.
-5. New track with offset, creates a new track from route.
-6. Undo for create new track from route.
-7. Should there be a separate Load Another Track button in the tool, with main button acting as old?
-8. Any change to track collection must invalidate nodes.
+1. Snap is finding nearby points on same track. Stop it.
+2. Another button to canonicalize (replace tracks with edges).
+3. ~~Undo analyze.~~
+4. Undo canonocalize.
+5. Route making, largely unchanged editing of traversals.
+6. New track with offset, creates a new track from route.
+7. Undo for create new track from route.
+8. Should there be a separate Load Another Track button in the tool, with main button acting as old?
+9. Any change to track collection must invalidate nodes.
 
 ---
 

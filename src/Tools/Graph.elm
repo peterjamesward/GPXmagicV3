@@ -976,8 +976,16 @@ identifyPointsToBeMerged tolerance graph =
                         searchLocus2d =
                             Point3d.projectInto SketchPlane3d.xy searchPoint.space
 
+                        linearTrackDistance i =
+                            case Dict.get searchTrack graph.edges of
+                                Just searchEdge ->
+                                    DomainModel.distanceFromIndex i searchEdge.track.trackTree
+
+                                Nothing ->
+                                    -- !!
+                                    Quantity.zero
+
                         resultsUnfiltered =
-                            --TODO: Pushing query into search would be efficient, once it's right.
                             SpatialIndex.query globalPointIndex (pointWithTolerance searchPoint.space)
                                 |> List.map .content
 
@@ -990,14 +998,14 @@ identifyPointsToBeMerged tolerance graph =
 
                         isNotSameOrAdjacent : PointIndexEntry -> Bool
                         isNotSameOrAdjacent { trackName, pointIndex, point } =
+                            --trackNamesDifferent || linearSeparationGreaterThanSpatial
                             trackName
                                 /= searchTrack
-                                || pointIndex
-                                < searchIndex
-                                - 1
-                                || pointIndex
-                                > searchIndex
-                                + 1
+                                || (linearTrackDistance searchIndex
+                                        |> Quantity.minus (linearTrackDistance pointIndex)
+                                        |> Quantity.abs
+                                        |> Quantity.greaterThan tolerance
+                                   )
 
                         results =
                             resultsUnfiltered
