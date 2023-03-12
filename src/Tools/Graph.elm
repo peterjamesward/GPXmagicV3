@@ -1408,6 +1408,16 @@ canonicalise graph =
        Use midpoint as via (but that may not be unique).
     -}
     let
+        summaryPutativeEdge pe =
+            { start = pe.startNode
+            , finish = pe.endNode
+            }
+
+        summaryEdge key e =
+            { startNode = e.lowNode
+            , finishNode = e.highNode
+            }
+
         allEdgeInstances : PutativeEdgeFold
         allEdgeInstances =
             {-
@@ -1420,9 +1430,9 @@ canonicalise graph =
                     walkEdgeSplittingAtNodes
                     { currentEdge = Nothing, foundEdges = [] }
 
-        _ =
-            Debug.log "allEdgeInstances" allEdgeInstances
-
+        --_ =
+        --    Debug.log "allEdgeInstances"
+        --        (List.map summaryPutativeEdge allEdgeInstances.foundEdges)
         edgesWithConsistentEndNodes : List PutativeEdge
         edgesWithConsistentEndNodes =
             -- Just make sure that the start nodekey <= end nodekey, flippin edge if needed.
@@ -1430,27 +1440,29 @@ canonicalise graph =
                 flipAsNeeded : PutativeEdge -> PutativeEdge
                 flipAsNeeded edge =
                     if edge.startNode <= edge.endNode then
-                        edge
+                        -- The points were cons'ed in reverse so let us now remedy that.
+                        { edge | pointsIncludingNodes = List.reverse edge.pointsIncludingNodes }
 
                     else
-                        { startNode = edge.endNode
-                        , endNode = edge.startNode
-                        , pointsIncludingNodes = List.reverse edge.pointsIncludingNodes
+                        -- Leave the points in reverse order.
+                        { edge
+                            | startNode = edge.endNode
+                            , endNode = edge.startNode
                         }
             in
             List.map flipAsNeeded allEdgeInstances.foundEdges
 
         _ =
-            Debug.log "edgesWithConsistentEndNodes" edgesWithConsistentEndNodes
-
-        _ =
-            Debug.log "edges" edges
+            Debug.log "edges" (Dict.map summaryEdge edges)
 
         edges : Dict String (Edge msg)
         edges =
             let
-                putEdgeInDictionary : PutativeEdge -> Dict String (Edge msg) -> Dict String (Edge msg)
-                putEdgeInDictionary putative dict =
+                putEdgeInDeDupeDictionary :
+                    PutativeEdge
+                    -> Dict ( String, String, String ) (Edge msg)
+                    -> Dict ( String, String, String ) (Edge msg)
+                putEdgeInDeDupeDictionary putative dict =
                     let
                         via =
                             List.Extra.getAt
@@ -1459,15 +1471,11 @@ canonicalise graph =
                                 |> Maybe.withDefault
                                     (DomainModel.withoutTime Point3d.origin)
 
-                        newKey =
-                            putative.startNode ++ nodeKey via ++ putative.endNode
+                        trackName =
+                            "Road " ++ String.fromInt (Dict.size dict + 1)
 
                         trackFromEarthPoints : List EarthPoint -> Maybe (TrackLoaded msg)
                         trackFromEarthPoints points =
-                            let
-                                trackName =
-                                    "Edge " ++ String.fromInt (Dict.size dict)
-                            in
                             points
                                 |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
                                 |> TrackLoaded.trackFromPoints trackName
@@ -1475,7 +1483,7 @@ canonicalise graph =
                     case trackFromEarthPoints putative.pointsIncludingNodes of
                         Just newTrack ->
                             Dict.insert
-                                newKey
+                                ( putative.startNode, putative.endNode, nodeKey via )
                                 { lowNode = putative.startNode
                                 , highNode = putative.endNode
                                 , via = nodeKey via
@@ -1486,8 +1494,21 @@ canonicalise graph =
 
                         Nothing ->
                             dict
+
+                correctEdgesAfterDeDupe :
+                    ( String, String, String )
+                    -> Edge msg
+                    -> Dict String (Edge msg)
+                    -> Dict String (Edge msg)
+                correctEdgesAfterDeDupe tempKey edge outputs =
+                    Dict.insert
+                        edge.track.trackName
+                        edge
+                        outputs
             in
-            List.foldl putEdgeInDictionary Dict.empty edgesWithConsistentEndNodes
+            edgesWithConsistentEndNodes
+                |> List.foldl putEdgeInDeDupeDictionary Dict.empty
+                |> Dict.foldl correctEdgesAfterDeDupe Dict.empty
 
         {-
            Essential algorithm above this line, support functions below.
@@ -1517,34 +1538,34 @@ canonicalise graph =
         lookAtPoint point foldState =
             let
                 pointIsNode =
-                    Dict.member (pointAsComparable point) nodeXyLookup
+                    Dict.get (pointAsComparable point) nodeXyLookup
 
-                startNewEdgeWith pt =
-                    { startNode = nodeKey pt
+                startNewEdgeWith pt node =
+                    { startNode = node
                     , endNode = ""
                     , pointsIncludingNodes = [ pt ]
                     }
             in
             case ( pointIsNode, foldState.currentEdge ) of
-                ( True, Nothing ) ->
+                ( Just node, Nothing ) ->
                     -- Start situation.
-                    { foldState | currentEdge = Just <| startNewEdgeWith point }
+                    { foldState | currentEdge = Just <| startNewEdgeWith point node }
 
-                ( True, Just currentEdge ) ->
+                ( Just node, Just currentEdge ) ->
                     -- End this edge and start a new one.
                     let
                         completedEdge =
                             { currentEdge
-                                | endNode = nodeKey point
+                                | endNode = node
                                 , pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
                             }
                     in
                     { foldState
-                        | currentEdge = Just <| startNewEdgeWith point
+                        | currentEdge = Just <| startNewEdgeWith point node
                         , foundEdges = completedEdge :: foldState.foundEdges
                     }
 
-                ( False, Just currentEdge ) ->
+                ( Nothing, Just currentEdge ) ->
                     -- Add non-node point to current
                     let
                         newCurrent =
@@ -1554,7 +1575,7 @@ canonicalise graph =
                     in
                     { foldState | currentEdge = Just newCurrent }
 
-                ( False, Nothing ) ->
+                ( Nothing, Nothing ) ->
                     -- Something went wrong!
                     foldState
     in

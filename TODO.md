@@ -13,6 +13,10 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
+> Figuring out why Underground graph shows all roads touching Place 0.
+> Edges looks to be OK, at least superficially.
+> Woah. Athens breaks into 10 tracks. That's not good.
+
 1. Another button to canonicalize (replace tracks with edges).
 2. Undo canonocalize.
 3. Route making, largely unchanged editing of traversals.
