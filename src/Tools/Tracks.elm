@@ -267,6 +267,7 @@ update msg options =
                     ( { options
                         | graph = preCanon
                         , graphState = GraphWithNodes preAnalyze preSnap
+                        , tracks = List.map .track <| Dict.values preCanon.edges
                       }
                     , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
                     )
