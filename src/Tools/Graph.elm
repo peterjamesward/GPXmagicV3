@@ -1402,10 +1402,10 @@ type alias PutativeEdgeFold =
 canonicalise : Graph msg -> Graph msg
 canonicalise graph =
     {-
-       Edge finding is a second walk along all the tracks, now we know where all the nodes are.
+       Edge finding is a walk along all the tracks, now we know where all the nodes are.
        Add node-node intervals to edge dict using (lowNode, highNode, via) as key where the node
        names in string sort order, via is (Float, Float).
-       Use midpoint as via (but that may not be unique).
+       Use midpoint as via (even though may not be unique).
     -}
     let
         summaryPutativeEdge pe =
@@ -1474,11 +1474,16 @@ canonicalise graph =
                         trackName =
                             "Road " ++ String.fromInt (Dict.size dict + 1)
 
+                        _ =
+                            Debug.log trackName graph.referenceLonLat
+
                         trackFromEarthPoints : List EarthPoint -> Maybe (TrackLoaded msg)
                         trackFromEarthPoints points =
                             points
+                                --|> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
                                 |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
                                 |> TrackLoaded.trackFromPoints trackName
+                                |> Maybe.map (TrackLoaded.changeReferencePoint graph.referenceLonLat)
                     in
                     case trackFromEarthPoints putative.pointsIncludingNodes of
                         Just newTrack ->

@@ -13,16 +13,12 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
-> Figuring out why Underground graph shows all roads touching Place 0.
-> Edges looks to be OK, at least superficially.
-> Woah. Athens breaks into 10 tracks. That's not good.
-
-1. Another button to canonicalize (replace tracks with edges).
-2. Undo canonocalize.
-3. Route making, largely unchanged editing of traversals.
+2. Undo canonicalize.
+3. Route making, (largely unchanged) editing of traversals.
 4. New track with offset, creates a new track from route.
 5. Undo for create new track from route.
 6. Should there be a separate Load Another Track button in the tool, with main button acting as old?
+> (Could change according to whether Tracks tool is open or not.)
 7. Any change to track collection must invalidate nodes.
 
 ---
@@ -37,6 +33,10 @@ Order alphabetically. Ability to jump into tool directly.
 
 I hope this will open the door to a much cleaner control flow, perhaps deprecating
 actions (yes, after all that) and using the track/newTrack diff to drive command generation.
+
+## Scientific notation in GPX
+
+If not too hard, support for really, really small longitude and latitude.
 
 ## Camera
 
