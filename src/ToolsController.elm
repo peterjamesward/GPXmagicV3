@@ -14,6 +14,7 @@ module ToolsController exposing
     , defaultOptions
     , encodeColour
     , flythroughTick
+    , isToolOpen
     , refreshOpenTools
     , restoreDockSettings
     , restoreMeasure

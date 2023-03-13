@@ -947,7 +947,22 @@ adoptTrackInModel track model =
             toolOptions.tracksOptions
 
         newTracksOptions =
-            Tools.Tracks.addTrack track tracksOptions
+            --WARN: Maybe unwise.
+            if ToolsController.isToolOpen ToolsController.ToolTracks toolOptions.tools then
+                -- Subsequent track only adds if tool is open
+                Tools.Tracks.addTrack track tracksOptions
+
+            else if model.activeTrack == Nothing then
+                -- First track always gets added.
+                Tools.Tracks.addTrack track tracksOptions
+
+            else
+                -- New track replaces current
+                let
+                    ( _, unloadedOptions ) =
+                        Tools.Tracks.unloadActiveTrack tracksOptions
+                in
+                Tools.Tracks.addTrack track unloadedOptions
 
         newToolOptions =
             { toolOptions

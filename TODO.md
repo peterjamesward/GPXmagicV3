@@ -15,11 +15,10 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 BUG: Lat and lon in Informatiom tool not reflecting Orange.
 
-3. Route making, (largely unchanged) editing of traversals.
-4. New track with offset, creates a new track from route.
-5. Undo for create new track from route.
-6. Should there be a separate Load Another Track button in the tool, with main button acting as old?
-> (Could change according to whether Tracks tool is open or not.)
+3. Button to collapse/expand Roads list.
+4. Route making, (largely unchanged) editing of traversals.
+5. New track with offset, creates a new track from route.
+6. Undo for create new track from route.
 7. Any change to track collection must invalidate nodes.
 8. Remove all logging.
 
