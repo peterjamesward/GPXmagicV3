@@ -15,8 +15,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 BUG: Lat and lon in Informatiom tool not reflecting Orange.
 
-1. mAdd a "skip snapping" button.
-2. Undo canonicalize.
 3. Route making, (largely unchanged) editing of traversals.
 4. New track with offset, creates a new track from route.
 5. Undo for create new track from route.

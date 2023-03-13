@@ -73,6 +73,7 @@ type Msg
     | SnapToNearby
     | UndoSnap
     | Canonicalise
+    | UndoCanonicalise
 
 
 defaultGraphOptions : Options.GraphOptions msg
@@ -251,6 +252,19 @@ update msg options =
                     ( { options
                         | graph = preAnalyze
                         , graphState = GraphSnapped preSnap
+                      }
+                    , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
+                    )
+
+                _ ->
+                    ( options, [] )
+
+        UndoCanonicalise ->
+            case options.graphState of
+                GraphWithEdges preCanon preAnalyze preSnap ->
+                    ( { options
+                        | graph = preCanon
+                        , graphState = GraphWithNodes preAnalyze preSnap
                       }
                     , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
                     )
@@ -589,7 +603,7 @@ viewGraph settings wrapper options graphOptions graph =
                     , convertButton
                     ]
 
-            GraphWithEdges _ _ _ ->
+            GraphWithEdges beforeEdges beforeNodes beforeSnap ->
                 let
                     offset =
                         Length.inMeters graphOptions.centreLineOffset
@@ -599,8 +613,8 @@ viewGraph settings wrapper options graphOptions graph =
 
                     revertButton =
                         Input.button neatToolsBorder
-                            { onPress = Just (wrapper UndoAnalyze)
-                            , label = i18n "undoAnalyze"
+                            { onPress = Just (wrapper UndoCanonicalise)
+                            , label = i18n "undoCanonicalise"
                             }
 
                     clearRouteButton =
