@@ -1,40 +1,57 @@
 module Tools.TracksOptions exposing (..)
 
 import DomainModel exposing (GPXSource, PeteTree)
-import Length
-import Tools.GraphOptions as Graph
+import Length exposing (Meters)
+import Quantity exposing (Quantity)
+import Tools.GraphOptions exposing (Cluster, Graph)
 import TrackLoaded exposing (TrackLoaded)
 
 
 type alias Options msg =
-    --TODO: This will develop, taking track stuff from Main, and perhaps subsume Graph.
     { nextTrackNumber : Int
     , tracks : List (TrackLoaded msg)
     , activeTrackIndex : Maybe Int
     , commonReferenceGPX : Maybe GPXSource -- from where we derive (X,Y) by map projection.
-    , graph : Graph.Graph msg
-    , graphOptions : GraphOptions msg
+    , graph : Graph msg
     , graphState : GraphState msg
     , roadListCollapsed : Bool
+    , selectedTraversal : Int
+    , userRoute : List Traversal
+    , matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
+    , centreLineOffset : Length.Length
+    , minimumRadiusAtPlaces : Length.Length
+    , clustersForPreview : List Cluster
     }
 
 
 type GraphState msg
     = GraphNoTracks
     | GraphOriginalTracks
-    | GraphSnapped (Graph.Graph msg)
-    | GraphWithNodes (Graph.Graph msg) (Graph.Graph msg)
-    | GraphWithEdges (Graph.Graph msg) (Graph.Graph msg) (Graph.Graph msg)
+    | GraphSnapped (Graph msg)
+    | GraphWithNodes (Graph msg) (Graph msg)
+    | GraphWithEdges (Graph msg) (Graph msg) (Graph msg)
 
 
-type alias GraphOptions msg =
-    { matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
-    , centreLineOffset : Length.Length
-    , minimumRadiusAtPlaces : Length.Length
+type ClickDetect
+    = ClickNode Int
+    | ClickEdge Int
+    | ClickNone
 
-    --, selectedTraversal : Int
-    , analyzed : Bool
-    , clustersForPreview : List Graph.Cluster
-    , graphUndos : List (Graph.Graph msg)
-    , userRoute : List Graph.Traversal
+
+type alias Traversal =
+    { edge : String
+    , direction : Direction
+    }
+
+
+type Direction
+    = Natural -- from low (sort order) node to high
+    | Reverse -- from high (sort order) to low
+
+
+type alias TraversalDisplay =
+    { startPlace : Int
+    , road : Int
+    , endPlace : Int
+    , length : Quantity Float Meters
     }

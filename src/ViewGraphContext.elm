@@ -5,7 +5,7 @@ import DomainModel exposing (EarthPoint)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Point2d exposing (Point2d)
-import Tools.GraphOptions exposing (ClickDetect)
+import Tools.TracksOptions exposing (ClickDetect)
 
 
 type EdgeMode

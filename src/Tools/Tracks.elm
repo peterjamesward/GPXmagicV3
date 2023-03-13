@@ -42,9 +42,9 @@ import Scene3d.Material as Material
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Tools.Graph as Graph
-import Tools.GraphOptions as Graph exposing (Cluster, Direction(..))
+import Tools.GraphOptions as Graph exposing (Cluster, Graph)
 import Tools.I18N as I18N
-import Tools.TracksOptions as Options exposing (GraphOptions, GraphState(..), Options)
+import Tools.TracksOptions as Options exposing (GraphState(..), Options, Traversal)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon, useIconWithSize)
@@ -62,7 +62,7 @@ type Msg
       --| CentreLineOffset (Quantity Float Meters)
       --| MinimumRadius (Quantity Float Meters)
       --| ConvertFromGraph
-      --| HighlightTraversal Int
+    | HighlightTraversal Int
       --| RemoveLastTraversal
     | DisplayInfo String String
       --| FlipDirection Int
@@ -77,30 +77,6 @@ type Msg
     | ToggleRoadList
 
 
-defaultGraphOptions : Options.GraphOptions msg
-defaultGraphOptions =
-    { matchingTolerance = Length.meters 1.5
-    , centreLineOffset = Length.meters 0.0
-    , minimumRadiusAtPlaces = Length.meters 3.0
-
-    --, boundingBox = BoundingBox3d.singleton Point3d.origin
-    --, selectedTraversal = 0
-    , analyzed = False
-
-    --, originalTrack = Nothing
-    --, editingTrack = 0
-    --, undoGraph = Nothing
-    --, undoOriginalTrack = Nothing
-    , clustersForPreview = []
-
-    --, perpsForPreview = []
-    --, suggestedNewTree = Nothing
-    --, suggestedNewGraph = Nothing
-    , graphUndos = []
-    , userRoute = []
-    }
-
-
 defaultOptions : Options msg
 defaultOptions =
     { nextTrackNumber = 1
@@ -108,9 +84,14 @@ defaultOptions =
     , activeTrackIndex = Nothing
     , commonReferenceGPX = Nothing
     , graph = emptyGraph
-    , graphOptions = defaultGraphOptions
     , graphState = GraphNoTracks
     , roadListCollapsed = False
+    , matchingTolerance = Length.meters 1.5
+    , centreLineOffset = Length.meters 0.0
+    , minimumRadiusAtPlaces = Length.meters 3.0
+    , selectedTraversal = 0
+    , clustersForPreview = []
+    , userRoute = []
     }
 
 
@@ -135,7 +116,7 @@ toolStateChange opened options =
     if opened then
         case options.graphState of
             GraphOriginalTracks ->
-                update (SetTolerance options.graphOptions.matchingTolerance) options
+                update (SetTolerance options.matchingTolerance) options
 
             _ ->
                 ( options, [] )
@@ -202,7 +183,7 @@ update msg options =
             let
                 newGraph =
                     Graph.snapToClusters
-                        options.graphOptions.matchingTolerance
+                        options.matchingTolerance
                         options.graph
 
                 newTracks =
@@ -275,10 +256,9 @@ update msg options =
                 _ ->
                     ( options, [] )
 
-        {-
-           HighlightTraversal traversal ->
-               ( { options | selectedTraversal = traversal }, [] )
-        -}
+        HighlightTraversal traversal ->
+            ( { options | selectedTraversal = traversal }, [] )
+
         {-
            RemoveLastTraversal ->
                let
@@ -506,7 +486,7 @@ view settings wrapper options =
             [ listOfTracks
             , collapseExpandButton
             , unloadButton
-            , viewGraph settings wrapper options options.graphOptions options.graph
+            , viewGraph settings wrapper options options.graph
             ]
 
 
@@ -514,10 +494,9 @@ viewGraph :
     SystemSettings
     -> (Msg -> msg)
     -> Options msg
-    -> GraphOptions msg
     -> Graph.Graph msg
     -> Element msg
-viewGraph settings wrapper options graphOptions graph =
+viewGraph settings wrapper options graph =
     let
         i18n =
             I18N.text settings.location toolId
@@ -578,11 +557,11 @@ viewGraph settings wrapper options graphOptions graph =
                                         text <|
                                             String.Interpolate.interpolate
                                                 (I18N.localisedString settings.location toolId "isTolerance")
-                                                [ showShortMeasure settings.imperial graphOptions.matchingTolerance ]
+                                                [ showShortMeasure settings.imperial options.matchingTolerance ]
                                 , min = 0.5
                                 , max = 5.0
                                 , step = Just 0.1
-                                , value = Length.inMeters graphOptions.matchingTolerance
+                                , value = Length.inMeters options.matchingTolerance
                                 , thumb = Input.defaultThumb
                                 }
                             ]
@@ -639,10 +618,10 @@ viewGraph settings wrapper options graphOptions graph =
             GraphWithEdges beforeEdges beforeNodes beforeSnap ->
                 let
                     offset =
-                        Length.inMeters graphOptions.centreLineOffset
+                        Length.inMeters options.centreLineOffset
 
                     radius =
-                        Length.inMeters graphOptions.minimumRadiusAtPlaces
+                        Length.inMeters options.minimumRadiusAtPlaces
 
                     revertButton =
                         Input.button neatToolsBorder
@@ -657,7 +636,7 @@ viewGraph settings wrapper options graphOptions graph =
                             }
 
                     finishButton =
-                        if not <| List.isEmpty graphOptions.userRoute then
+                        if not <| List.isEmpty options.userRoute then
                             row [ spacing 3 ]
                                 [ infoButton (wrapper <| DisplayInfo toolId "render")
                                 , Input.button
@@ -725,23 +704,25 @@ viewGraph settings wrapper options graphOptions graph =
 
                     traversalNext =
                         Input.button neatToolsBorder
-                            { onPress = Nothing
-
-                            --Just <|
-                            --    wrapper <|
-                            --        HighlightTraversal <|
-                            --            min (List.length traversals - 1) (options.selectedTraversal + 1)
+                            { onPress =
+                                Just <|
+                                    wrapper <|
+                                        HighlightTraversal <|
+                                            min
+                                                (List.length options.userRoute - 1)
+                                                (options.selectedTraversal + 1)
                             , label = useIconWithSize 16 FeatherIcons.chevronRight
                             }
 
                     traversalPrevious =
                         Input.button neatToolsBorder
-                            { onPress = Nothing
-
-                            --Just <|
-                            --    wrapper <|
-                            --        HighlightTraversal <|
-                            --            max 0 (options.selectedTraversal - 1)
+                            { onPress =
+                                Just <|
+                                    wrapper <|
+                                        HighlightTraversal <|
+                                            max
+                                                0
+                                                (options.selectedTraversal - 1)
                             , label = useIconWithSize 16 FeatherIcons.chevronLeft
                             }
                 in
@@ -949,24 +930,18 @@ lookForClusters options tolerance =
 
         --Return only the clusters. Wait for button click.
         --Graph.identifyPointsToBeMerged tolerance options.graph
-        graphOptions =
-            options.graphOptions
-
-        newGraphOptions =
-            { graphOptions
+        newOptions =
+            { options
                 | matchingTolerance = tolerance
                 , clustersForPreview = clusters
             }
-
-        newOptions =
-            { options | graphOptions = newGraphOptions }
     in
     ( newOptions
-    , [ makePreview newGraphOptions ]
+    , [ makePreview newOptions ]
     )
 
 
-makePreview : GraphOptions msg -> Actions.ToolAction msg
+makePreview : Options msg -> Actions.ToolAction msg
 makePreview graphOptions =
     Actions.ShowPreview
         { tag = "graph"
@@ -990,3 +965,87 @@ showNewPoints clusters =
 getKeyPlaces : Options msg -> List DomainModel.EarthPoint
 getKeyPlaces options =
     Dict.values options.graph.nodes
+
+
+traversalCanBeAdded : String -> List Traversal -> Graph.Graph msg -> Bool
+traversalCanBeAdded newEdge userRoute graph =
+    False
+
+
+
+{-
+   -- Edge can be added if either node is same as final node of last traversal,
+   -- or if there are no traversals.
+   case
+       ( List.Extra.last userRoute
+       , Dict.get newEdge graph.edges
+       )
+   of
+       ( Just lastTraversal, Just clickedEdge ) ->
+           case Dict.get lastTraversal.edge graph.edges of
+               Just currentLastEdge ->
+                   let
+                       finalNode =
+                           if lastTraversal.direction == Natural then
+                               currentLastEdge.highNode
+
+                           else
+                               currentLastEdge.lowNode
+                   in
+                   finalNode == clickedEdge.lowNode || finalNode == clickedEdge.highNode
+
+               Nothing ->
+                   False
+
+       ( Nothing, Just _ ) ->
+           -- Any edge can be the first edge used.
+           True
+
+       _ ->
+           False
+-}
+{-
+
+   edgeCanBeDeleted : Int -> List Traversal -> Graph msg -> Bool
+   edgeCanBeDeleted edge userRoute graph =
+       -- Edge can be deleted if it's not the only edge and it's not used in the route.
+       Dict.size graph.edges
+           > 1
+           && (not <|
+                   List.any (\traversal -> traversal.edge == edge) userRoute
+              )
+
+
+   loopCanBeAdded : Int -> List Traversal -> Graph msg -> Bool
+   loopCanBeAdded node userRoute graph =
+       False
+-}
+{-
+   -- Loop can be added if node is same as final node of last traversal.
+   case
+       List.Extra.last userRoute
+   of
+       Just traversal ->
+           case Dict.get traversal.edge graph.edges of
+               Just finalEdge ->
+                   let
+                       finalNode =
+                           if traversal.direction == Natural then
+                               finalEdge.highNode
+
+                           else
+                               finalEdge.lowNode
+                   in
+                   finalNode == node
+
+               Nothing ->
+                   False
+
+       Nothing ->
+           False
+-}
+
+
+deleteEdgeTraversal : Int -> List Traversal -> Graph msg -> Graph msg
+deleteEdgeTraversal edge userRoute graph =
+    graph

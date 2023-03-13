@@ -790,7 +790,7 @@ viewPanes :
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes settings msgWrapper mTrack graphOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes settings msgWrapper mTrack tracksOptions displayOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -848,8 +848,7 @@ viewPanes settings msgWrapper mTrack graphOptions displayOptions ( w, h ) option
                                 settings
                                 context
                                 ( paneWidth, paneHeight )
-                                graphOptions.graphOptions
-                                graphOptions.graph
+                                tracksOptions
                                 (msgWrapper << GraphViewMessage pane.paneId)
 
                         _ ->

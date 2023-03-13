@@ -7,12 +7,6 @@ module Tools.Graph exposing
     , addEdgeFromTrack
     , analyzeTracksAsGraph
     , canonicalise
-    ,  deleteEdgeTraversal
-       --,  edgeCanBeDeleted
-       --, enterRoutePlanningMode
-       --, getTrack
-       --, loopCanBeAdded
-
     ,  identifyPointsToBeMerged
        --, makeNewRoute
 
@@ -20,7 +14,6 @@ module Tools.Graph exposing
     ,  snapToClusters
        --, undoWalkRoute
 
-    , traversalCanBeAdded
     , updatedEdge
     )
 
@@ -98,7 +91,6 @@ addEdgeFromTrack track graph =
             , highNode = endKey
             , via = nodeKey midPoint
             , track = track
-            , originalDirection = Natural
             }
 
         edgeDict =
@@ -122,90 +114,6 @@ removeEdge : TrackLoaded msg -> Graph msg -> Graph msg
 removeEdge track graph =
     -- User has removed a track, so the graph must point to the newest version.
     { graph | edges = Dict.remove track.trackName graph.edges }
-
-
-traversalCanBeAdded : String -> List Traversal -> Graph msg -> Bool
-traversalCanBeAdded newEdge userRoute graph =
-    False
-
-
-
-{-
-   -- Edge can be added if either node is same as final node of last traversal,
-   -- or if there are no traversals.
-   case
-       ( List.Extra.last userRoute
-       , Dict.get newEdge graph.edges
-       )
-   of
-       ( Just lastTraversal, Just clickedEdge ) ->
-           case Dict.get lastTraversal.edge graph.edges of
-               Just currentLastEdge ->
-                   let
-                       finalNode =
-                           if lastTraversal.direction == Natural then
-                               currentLastEdge.highNode
-
-                           else
-                               currentLastEdge.lowNode
-                   in
-                   finalNode == clickedEdge.lowNode || finalNode == clickedEdge.highNode
-
-               Nothing ->
-                   False
-
-       ( Nothing, Just _ ) ->
-           -- Any edge can be the first edge used.
-           True
-
-       _ ->
-           False
--}
-{-
-
-   edgeCanBeDeleted : Int -> List Traversal -> Graph msg -> Bool
-   edgeCanBeDeleted edge userRoute graph =
-       -- Edge can be deleted if it's not the only edge and it's not used in the route.
-       Dict.size graph.edges
-           > 1
-           && (not <|
-                   List.any (\traversal -> traversal.edge == edge) userRoute
-              )
-
-
-   loopCanBeAdded : Int -> List Traversal -> Graph msg -> Bool
-   loopCanBeAdded node userRoute graph =
-       False
--}
-{-
-   -- Loop can be added if node is same as final node of last traversal.
-   case
-       List.Extra.last userRoute
-   of
-       Just traversal ->
-           case Dict.get traversal.edge graph.edges of
-               Just finalEdge ->
-                   let
-                       finalNode =
-                           if traversal.direction == Natural then
-                               finalEdge.highNode
-
-                           else
-                               finalEdge.lowNode
-                   in
-                   finalNode == node
-
-               Nothing ->
-                   False
-
-       Nothing ->
-           False
--}
-
-
-deleteEdgeTraversal : Int -> List Traversal -> Graph msg -> Graph msg
-deleteEdgeTraversal edge userRoute graph =
-    graph
 
 
 
@@ -1240,7 +1148,6 @@ type alias EdgeFinder msg =
     , currentEdge : List ( EarthPoint, GPXSource )
     , edgeResolverDict : Dict ( String, String, String ) ( String, PeteTree )
     , edgesDict : Dict String (Edge msg)
-    , traversals : List Traversal
     }
 
 
@@ -1507,7 +1414,6 @@ canonicalise graph =
                                 , highNode = putative.endNode
                                 , via = via
                                 , track = track
-                                , originalDirection = Natural -- not sure this is relevant.
                                 }
                                 outputs
 

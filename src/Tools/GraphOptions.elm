@@ -1,14 +1,10 @@
 module Tools.GraphOptions exposing
-    ( ClickDetect(..)
-    , Cluster
-    , Direction(..)
+    ( Cluster
     , Edge
     , Graph
     , PointNearbyLeaf
     , PointNearbyPoint
     , ProjectedPointOnLeaf
-    , Traversal
-    , TraversalDisplay
     )
 
 --This module now about the graph structure, not the UI.
@@ -25,11 +21,6 @@ import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
 
 
-type Direction
-    = Natural -- from low (sort order) node to high
-    | Reverse -- from high (sort order) to low
-
-
 type alias Edge msg =
     -- (low node index, high node index, point 1 XY)
     --( ( Int, Int, XY ), TrackLoaded msg )
@@ -40,7 +31,6 @@ type alias Edge msg =
     , highNode : String
     , via : String
     , track : TrackLoaded msg
-    , originalDirection : Direction
     }
 
 
@@ -61,26 +51,6 @@ emptyGraph =
         , altitude = Quantity.zero
         , timestamp = Nothing
         }
-    }
-
-
-type ClickDetect
-    = ClickNode Int
-    | ClickEdge Int
-    | ClickNone
-
-
-type alias Traversal =
-    { edge : String
-    , direction : Direction
-    }
-
-
-type alias TraversalDisplay =
-    { startPlace : Int
-    , road : Int
-    , endPlace : Int
-    , length : Quantity Float Meters
     }
 
 

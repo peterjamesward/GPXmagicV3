@@ -11,7 +11,6 @@ module ViewGraph exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import Arc2d
 import Axis2d
 import Camera3d exposing (Camera3d)
 import Circle2d
@@ -35,9 +34,7 @@ import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
-import Json.Encode as E
 import Length exposing (Meters, meters)
-import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
 import Plane3d
@@ -53,10 +50,8 @@ import Svg exposing (Svg)
 import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
-import Tools.Graph
-import Tools.GraphOptions as Graph exposing (ClickDetect(..), Direction(..), Edge, Graph)
-import Tools.I18NOptions as I18NOptions
-import Tools.TracksOptions as Tracks
+import Tools.GraphOptions as Graph exposing (Edge, Graph)
+import Tools.TracksOptions exposing (ClickDetect(..))
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
@@ -164,7 +159,7 @@ zoomButtons settings msgWrapper context =
 popup :
     (Msg -> msg)
     -> GraphContext
-    -> Tracks.GraphOptions msg
+    -> Tools.TracksOptions.Options msg
     -> Graph.Graph msg
     -> Element msg
 popup msgWrapper context options graph =
@@ -267,12 +262,14 @@ view :
     SystemSettings
     -> GraphContext
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Tracks.GraphOptions msg
-    -> Graph.Graph msg
+    -> Tools.TracksOptions.Options msg
     -> (Msg -> msg)
     -> Element msg
-view settings context ( width, height ) options graph msgWrapper =
+view settings context ( width, height ) options msgWrapper =
     let
+        graph =
+            options.graph
+
         camera =
             deriveCamera context
 
