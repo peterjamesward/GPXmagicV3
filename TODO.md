@@ -14,16 +14,14 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 ## Promote Graph
 
 BUG: Lat and lon in Informatiom tool not reflecting Orange.
-1. See `round and round`. Missing edges.
-> Is partly because snapped points are duplicated in track.
-> This confuses the edge finder, though it shouldn't.
-2. Add a "skip snapping" button.
-3. New tracks need new leaf indexes.
-4. Undo canonicalize.
-5. Route making, (largely unchanged) editing of traversals.
-6. New track with offset, creates a new track from route.
-7. Undo for create new track from route.
-8. Should there be a separate Load Another Track button in the tool, with main button acting as old?
+
+3. Add a "skip snapping" button.
+4. New tracks need new leaf indexes.
+5. Undo canonicalize.
+6. Route making, (largely unchanged) editing of traversals.
+7. New track with offset, creates a new track from route.
+8. Undo for create new track from route.
+9. Should there be a separate Load Another Track button in the tool, with main button acting as old?
 > (Could change according to whether Tracks tool is open or not.)
 7. Any change to track collection must invalidate nodes.
 8. Remove all logging.

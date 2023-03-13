@@ -64,7 +64,7 @@ nodeKey point =
         { x, y, z } =
             Point3d.toRecord Length.inMeters point.space
     in
-    String.fromFloat x ++ String.fromFloat y
+    String.fromFloat x ++ ";" ++ String.fromFloat y
 
 
 addEdgeFromTrack : TrackLoaded msg -> Graph msg -> Graph msg
@@ -1431,8 +1431,8 @@ canonicalise graph =
                     { currentEdge = Nothing, foundEdges = [] }
 
         _ =
-            Debug.log "allEdgeInstances"
-                (List.map summaryPutativeEdge allEdgeInstances.foundEdges)
+            Debug.log "edgesWithConsistentEndNodes"
+                (List.map summaryPutativeEdge edgesWithConsistentEndNodes)
 
         edgesWithConsistentEndNodes : List PutativeEdge
         edgesWithConsistentEndNodes =
@@ -1459,11 +1459,11 @@ canonicalise graph =
         edges : Dict String (Edge msg)
         edges =
             let
-                putEdgeInDeDupeDictionary :
+                deDuplicatePutativeEdge :
                     PutativeEdge
-                    -> Dict ( String, String, String ) (Edge msg)
-                    -> Dict ( String, String, String ) (Edge msg)
-                putEdgeInDeDupeDictionary putative dict =
+                    -> Dict ( String, String, String ) PutativeEdge
+                    -> Dict ( String, String, String ) PutativeEdge
+                deDuplicatePutativeEdge putative dict =
                     let
                         via =
                             List.Extra.getAt
@@ -1471,50 +1471,59 @@ canonicalise graph =
                                 putative.pointsIncludingNodes
                                 |> Maybe.withDefault
                                     (DomainModel.withoutTime Point3d.origin)
+                    in
+                    Dict.insert
+                        ( putative.startNode, putative.endNode, nodeKey via )
+                        putative
+                        dict
 
-                        trackName =
-                            "Road " ++ String.fromInt (Dict.size dict + 1)
-
-                        _ =
-                            Debug.log trackName ( putative.startNode, putative.endNode )
-
+                trackFromPutativeEdge : String -> PutativeEdge -> Maybe (TrackLoaded msg)
+                trackFromPutativeEdge name putative =
+                    let
                         trackFromEarthPoints : List EarthPoint -> Maybe (TrackLoaded msg)
                         trackFromEarthPoints points =
                             points
-                                --|> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
                                 |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
-                                |> TrackLoaded.trackFromPoints trackName
+                                |> TrackLoaded.trackFromPoints name
                                 |> Maybe.map (TrackLoaded.changeReferencePoint graph.referenceLonLat)
                     in
-                    case trackFromEarthPoints putative.pointsIncludingNodes of
-                        Just newTrack ->
-                            Dict.insert
-                                ( putative.startNode, putative.endNode, nodeKey via )
-                                { lowNode = putative.startNode
-                                , highNode = putative.endNode
-                                , via = nodeKey via
-                                , track = newTrack
-                                , originalDirection = Natural -- not sure this is relevant.
-                                }
-                                dict
-
-                        Nothing ->
-                            dict
+                    trackFromEarthPoints putative.pointsIncludingNodes
 
                 correctEdgesAfterDeDupe :
                     ( String, String, String )
-                    -> Edge msg
+                    -> PutativeEdge
                     -> Dict String (Edge msg)
                     -> Dict String (Edge msg)
-                correctEdgesAfterDeDupe tempKey edge outputs =
-                    Dict.insert
-                        edge.track.trackName
-                        edge
-                        outputs
+                correctEdgesAfterDeDupe ( _, _, via ) putative outputs =
+                    let
+                        trackName =
+                            "Road " ++ String.fromInt (Dict.size outputs + 1)
+                    in
+                    case trackFromPutativeEdge trackName putative of
+                        Just track ->
+                            Dict.insert
+                                track.trackName
+                                { lowNode = putative.startNode
+                                , highNode = putative.endNode
+                                , via = via
+                                , track = track
+                                , originalDirection = Natural -- not sure this is relevant.
+                                }
+                                outputs
+
+                        Nothing ->
+                            outputs
+
+                deDupedEdges =
+                    List.foldl
+                        deDuplicatePutativeEdge
+                        Dict.empty
+                        edgesWithConsistentEndNodes
             in
-            edgesWithConsistentEndNodes
-                |> List.foldl putEdgeInDeDupeDictionary Dict.empty
-                |> Dict.foldl correctEdgesAfterDeDupe Dict.empty
+            Dict.foldl
+                correctEdgesAfterDeDupe
+                Dict.empty
+                deDupedEdges
 
         {-
            Essential algorithm above this line, support functions below.
@@ -1572,8 +1581,8 @@ canonicalise graph =
                                     , pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
                                 }
 
-                            _ =
-                                Debug.log "completedEdge" (summaryPutativeEdge completedEdge)
+                            --_ =
+                            --    Debug.log "completedEdge" (summaryPutativeEdge completedEdge)
                         in
                         { foldState
                             | currentEdge = Just <| startNewEdgeWith point node
@@ -1588,8 +1597,8 @@ canonicalise graph =
                                 | pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
                             }
 
-                        _ =
-                            Debug.log "NOT NODE" point
+                        --_ =
+                        --    Debug.log "NOT NODE" point
                     in
                     { foldState | currentEdge = Just newCurrent }
 
