@@ -50,8 +50,8 @@ type Direction
 
 
 type alias TraversalDisplay =
-    { startPlace : Int
-    , road : Int
-    , endPlace : Int
+    { startPlace : String
+    , road : String
+    , endPlace : String
     , length : Quantity Float Meters
     }

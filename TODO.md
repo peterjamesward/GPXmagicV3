@@ -13,13 +13,12 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
-BUG: Lat and lon in Informatiom tool not reflecting Orange.
-
-5. Route making, (largely unchanged) editing of traversals.
-6. New track with offset, creates a new track from route.
-7. Undo for create new track from route.
-8. Any change to track collection must invalidate nodes.
-9. Remove all logging.
+1. Route making, (largely unchanged) editing of traversals.
+2. Should still be able to revert to pre-routing tracks, right until convert back to single.
+3. New track with offset, creates a new track from route.
+4. Undo for create new track from route.
+5. Any change to track collection must invalidate nodes.
+6. Remove all logging.
 
 ---
 

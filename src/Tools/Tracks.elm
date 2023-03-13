@@ -41,10 +41,11 @@ import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
+import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.Graph as Graph
 import Tools.GraphOptions as Graph exposing (Cluster, Graph)
 import Tools.I18N as I18N
-import Tools.TracksOptions as Options exposing (GraphState(..), Options, Traversal)
+import Tools.TracksOptions as Options exposing (Direction(..), GraphState(..), Options, Traversal, TraversalDisplay)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon, useIconWithSize)
@@ -725,6 +726,172 @@ viewGraph settings wrapper options graph =
                                                 (options.selectedTraversal - 1)
                             , label = useIconWithSize 16 FeatherIcons.chevronLeft
                             }
+
+                    traversals : List TraversalDisplay
+                    traversals =
+                        -- Display-ready version of the route.
+                        options.userRoute
+                            |> List.map
+                                (\traversal ->
+                                    case Dict.get traversal.edge graph.edges of
+                                        Nothing ->
+                                            { startPlace = ""
+                                            , road = ""
+                                            , endPlace = ""
+                                            , length = Quantity.zero
+                                            }
+
+                                        Just edgeInfo ->
+                                            case traversal.direction of
+                                                Natural ->
+                                                    { startPlace = edgeInfo.lowNode
+                                                    , road = traversal.edge
+                                                    , endPlace = edgeInfo.highNode
+                                                    , length = trueLength edgeInfo.track.trackTree
+                                                    }
+
+                                                Reverse ->
+                                                    { startPlace = edgeInfo.highNode
+                                                    , road = traversal.edge
+                                                    , endPlace = edgeInfo.lowNode
+                                                    , length = trueLength edgeInfo.track.trackTree
+                                                    }
+                                )
+
+                    dataStyles selected =
+                        if selected then
+                            [ Font.bold, padding 2 ]
+
+                        else
+                            [ padding 2 ]
+
+                    traversalsTable : Element msg
+                    traversalsTable =
+                        let
+                            totalLength =
+                                traversals |> List.map .length |> Quantity.sum
+
+                            headerAttrs =
+                                [ Font.bold
+                                , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                                , Border.color FlatColors.FlatUIPalette.concrete
+                                ]
+
+                            footerAttrs =
+                                [ Font.bold
+                                , Border.widthEach { bottom = 0, top = 2, left = 0, right = 0 }
+                                , Border.color FlatColors.FlatUIPalette.concrete
+                                ]
+                        in
+                        column
+                            [ width <| maximum 500 fill
+                            , height <| px 300
+                            , spacing 10
+                            , padding 5
+                            , Border.width 2
+                            , Border.rounded 6
+                            , Border.color FlatColors.FlatUIPalette.concrete
+                            ]
+                            [ row [ width fill ]
+                                [ el ((width <| fillPortion 1) :: headerAttrs) <| i18n "blank"
+                                , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "from"
+                                , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "to"
+                                , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "along"
+                                , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "distance"
+                                ]
+
+                            -- workaround for a bug: it's necessary to wrap `table` in an `el`
+                            -- to get table height attribute to apply
+                            , el [ width fill ] <|
+                                indexedTable
+                                    [ width fill
+                                    , height <| px 220
+                                    , scrollbarY
+                                    , spacing 4
+                                    ]
+                                    { data = traversals
+                                    , columns =
+                                        [ { header = none
+                                          , width = fillPortion 1
+                                          , view =
+                                                \i t ->
+                                                    row
+                                                        [ spacing 2 ]
+                                                        [ if i + 1 == List.length traversals then
+                                                            Input.button
+                                                                [ alignRight
+                                                                , tooltip below (localisedTooltip settings.location toolId "remove")
+                                                                ]
+                                                                { onPress = Nothing --Just <| wrapper RemoveLastTraversal
+                                                                , label = useIcon FeatherIcons.delete
+                                                                }
+
+                                                          else
+                                                            none
+                                                        , if
+                                                            List.length traversals
+                                                                == 1
+                                                                || t.startPlace
+                                                                == t.endPlace
+                                                          then
+                                                            Input.button
+                                                                [ alignRight
+                                                                , tooltip below (localisedTooltip settings.location toolId "reverse")
+                                                                ]
+                                                                { onPress = Nothing --Just <| wrapper <| FlipDirection i
+                                                                , label = useIcon FeatherIcons.refreshCw
+                                                                }
+
+                                                          else
+                                                            none
+                                                        , Input.button
+                                                            [ alignRight ]
+                                                            { onPress = Nothing --Just <| wrapper <| HighlightTraversal i
+                                                            , label = useIcon FeatherIcons.eye
+                                                            }
+                                                        ]
+                                          }
+                                        , { header = none
+                                          , width = fillPortion 2
+                                          , view =
+                                                \i t ->
+                                                    el (dataStyles (i == options.selectedTraversal)) <|
+                                                        text t.startPlace
+                                          }
+                                        , { header = none
+                                          , width = fillPortion 2
+                                          , view =
+                                                \i t ->
+                                                    el (dataStyles (i == options.selectedTraversal)) <|
+                                                        text t.endPlace
+                                          }
+                                        , { header = none
+                                          , width = fillPortion 2
+                                          , view =
+                                                \i t ->
+                                                    el (dataStyles (i == options.selectedTraversal)) <|
+                                                        text t.road
+                                          }
+                                        , { header = none
+                                          , width = fillPortion 2
+                                          , view =
+                                                \i t ->
+                                                    el (dataStyles (i == options.selectedTraversal)) <|
+                                                        text <|
+                                                            showLongMeasure False t.length
+                                          }
+                                        ]
+                                    }
+                            , row [ width fill ]
+                                [ el ((width <| fillPortion 1) :: footerAttrs) <| text " "
+                                , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                                , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                                , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                                , el ((width <| fillPortion 2) :: footerAttrs) <|
+                                    text <|
+                                        showLongMeasure False totalLength
+                                ]
+                            ]
                 in
                 column [ width fill, padding 4, spacing 10 ]
                     [ revertButton
@@ -733,8 +900,7 @@ viewGraph settings wrapper options graph =
                         , traversalNext
                         , clearRouteButton
                         ]
-
-                    --, traversalsTable
+                    , traversalsTable
                     , offsetSlider
                     , minRadiusSlider
                     , finishButton
