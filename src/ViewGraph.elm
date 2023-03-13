@@ -35,6 +35,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters, meters)
+import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
 import Plane3d
@@ -156,72 +157,63 @@ zoomButtons settings msgWrapper context =
         ]
 
 
-popup :
+popupEditingMenu :
     (Msg -> msg)
     -> GraphContext
     -> Tools.TracksOptions.Options msg
-    -> Graph.Graph msg
     -> Element msg
-popup msgWrapper context options graph =
+popupEditingMenu msgWrapper context options =
     let
         popupMenu =
             case context.clickFeature of
                 ClickNone ->
                     []
 
-                _ ->
-                    []
+                ClickNode node ->
+                    [ text <| node
 
-        {-
-           ClickNode node ->
-               [ text <| "Place " ++ String.fromInt node ++ "..."
-               , if Tools.Graph.loopCanBeAdded node options.userRoute graph then
-                   Input.button []
-                       { onPress = Just <| msgWrapper <| AddSelfLoop node
-                       , label =
-                           text <|
-                               "Add "
-                                   ++ showShortMeasure False options.minimumRadiusAtPlaces
-                                   ++ " loop here"
-                       }
+                    --, if Tools.Tracks.loopCanBeAdded node options then
+                    --    Input.button []
+                    --        { onPress = Just <| msgWrapper <| AddSelfLoop node
+                    --        , label =
+                    --            text <|
+                    --                "Add "
+                    --                    ++ showShortMeasure False options.minimumRadiusAtPlaces
+                    --                    ++ " loop here"
+                    --        }
+                    --
+                    --  else
+                    --    none
+                    , Input.button []
+                        { onPress = Just <| msgWrapper PopupHide
+                        , label = text "Close menu"
+                        }
+                    ]
 
-                 else
-                   none
-               , Input.button []
-                   { onPress = Just <| msgWrapper PopupHide
-                   , label = text "Close menu"
-                   }
-               ]
-        -}
-        {-
-           ClickEdge edge ->
-               [ text <| "Road " ++ String.fromInt edge ++ "..."
-               , if Tools.Graph.traversalCanBeAdded edge options.userRoute graph then
-                   Input.button []
-                       { onPress = Just <| msgWrapper <| AddTraversal edge
-                       , label = text "Add to route"
-                       }
+                ClickEdge edge ->
+                    [ text edge
 
-                 else
-                   none
-               , Input.button []
-                   { onPress = Just <| msgWrapper <| EditRoad edge
-                   , label = text "Edit this road"
-                   }
-               , if Tools.Graph.edgeCanBeDeleted edge options.userRoute graph then
-                   Input.button []
-                       { onPress = Just <| msgWrapper <| DeleteRoad edge
-                       , label = text "Delete this Road"
-                       }
-
-                 else
-                   none
-               , Input.button []
-                   { onPress = Just <| msgWrapper PopupHide
-                   , label = text "Close menu"
-                   }
-               ]
-        -}
+                    --, if Tools.Graph.traversalCanBeAdded edge options.userRoute graph then
+                    --    Input.button []
+                    --        { onPress = Just <| msgWrapper <| AddTraversal edge
+                    --        , label = text "Add to route"
+                    --        }
+                    --
+                    --  else
+                    --    none
+                    --, if Tools.Graph.edgeCanBeDeleted edge options.userRoute graph then
+                    --    Input.button []
+                    --        { onPress = Just <| msgWrapper <| DeleteRoad edge
+                    --        , label = text "Delete this Road"
+                    --        }
+                    --
+                    --  else
+                    --    none
+                    , Input.button []
+                        { onPress = Just <| msgWrapper PopupHide
+                        , label = text "Close menu"
+                        }
+                    ]
     in
     case context.clickPoint of
         Nothing ->
@@ -516,7 +508,7 @@ view settings context ( width, height ) options msgWrapper =
         , Border.color FlatColors.ChinesePalette.peace
         , Background.color FlatColors.FlatUIPalette.silver
         , inFront <| zoomButtons settings msgWrapper context
-        , inFront <| popup msgWrapper context options graph
+        , inFront <| popupEditingMenu msgWrapper context options
         ]
     <|
         Element.html svgElement
@@ -757,76 +749,64 @@ detectHit event graph ( w, h ) context =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
 
-        candidates : List ( Int, ( Int, Bool, Quantity Float Pixels ) )
+        candidates : List ( String, ( Int, Bool, Quantity Float Pixels ) )
         candidates =
-            []
+            graph.edges
+                |> Dict.toList
+                |> List.map
+                    (\( edgeIndex, edgeInfo ) ->
+                        let
+                            thisEdgeNearestIndex =
+                                nearestToRay
+                                    ray
+                                    edgeInfo.track.trackTree
+                                    edgeInfo.track.leafIndex
+                                    edgeInfo.track.currentPosition
 
-        {-
-           graph.edges
-               |> Dict.toList
-               |> List.map
-                   (\( edgeIndex, edgeInfo ) ->
-                       let
-                           thisEdgeNearestIndex =
-                               nearestToRay
-                                   ray
-                                   edgeInfo.track.trackTree
-                                   edgeInfo.track.leafIndex
-                                   edgeInfo.track.currentPosition
+                            thisEdgeNearestPoint =
+                                earthPointFromIndex thisEdgeNearestIndex edgeInfo.track.trackTree
+                                    |> .space
+                                    |> Point3d.toScreenSpace camera screenRectangle
+                        in
+                        ( edgeIndex
+                        , ( thisEdgeNearestIndex
+                          , thisEdgeNearestIndex == skipCount edgeInfo.track.trackTree
+                          , Point2d.distanceFrom screenPoint thisEdgeNearestPoint
+                          )
+                        )
+                    )
 
-                           thisEdgeNearestPoint =
-                               earthPointFromIndex thisEdgeNearestIndex edgeInfo.track.trackTree
-                                   |> .space
-                                   |> Point3d.toScreenSpace camera screenRectangle
-                       in
-                       ( edgeIndex
-                       , ( thisEdgeNearestIndex
-                         , thisEdgeNearestIndex == skipCount edgeInfo.track.trackTree
-                         , Point2d.distanceFrom screenPoint thisEdgeNearestPoint
-                         )
-                       )
-                   )
-        -}
         bestCandidate =
-            Nothing
+            candidates
+                |> List.Extra.minimumBy
+                    (\( _, ( _, _, dist ) ) -> Pixels.inPixels dist)
 
-        --candidates
-        --    |> List.Extra.minimumBy
-        --        (\( _, ( _, _, dist ) ) -> Pixels.inPixels dist)
-        {-
-           returnStartNode edgeIndex =
-               case Dict.get edgeIndex graph.edges of
-                   Nothing ->
-                       ClickNone
+        returnStartNode edgeIndex =
+            case Dict.get edgeIndex graph.edges of
+                Nothing ->
+                    ClickNone
 
-                   Just edgeInfo ->
-                       ClickNode edgeInfo.lowNode
+                Just edgeInfo ->
+                    ClickNode edgeInfo.lowNode
 
-           returnEndNode edgeIndex =
-               case Dict.get edgeIndex graph.edges of
-                   Nothing ->
-                       ClickNone
+        returnEndNode edgeIndex =
+            case Dict.get edgeIndex graph.edges of
+                Nothing ->
+                    ClickNone
 
-                   Just edgeInfo ->
-                       ClickNode edgeInfo.highNode
-        -}
+                Just edgeInfo ->
+                    ClickNode edgeInfo.highNode
     in
-    ClickNone
+    case bestCandidate of
+        Nothing ->
+            ClickNone
 
+        Just ( edgeIndex, ( pointIndex, isEnd, _ ) ) ->
+            if pointIndex == 0 then
+                returnStartNode edgeIndex
 
+            else if isEnd then
+                returnEndNode edgeIndex
 
-{-
-   case bestCandidate of
-       Nothing ->
-           ClickNone
-
-       Just ( edgeIndex, ( pointIndex, isEnd, _ ) ) ->
-           if pointIndex == 0 then
-               returnStartNode edgeIndex
-
-           else if isEnd then
-               returnEndNode edgeIndex
-
-           else
-               ClickEdge edgeIndex
--}
+            else
+                ClickEdge edgeIndex

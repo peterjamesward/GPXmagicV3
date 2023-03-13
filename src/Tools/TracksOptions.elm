@@ -33,8 +33,8 @@ type GraphState msg
 
 
 type ClickDetect
-    = ClickNode Int
-    | ClickEdge Int
+    = ClickNode String
+    | ClickEdge String
     | ClickNone
 
 
