@@ -15,6 +15,7 @@ type alias Options msg =
     , graph : Graph.Graph msg
     , graphOptions : GraphOptions msg
     , graphState : GraphState msg
+    , roadListCollapsed : Bool
     }
 
 

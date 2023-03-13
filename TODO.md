@@ -15,7 +15,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 BUG: Lat and lon in Informatiom tool not reflecting Orange.
 
-3. Button to collapse/expand Roads list.
 4. Route making, (largely unchanged) editing of traversals.
 5. New track with offset, creates a new track from route.
 6. Undo for create new track from route.

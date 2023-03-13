@@ -74,6 +74,7 @@ type Msg
     | UndoSnap
     | Canonicalise
     | UndoCanonicalise
+    | ToggleRoadList
 
 
 defaultGraphOptions : Options.GraphOptions msg
@@ -109,6 +110,7 @@ defaultOptions =
     , graph = emptyGraph
     , graphOptions = defaultGraphOptions
     , graphState = GraphNoTracks
+    , roadListCollapsed = False
     }
 
 
@@ -393,6 +395,9 @@ update msg options =
                 _ ->
                     ( { options | graphState = GraphOriginalTracks }, [] )
 
+        ToggleRoadList ->
+            ( { options | roadListCollapsed = not options.roadListCollapsed }, [] )
+
 
 
 {-
@@ -450,12 +455,16 @@ view settings wrapper options =
             I18N.text settings.location toolId
 
         listOfTracks =
-            column [ spacing 5 ] <|
-                List.indexedMap
-                    (\index entry ->
-                        displayTrackInfo index entry wrapper options
-                    )
-                    options.tracks
+            if options.roadListCollapsed then
+                none
+
+            else
+                column [ spacing 5 ] <|
+                    List.indexedMap
+                        (\index entry ->
+                            displayTrackInfo index entry wrapper options
+                        )
+                        options.tracks
 
         unloadButton =
             el [ centerX, width fill ] <|
@@ -468,10 +477,33 @@ view settings wrapper options =
 
                 else
                     none
+
+        collapseExpandButton =
+            if List.length options.tracks > 1 then
+                el [ centerX, width fill, paddingXY 20 0 ] <|
+                    Input.button
+                        [ Border.width 1
+                        , Border.rounded 6
+                        , Border.color FlatColors.FlatUIPalette.concrete
+                        , width fill
+                        ]
+                        { label =
+                            useIcon <|
+                                if options.roadListCollapsed then
+                                    FeatherIcons.chevronDown
+
+                                else
+                                    FeatherIcons.chevronUp
+                        , onPress = Just <| wrapper ToggleRoadList
+                        }
+
+            else
+                none
     in
     el (CommonToolStyles.toolContentBoxStyle settings) <|
         column [ spacing 5 ]
             [ listOfTracks
+            , collapseExpandButton
             , unloadButton
             , viewGraph settings wrapper options options.graphOptions options.graph
             ]
