@@ -1430,9 +1430,10 @@ canonicalise graph =
                     walkEdgeSplittingAtNodes
                     { currentEdge = Nothing, foundEdges = [] }
 
-        --_ =
-        --    Debug.log "allEdgeInstances"
-        --        (List.map summaryPutativeEdge allEdgeInstances.foundEdges)
+        _ =
+            Debug.log "allEdgeInstances"
+                (List.map summaryPutativeEdge allEdgeInstances.foundEdges)
+
         edgesWithConsistentEndNodes : List PutativeEdge
         edgesWithConsistentEndNodes =
             -- Just make sure that the start nodekey <= end nodekey, flippin edge if needed.
@@ -1475,7 +1476,7 @@ canonicalise graph =
                             "Road " ++ String.fromInt (Dict.size dict + 1)
 
                         _ =
-                            Debug.log trackName graph.referenceLonLat
+                            Debug.log trackName ( putative.startNode, putative.endNode )
 
                         trackFromEarthPoints : List EarthPoint -> Maybe (TrackLoaded msg)
                         trackFromEarthPoints points =
@@ -1558,17 +1559,26 @@ canonicalise graph =
 
                 ( Just node, Just currentEdge ) ->
                     -- End this edge and start a new one.
-                    let
-                        completedEdge =
-                            { currentEdge
-                                | endNode = node
-                                , pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
-                            }
-                    in
-                    { foldState
-                        | currentEdge = Just <| startNewEdgeWith point node
-                        , foundEdges = completedEdge :: foldState.foundEdges
-                    }
+                    -- But for a self-loop, only if there's any intervening points!
+                    if node == currentEdge.startNode && List.length currentEdge.pointsIncludingNodes == 1 then
+                        -- Just drop this duplicated point.
+                        foldState
+
+                    else
+                        let
+                            completedEdge =
+                                { currentEdge
+                                    | endNode = node
+                                    , pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
+                                }
+
+                            _ =
+                                Debug.log "completedEdge" (summaryPutativeEdge completedEdge)
+                        in
+                        { foldState
+                            | currentEdge = Just <| startNewEdgeWith point node
+                            , foundEdges = completedEdge :: foldState.foundEdges
+                        }
 
                 ( Nothing, Just currentEdge ) ->
                     -- Add non-node point to current
@@ -1577,6 +1587,9 @@ canonicalise graph =
                             { currentEdge
                                 | pointsIncludingNodes = point :: currentEdge.pointsIncludingNodes
                             }
+
+                        _ =
+                            Debug.log "NOT NODE" point
                     in
                     { foldState | currentEdge = Just newCurrent }
 
