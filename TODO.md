@@ -15,13 +15,12 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 BUG: Lat and lon in Informatiom tool not reflecting Orange.
 
-3. Add a "skip snapping" button.
-4. New tracks need new leaf indexes.
-5. Undo canonicalize.
-6. Route making, (largely unchanged) editing of traversals.
-7. New track with offset, creates a new track from route.
-8. Undo for create new track from route.
-9. Should there be a separate Load Another Track button in the tool, with main button acting as old?
+1. mAdd a "skip snapping" button.
+2. Undo canonicalize.
+3. Route making, (largely unchanged) editing of traversals.
+4. New track with offset, creates a new track from route.
+5. Undo for create new track from route.
+6. Should there be a separate Load Another Track button in the tool, with main button acting as old?
 > (Could change according to whether Tracks tool is open or not.)
 7. Any change to track collection must invalidate nodes.
 8. Remove all logging.
