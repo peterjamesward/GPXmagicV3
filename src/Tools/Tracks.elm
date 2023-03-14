@@ -77,10 +77,9 @@ type Msg
     | RemoveLastTraversal
     | DisplayInfo String String
     | FlipDirection Int
-      --| ClearRoute
+    | ClearRoute
     | UndoAnalyze
     | SetTolerance (Quantity Float Meters)
-      --| UndoDeleteRoad
     | SnapToNearby
     | UndoSnap
     | Canonicalise
@@ -378,46 +377,17 @@ update msg options =
         ToggleRoadList ->
             ( { options | roadListCollapsed = not options.roadListCollapsed }, [] )
 
-
-
-{-
-   ClearRoute ->
-       let
-           graph =
-               options.graph
-
-           newGraph =
-               { graph | userRoute = [] }
-       in
-       ( { options
-           | graph = newGraph
-           , selectedTraversal = -1
-         }
-       , []
-       )
--}
-{-
-   UndoDeleteRoad ->
-       case options.graphUndos of
-           lastVersion :: olderVersions ->
-               ( { options
-                   | graph = lastVersion
-                   , graphUndos = olderVersions
-                 }
-               , []
-               )
-
-           _ ->
-               ( options, [] )
--}
+        ClearRoute ->
+            ( { options
+                | userRoute = []
+                , selectedTraversal = -1
+              }
+            , []
+            )
 
 
 addTraversal : String -> Options msg -> Options msg
 addTraversal newEdge options =
-    let
-        _ =
-            Debug.log "addTraversal" newEdge
-    in
     case
         ( List.Extra.last options.userRoute
         , Dict.get newEdge options.graph.edges
@@ -451,6 +421,7 @@ addTraversal newEdge options =
                         | userRoute =
                             options.userRoute
                                 ++ [ { edge = newEdge, direction = newEdgeDirection } ]
+                        , selectedTraversal = List.length options.userRoute
                     }
 
                 Nothing ->
@@ -469,6 +440,15 @@ addTraversal newEdge options =
 
 updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
 updateActiveTrack oldTrack newTrack options =
+    -- If name changed, must reflect in traversals.
+    let
+        renameEdge traversal =
+            if traversal.edge == oldTrack.trackName then
+                { edge = newTrack.trackName, direction = traversal.direction }
+
+            else
+                traversal
+    in
     case options.activeTrackIndex of
         Just index ->
             ( newTrack
@@ -476,6 +456,7 @@ updateActiveTrack oldTrack newTrack options =
                 | tracks =
                     List.Extra.setAt index newTrack options.tracks
                 , graph = Graph.updatedEdge oldTrack newTrack options.graph
+                , userRoute = List.map renameEdge options.userRoute
               }
             )
 
@@ -685,7 +666,7 @@ viewGraph settings wrapper options graph =
 
                     clearRouteButton =
                         Input.button neatToolsBorder
-                            { onPress = Nothing --Just (wrapper ClearRoute)
+                            { onPress = Just (wrapper ClearRoute)
                             , label = i18n "clear"
                             }
 
@@ -899,7 +880,7 @@ viewGraph settings wrapper options graph =
                                                             none
                                                         , Input.button
                                                             [ alignRight ]
-                                                            { onPress = Nothing --Just <| wrapper <| HighlightTraversal i
+                                                            { onPress = Just <| wrapper <| HighlightTraversal i
                                                             , label = useIcon FeatherIcons.eye
                                                             }
                                                         ]
