@@ -86,7 +86,7 @@ import Tools.StravaDataLoad
 import Tools.StravaTools
 import Tools.Timestamp
 import Tools.TrackInfoBox
-import Tools.Tracks
+import Tools.Tracks as Tracks
 import Tools.TracksOptions as Tracks
 import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
@@ -347,7 +347,7 @@ updateActiveTrack newTrack model =
             case model.activeTrack of
                 Just activeTrack ->
                     Tuple.mapFirst Just <|
-                        Tools.Tracks.updateActiveTrack
+                        Tracks.updateActiveTrack
                             activeTrack
                             newTrack
                             model.toolOptions.tracksOptions
@@ -808,7 +808,23 @@ update msg model =
         FilenameChange newName ->
             case model.activeTrack of
                 Just track ->
-                    ( updateActiveTrack { track | trackName = newName } model
+                    let
+                        toolOptions =
+                            model.toolOptions
+
+                        tracksOptions =
+                            toolOptions.tracksOptions
+
+                        updatedTracks =
+                            Tracks.renameActiveTrack newName tracksOptions
+
+                        newToolOptions =
+                            { toolOptions | tracksOptions = updatedTracks }
+                    in
+                    ( { model
+                        | toolOptions = newToolOptions
+                        , activeTrack = Tracks.getActiveTrack updatedTracks
+                      }
                     , Cmd.none
                     )
 
@@ -958,19 +974,18 @@ adoptTrackInModel track model =
             --WARN: Maybe unwise.
             if ToolsController.isToolOpen ToolsController.ToolTracks toolOptions.tools then
                 -- Subsequent track only adds if tool is open
-                Tools.Tracks.addTrack track tracksOptions
+                Tracks.addTrack track tracksOptions
 
             else if model.activeTrack == Nothing then
                 -- First track always gets added.
-                Tools.Tracks.addTrack track tracksOptions
+                Tracks.addTrack track tracksOptions
 
             else
                 -- New track replaces current
-                let
-                    ( _, unloadedOptions ) =
-                        Tools.Tracks.unloadActiveTrack tracksOptions
-                in
-                Tools.Tracks.addTrack track unloadedOptions
+                tracksOptions
+                    |> Tracks.unloadActiveTrack
+                    |> Tuple.second
+                    |> Tracks.addTrack track
 
         newToolOptions =
             { toolOptions
@@ -979,7 +994,7 @@ adoptTrackInModel track model =
 
         modelWithTrack =
             { model
-                | activeTrack = Tools.Tracks.getActiveTrack newTracksOptions
+                | activeTrack = Tracks.getActiveTrack newTracksOptions
                 , paneLayoutOptions =
                     PaneLayoutManager.initialise
                         track
@@ -1514,7 +1529,7 @@ performActionsOnModel actions model =
                             toolOptions.tracksOptions
 
                         ( newTrack, newOptions ) =
-                            Tools.Tracks.unloadActiveTrack tracksOptions
+                            Tracks.unloadActiveTrack tracksOptions
 
                         newToolOptions =
                             { toolOptions | tracksOptions = newOptions }
@@ -1530,11 +1545,8 @@ performActionsOnModel actions model =
                         toolOptions =
                             model.toolOptions
 
-                        tracksOptions =
-                            toolOptions.tracksOptions
-
                         ( newTrack, newOptions ) =
-                            Tools.Tracks.setTrack trackIndex tracksOptions
+                            Tracks.setTrack trackIndex toolOptions.tracksOptions
 
                         newToolOptions =
                             { toolOptions | tracksOptions = newOptions }
@@ -2576,7 +2588,7 @@ performActionCommands actions model =
 
 showTrackOnMapCentered : Tracks.Options msg -> Cmd msg
 showTrackOnMapCentered tracks =
-    case Tools.Tracks.getActiveTrack tracks of
+    case Tracks.getActiveTrack tracks of
         Just activeTrack ->
             Cmd.batch
                 [ MapPortController.addAllTracksToMap tracks

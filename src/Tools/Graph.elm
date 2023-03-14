@@ -13,6 +13,7 @@ module Tools.Graph exposing
     , nodeKey
     , pointAsComparable
     , removeEdge
+    , renameEdge
     ,  snapToClusters
        --, undoWalkRoute
 
@@ -116,6 +117,22 @@ removeEdge : TrackLoaded msg -> Graph msg -> Graph msg
 removeEdge track graph =
     -- User has removed a track, so the graph must point to the newest version.
     { graph | edges = Dict.remove track.trackName graph.edges }
+
+
+renameEdge : String -> String -> Graph msg -> Graph msg
+renameEdge oldName newName graph =
+    -- Replace edge in dict with new name.
+    case Dict.get oldName graph.edges of
+        Just entry ->
+            { graph
+                | edges =
+                    graph.edges
+                        |> Dict.remove oldName
+                        |> Dict.insert newName entry
+            }
+
+        Nothing ->
+            graph
 
 
 
@@ -1140,9 +1157,7 @@ analyzeTracksAsGraph graph =
                     , Point3d.zCoordinate road.endPoint.space
                     )
     in
-    { graph
-        | nodes = makeNamedNodes nodeLocationsXY
-    }
+    { graph | nodes = makeNamedNodes nodeLocationsXY }
 
 
 type alias PutativeEdge =

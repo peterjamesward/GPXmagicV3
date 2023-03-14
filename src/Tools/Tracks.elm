@@ -9,6 +9,7 @@ module Tools.Tracks exposing
     , loopCanBeAdded
     , mapOverInvisibleTracks
     , mapOverVisibleTracks
+    , renameActiveTrack
     , setTrack
     , toolId
     , toolStateChange
@@ -140,7 +141,9 @@ update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options =
     case msg of
         SelectActiveTrack index ->
-            ( options, [ Actions.SetActiveTrack index ] )
+            ( options
+            , [ Actions.SetActiveTrack index ]
+            )
 
         ToggleVisibility index ->
             case List.Extra.getAt index options.tracks of
@@ -357,11 +360,8 @@ update msg options =
             case options.graphState of
                 GraphWithNodes beforeNodes beforeSnap ->
                     let
-                        graph =
-                            options.graph
-
                         newGraph =
-                            Graph.canonicalise graph
+                            Graph.canonicalise options.graph
                     in
                     ( { options
                         | graph = newGraph
@@ -438,25 +438,41 @@ addTraversal newEdge options =
             options
 
 
+renameActiveTrack : String -> Options msg -> Options msg
+renameActiveTrack newName options =
+    case options.activeTrackIndex of
+        Just index ->
+            case List.Extra.getAt index options.tracks of
+                Just oldTrack ->
+                    let
+                        renameEdge traversal =
+                            if traversal.edge == oldTrack.trackName then
+                                { edge = newName, direction = traversal.direction }
+
+                            else
+                                traversal
+                    in
+                    { options
+                        | graph = Graph.renameEdge oldTrack.trackName newName options.graph
+                        , userRoute = List.map renameEdge options.userRoute
+                    }
+
+                Nothing ->
+                    options
+
+        Nothing ->
+            options
+
+
 updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
 updateActiveTrack oldTrack newTrack options =
-    -- If name changed, must reflect in traversals.
-    let
-        renameEdge traversal =
-            if traversal.edge == oldTrack.trackName then
-                { edge = newTrack.trackName, direction = traversal.direction }
-
-            else
-                traversal
-    in
+    -- Do not use for rename.
     case options.activeTrackIndex of
         Just index ->
             ( newTrack
             , { options
-                | tracks =
-                    List.Extra.setAt index newTrack options.tracks
+                | tracks = List.Extra.setAt index newTrack options.tracks
                 , graph = Graph.updatedEdge oldTrack newTrack options.graph
-                , userRoute = List.map renameEdge options.userRoute
               }
             )
 
