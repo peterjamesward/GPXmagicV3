@@ -348,50 +348,6 @@ reverseTrack track =
        asLow ++ asHigh
 -}
 {-
-   addTraversal : Int -> List Traversal -> Graph msg -> List Traversal
-   addTraversal newEdge userRoute graph =
-       case
-           ( List.Extra.last userRoute
-           , Dict.get newEdge graph.edges
-           )
-       of
-           ( Just traversal, Just addedEdgeInfo ) ->
-               case Dict.get traversal.edge graph.edges of
-                   Just lastEdgeInfo ->
-                       let
-                           newEdgeDirection =
-                               -- Special case if added section is a loop.
-                               if addedEdgeInfo.lowNode == addedEdgeInfo.highNode then
-                                   Natural
-
-                               else
-                                   let
-                                       finalNode =
-                                           if traversal.direction == Natural then
-                                               lastEdgeInfo.highNode
-
-                                           else
-                                               lastEdgeInfo.lowNode
-                                   in
-                                   if finalNode == addedEdgeInfo.lowNode then
-                                       Natural
-
-                                   else
-                                       Reverse
-                       in
-                       userRoute
-                           ++ [ { edge = newEdge, direction = newEdgeDirection } ]
-
-                   Nothing ->
-                       userRoute
-
-           ( Nothing, Just _ ) ->
-               userRoute ++ [ { edge = newEdge, direction = Natural } ]
-
-           _ ->
-               userRoute
--}
-{-
 
    addSelfLoop : Int -> List Traversal -> Graph msg -> Graph msg
    addSelfLoop node userRoute graph =

@@ -18,9 +18,9 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 > so we would avoid use of Actions for the route editing. That's a step in the right direction.
 
 1. ~~Traversal table.~~
-2. Try GraphState = State GraphState style.
-3. Add traversal.
-4. Reverse traversal.
+2. ~~Add traversal.~~
+3. Reverse traversal (only one or a loop)
+4. Remove last traversal.
 5. Add self-loop.
 6. New track with offset, creates a new track from route.
 7. Should still be able to revert to pre-routing tracks, right until convert back to single.

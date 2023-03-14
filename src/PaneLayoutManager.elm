@@ -236,14 +236,13 @@ update paneMsg msgWrapper tracks contentArea options previews =
 
         updatePaneWith :
             PaneId
-            -> Tracks.Options msg
             -> (PaneContext -> Tracks.Options msg -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) ))
             -> ( PaneLayoutOptions, Tracks.Options msg, List (ToolAction msg) )
-        updatePaneWith id tracksIn updateFn =
+        updatePaneWith id updateFn =
             -- Helper avoids tedious repetition of these case statements.
             let
                 ( updatedPane, tracksOut, actions ) =
-                    updateFn (currentPane id) tracksIn
+                    updateFn (currentPane id) tracks
 
                 updatedOptions =
                     case id of
@@ -284,7 +283,6 @@ update paneMsg msgWrapper tracks contentArea options previews =
             let
                 ( newOptions, _, _ ) =
                     updatePaneWith paneId
-                        tracks
                         (\pane _ ->
                             ( { pane
                                 | activeView = viewMode
@@ -350,7 +348,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                     in
                     ( newPane, tracks, actions )
             in
-            updatePaneWith paneId tracks paneUpdateFunction
+            updatePaneWith paneId paneUpdateFunction
 
         PlanViewMessage paneId imageMsg ->
             let
@@ -382,7 +380,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                     in
                     ( newPane, tracks, actions )
             in
-            updatePaneWith paneId tracks paneUpdateFunction
+            updatePaneWith paneId paneUpdateFunction
 
         GraphViewMessage paneId imageMsg ->
             let
@@ -392,11 +390,11 @@ update paneMsg msgWrapper tracks contentArea options previews =
                     -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
                 paneUpdateFunction paneInfo _ =
                     let
-                        ( newContext, actions ) =
+                        ( newContext, newTracks, actions ) =
                             case paneInfo.graphContext of
                                 Just graphContext ->
                                     let
-                                        ( new, act ) =
+                                        ( innerContext, innerTracks, innerActions ) =
                                             ViewGraph.update
                                                 imageMsg
                                                 (msgWrapper << GraphViewMessage Pane1)
@@ -404,17 +402,17 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 graphContext
                                     in
-                                    ( Just new, act )
+                                    ( Just innerContext, innerTracks, innerActions )
 
                                 _ ->
-                                    ( Nothing, [] )
+                                    ( Nothing, tracks, [] )
 
                         newPane =
                             { paneInfo | graphContext = newContext }
                     in
-                    ( newPane, tracks, actions )
+                    ( newPane, newTracks, actions )
             in
-            updatePaneWith paneId tracks paneUpdateFunction
+            updatePaneWith paneId paneUpdateFunction
 
         ProfileViewMessage paneId imageMsg ->
             let
@@ -457,7 +455,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                     in
                     ( newPane, tracks, actions )
             in
-            updatePaneWith paneId tracks paneUpdateFunction
+            updatePaneWith paneId paneUpdateFunction
 
         MapViewMessage mapViewMsg ->
             -- Can only be pane 1!

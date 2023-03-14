@@ -1,6 +1,7 @@
 module Tools.Tracks exposing
     ( Msg(..)
     , addTrack
+    , addTraversal
     , defaultOptions
     , getActiveTrack
     , getKeyPlaces
@@ -413,6 +414,61 @@ update msg options =
            _ ->
                ( options, [] )
 -}
+
+
+addTraversal : String -> Options msg -> Options msg
+addTraversal newEdge options =
+    let
+        _ =
+            Debug.log "addTraversal" newEdge
+    in
+    case
+        ( List.Extra.last options.userRoute
+        , Dict.get newEdge options.graph.edges
+        )
+    of
+        ( Just traversal, Just addedEdgeInfo ) ->
+            case Dict.get traversal.edge options.graph.edges of
+                Just lastEdgeInfo ->
+                    let
+                        newEdgeDirection =
+                            -- Special case if added section is a loop.
+                            if addedEdgeInfo.lowNode == addedEdgeInfo.highNode then
+                                Natural
+
+                            else
+                                let
+                                    finalNode =
+                                        if traversal.direction == Natural then
+                                            lastEdgeInfo.highNode
+
+                                        else
+                                            lastEdgeInfo.lowNode
+                                in
+                                if finalNode == addedEdgeInfo.lowNode then
+                                    Natural
+
+                                else
+                                    Reverse
+                    in
+                    { options
+                        | userRoute =
+                            options.userRoute
+                                ++ [ { edge = newEdge, direction = newEdgeDirection } ]
+                    }
+
+                Nothing ->
+                    options
+
+        ( Nothing, Just _ ) ->
+            { options
+                | userRoute =
+                    options.userRoute
+                        ++ [ { edge = newEdge, direction = Natural } ]
+            }
+
+        _ ->
+            options
 
 
 updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )

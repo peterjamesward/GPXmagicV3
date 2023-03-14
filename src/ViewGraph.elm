@@ -52,7 +52,7 @@ import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions as Graph exposing (Edge, Graph)
-import Tools.Tracks
+import Tools.Tracks as Tracks
 import Tools.TracksOptions as Tracks exposing (ClickDetect(..))
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
@@ -193,7 +193,7 @@ popupEditingMenu msgWrapper context options =
 
                 ClickEdge edge ->
                     [ text edge
-                    , if Tools.Tracks.traversalCanBeAdded edge options then
+                    , if Tracks.traversalCanBeAdded edge options then
                         Input.button []
                             { onPress = Just <| msgWrapper <| AddTraversal edge
                             , label = text "Add to route"
@@ -552,7 +552,7 @@ update :
     -> Tracks.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> GraphContext
-    -> ( GraphContext, List (ToolAction msg) )
+    -> ( GraphContext, Tracks.Options msg, List (ToolAction msg) )
 update msg msgWrapper tracks area context =
     -- Second return value indicates whether selection needs to change.
     case msg of
@@ -564,11 +564,13 @@ update msg msgWrapper tracks area context =
                 , dragAction = DragPan
                 , waitingForClickDelay = True
               }
+            , tracks
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
             )
 
         ClickDelayExpired ->
             ( { context | waitingForClickDelay = False }
+            , tracks
             , []
             )
 
@@ -598,12 +600,14 @@ update msg msgWrapper tracks area context =
                                 |> DomainModel.withoutTime
                         , orbiting = Just ( dx, dy )
                       }
+                    , tracks
                     , []
                     )
 
                 _ ->
                     -- Not dragging, just track mouse so we can use it to centre zooming.
                     ( { context | mouseHere = Point2d.fromTuple Pixels.pixels event.offsetPos }
+                    , tracks
                     , []
                     )
 
@@ -612,6 +616,7 @@ update msg msgWrapper tracks area context =
                 | orbiting = Nothing
                 , dragAction = DragNone
               }
+            , tracks
             , []
             )
 
@@ -661,6 +666,7 @@ update msg msgWrapper tracks area context =
                 | zoomLevel = newZoom
                 , focalPoint = DomainModel.withoutTime newFocalPoint
               }
+            , tracks
             , []
             )
 
@@ -670,30 +676,33 @@ update msg msgWrapper tracks area context =
                     | clickPoint = Just <| event.offsetPos
                     , clickFeature = detectHit event tracks.graph area context
                   }
+                , tracks
                 , []
                 )
 
             else
-                ( context, [] )
+                ( context, tracks, [] )
 
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
+            , tracks
             , []
             )
 
         ImageZoomOut ->
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
+            , tracks
             , []
             )
 
         ImageReset ->
-            ( { context | zoomLevel = context.defaultZoomLevel }, [] )
+            ( { context | zoomLevel = context.defaultZoomLevel }, tracks, [] )
 
         PopupHide ->
-            ( { context | clickPoint = Nothing, clickFeature = ClickNone }, [] )
+            ( { context | clickPoint = Nothing, clickFeature = ClickNone }, tracks, [] )
 
         ImageNoOp ->
-            ( context, [] )
+            ( context, tracks, [] )
 
         ToggleEdgeMode ->
             ( { context
@@ -705,16 +714,19 @@ update msg msgWrapper tracks area context =
                         EdgeArc ->
                             EdgeSketch
               }
+            , tracks
             , []
             )
 
         AddTraversal edge ->
             ( { context | clickPoint = Nothing, clickFeature = ClickNone }
+            , Tracks.addTraversal edge tracks
             , []
             )
 
         AddSelfLoop node ->
             ( { context | clickPoint = Nothing, clickFeature = ClickNone }
+            , tracks
             , []
             )
 
