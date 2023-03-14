@@ -301,13 +301,10 @@ view settings context ( width, height ) options msgWrapper =
                     )
 
         edgeToHighlight =
-            "NOT YET"
+            List.Extra.getAt options.selectedTraversal options.userRoute
+                |> Maybe.map .edge
+                |> Maybe.withDefault ""
 
-        {-
-           List.Extra.getAt options.selectedTraversal options.userRoute
-               |> Maybe.map .edge
-               |> Maybe.withDefault -1
-        -}
         arrowAttributes atPoint =
             [ Svg.Attributes.fill <| uiColourHexString rgtPurple
             , Svg.Attributes.fontFamily "sans serif"
@@ -317,48 +314,6 @@ view settings context ( width, height ) options msgWrapper =
             , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint) + 10))
             ]
 
-        {-
-           arrowsOnHighlightedEdge =
-               case List.Extra.getAt options.selectedTraversal options.userRoute of
-                   Nothing ->
-                       []
-
-                   Just { edge, direction } ->
-                       case Dict.get edge graph.edges of
-                           Nothing ->
-                               []
-
-                           Just edgeInfo ->
-                               let
-                                   midPoint =
-                                       skipCount edgeInfo.track.trackTree // 2
-
-                                   midLeaf =
-                                       asRecord <| leafFromIndex midPoint edgeInfo.track.trackTree
-
-                                   ( p1, _ ) =
-                                       ( midLeaf.startPoint.space |> Point3d.toScreenSpace camera screenRectangle
-                                       , midLeaf.endPoint.space |> Point3d.toScreenSpace camera screenRectangle
-                                       )
-
-                                   rotation =
-                                       case direction of
-                                           Natural ->
-                                               toAngle midLeaf.directionAtStart
-
-                                           Reverse ->
-                                               toAngle <| Direction2d.reverse midLeaf.directionAtStart
-                               in
-                               [ Svg.text_
-                                   (arrowAttributes p1)
-                                   [ Svg.text ">>>>" ]
-                                   -- Hack: flip the text upside down since our later
-                                   -- 'Svg.relativeTo topLeftFrame' call will flip it
-                                   -- back right side up
-                                   |> Svg.mirrorAcross (Axis2d.through p1 Direction2d.x)
-                                   |> Svg.rotateAround p1 rotation
-                               ]
-        -}
         edgeAttributes edgeIndex =
             if edgeIndex == edgeToHighlight then
                 [ Svg.Attributes.stroke <| uiColourHexString rgtPurple
@@ -366,6 +321,7 @@ view settings context ( width, height ) options msgWrapper =
                 , Svg.Attributes.strokeWidth "5"
                 , Svg.Attributes.strokeLinecap "round"
                 , Svg.Attributes.strokeLinejoin "round"
+                , Svg.Attributes.markerMid "url(#arrow)"
                 ]
 
             else
@@ -404,7 +360,7 @@ view settings context ( width, height ) options msgWrapper =
                         [ startPoint ]
 
                 startPoint =
-                    DomainModel.earthPointFromIndex 0 edge.track.trackTree
+                    DomainModel.startPoint edge.track.trackTree
                         |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
             in
@@ -473,7 +429,22 @@ view settings context ( width, height ) options msgWrapper =
                 [ Attributes.width <| Pixels.inPixels width
                 , Attributes.height <| Pixels.inPixels height
                 ]
-                [ Svg.relativeTo topLeftFrame
+                [ Svg.defs []
+                    [ Svg.marker
+                        [ Svg.Attributes.id "arrow"
+                        , Svg.Attributes.viewBox "0 0 10 10"
+                        , Svg.Attributes.refX "5"
+                        , Svg.Attributes.refY "5"
+                        , Svg.Attributes.markerWidth "6"
+                        , Svg.Attributes.markerHeight "6"
+                        , Svg.Attributes.orient "auto-start-reverse"
+                        ]
+                        [ Svg.path
+                            [ Svg.Attributes.d "M 0 0 L 10 5 L 0 10 z" ]
+                            []
+                        ]
+                    ]
+                , Svg.relativeTo topLeftFrame
                     (Svg.g []
                         (svgNodes
                             ++ svgEdges
