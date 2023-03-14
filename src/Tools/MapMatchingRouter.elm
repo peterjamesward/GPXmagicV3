@@ -33,6 +33,7 @@ import Tools.I18N as I18N
 import Tools.MapMatchingRouterOptions exposing (Intersection, Leg, Matching, Matchings, Options, RouteState(..), Step, matchingsDecoder)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
+import Utils
 import ViewPureStyles exposing (neatToolsBorder, rgtPurple, useIconWithSize)
 
 
@@ -107,7 +108,9 @@ trackFromDrawnRoute result options =
             let
                 asGPXpoints : List DomainModel.GPXSource
                 asGPXpoints =
-                    resultBody.matchings |> List.concatMap collectMatchings
+                    resultBody.matchings
+                        |> List.concatMap collectMatchings
+                        |> Utils.deDupe (==)
 
                 collectMatchings : Matching -> List DomainModel.GPXSource
                 collectMatchings matching =

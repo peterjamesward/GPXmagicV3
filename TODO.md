@@ -16,14 +16,13 @@ BUG: Right split not being saved/restored.
 
 ## Promote Graph
 
-BUG? May be shortening drawn routes somehow.
-
-3. Renaming tracks Seems to give us S & F ! Probably because we're selecting Active Track.
-5. New track with offset, creates a new track from route.
-6. Should still be able to revert to pre-routing tracks, right until convert back to single.
-7. Undo for create new track from route.
-8. Any change to track collection must invalidate nodes.
-9. Remove all logging.
+3. Renaming tracks Seems to give us S & F ! 
+> Suspect stale state in Main.
+4. New track with offset, creates a new track from route.
+5. Should still be able to revert to pre-routing tracks, right until convert back to single.
+6. Undo for create new track from route.
+7. Any change to track collection must invalidate nodes.
+8. Remove all logging.
 
 ---
 
