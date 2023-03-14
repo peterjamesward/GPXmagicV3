@@ -66,7 +66,7 @@ type Msg
       --| MinimumRadius (Quantity Float Meters)
       --| ConvertFromGraph
     | HighlightTraversal Int
-      --| RemoveLastTraversal
+    | RemoveLastTraversal
     | DisplayInfo String String
       --| FlipDirection Int
       --| ClearRoute
@@ -262,25 +262,18 @@ update msg options =
         HighlightTraversal traversal ->
             ( { options | selectedTraversal = traversal }, [] )
 
-        {-
-           RemoveLastTraversal ->
-               let
-                   graph =
-                       options.graph
+        RemoveLastTraversal ->
+            let
+                newRoute =
+                    List.take (List.length options.userRoute - 1) options.userRoute
+            in
+            ( { options
+                | userRoute = newRoute
+                , selectedTraversal = List.length newRoute - 1
+              }
+            , []
+            )
 
-                   newGraph =
-                       { graph
-                           | userRoute =
-                               List.take (List.length graph.userRoute - 1) graph.userRoute
-                       }
-               in
-               ( { options
-                   | graph = newGraph
-                   , selectedTraversal = List.length newGraph.userRoute - 1
-                 }
-               , []
-               )
-        -}
         {-
            FlipDirection i ->
                let
@@ -879,7 +872,7 @@ viewGraph settings wrapper options graph =
                                                                 [ alignRight
                                                                 , tooltip below (localisedTooltip settings.location toolId "remove")
                                                                 ]
-                                                                { onPress = Nothing --Just <| wrapper RemoveLastTraversal
+                                                                { onPress = Just <| wrapper RemoveLastTraversal
                                                                 , label = useIcon FeatherIcons.delete
                                                                 }
 
