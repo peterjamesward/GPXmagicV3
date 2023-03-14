@@ -53,7 +53,7 @@ import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions as Graph exposing (Edge, Graph)
 import Tools.Tracks as Tracks
-import Tools.TracksOptions as Tracks exposing (ClickDetect(..))
+import Tools.TracksOptions as Tracks exposing (ClickDetect(..), Direction(..))
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
@@ -294,49 +294,56 @@ view settings context ( width, height ) options msgWrapper =
                     (\( index, edgeInfo ) ->
                         case context.edgeMode of
                             EdgeArc ->
-                                renderEdgeLoFi index edgeInfo
+                                renderEdge 3 index edgeInfo
 
                             EdgeSketch ->
                                 renderEdge 8 index edgeInfo
                     )
 
-        edgeToHighlight =
-            List.Extra.getAt options.selectedTraversal options.userRoute
-                |> Maybe.map .edge
-                |> Maybe.withDefault ""
-
-        arrowAttributes atPoint =
-            [ Svg.Attributes.fill <| uiColourHexString rgtPurple
-            , Svg.Attributes.fontFamily "sans serif"
-            , Svg.Attributes.fontSize "20px"
-            , Svg.Attributes.stroke "none"
-            , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate atPoint) + 10))
-            , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint) + 10))
-            ]
-
-        edgeAttributes edgeIndex =
-            if edgeIndex == edgeToHighlight then
-                [ Svg.Attributes.stroke <| uiColourHexString rgtPurple
-                , Svg.Attributes.fill "none"
-                , Svg.Attributes.strokeWidth "5"
-                , Svg.Attributes.strokeLinecap "round"
-                , Svg.Attributes.strokeLinejoin "round"
-                , Svg.Attributes.markerMid "url(#arrow)"
-                ]
-
-            else
-                [ Svg.Attributes.stroke <| uiColourHexString FlatColors.FlatUIPalette.peterRiver
-                , Svg.Attributes.fill "none"
-                , Svg.Attributes.strokeWidth "3"
-                , Svg.Attributes.strokeLinecap "round"
-                , Svg.Attributes.strokeLinejoin "round"
-                ]
-
         pointsAsPolyline : String -> List (Point2d.Point2d units coordinates) -> Svg msg
         pointsAsPolyline edgeIndex points =
-            Svg.polyline2d
-                (edgeAttributes edgeIndex)
-                (Polyline2d.fromVertices points)
+            let
+                edgeAttributes highlight =
+                    if highlight then
+                        [ Svg.Attributes.stroke <| uiColourHexString rgtPurple
+                        , Svg.Attributes.fill "none"
+                        , Svg.Attributes.strokeWidth "5"
+                        , Svg.Attributes.strokeLinecap "round"
+                        , Svg.Attributes.strokeLinejoin "round"
+                        , Svg.Attributes.markerMid "url(#arrow)"
+                        ]
+
+                    else
+                        [ Svg.Attributes.stroke <| uiColourHexString FlatColors.FlatUIPalette.peterRiver
+                        , Svg.Attributes.fill "none"
+                        , Svg.Attributes.strokeWidth "3"
+                        , Svg.Attributes.strokeLinecap "round"
+                        , Svg.Attributes.strokeLinejoin "round"
+                        ]
+            in
+            case List.Extra.getAt options.selectedTraversal options.userRoute of
+                Just selected ->
+                    if selected.edge == edgeIndex then
+                        -- Must get orientation correct.
+                        if selected.direction == Reverse then
+                            Svg.polyline2d
+                                (edgeAttributes True)
+                                (Polyline2d.fromVertices points)
+
+                        else
+                            Svg.polyline2d
+                                (edgeAttributes True)
+                                (Polyline2d.fromVertices <| List.reverse points)
+
+                    else
+                        Svg.polyline2d
+                            (edgeAttributes False)
+                            (Polyline2d.fromVertices <| List.reverse points)
+
+                Nothing ->
+                    Svg.polyline2d
+                        (edgeAttributes False)
+                        (Polyline2d.fromVertices <| List.reverse points)
 
         edgeFold :
             RoadSection
@@ -365,10 +372,6 @@ view settings context ( width, height ) options msgWrapper =
                         |> Point3d.toScreenSpace camera screenRectangle
             in
             svgPoints |> pointsAsPolyline edgeKey
-
-        renderEdgeLoFi : String -> Edge msg -> Svg msg
-        renderEdgeLoFi edgeIndex edge =
-            renderEdge 4 edgeIndex edge
 
         textAttributes atPoint =
             [ Svg.Attributes.fill "rgb(250, 250, 250)"
@@ -435,8 +438,8 @@ view settings context ( width, height ) options msgWrapper =
                         , Svg.Attributes.viewBox "0 0 10 10"
                         , Svg.Attributes.refX "5"
                         , Svg.Attributes.refY "5"
-                        , Svg.Attributes.markerWidth "6"
-                        , Svg.Attributes.markerHeight "6"
+                        , Svg.Attributes.markerWidth "3"
+                        , Svg.Attributes.markerHeight "3"
                         , Svg.Attributes.orient "auto-start-reverse"
                         ]
                         [ Svg.path
@@ -450,7 +453,6 @@ view settings context ( width, height ) options msgWrapper =
                             ++ svgEdges
                             ++ nodeLabels
                             ++ edgeLabels
-                         --++ arrowsOnHighlightedEdge
                         )
                     )
                 ]
