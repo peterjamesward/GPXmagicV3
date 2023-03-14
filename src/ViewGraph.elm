@@ -172,19 +172,18 @@ popupEditingMenu msgWrapper context options =
 
                 ClickNode node ->
                     [ text <| node
+                    , if Tracks.loopCanBeAdded node options then
+                        Input.button []
+                            { onPress = Just <| msgWrapper <| AddSelfLoop node
+                            , label =
+                                text <|
+                                    "Add "
+                                        ++ showShortMeasure False options.minimumRadiusAtPlaces
+                                        ++ " loop here"
+                            }
 
-                    --, if Tools.Tracks.loopCanBeAdded node options then
-                    --    Input.button []
-                    --        { onPress = Just <| msgWrapper <| AddSelfLoop node
-                    --        , label =
-                    --            text <|
-                    --                "Add "
-                    --                    ++ showShortMeasure False options.minimumRadiusAtPlaces
-                    --                    ++ " loop here"
-                    --        }
-                    --
-                    --  else
-                    --    none
+                      else
+                        none
                     , Input.button []
                         { onPress = Just <| msgWrapper PopupHide
                         , label = text "Close menu"
@@ -201,15 +200,6 @@ popupEditingMenu msgWrapper context options =
 
                       else
                         none
-
-                    --, if Tools.Graph.edgeCanBeDeleted edge options.userRoute graph then
-                    --    Input.button []
-                    --        { onPress = Just <| msgWrapper <| DeleteRoad edge
-                    --        , label = text "Delete this Road"
-                    --        }
-                    --
-                    --  else
-                    --    none
                     , Input.button []
                         { onPress = Just <| msgWrapper PopupHide
                         , label = text "Close menu"
@@ -726,7 +716,7 @@ update msg msgWrapper tracks area context =
 
         AddSelfLoop node ->
             ( { context | clickPoint = Nothing, clickFeature = ClickNone }
-            , tracks
+            , Tracks.addSelfLoop node tracks
             , []
             )
 

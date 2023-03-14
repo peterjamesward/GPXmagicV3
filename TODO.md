@@ -7,21 +7,22 @@
 
 BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
 
+BUG: Right split not being saved/restored.
+
 --- 
+
 
 # WIP
 
 ## Promote Graph
 
-
-> If PaneLayoutManager.update takes TracksOptions instead of Graph, it can also return it
-> so we would avoid use of Actions for the route editing. That's a step in the right direction.
+BUG? May be shortening drawn routes somehow.
 
 1. ~~Traversal table.~~
 2. ~~Add traversal.~~
 3. ~~Do not create edge from end of one track to start of the next (drop the current edge).~~
-4. Reverse traversal (only one or a loop)
-5. Remove last traversal.
+4. ~~Reverse traversal (only one or a loop)~~
+5. ~~Remove last traversal.~~
 6. Add self-loop.
 7. New track with offset, creates a new track from route.
 8. Should still be able to revert to pre-routing tracks, right until convert back to single.

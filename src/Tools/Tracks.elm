@@ -1,10 +1,12 @@
 module Tools.Tracks exposing
     ( Msg(..)
+    , addSelfLoop
     , addTrack
     , addTraversal
     , defaultOptions
     , getActiveTrack
     , getKeyPlaces
+    , loopCanBeAdded
     , mapOverInvisibleTracks
     , mapOverVisibleTracks
     , setTrack
@@ -19,10 +21,13 @@ module Tools.Tracks exposing
 
 import Actions
 import Angle
+import Arc3d
+import Axis3d
 import Color
 import CommonToolStyles
 import Dict
 import Direction2d
+import Direction3d
 import DomainModel exposing (GPXSource, PeteTree, trueLength)
 import Element exposing (..)
 import Element.Background as Background
@@ -37,10 +42,12 @@ import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels
 import Point3d
+import Polyline3d
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
+import SketchPlane3d
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, tooltip)
@@ -50,6 +57,7 @@ import Tools.I18N as I18N
 import Tools.TracksOptions as Options exposing (Direction(..), GraphState(..), Options, Traversal, TraversalDisplay)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
+import Vector3d
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon, useIconWithSize)
 
 
@@ -68,7 +76,7 @@ type Msg
     | HighlightTraversal Int
     | RemoveLastTraversal
     | DisplayInfo String String
-      --| FlipDirection Int
+    | FlipDirection Int
       --| ClearRoute
     | UndoAnalyze
     | SetTolerance (Quantity Float Meters)
@@ -274,37 +282,32 @@ update msg options =
             , []
             )
 
-        {-
-           FlipDirection i ->
-               let
-                   graph =
-                       options.graph
+        FlipDirection i ->
+            let
+                newOptions =
+                    { options
+                        | userRoute =
+                            options.userRoute
+                                |> List.Extra.updateAt i
+                                    (\t ->
+                                        { t
+                                            | direction =
+                                                case t.direction of
+                                                    Natural ->
+                                                        Reverse
 
-                   newGraph =
-                       { graph
-                           | userRoute =
-                               graph.userRoute
-                                   |> List.Extra.updateAt i
-                                       (\t ->
-                                           { t
-                                               | direction =
-                                                   case t.direction of
-                                                       Natural ->
-                                                           Reverse
+                                                    Reverse ->
+                                                        Natural
+                                        }
+                                    )
+                    }
+            in
+            ( { newOptions
+                | selectedTraversal = min options.selectedTraversal (List.length newOptions.userRoute - 1)
+              }
+            , []
+            )
 
-                                                       Reverse ->
-                                                           Natural
-                                           }
-                                       )
-                       }
-               in
-               ( { options
-                   | graph = newGraph
-                   , selectedTraversal = min options.selectedTraversal (List.length newGraph.userRoute - 1)
-                 }
-               , []
-               )
-        -}
         SetTolerance tolerance ->
             lookForClusters options tolerance
 
@@ -888,7 +891,7 @@ viewGraph settings wrapper options graph =
                                                                 [ alignRight
                                                                 , tooltip below (localisedTooltip settings.location toolId "reverse")
                                                                 ]
-                                                                { onPress = Nothing --Just <| wrapper <| FlipDirection i
+                                                                { onPress = Just <| wrapper <| FlipDirection i
                                                                 , label = useIcon FeatherIcons.refreshCw
                                                                 }
 
@@ -1228,37 +1231,146 @@ traversalCanBeAdded newEdge options =
                    List.any (\traversal -> traversal.edge == edge) userRoute
               )
 
-
-   loopCanBeAdded : Int -> List Traversal -> Graph msg -> Bool
-   loopCanBeAdded node userRoute graph =
-       False
 -}
-{-
-   -- Loop can be added if node is same as final node of last traversal.
-   case
-       List.Extra.last userRoute
-   of
-       Just traversal ->
-           case Dict.get traversal.edge graph.edges of
-               Just finalEdge ->
-                   let
-                       finalNode =
-                           if traversal.direction == Natural then
-                               finalEdge.highNode
 
-                           else
-                               finalEdge.lowNode
-                   in
-                   finalNode == node
 
-               Nothing ->
-                   False
+loopCanBeAdded : String -> Options msg -> Bool
+loopCanBeAdded node options =
+    -- Loop can be added if node is same as final node of last traversal.
+    case
+        List.Extra.last options.userRoute
+    of
+        Just traversal ->
+            case Dict.get traversal.edge options.graph.edges of
+                Just finalEdge ->
+                    let
+                        finalNode =
+                            if traversal.direction == Natural then
+                                finalEdge.highNode
 
-       Nothing ->
-           False
--}
+                            else
+                                finalEdge.lowNode
+                    in
+                    finalNode == node
+
+                Nothing ->
+                    False
+
+        Nothing ->
+            False
 
 
 deleteEdgeTraversal : Int -> List Traversal -> Graph msg -> Graph msg
 deleteEdgeTraversal edge userRoute graph =
     graph
+
+
+addSelfLoop : String -> Options msg -> Options msg
+addSelfLoop node options =
+    case
+        List.Extra.last options.userRoute
+    of
+        Just traversal ->
+            case Dict.get traversal.edge options.graph.edges of
+                Just edgeInfo ->
+                    let
+                        ( _, edgeDirection, endPoint ) =
+                            if traversal.direction == Natural then
+                                ( edgeInfo.highNode
+                                , DomainModel.getLastLeaf edgeInfo.track.trackTree |> .directionAtEnd
+                                , DomainModel.earthPointFromIndex
+                                    (DomainModel.skipCount edgeInfo.track.trackTree)
+                                    edgeInfo.track.trackTree
+                                )
+
+                            else
+                                ( edgeInfo.lowNode
+                                , DomainModel.getFirstLeaf edgeInfo.track.trackTree
+                                    |> .directionAtStart
+                                    |> Direction2d.reverse
+                                , DomainModel.startPoint edgeInfo.track.trackTree
+                                )
+
+                        loopOpposite =
+                            endPoint.space
+                                |> Point3d.translateBy
+                                    (Vector3d.withLength
+                                        (Quantity.twice options.minimumRadiusAtPlaces)
+                                        (edgeDirection |> Direction3d.on SketchPlane3d.xy)
+                                    )
+
+                        loopCentre =
+                            Point3d.midpoint endPoint.space loopOpposite
+
+                        axis =
+                            Axis3d.withDirection Direction3d.positiveZ loopCentre
+
+                        ( arcStart, arcEnd ) =
+                            ( endPoint.space |> Point3d.rotateAround axis (Angle.degrees 30)
+                            , endPoint.space |> Point3d.rotateAround axis (Angle.degrees -30)
+                            )
+
+                        arc =
+                            Arc3d.throughPoints arcStart loopOpposite arcEnd
+                    in
+                    case arc of
+                        Just isArc ->
+                            let
+                                edgePoints =
+                                    isArc
+                                        |> Arc3d.approximate (Length.meters 0.1)
+                                        |> Polyline3d.vertices
+                                        |> List.map DomainModel.withoutTime
+                                        |> List.map (DomainModel.gpxFromPointWithReference options.graph.referenceLonLat)
+
+                                newEdgeTree =
+                                    DomainModel.treeFromSourcesWithExistingReference
+                                        edgeInfo.track.referenceLonLat
+                                        edgePoints
+
+                                newEdgeTrack =
+                                    Maybe.map (TrackLoaded.newTrackFromTree edgeInfo.track.referenceLonLat)
+                                        newEdgeTree
+                            in
+                            case newEdgeTrack of
+                                Just newTrack ->
+                                    let
+                                        graph =
+                                            options.graph
+
+                                        newEdgeInfo =
+                                            { lowNode = node
+                                            , highNode = node
+                                            , via = DomainModel.withoutTime loopOpposite
+                                            }
+
+                                        newEdgeIndex =
+                                            "Road " ++ (String.fromInt <| 1 + Dict.size options.graph.edges)
+
+                                        newGraph =
+                                            --TODO: Should be in Graph.
+                                            { graph
+                                                | edges =
+                                                    Dict.insert
+                                                        newEdgeIndex
+                                                        { lowNode = newEdgeInfo.lowNode
+                                                        , highNode = newEdgeInfo.highNode
+                                                        , via = Graph.nodeKey newEdgeInfo.via
+                                                        , track = newTrack
+                                                        }
+                                                        graph.edges
+                                            }
+                                    in
+                                    { options | graph = newGraph }
+
+                                Nothing ->
+                                    options
+
+                        Nothing ->
+                            options
+
+                Nothing ->
+                    options
+
+        Nothing ->
+            options

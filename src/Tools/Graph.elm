@@ -10,6 +10,8 @@ module Tools.Graph exposing
     ,  identifyPointsToBeMerged
        --, makeNewRoute
 
+    , nodeKey
+    , pointAsComparable
     , removeEdge
     ,  snapToClusters
        --, undoWalkRoute
@@ -346,112 +348,6 @@ reverseTrack track =
                listEdgesForNode node graph
        in
        asLow ++ asHigh
--}
-{-
-
-   addSelfLoop : Int -> List Traversal -> Graph msg -> Graph msg
-   addSelfLoop node userRoute graph =
-       case
-           List.Extra.last userRoute
-       of
-           Just traversal ->
-               case Dict.get traversal.edge graph.edges of
-                   Just edgeInfo ->
-                       let
-                           ( _, edgeDirection, endPoint ) =
-                               if traversal.direction == Natural then
-                                   ( edgeInfo.highNode
-                                   , DomainModel.getLastLeaf edgeInfo.track.trackTree |> .directionAtEnd
-                                   , DomainModel.earthPointFromIndex
-                                       (skipCount edgeInfo.track.trackTree)
-                                       edgeInfo.track.trackTree
-                                   )
-
-                               else
-                                   ( edgeInfo.lowNode
-                                   , DomainModel.getFirstLeaf edgeInfo.track.trackTree
-                                       |> .directionAtStart
-                                       |> Direction2d.reverse
-                                   , DomainModel.earthPointFromIndex 0 edgeInfo.track.trackTree
-                                   )
-
-                           loopOpposite =
-                               endPoint.space
-                                   |> Point3d.translateBy
-                                       (Vector3d.withLength
-                                           (Quantity.twice options.minimumRadiusAtPlaces)
-                                           (edgeDirection |> Direction3d.on SketchPlane3d.xy)
-                                       )
-
-                           loopCentre =
-                               Point3d.midpoint endPoint.space loopOpposite
-
-                           axis =
-                               Axis3d.withDirection Direction3d.positiveZ loopCentre
-
-                           ( arcStart, arcEnd ) =
-                               ( endPoint.space |> Point3d.rotateAround axis (Angle.degrees 30)
-                               , endPoint.space |> Point3d.rotateAround axis (Angle.degrees -30)
-                               )
-
-                           arc =
-                               Arc3d.throughPoints arcStart loopOpposite arcEnd
-                       in
-                       case arc of
-                           Just isArc ->
-                               let
-                                   edgePoints =
-                                       isArc
-                                           |> Arc3d.approximate (Length.meters 0.1)
-                                           |> Polyline3d.vertices
-                                           |> List.map DomainModel.withoutTime
-                                           |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
-
-                                   newEdgeTree =
-                                       DomainModel.treeFromSourcesWithExistingReference
-                                           edgeInfo.track.referenceLonLat
-                                           edgePoints
-
-                                   newEdgeTrack =
-                                       Maybe.map (TrackLoaded.newTrackFromTree edgeInfo.track.referenceLonLat)
-                                           newEdgeTree
-                               in
-                               case newEdgeTrack of
-                                   Just newTrack ->
-                                       let
-                                           newEdgeInfo =
-                                               { lowNode = node
-                                               , highNode = node
-                                               , via = makeXY <| DomainModel.withoutTime loopOpposite
-                                               }
-
-                                           newEdgeIndex =
-                                               Dict.size graph.edges
-                                       in
-                                       { graph
-                                           | edges =
-                                               Dict.insert
-                                                   newEdgeIndex
-                                                   { lowNode = newEdgeInfo.lowNode
-                                                   , highNode = newEdgeInfo.highNode
-                                                   , via = newEdgeInfo.via
-                                                   , track = newTrack
-                                                   , originalDirection = Natural
-                                                   }
-                                                   graph.edges
-                                       }
-
-                                   Nothing ->
-                                       graph
-
-                           Nothing ->
-                               graph
-
-                   Nothing ->
-                       graph
-
-           Nothing ->
-               graph
 -}
 
 
