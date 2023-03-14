@@ -18,18 +18,12 @@ BUG: Right split not being saved/restored.
 
 BUG? May be shortening drawn routes somehow.
 
-1. ~~Traversal table.~~
-2. ~~Add traversal.~~
-3. ~~Do not create edge from end of one track to start of the next (drop the current edge).~~
-4. ~~Reverse traversal (only one or a loop)~~
-5. ~~Remove last traversal.~~
-6. ~~Add self-loop.~~
-7. Show direction on Route View.
-8. New track with offset, creates a new track from route.
-9. Should still be able to revert to pre-routing tracks, right until convert back to single.
-10. Undo for create new track from route.
-11. Any change to track collection must invalidate nodes.
-12. Remove all logging.
+1. Update active traversal in route view.
+2. New track with offset, creates a new track from route.
+3. Should still be able to revert to pre-routing tracks, right until convert back to single.
+4. Undo for create new track from route.
+5. Any change to track collection must invalidate nodes.
+6. Remove all logging.
 
 ---
 
