@@ -715,18 +715,17 @@ update msg model =
 
         PaneMsg paneMsg ->
             let
-                ( newOptions, actions ) =
+                ( newPaneOptions, newTracksOptions, actions ) =
                     PaneLayoutManager.update
                         paneMsg
                         PaneMsg
-                        model.activeTrack
-                        model.toolOptions.tracksOptions.graph
+                        model.toolOptions.tracksOptions
                         model.contentArea
                         model.paneLayoutOptions
                         model.previews
 
                 newModel =
-                    { model | paneLayoutOptions = newOptions }
+                    { model | paneLayoutOptions = newPaneOptions }
                         |> performActionsOnModel actions
             in
             ( newModel

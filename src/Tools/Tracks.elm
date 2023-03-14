@@ -9,6 +9,7 @@ module Tools.Tracks exposing
     , setTrack
     , toolId
     , toolStateChange
+    , traversalCanBeAdded
     , unloadActiveTrack
     , update
     , updateActiveTrack
@@ -1133,43 +1134,40 @@ getKeyPlaces options =
     Dict.values options.graph.nodes
 
 
-traversalCanBeAdded : String -> List Traversal -> Graph.Graph msg -> Bool
-traversalCanBeAdded newEdge userRoute graph =
-    False
+traversalCanBeAdded : String -> Options msg -> Bool
+traversalCanBeAdded newEdge options =
+    -- Edge can be added if either node is same as final node of last traversal,
+    -- or if there are no traversals.
+    case
+        ( List.Extra.last options.userRoute
+        , Dict.get newEdge options.graph.edges
+        )
+    of
+        ( Just lastTraversal, Just clickedEdge ) ->
+            case Dict.get lastTraversal.edge options.graph.edges of
+                Just currentLastEdge ->
+                    let
+                        finalNode =
+                            if lastTraversal.direction == Natural then
+                                currentLastEdge.highNode
+
+                            else
+                                currentLastEdge.lowNode
+                    in
+                    finalNode == clickedEdge.lowNode || finalNode == clickedEdge.highNode
+
+                Nothing ->
+                    False
+
+        ( Nothing, Just _ ) ->
+            -- Any edge can be the first edge used.
+            True
+
+        _ ->
+            False
 
 
 
-{-
-   -- Edge can be added if either node is same as final node of last traversal,
-   -- or if there are no traversals.
-   case
-       ( List.Extra.last userRoute
-       , Dict.get newEdge graph.edges
-       )
-   of
-       ( Just lastTraversal, Just clickedEdge ) ->
-           case Dict.get lastTraversal.edge graph.edges of
-               Just currentLastEdge ->
-                   let
-                       finalNode =
-                           if lastTraversal.direction == Natural then
-                               currentLastEdge.highNode
-
-                           else
-                               currentLastEdge.lowNode
-                   in
-                   finalNode == clickedEdge.lowNode || finalNode == clickedEdge.highNode
-
-               Nothing ->
-                   False
-
-       ( Nothing, Just _ ) ->
-           -- Any edge can be the first edge used.
-           True
-
-       _ ->
-           False
--}
 {-
 
    edgeCanBeDeleted : Int -> List Traversal -> Graph msg -> Bool

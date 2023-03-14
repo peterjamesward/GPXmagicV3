@@ -46,7 +46,7 @@ import Tools.GraphOptions exposing (Graph)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.NamedSegmentOptions exposing (NamedSegment)
-import Tools.Tracks
+import Tools.Tracks as Tracks
 import Tools.TracksOptions as Tracks
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
@@ -200,24 +200,26 @@ render toolSettings options width tracks previews =
         | scene3d =
             SceneBuilder3D.renderPreviews previews
                 ++ (List.concat <|
-                        Tools.Tracks.mapOverVisibleTracks renderTrack <|
+                        Tracks.mapOverVisibleTracks renderTrack <|
                             tracks
                    )
-                ++ (SceneBuilder3D.renderKeyPlaces <| Tools.Tracks.getKeyPlaces tracks)
+                ++ (SceneBuilder3D.renderKeyPlaces <| Tracks.getKeyPlaces tracks)
     }
 
 
 update :
     Msg
     -> (Msg -> msg)
-    -> Maybe (TrackLoaded msg)
-    -> Graph msg
+    -> Tracks.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> PaneLayoutOptions
     -> Dict String PreviewData
-    -> ( PaneLayoutOptions, List (ToolAction msg) )
-update paneMsg msgWrapper mTrack graph contentArea options previews =
+    -> ( PaneLayoutOptions, Tracks.Options msg, List (ToolAction msg) )
+update paneMsg msgWrapper tracks contentArea options previews =
     let
+        mTrack =
+            Tracks.getActiveTrack tracks
+
         currentPane id =
             case id of
                 Pane1 ->
@@ -234,13 +236,14 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
 
         updatePaneWith :
             PaneId
-            -> (PaneContext -> ( PaneContext, List (ToolAction msg) ))
-            -> ( PaneLayoutOptions, List (ToolAction msg) )
-        updatePaneWith id updateFn =
+            -> Tracks.Options msg
+            -> (PaneContext -> Tracks.Options msg -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) ))
+            -> ( PaneLayoutOptions, Tracks.Options msg, List (ToolAction msg) )
+        updatePaneWith id tracksIn updateFn =
             -- Helper avoids tedious repetition of these case statements.
             let
-                ( updatedPane, actions ) =
-                    updateFn (currentPane id)
+                ( updatedPane, tracksOut, actions ) =
+                    updateFn (currentPane id) tracksIn
 
                 updatedOptions =
                     case id of
@@ -256,11 +259,11 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                         Pane4 ->
                             { options | pane4 = updatedPane }
             in
-            ( updatedOptions, actions )
+            ( updatedOptions, tracksOut, actions )
     in
     case paneMsg of
         PaneNoOp ->
-            ( options, [] )
+            ( options, tracks, [] )
 
         SetPaneLayout paneLayout ->
             let
@@ -268,27 +271,31 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                     { options | paneLayout = paneLayout }
             in
             ( newOptions
+            , tracks
             , [ MapRefresh
               , StoreLocally "panes" <| encodePaneState newOptions
               ]
             )
 
         TogglePopup ->
-            ( { options | popupVisible = not options.popupVisible }, [] )
+            ( { options | popupVisible = not options.popupVisible }, tracks, [] )
 
         SetViewMode paneId viewMode ->
             let
-                ( newOptions, _ ) =
+                ( newOptions, _, _ ) =
                     updatePaneWith paneId
-                        (\pane ->
+                        tracks
+                        (\pane _ ->
                             ( { pane
                                 | activeView = viewMode
                               }
+                            , tracks
                             , []
                             )
                         )
             in
             ( newOptions
+            , tracks
             , [ MapRefresh
               , StoreLocally "panes" <| encodePaneState newOptions
               ]
@@ -296,8 +303,11 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
 
         ThirdPersonViewMessage paneId imageMsg ->
             let
-                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
-                paneUpdateFunction paneInfo =
+                paneUpdateFunction :
+                    PaneContext
+                    -> Tracks.Options msg
+                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                paneUpdateFunction paneInfo _ =
                     let
                         effectiveContext =
                             case paneInfo.activeView of
@@ -314,7 +324,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                             case ( mTrack, effectiveContext ) of
                                 ( Just track, Just context ) ->
                                     let
-                                        ( new, act ) =
+                                        ( newThirdContext, act ) =
                                             ViewThirdPerson.update
                                                 imageMsg
                                                 (msgWrapper << ThirdPersonViewMessage Pane1)
@@ -322,7 +332,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 context
                                     in
-                                    ( Just new, act )
+                                    ( Just newThirdContext, act )
 
                                 _ ->
                                     ( Nothing, [] )
@@ -338,14 +348,17 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                                 _ ->
                                     paneInfo
                     in
-                    ( newPane, actions )
+                    ( newPane, tracks, actions )
             in
-            updatePaneWith paneId paneUpdateFunction
+            updatePaneWith paneId tracks paneUpdateFunction
 
         PlanViewMessage paneId imageMsg ->
             let
-                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
-                paneUpdateFunction paneInfo =
+                paneUpdateFunction :
+                    PaneContext
+                    -> Tracks.Options msg
+                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                paneUpdateFunction paneInfo _ =
                     let
                         ( newContext, actions ) =
                             case ( mTrack, paneInfo.planContext ) of
@@ -367,14 +380,17 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                         newPane =
                             { paneInfo | planContext = newContext }
                     in
-                    ( newPane, actions )
+                    ( newPane, tracks, actions )
             in
-            updatePaneWith paneId paneUpdateFunction
+            updatePaneWith paneId tracks paneUpdateFunction
 
         GraphViewMessage paneId imageMsg ->
             let
-                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
-                paneUpdateFunction paneInfo =
+                paneUpdateFunction :
+                    PaneContext
+                    -> Tracks.Options msg
+                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                paneUpdateFunction paneInfo _ =
                     let
                         ( newContext, actions ) =
                             case paneInfo.graphContext of
@@ -384,7 +400,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                                             ViewGraph.update
                                                 imageMsg
                                                 (msgWrapper << GraphViewMessage Pane1)
-                                                graph
+                                                tracks
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 graphContext
                                     in
@@ -396,14 +412,17 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                         newPane =
                             { paneInfo | graphContext = newContext }
                     in
-                    ( newPane, actions )
+                    ( newPane, tracks, actions )
             in
-            updatePaneWith paneId paneUpdateFunction
+            updatePaneWith paneId tracks paneUpdateFunction
 
         ProfileViewMessage paneId imageMsg ->
             let
-                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
-                paneUpdateFunction paneInfo =
+                paneUpdateFunction :
+                    PaneContext
+                    -> Tracks.Options msg
+                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                paneUpdateFunction paneInfo _ =
                     let
                         ( newContext, actions ) =
                             case ( mTrack, paneInfo.profileContext ) of
@@ -436,9 +455,9 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                         newPane =
                             { paneInfo | profileContext = newContext }
                     in
-                    ( newPane, actions )
+                    ( newPane, tracks, actions )
             in
-            updatePaneWith paneId paneUpdateFunction
+            updatePaneWith paneId tracks paneUpdateFunction
 
         MapViewMessage mapViewMsg ->
             -- Can only be pane 1!
@@ -466,7 +485,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                 newPane =
                     { paneInfo | mapContext = newContext }
             in
-            ( { options | pane1 = newPane }, actions )
+            ( { options | pane1 = newPane }, tracks, actions )
 
         MapPortsMessage mapMsg ->
             let
@@ -474,6 +493,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                     MapPortController.update mapMsg mTrack options.mapState
             in
             ( { options | mapState = newState }
+            , tracks
             , actions
             )
 
@@ -493,6 +513,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                     { options | sliderState = SliderMoved }
             in
             ( newOptions
+            , tracks
             , [ SetCurrent pos
               , PointerChange
               , if mapFollowsOrange then

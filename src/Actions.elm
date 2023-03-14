@@ -117,14 +117,8 @@ type
     | Straighten
     | DisplayInfo String String
     | Autofix (List Int)
-    | AddTraversal Int
-    | AddSelfLoop Int
-    | DeleteEdge Int
-      --| StartRoutePlanning
-      --| ExitRoutePlanning
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
-      --| CombineNearbyPoints
     | WidenBend (List Int) (Quantity Float Meters)
     | AdjustTimes Tools.TimestampOptions.Options
     | SetTimeTicks Int

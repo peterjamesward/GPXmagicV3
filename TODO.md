@@ -13,15 +13,20 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Promote Graph
 
+
+> If PaneLayoutManager.update takes TracksOptions instead of Graph, it can also return it
+> so we would avoid use of Actions for the route editing. That's a step in the right direction.
+
 1. ~~Traversal table.~~
-2. Add traversal.
-3. Reverse traversal.
-4. Add self-loop.
+2. Try GraphState = State GraphState style.
+3. Add traversal.
+4. Reverse traversal.
+5. Add self-loop.
 6. New track with offset, creates a new track from route.
-5. Should still be able to revert to pre-routing tracks, right until convert back to single.
-7. Undo for create new track from route.
-8. Any change to track collection must invalidate nodes.
-9. Remove all logging.
+7. Should still be able to revert to pre-routing tracks, right until convert back to single.
+8. Undo for create new track from route.
+9. Any change to track collection must invalidate nodes.
+10. Remove all logging.
 
 ---
 

@@ -52,7 +52,8 @@ import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions as Graph exposing (Edge, Graph)
-import Tools.TracksOptions exposing (ClickDetect(..))
+import Tools.Tracks
+import Tools.TracksOptions as Tracks exposing (ClickDetect(..))
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
@@ -74,8 +75,8 @@ type Msg
     | ClickDelayExpired
     | PopupHide
     | ToggleEdgeMode
-    | AddTraversal Int
-    | AddSelfLoop Int
+    | AddTraversal String
+    | AddSelfLoop String
 
 
 initialiseView :
@@ -160,7 +161,7 @@ zoomButtons settings msgWrapper context =
 popupEditingMenu :
     (Msg -> msg)
     -> GraphContext
-    -> Tools.TracksOptions.Options msg
+    -> Tracks.Options msg
     -> Element msg
 popupEditingMenu msgWrapper context options =
     let
@@ -192,15 +193,15 @@ popupEditingMenu msgWrapper context options =
 
                 ClickEdge edge ->
                     [ text edge
+                    , if Tools.Tracks.traversalCanBeAdded edge options then
+                        Input.button []
+                            { onPress = Just <| msgWrapper <| AddTraversal edge
+                            , label = text "Add to route"
+                            }
 
-                    --, if Tools.Graph.traversalCanBeAdded edge options.userRoute graph then
-                    --    Input.button []
-                    --        { onPress = Just <| msgWrapper <| AddTraversal edge
-                    --        , label = text "Add to route"
-                    --        }
-                    --
-                    --  else
-                    --    none
+                      else
+                        none
+
                     --, if Tools.Graph.edgeCanBeDeleted edge options.userRoute graph then
                     --    Input.button []
                     --        { onPress = Just <| msgWrapper <| DeleteRoad edge
@@ -254,7 +255,7 @@ view :
     SystemSettings
     -> GraphContext
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Tools.TracksOptions.Options msg
+    -> Tracks.Options msg
     -> (Msg -> msg)
     -> Element msg
 view settings context ( width, height ) options msgWrapper =
@@ -548,11 +549,11 @@ deriveCamera context =
 update :
     Msg
     -> (Msg -> msg)
-    -> Graph msg
+    -> Tracks.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> GraphContext
     -> ( GraphContext, List (ToolAction msg) )
-update msg msgWrapper graph area context =
+update msg msgWrapper tracks area context =
     -- Second return value indicates whether selection needs to change.
     case msg of
         ImageGrab event ->
@@ -667,7 +668,7 @@ update msg msgWrapper graph area context =
             if context.waitingForClickDelay then
                 ( { context
                     | clickPoint = Just <| event.offsetPos
-                    , clickFeature = detectHit event graph area context
+                    , clickFeature = detectHit event tracks.graph area context
                   }
                 , []
                 )
@@ -709,12 +710,12 @@ update msg msgWrapper graph area context =
 
         AddTraversal edge ->
             ( { context | clickPoint = Nothing, clickFeature = ClickNone }
-            , [ Actions.AddTraversal edge ]
+            , []
             )
 
         AddSelfLoop node ->
             ( { context | clickPoint = Nothing, clickFeature = ClickNone }
-            , [ Actions.AddSelfLoop node ]
+            , []
             )
 
 
