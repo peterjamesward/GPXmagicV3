@@ -1406,10 +1406,15 @@ canonicalise graph =
 
         walkEdgeSplittingAtNodes : Edge msg -> PutativeEdgeFold -> PutativeEdgeFold
         walkEdgeSplittingAtNodes edge collectEdges =
-            DomainModel.foldOverEarthPoints
-                lookAtPoint
-                edge.track.trackTree
-                collectEdges
+            -- Flush current edge in fold at end of each track.
+            let
+                foldAtTrackEnd =
+                    DomainModel.foldOverEarthPoints
+                        lookAtPoint
+                        edge.track.trackTree
+                        collectEdges
+            in
+            { foldAtTrackEnd | currentEdge = Nothing }
 
         lookAtPoint : EarthPoint -> PutativeEdgeFold -> PutativeEdgeFold
         lookAtPoint point foldState =

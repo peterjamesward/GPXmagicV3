@@ -19,14 +19,15 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 1. ~~Traversal table.~~
 2. ~~Add traversal.~~
-3. Reverse traversal (only one or a loop)
-4. Remove last traversal.
-5. Add self-loop.
-6. New track with offset, creates a new track from route.
-7. Should still be able to revert to pre-routing tracks, right until convert back to single.
-8. Undo for create new track from route.
-9. Any change to track collection must invalidate nodes.
-10. Remove all logging.
+3. ~~Do not create edge from end of one track to start of the next (drop the current edge).~~
+4. Reverse traversal (only one or a loop)
+5. Remove last traversal.
+6. Add self-loop.
+7. New track with offset, creates a new track from route.
+8. Should still be able to revert to pre-routing tracks, right until convert back to single.
+9. Undo for create new track from route.
+10. Any change to track collection must invalidate nodes.
+11. Remove all logging.
 
 ---
 
