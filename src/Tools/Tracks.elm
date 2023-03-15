@@ -22,14 +22,15 @@ module Tools.Tracks exposing
 
 import Actions
 import Angle
-import Arc3d
+import Arc2d exposing (Arc2d)
+import Arc3d exposing (Arc3d)
 import Axis3d
 import Color
 import CommonToolStyles
 import Dict
 import Direction2d
 import Direction3d
-import DomainModel exposing (GPXSource, PeteTree, trueLength)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -38,16 +39,21 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.FlatUIPalette
-import Length exposing (Meters)
+import Geometry101
+import Length exposing (Meters, inMeters, meters)
+import LineSegment2d
+import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels
+import Point2d
 import Point3d
 import Polyline3d
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
+import Set
 import SketchPlane3d
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
@@ -55,9 +61,12 @@ import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.Graph as Graph
 import Tools.GraphOptions as Graph exposing (Cluster, Graph)
 import Tools.I18N as I18N
+import Tools.Nudge
+import Tools.NudgeOptions
 import Tools.TracksOptions as Options exposing (Direction(..), GraphState(..), Options, Traversal, TraversalDisplay)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
+import Vector2d
 import Vector3d
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon, useIconWithSize)
 
@@ -73,7 +82,7 @@ type Msg
     | GraphAnalyse
     | CentreLineOffset (Quantity Float Meters)
     | MinimumRadius (Quantity Float Meters)
-      --| ConvertFromGraph
+    | ConvertFromGraph
     | HighlightTraversal Int
     | RemoveLastTraversal
     | DisplayInfo String String
@@ -314,16 +323,11 @@ update msg options =
         MinimumRadius float ->
             ( { options | minimumRadiusAtPlaces = float }, [] )
 
-        {-
-           ConvertFromGraph ->
-               ( options
-               , [ Actions.MakeRouteFromGraph
-                 , Actions.TrackHasChanged
-                 , Actions.ExitRoutePlanning
-                 , Actions.HidePreview toolId
-                 ]
-               )
-        -}
+        ConvertFromGraph ->
+            ( makeNewRoute options.userRoute options
+            , []
+            )
+
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
 
@@ -684,7 +688,7 @@ viewGraph settings wrapper options graph =
                                 [ infoButton (wrapper <| DisplayInfo toolId "render")
                                 , Input.button
                                     neatToolsBorder
-                                    { onPress = Nothing --Just (wrapper ConvertFromGraph)
+                                    { onPress = Just (wrapper ConvertFromGraph)
                                     , label = i18n "convert"
                                     }
                                 ]
@@ -1239,11 +1243,6 @@ loopCanBeAdded node options =
             False
 
 
-deleteEdgeTraversal : Int -> List Traversal -> Graph msg -> Graph msg
-deleteEdgeTraversal edge userRoute graph =
-    graph
-
-
 addSelfLoop : String -> Options msg -> Options msg
 addSelfLoop node options =
     case List.Extra.last options.userRoute of
@@ -1353,4 +1352,331 @@ addSelfLoop node options =
                     options
 
         Nothing ->
+            options
+
+
+type alias Junction =
+    { arc : Maybe (Arc3d Meters LocalCoords)
+    , trim : Quantity Float Meters
+    }
+
+
+makeNewRoute : List Traversal -> Options msg -> Options msg
+makeNewRoute userRoute options =
+    {-
+       This will walk the route, apply offset, push the old track on the Undo stack
+       and then become a "trivialGraph" of the new route.
+       Also note we nudge down by 1cm any edges that are revisited.
+       Don't forget to push the old points on Undo stack.
+
+        Nope, not doing a fold at traversal level since it gets unduly complicated.
+        We need to consider a traversal and both its neighbours, to work out any edge
+        shortening, so a triple map is conceptually easier, and a simple recursive
+        function more so.
+    -}
+    let
+        graph =
+            options.graph
+
+        useNudgeTool nudgeOption track index =
+            -- Simple wrapper to use internal operation in Nudge; not efficient!
+            Tools.Nudge.nudgeTrackPoint
+                nudgeOption
+                1.0
+                index
+                track
+
+        dummyJunction : Junction
+        dummyJunction =
+            { arc = Nothing, trim = Quantity.zero }
+
+        junctions : List Junction
+        junctions =
+            -- Took me so long to see this. Getting old?
+            -- There will be one fewer junctions than edges.
+            List.map2
+                computeJunction
+                options.userRoute
+                (List.drop 1 options.userRoute)
+
+        trim =
+            -- CHANGE. Actually prune the trees to get the right leaf.
+            -- Will need to do this in the traversal rendering as well.
+            -- This changes the "minimum radius" semantics.
+            options.minimumRadiusAtPlaces
+
+        renderedArcs : List (List EarthPoint)
+        renderedArcs =
+            List.map renderJunction junctions
+
+        isNotFirstUseOfEdge : List Bool
+        isNotFirstUseOfEdge =
+            -- Good practice for RGT is to depress subsequent edge pass by 1cm; avoids flicker.
+            let
+                ( _, flags ) =
+                    List.foldl
+                        (\{ edge } ( traversed, outputs ) ->
+                            ( Set.insert edge traversed
+                            , Set.member edge traversed :: outputs
+                            )
+                        )
+                        ( Set.empty, [] )
+                        options.userRoute
+            in
+            List.reverse flags
+
+        trimmedTraversals : List (List EarthPoint)
+        trimmedTraversals =
+            List.map4
+                trimTraversal
+                (dummyJunction :: junctions)
+                options.userRoute
+                isNotFirstUseOfEdge
+                (junctions ++ [ dummyJunction ])
+
+        trimTraversal : Junction -> Traversal -> Bool -> Junction -> List EarthPoint
+        trimTraversal preceding { edge, direction } repetition following =
+            -- Emit offset points but not within the trim areas.
+            case Dict.get edge graph.edges of
+                Just edgeInfo ->
+                    -- It's a real edge, offset flipped if reversed.
+                    -- Compute offset points on unflipped edge then flip if reversed.
+                    let
+                        correctedOffset =
+                            case direction of
+                                Natural ->
+                                    options.centreLineOffset
+
+                                Reverse ->
+                                    Quantity.negate options.centreLineOffset
+
+                        ( firstOffsetIndex, lastOffsetIndex ) =
+                            -- Other than start and end of route, trim back the edge to allow for the Place arc.
+                            ( DomainModel.indexFromDistance trim edgeInfo.track.trackTree + 1
+                            , DomainModel.indexFromDistance
+                                (trueLength edgeInfo.track.trackTree |> Quantity.minus trim)
+                                edgeInfo.track.trackTree
+                                - 1
+                            )
+
+                        defaultNudge =
+                            Tools.Nudge.defaultOptions
+
+                        nudgeOptions : Tools.NudgeOptions.Options
+                        nudgeOptions =
+                            { defaultNudge
+                                | horizontal = correctedOffset
+                                , vertical =
+                                    if repetition then
+                                        Length.centimeters -1
+
+                                    else
+                                        Quantity.zero
+                            }
+
+                        nudgedPoints =
+                            List.range firstOffsetIndex lastOffsetIndex
+                                |> List.map (useNudgeTool nudgeOptions edgeInfo.track.trackTree)
+                    in
+                    case direction of
+                        Natural ->
+                            nudgedPoints
+
+                        Reverse ->
+                            List.reverse nudgedPoints
+
+                Nothing ->
+                    []
+
+        newEarthPoints =
+            List.take 1 trimmedTraversals
+                ++ List.Extra.interweave renderedArcs (List.drop 1 trimmedTraversals)
+
+        computeJunction : Traversal -> Traversal -> Junction
+        computeJunction inbound outbound =
+            -- This is the bit of new geometry. We need the "end" direction of the inbound edge
+            -- (allowing for Direction) and the "start" direction of the outbound.
+            -- We work out the arc needed to give the minimum radius at centre-line.
+            -- We work out how much this impedes on the edges (the "trim").
+            -- We compute the "arc" according to the direction and offset.
+            -- Note we actually make a 2D arc, then interpolate altitudes to get 3D.
+            -- First thing is all the necessary dictionary lookups.
+            case ( Dict.get inbound.edge graph.edges, Dict.get outbound.edge graph.edges ) of
+                ( Just inEdge, Just outEdge ) ->
+                    let
+                        actualVertex =
+                            case inbound.direction of
+                                Natural ->
+                                    DomainModel.earthPointFromIndex
+                                        (DomainModel.skipCount inEdge.track.trackTree)
+                                        inEdge.track.trackTree
+
+                                Reverse ->
+                                    DomainModel.earthPointFromIndex
+                                        0
+                                        inEdge.track.trackTree
+
+                        ( _, inboundTrimPoint ) =
+                            case inbound.direction of
+                                Natural ->
+                                    DomainModel.interpolateTrack
+                                        (trueLength inEdge.track.trackTree |> Quantity.minus trim)
+                                        inEdge.track.trackTree
+
+                                Reverse ->
+                                    DomainModel.interpolateTrack
+                                        trim
+                                        inEdge.track.trackTree
+
+                        ( _, outboundTrimPoint ) =
+                            case outbound.direction of
+                                Natural ->
+                                    DomainModel.interpolateTrack
+                                        trim
+                                        outEdge.track.trackTree
+
+                                Reverse ->
+                                    DomainModel.interpolateTrack
+                                        (trueLength outEdge.track.trackTree |> Quantity.minus trim)
+                                        outEdge.track.trackTree
+
+                        ( inboundDirection, outboundDirection ) =
+                            ( Direction3d.from inboundTrimPoint.space actualVertex.space
+                                |> Maybe.withDefault Direction3d.positiveZ
+                                |> Direction3d.projectInto planeFor2dArc
+                                |> Maybe.withDefault Direction2d.positiveX
+                            , Direction3d.from actualVertex.space outboundTrimPoint.space
+                                |> Maybe.withDefault Direction3d.positiveZ
+                                |> Direction3d.projectInto planeFor2dArc
+                                |> Maybe.withDefault Direction2d.positiveX
+                            )
+
+                        ( inboundRoad, outboundRoad ) =
+                            ( LineSegment3d.from inboundTrimPoint.space actualVertex.space
+                            , LineSegment3d.from actualVertex.space outboundTrimPoint.space
+                            )
+
+                        ( offsetVectorInbound, offsetVectorOutbound ) =
+                            ( Vector2d.withLength options.centreLineOffset
+                                (Direction2d.rotateClockwise inboundDirection)
+                            , Vector2d.withLength options.centreLineOffset
+                                (Direction2d.rotateClockwise outboundDirection)
+                            )
+
+                        meanHeight =
+                            Quantity.half <|
+                                Quantity.plus
+                                    (Point3d.zCoordinate inboundTrimPoint.space)
+                                    (Point3d.zCoordinate outboundTrimPoint.space)
+
+                        -- If we now apply offset to the start and end (which we can), we
+                        -- make the offset arc not the centre line arc here.
+                        planeFor2dArc =
+                            SketchPlane3d.xy
+                                |> SketchPlane3d.translateBy (Vector3d.xyz Quantity.zero Quantity.zero meanHeight)
+
+                        ( inboundTrim2d, outboundTrim2d ) =
+                            ( inboundTrimPoint.space |> Point3d.projectInto planeFor2dArc
+                            , outboundTrimPoint.space |> Point3d.projectInto planeFor2dArc
+                            )
+
+                        ( inboundRoad2d, outboundRoad2d ) =
+                            ( inboundRoad |> LineSegment3d.projectInto planeFor2dArc
+                            , outboundRoad |> LineSegment3d.projectInto planeFor2dArc
+                            )
+
+                        geometryPoint point =
+                            Point2d.toRecord inMeters point
+
+                        lineEquationFromSegment segment =
+                            Geometry101.lineEquationFromTwoPoints
+                                (geometryPoint <| LineSegment2d.startPoint segment)
+                                (geometryPoint <| LineSegment2d.endPoint segment)
+
+                        ( inboundLineEquation, outboundLineEquation ) =
+                            ( lineEquationFromSegment inboundRoad2d
+                            , lineEquationFromSegment outboundRoad2d
+                            )
+
+                        ( perpToInbound, perToOutbound ) =
+                            ( Geometry101.linePerpendicularTo
+                                inboundLineEquation
+                                (geometryPoint inboundTrim2d)
+                            , Geometry101.linePerpendicularTo
+                                outboundLineEquation
+                                (geometryPoint outboundTrim2d)
+                            )
+
+                        arcCentre =
+                            Maybe.map (Point2d.fromRecord meters) <|
+                                Geometry101.lineIntersection
+                                    perpToInbound
+                                    perToOutbound
+
+                        arc : Maybe (Arc2d Meters LocalCoords)
+                        arc =
+                            case arcCentre of
+                                Just centre ->
+                                    let
+                                        ( offsetInboundTrimPoint, _ ) =
+                                            ( inboundTrim2d |> Point2d.translateBy offsetVectorInbound
+                                            , outboundTrim2d |> Point2d.translateBy offsetVectorOutbound
+                                            )
+
+                                        turnAngle =
+                                            Direction2d.angleFrom inboundDirection outboundDirection
+                                    in
+                                    Just <| Arc2d.sweptAround centre turnAngle offsetInboundTrimPoint
+
+                                Nothing ->
+                                    Nothing
+                    in
+                    -- We make a 3d arc through the same points.
+                    case arc of
+                        Just foundArc ->
+                            { arc = Just <| Arc3d.on planeFor2dArc foundArc
+                            , trim = trim
+                            }
+
+                        Nothing ->
+                            dummyJunction
+
+                _ ->
+                    dummyJunction
+
+        renderJunction : Junction -> List EarthPoint
+        renderJunction junction =
+            case junction.arc of
+                Just arc ->
+                    arc
+                        |> Arc3d.approximate (Length.meters 0.1)
+                        |> Polyline3d.vertices
+                        |> List.map DomainModel.withoutTime
+
+                Nothing ->
+                    []
+
+        newTrack : Maybe (TrackLoaded msg)
+        newTrack =
+            newEarthPoints
+                |> List.concat
+                |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
+                |> DomainModel.treeFromSourcesWithExistingReference graph.referenceLonLat
+                |> Maybe.map (TrackLoaded.newTrackFromTree graph.referenceLonLat)
+    in
+    case newTrack of
+        Just track ->
+            -- All has worked.
+            let
+                trackWithUndo =
+                    TrackLoaded.addToUndoStack Actions.MakeRouteFromGraph track
+            in
+            { options
+                | graph = Graph.addEdgeFromTrack trackWithUndo emptyGraph
+                , selectedTraversal = 0
+                , graphState = GraphOriginalTracks
+            }
+
+        Nothing ->
+            -- Not so much worked.
             options

@@ -16,13 +16,14 @@ BUG: Right split not being saved/restored.
 
 ## Promote Graph
 
-1. New track with offset, creates a new track from route.
-2. "undo decomposition" should show original track.
-3. Undo for create new track from route.
-4. Should still be able to revert to pre-routing tracks, right until convert back to single.
-5. Any change to track collection must invalidate nodes.
-6. Remove all logging.
-7. Add missing language text in UK.elm.
+> Route from graph essentially works but UX needs cleaning up.
+
+3. "undo decomposition" should show original track.
+4. Undo for create new track from route.
+5. Should still be able to revert to pre-routing tracks, right until convert back to single.
+6. Any change to track collection must invalidate nodes.
+7. Remove all logging.
+8. Add missing language text in UK.elm.
 
 ---
 
