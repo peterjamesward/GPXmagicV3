@@ -130,10 +130,25 @@ want to use the other features of Route maker to define your own route.""" )
                 , ( "undoAnalyze", """Undo find key places""" )
                 , ( "canonicalise", """Split into component tracks""" )
                 , ( "undoCanonicalise", """Undo decomposition""" )
-                , ( "graphNone", """Please load one or more tracks, or draw some on the Map.""" )
+                , ( "graphNone", """Welcome to Route Builder. You can now use more than one GPX file.
+Load one or more tracks, or draw some on the Map, with this tool open. The route appear in the list
+at the top of this tool.
+Click on the "Edit" button to make the track "Active" for editing. Click on the "eye" to
+show or hide a track, use the button below to remove a track. You can rename the active track
+in the filename box at the top of the page.""" )
                 , ( "graphOriginal", """Choose which tracks to see, and choose one track to edit.""" )
-                , ( "graphSnapped", """SNAPPED""" )
-                , ( "graphAnalyzed", """ANALYZED""" )
+                , ( "graphSnapped", """Extra points have been added to align the roads. You
+can revert to the previous roads, or continue to find key places and use the Route Builder.""" )
+                , ( "graphAnalyzed", """The places highlighed in the 3D and Plan views are
+possible "junctions" where the route could go different ways. You can go back to the previous
+setting to make adjustments, or continue with splitting the track into sections that you can
+then recombine to make your own route.""" )
+                , ( "graphConverted", """Click on a section of road in the Route View to form
+your own route. If the road is in the wrong direction, use the Reverse button next to it in the
+table below. You can also click on a Place and add a loop (using the radius from the slider below
+the table. When you're finished, you can "Make a new track with this route". If your route uses
+the same piece of road in both directions, you may want to apply an offset to avoid collisions.
+(The offset applies to the whole route.)""" )
                 , ( "info", """
 We follow the route looking for places and road sections that are used more than once.
 This allows us to divide the route into a list of Roads, where each Road goes from from one

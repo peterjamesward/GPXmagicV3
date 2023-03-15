@@ -1668,13 +1668,21 @@ makeNewRoute userRoute options =
         Just track ->
             -- All has worked.
             let
+                newTrackName =
+                    List.map .edge options.userRoute
+                        |> String.join "-"
+
                 trackWithUndo =
-                    TrackLoaded.addToUndoStack Actions.MakeRouteFromGraph track
+                    TrackLoaded.addToUndoStack
+                        Actions.MakeRouteFromGraph
+                        { track | trackName = newTrackName }
             in
             { options
                 | graph = Graph.addEdgeFromTrack trackWithUndo emptyGraph
                 , selectedTraversal = 0
                 , graphState = GraphOriginalTracks
+                , activeTrackName = Just newTrackName
+                , roadListCollapsed = False
             }
 
         Nothing ->
