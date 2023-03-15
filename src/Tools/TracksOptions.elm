@@ -9,8 +9,7 @@ import TrackLoaded exposing (TrackLoaded)
 
 type alias Options msg =
     { nextTrackNumber : Int
-    , tracks : List (TrackLoaded msg)
-    , activeTrackIndex : Maybe Int
+    , activeTrackName : Maybe String
     , commonReferenceGPX : Maybe GPXSource -- from where we derive (X,Y) by map projection.
     , graph : Graph msg
     , graphState : GraphState msg

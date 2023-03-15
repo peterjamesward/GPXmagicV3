@@ -67,8 +67,8 @@ toolId =
 
 
 type Msg
-    = SelectActiveTrack Int
-    | ToggleVisibility Int
+    = SelectActiveTrack String
+    | ToggleVisibility String
     | UnloadActiveTrack
     | GraphAnalyse
       --| CentreLineOffset (Quantity Float Meters)
@@ -91,8 +91,7 @@ type Msg
 defaultOptions : Options msg
 defaultOptions =
     { nextTrackNumber = 1
-    , tracks = []
-    , activeTrackIndex = Nothing
+    , activeTrackName = Nothing
     , commonReferenceGPX = Nothing
     , graph = emptyGraph
     , graphState = GraphNoTracks
@@ -140,55 +139,49 @@ toolStateChange opened options =
 update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options =
     case msg of
-        SelectActiveTrack index ->
-            ( options
-            , [ Actions.SetActiveTrack index ]
-            )
+        SelectActiveTrack name ->
+            case Dict.get name options.graph.edges of
+                Just found ->
+                    ( options
+                    , [ Actions.SetActiveTrack found.track.trackName ]
+                    )
 
-        ToggleVisibility index ->
-            case List.Extra.getAt index options.tracks of
+                Nothing ->
+                    ( options, [] )
+
+        ToggleVisibility name ->
+            case Dict.get name options.graph.edges of
                 Just found ->
                     let
+                        track =
+                            found.track
+
                         updatedTrack =
-                            { found | visible = not found.visible }
+                            { track | visible = not track.visible }
                     in
                     ( { options
-                        | tracks =
-                            List.Extra.updateAt
-                                index
-                                (always updatedTrack)
-                                options.tracks
-                        , graph =
+                        | graph =
                             if updatedTrack.visible then
                                 Graph.addEdgeFromTrack updatedTrack options.graph
 
                             else
                                 Graph.removeEdge updatedTrack options.graph
                       }
-                    , [ Actions.SetActiveTrack <| Maybe.withDefault 0 options.activeTrackIndex ]
+                    , [ Actions.SetActiveTrack found.track.trackName ]
                     )
 
                 Nothing ->
                     ( options
-                    , if Just index == options.activeTrackIndex then
-                        [ Actions.HidePreview "graph" ]
-
-                      else
-                        []
+                    , [ Actions.HidePreview "graph" ]
                     )
 
         UnloadActiveTrack ->
-            case options.activeTrackIndex of
+            case options.activeTrackName of
                 Just active ->
-                    case List.Extra.getAt active options.tracks of
-                        Just track ->
-                            ( options, [ Actions.UnloadActiveTrack track.trackName ] )
-
-                        Nothing ->
-                            ( options, [ Actions.HidePreview "graph" ] )
+                    ( options, [ Actions.UnloadActiveTrack active ] )
 
                 Nothing ->
-                    ( options, [] )
+                    ( options, [ Actions.HidePreview "graph" ] )
 
         SnapToNearby ->
             -- All tracks update as the snap to the clusters we have found.
@@ -205,10 +198,12 @@ update msg options =
             in
             ( { options
                 | graph = newGraph
-                , tracks = newTracks
                 , graphState = GraphSnapped options.graph
               }
-            , [ Actions.SetActiveTrack 0
+            , [ Actions.SetActiveTrack <|
+                    Maybe.withDefault "" <|
+                        Maybe.map .trackName <|
+                            Graph.trackFromIndex 0 newGraph
               , Actions.HidePreview "graph"
               ]
             )
@@ -231,10 +226,12 @@ update msg options =
                     in
                     ( { options
                         | graph = newGraph
-                        , tracks = newTracks
                         , graphState = GraphWithNodes options.graph preSnapGraph
                       }
-                    , [ Actions.SetActiveTrack 0
+                    , [ Actions.SetActiveTrack <|
+                            Maybe.withDefault "" <|
+                                Maybe.map .trackName <|
+                                    Graph.trackFromIndex 0 newGraph
                       , Actions.HidePreview "graph"
                       ]
                     )
@@ -261,9 +258,10 @@ update msg options =
                     ( { options
                         | graph = preCanon
                         , graphState = GraphWithNodes preAnalyze preSnap
-                        , tracks = List.map .track <| Dict.values preCanon.edges
                       }
-                    , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
+                    , [ Actions.ChangeActiveTrack 0
+                      , Actions.TrackHasChanged
+                      ]
                     )
 
                 _ ->
@@ -337,20 +335,15 @@ update msg options =
         UndoSnap ->
             case options.graphState of
                 GraphSnapped previous ->
-                    let
-                        graph =
-                            options.graph
-
-                        newTracks =
-                            Dict.values previous.edges
-                                |> List.map .track
-                    in
                     ( { options
                         | graph = previous
-                        , tracks = newTracks
                         , graphState = GraphOriginalTracks
                       }
-                    , [ Actions.SetActiveTrack 0 ]
+                    , [ Actions.SetActiveTrack <|
+                            Maybe.withDefault "" <|
+                                Maybe.map .trackName <|
+                                    Graph.trackFromIndex 0 options.graph
+                      ]
                     )
 
                 _ ->
@@ -365,10 +358,13 @@ update msg options =
                     in
                     ( { options
                         | graph = newGraph
-                        , tracks = List.map .track <| Dict.values newGraph.edges
                         , graphState = GraphWithEdges options.graph beforeNodes beforeSnap
                       }
-                    , [ Actions.SetActiveTrack 0 ]
+                    , [ Actions.SetActiveTrack <|
+                            Maybe.withDefault "" <|
+                                Maybe.map .trackName <|
+                                    Graph.trackFromIndex 0 newGraph
+                      ]
                     )
 
                 _ ->
@@ -440,20 +436,23 @@ addTraversal newEdge options =
 
 renameActiveTrack : String -> Options msg -> Options msg
 renameActiveTrack newName options =
-    case options.activeTrackIndex of
-        Just index ->
-            case List.Extra.getAt index options.tracks of
+    case options.activeTrackName of
+        Just name ->
+            case Dict.get name options.graph.edges of
                 Just oldTrack ->
                     let
                         renameEdge traversal =
-                            if traversal.edge == oldTrack.trackName then
+                            if traversal.edge == name then
                                 { edge = newName, direction = traversal.direction }
 
                             else
                                 traversal
+
+                        newGraph =
+                            Graph.renameEdge name newName options.graph
                     in
                     { options
-                        | graph = Graph.renameEdge oldTrack.trackName newName options.graph
+                        | graph = newGraph
                         , userRoute = List.map renameEdge options.userRoute
                     }
 
@@ -467,12 +466,11 @@ renameActiveTrack newName options =
 updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
 updateActiveTrack oldTrack newTrack options =
     -- Do not use for rename.
-    case options.activeTrackIndex of
+    case options.activeTrackName of
         Just index ->
             ( newTrack
             , { options
-                | tracks = List.Extra.setAt index newTrack options.tracks
-                , graph = Graph.updatedEdge oldTrack newTrack options.graph
+                | graph = Graph.updatedEdge oldTrack newTrack options.graph
               }
             )
 
@@ -492,15 +490,15 @@ view settings wrapper options =
 
             else
                 column [ spacing 5 ] <|
-                    List.indexedMap
-                        (\index entry ->
-                            displayTrackInfo index entry wrapper options
+                    List.map
+                        (\entry ->
+                            displayTrackInfo entry wrapper options
                         )
-                        options.tracks
+                        (List.map .track <| Dict.values options.graph.edges)
 
         unloadButton =
             el [ centerX, width fill ] <|
-                if options.activeTrackIndex /= Nothing then
+                if options.activeTrackName /= Nothing then
                     Input.button
                         neatToolsBorder
                         { label = helper "unload"
@@ -511,7 +509,7 @@ view settings wrapper options =
                     none
 
         collapseExpandButton =
-            if List.length options.tracks > 1 then
+            if Dict.size options.graph.edges > 1 then
                 el [ centerX, width fill, paddingXY 20 0 ] <|
                     Input.button
                         [ Border.width 1
@@ -958,15 +956,15 @@ viewGraph settings wrapper options graph =
         ]
 
 
-displayTrackInfo : Int -> TrackLoaded msg -> (Msg -> msg) -> Options msg -> Element msg
-displayTrackInfo index track wrapper options =
+displayTrackInfo : TrackLoaded msg -> (Msg -> msg) -> Options msg -> Element msg
+displayTrackInfo track wrapper options =
     row [ spacing 5 ]
         [ Input.button
             []
             { label = useIcon FeatherIcons.edit
-            , onPress = Just <| wrapper (SelectActiveTrack index)
+            , onPress = Just <| wrapper (SelectActiveTrack track.trackName)
             }
-        , if Just index == options.activeTrackIndex then
+        , if Just track.trackName == options.activeTrackName then
             -- Can't change visibility of active track.
             none
 
@@ -979,7 +977,7 @@ displayTrackInfo index track wrapper options =
 
                         else
                             FeatherIcons.eye
-                , onPress = Just <| wrapper (ToggleVisibility index)
+                , onPress = Just <| wrapper (ToggleVisibility track.trackName)
                 }
         , text track.trackName
         ]
@@ -992,11 +990,7 @@ addTrack track options =
     --If not, we (I) will have to change it. POITROAE.
     let
         unambiguousName =
-            case
-                List.Extra.find
-                    (\t -> t.trackName == track.trackName)
-                    options.tracks
-            of
+            case Dict.get track.trackName options.graph.edges of
                 Just _ ->
                     track.trackName ++ "-" ++ String.fromInt options.nextTrackNumber
 
@@ -1023,28 +1017,27 @@ addTrack track options =
                     Just <| TrackLoaded.getReferencePoint track
     in
     { options
-        | tracks = trackWithUnambiguousName :: options.tracks
-        , nextTrackNumber = options.nextTrackNumber + 1
-        , activeTrackIndex = Just 0
+        | nextTrackNumber = options.nextTrackNumber + 1
+        , activeTrackName = Just track.trackName
         , commonReferenceGPX = newReferenceGPX
         , graph = Graph.addEdgeFromTrack trackWithUnambiguousName options.graph
         , graphState = GraphOriginalTracks
     }
 
 
-setTrack : Int -> Options msg -> ( Maybe (TrackLoaded msg), Options msg )
-setTrack index options =
-    case List.Extra.getAt index options.tracks of
+setTrack : String -> Options msg -> ( Maybe (TrackLoaded msg), Options msg )
+setTrack name options =
+    case Dict.get name options.graph.edges of
         Just found ->
             let
+                track =
+                    found.track
+
                 visibleTrack =
-                    { found | visible = True }
+                    { track | visible = True }
             in
             ( Just visibleTrack
-            , { options
-                | activeTrackIndex = Just index
-                , tracks = List.Extra.updateAt index (always visibleTrack) options.tracks
-              }
+            , { options | activeTrackName = Just name }
             )
 
         Nothing ->
@@ -1053,9 +1046,9 @@ setTrack index options =
 
 getActiveTrack : Options msg -> Maybe (TrackLoaded msg)
 getActiveTrack options =
-    case options.activeTrackIndex of
-        Just index ->
-            List.Extra.getAt index options.tracks
+    case options.activeTrackName of
+        Just name ->
+            Dict.get name options.graph.edges |> Maybe.map .track
 
         Nothing ->
             Nothing
@@ -1063,28 +1056,23 @@ getActiveTrack options =
 
 unloadActiveTrack : Options msg -> ( Maybe (TrackLoaded msg), Options msg )
 unloadActiveTrack options =
-    case options.activeTrackIndex of
+    case options.activeTrackName of
         Just active ->
             let
+                graph =
+                    options.graph
+
+                newGraph =
+                    { graph | edges = Dict.remove active options.graph.edges }
+
                 newOptions =
                     { options
-                        | tracks = List.Extra.removeAt active options.tracks
-                        , activeTrackIndex =
+                        | activeTrackName =
                             -- Better to let the user see something.
-                            if List.length options.tracks > 1 then
-                                Just 0
-
-                            else
-                                Nothing
-                        , graph =
-                            case List.Extra.getAt active options.tracks of
-                                Just track ->
-                                    Graph.removeEdge track options.graph
-
-                                Nothing ->
-                                    options.graph
+                            newGraph.edges |> Dict.keys |> List.head
+                        , graph = newGraph
                         , graphState =
-                            if List.length options.tracks > 1 then
+                            if Dict.size newGraph.edges > 1 then
                                 GraphOriginalTracks
 
                             else
@@ -1092,9 +1080,9 @@ unloadActiveTrack options =
                     }
 
                 newTrack =
-                    case newOptions.activeTrackIndex of
-                        Just index ->
-                            List.Extra.getAt index newOptions.tracks
+                    case newOptions.activeTrackName of
+                        Just name ->
+                            Dict.get name newGraph.edges |> Maybe.map .track
 
                         Nothing ->
                             Nothing
@@ -1109,11 +1097,12 @@ unloadActiveTrack options =
 
 mapOverVisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
 mapOverVisibleTracks f options =
-    options.tracks
+    options.graph.edges
+        |> Dict.values
         |> List.indexedMap
-            (\i track ->
-                if track.visible then
-                    Just <| f track (Just i == options.activeTrackIndex)
+            (\i edge ->
+                if edge.track.visible then
+                    Just <| f edge.track (Just edge.track.trackName == options.activeTrackName)
 
                 else
                     Nothing
@@ -1123,11 +1112,12 @@ mapOverVisibleTracks f options =
 
 mapOverInvisibleTracks : (TrackLoaded msg -> Bool -> a) -> Options msg -> List a
 mapOverInvisibleTracks f options =
-    options.tracks
+    options.graph.edges
+        |> Dict.values
         |> List.indexedMap
-            (\i track ->
-                if not track.visible then
-                    Just <| f track (Just i == options.activeTrackIndex)
+            (\i edge ->
+                if not edge.track.visible then
+                    Just <| f edge.track (Just edge.track.trackName == options.activeTrackName)
 
                 else
                     Nothing

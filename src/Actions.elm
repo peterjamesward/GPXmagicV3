@@ -129,7 +129,7 @@ type
     | EnablePlanningOnMap
     | GetPointsFromMap
     | FetchMatchingRoute (List (List Float))
-    | SetActiveTrack Int
+    | SetActiveTrack String
     | UpdateNamedSegments (List NamedSegment)
     | UnloadActiveTrack String
 

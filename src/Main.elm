@@ -154,9 +154,8 @@ type alias Model =
     -- State machine for map synchronisation
     , mapState : MapState
 
-    -- Track stuff
-    , activeTrack : Maybe (TrackLoaded Msg)
-
+    -- Track stuff now all in Tools.Tracks.
+    --, activeTrack : Maybe String
     -- Visuals (scenes now in PaneLayoutManager)
     , previews : Dict String PreviewData
     , flythroughRunning : Bool
@@ -268,7 +267,6 @@ init mflags origin navigationKey =
       , rgtOptionsVisible = False
       , loadFromUrl = remoteUrl
       , mapState = MapDivNeeded
-      , activeTrack = Nothing
       , mapPointsDraggable = False
       , previews = Dict.empty
       , needsRendering = False
@@ -344,7 +342,7 @@ updateActiveTrack newTrack model =
             model.toolOptions
 
         ( useTrack, newOptions ) =
-            case model.activeTrack of
+            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
                 Just activeTrack ->
                     Tuple.mapFirst Just <|
                         Tracks.updateActiveTrack
@@ -359,8 +357,7 @@ updateActiveTrack newTrack model =
             { toolsOptions | tracksOptions = newOptions }
     in
     { model
-        | activeTrack = useTrack
-        , toolOptions = newToolsOptions
+        | toolOptions = newToolsOptions
         , needsRendering = True
     }
 
@@ -439,7 +436,7 @@ update msg model =
         ProfilePaint ->
             -- This does a deferred paint of profiles after a track is loaded
             -- as the needed DIVs are not reliably there on loading the app.
-            case model.activeTrack of
+            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
                 Just track ->
                     ( model
                     , PaneLayoutManager.paintProfileCharts
@@ -699,7 +696,7 @@ update msg model =
                     --TODO: Deprecate the Actions concept, JFDI.
                     --This may introduce some unwieldy function type signatures.
                     ToolsController.update toolMsg
-                        model.activeTrack
+                        (Tracks.getActiveTrack model.toolOptions.tracksOptions)
                         ToolsMsg
                         model.toolOptions
 
@@ -777,7 +774,7 @@ update msg model =
         WriteGpxFile ->
             let
                 outputFilename =
-                    case model.activeTrack of
+                    case Tracks.getActiveTrack model.toolOptions.tracksOptions of
                         Just track ->
                             track.trackName
                                 ++ (if not (String.endsWith ".GPX" (String.toUpper track.trackName)) then
@@ -790,7 +787,7 @@ update msg model =
                         Nothing ->
                             "NOFILENAME"
             in
-            case model.activeTrack of
+            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
                 Just track ->
                     ( model
                     , Download.string outputFilename "text/gpx" <|
@@ -806,7 +803,7 @@ update msg model =
                     )
 
         FilenameChange newName ->
-            case model.activeTrack of
+            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
                 Just track ->
                     let
                         toolOptions =
@@ -821,10 +818,7 @@ update msg model =
                         newToolOptions =
                             { toolOptions | tracksOptions = updatedTracks }
                     in
-                    ( { model
-                        | toolOptions = newToolOptions
-                        , activeTrack = Tracks.getActiveTrack updatedTracks
-                      }
+                    ( { model | toolOptions = newToolOptions }
                     , Cmd.none
                     )
 
@@ -838,7 +832,8 @@ update msg model =
             let
                 actions =
                     -- Some of the actions update the model, some issue commands.
-                    Tools.OneClickQuickFix.update oneClickMsg model.activeTrack
+                    Tools.OneClickQuickFix.update oneClickMsg
+                        (Tracks.getActiveTrack model.toolOptions.tracksOptions)
 
                 modelAfterActions =
                     performActionsOnModel actions model
@@ -887,7 +882,7 @@ update msg model =
 
         FlythroughTick posix ->
             -- Like a tool message, just isn't.
-            case model.activeTrack of
+            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
                 Just track ->
                     let
                         ( updatedToolOptions, actions ) =
@@ -906,7 +901,7 @@ update msg model =
             ( { model | infoText = Nothing }, Cmd.none )
 
         ReceivedLandUseData results ->
-            case model.activeTrack of
+            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
                 Just track ->
                     let
                         ( landUse, cmds ) =
@@ -976,7 +971,7 @@ adoptTrackInModel track model =
                 -- Subsequent track only adds if tool is open
                 Tracks.addTrack track tracksOptions
 
-            else if model.activeTrack == Nothing then
+            else if Tracks.getActiveTrack tracksOptions == Nothing then
                 -- First track always gets added.
                 Tracks.addTrack track tracksOptions
 
@@ -994,8 +989,7 @@ adoptTrackInModel track model =
 
         modelWithTrack =
             { model
-                | activeTrack = Tracks.getActiveTrack newTracksOptions
-                , paneLayoutOptions =
+                | paneLayoutOptions =
                     PaneLayoutManager.initialise
                         track
                         model.paneLayoutOptions
@@ -1071,7 +1065,7 @@ adjustSpaceForContent model =
 
 composeTitle : Model -> String
 composeTitle model =
-    case model.activeTrack of
+    case Tracks.getActiveTrack model.toolOptions.tracksOptions of
         Nothing ->
             "GPXmagic"
 
@@ -1081,7 +1075,7 @@ composeTitle model =
 
 bestTrackName : Model -> String
 bestTrackName model =
-    case model.activeTrack of
+    case Tracks.getActiveTrack model.toolOptions.tracksOptions of
         Nothing ->
             I18N.localisedString model.systemSettings.location "main" "notrack"
 
@@ -1179,7 +1173,7 @@ upperLeftDockView model =
             model.systemSettings
             ToolsController.DockUpperLeft
             ToolsMsg
-            model.activeTrack
+            (Tracks.getActiveTrack model.toolOptions.tracksOptions)
             model.toolOptions
 
 
@@ -1192,7 +1186,7 @@ upperRightDockView model =
             model.systemSettings
             ToolsController.DockUpperRight
             ToolsMsg
-            model.activeTrack
+            (Tracks.getActiveTrack model.toolOptions.tracksOptions)
             model.toolOptions
 
 
@@ -1209,7 +1203,7 @@ viewPaneArea model =
         PaneLayoutManager.viewPanes
             model.systemSettings
             PaneMsg
-            model.activeTrack
+            (Tracks.getActiveTrack model.toolOptions.tracksOptions)
             model.toolOptions.tracksOptions
             model.toolOptions.displaySettings
             model.contentArea
@@ -1325,7 +1319,7 @@ topLoadingBar model =
         [ globalOptions model
         , loadGpxButton
         , moreOptionsButton
-        , case model.activeTrack of
+        , case Tracks.getActiveTrack model.toolOptions.tracksOptions of
             Just track ->
                 Input.text
                     [ padding 5
@@ -1343,7 +1337,10 @@ topLoadingBar model =
                 none
         , saveButton
         , row [ alignRight, spacing 5 ]
-            [ Tools.OneClickQuickFix.oneClickQuickFixButton model.systemSettings.location OneClickMsg model.activeTrack
+            [ Tools.OneClickQuickFix.oneClickQuickFixButton
+                model.systemSettings.location
+                OneClickMsg
+                (Tracks.getActiveTrack model.toolOptions.tracksOptions)
             , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
             , buyMeACoffeeButton
             ]
@@ -1519,7 +1516,7 @@ performActionsOnModel actions model =
 
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
-            case ( action, foldedModel.activeTrack ) of
+            case ( action, Tracks.getActiveTrack model.toolOptions.tracksOptions ) of
                 ( UnloadActiveTrack _, Just _ ) ->
                     let
                         toolOptions =
@@ -1535,8 +1532,7 @@ performActionsOnModel actions model =
                             { toolOptions | tracksOptions = newOptions }
                     in
                     { foldedModel
-                        | activeTrack = newTrack
-                        , needsRendering = True
+                        | needsRendering = True
                         , toolOptions = newToolOptions
                     }
 
@@ -1552,8 +1548,7 @@ performActionsOnModel actions model =
                             { toolOptions | tracksOptions = newOptions }
                     in
                     { foldedModel
-                        | activeTrack = newTrack
-                        , needsRendering = True
+                        | needsRendering = True
                         , toolOptions = newToolOptions
                     }
 
@@ -1733,15 +1728,13 @@ performActionsOnModel actions model =
                     }
 
                 ( Autofix indices, Just track ) ->
-                    { foldedModel
-                        | activeTrack =
-                            Just <|
-                                Tools.BendSmoother.applyAutofix
-                                    model.toolOptions.bendSmootherOptions
-                                    indices
-                                    track
-                        , needsRendering = True
-                    }
+                    updateActiveTrack
+                        (Tools.BendSmoother.applyAutofix
+                            model.toolOptions.bendSmootherOptions
+                            indices
+                            track
+                        )
+                        foldedModel
 
                 ( OutAndBackApplyWithOptions options, Just track ) ->
                     updateActiveTrack
@@ -1916,183 +1909,6 @@ performActionsOnModel actions model =
                         newTrack
                         foldedModel
 
-                {-
-                   ( StartRoutePlanning, Just track ) ->
-                       let
-                           toolOptions =
-                               foldedModel.toolOptions
-
-                           graphOptions =
-                               toolOptions.graphOptions
-
-                           newPaneLayout =
-                               PaneLayoutManager.forceRouteView foldedModel.paneLayoutOptions
-
-                           ( newGraphOptions, newTree ) =
-                               Tools.Graph.enterRoutePlanningMode graphOptions track
-
-                           newToolOptions =
-                               { toolOptions | graphOptions = newGraphOptions }
-
-                           newTrack =
-                               { track | trackTree = newTree }
-                       in
-                       updateActiveTrack
-                           newTrack
-                           { foldedModel | paneLayoutOptions = newPaneLayout }
-                -}
-                {-
-                   ( ExitRoutePlanning, Just _ ) ->
-                       let
-                           toolOptions =
-                               foldedModel.toolOptions
-
-                           newPaneLayout =
-                               PaneLayoutManager.exitRouteView foldedModel.paneLayoutOptions
-
-                           newToolOptions =
-                               -- Hack here.
-                               { toolOptions
-                                   | tools =
-                                       List.map
-                                           (ToolsController.setToolState ToolsController.ToolGraph ToolsController.Contracted)
-                                           toolOptions.tools
-                               }
-                       in
-                       { foldedModel
-                           | toolOptions = newToolOptions
-                           , paneLayoutOptions = newPaneLayout
-                       }
-                -}
-                {-
-                   ( AddTraversal edge, Just _ ) ->
-                       let
-                           toolOptions =
-                               foldedModel.toolOptions
-
-                           graphOptions =
-                               toolOptions.graphOptions
-
-                           newGraphOptions =
-                               Tools.Graph.addTraversal edge graphOptions
-
-                           newToolOptions =
-                               { toolOptions | graphOptions = newGraphOptions }
-                       in
-                       { foldedModel | toolOptions = newToolOptions }
-                -}
-                {-
-                   ( AddSelfLoop node, Just _ ) ->
-                       let
-                           toolOptions =
-                               foldedModel.toolOptions
-
-                           graphOptions =
-                               toolOptions.graphOptions
-
-                           newGraphOptions =
-                               Tools.Graph.addSelfLoop node graphOptions
-
-                           newToolOptions =
-                               { toolOptions | graphOptions = newGraphOptions }
-                       in
-                       { foldedModel | toolOptions = newToolOptions }
-                -}
-                {-
-                   ( DeleteEdge edge, Just _ ) ->
-                       let
-                           toolOptions =
-                               foldedModel.toolOptions
-
-                           graphOptions =
-                               toolOptions.graphOptions
-
-                           newToolOptions =
-                               { toolOptions | graphOptions = Tools.Graph.deleteEdge edge graphOptions }
-                       in
-                       { foldedModel | toolOptions = newToolOptions }
-                -}
-                {-
-                   ( ChangeActiveTrack edge, Just _ ) ->
-                       let
-                           toolOptions =
-                               foldedModel.toolOptions
-
-                           graphOptions =
-                               toolOptions.graphOptions
-
-                           newGraphOptions =
-                               Tools.Graph.changeActiveTrack edge graphOptions
-
-                           newToolOptions =
-                               { toolOptions | graphOptions = newGraphOptions }
-                       in
-                       { foldedModel
-                           | toolOptions = newToolOptions
-                           , activeTrack = Tools.Graph.getTrack edge graphOptions
-                           , needsRendering = True
-                       }
-                -}
-                {-
-                   ( MakeRouteFromGraph, Just _ ) ->
-                       let
-                           toolOptions =
-                               foldedModel.toolOptions
-
-                           graphOptions =
-                               toolOptions.graphOptions
-
-                           newGraphOptions =
-                               Tools.Graph.makeNewRoute graphOptions
-
-                           newToolOptions =
-                               { toolOptions | graphOptions = newGraphOptions }
-                       in
-                       case Tools.Graph.getTrack 0 newGraphOptions of
-                           Just foundNewTrack ->
-                               updateActiveTrack
-                                   foundNewTrack
-                                   { foldedModel | toolOptions = newToolOptions }
-
-                           Nothing ->
-                               foldedModel
-                -}
-                {-
-                   ( CombineNearbyPoints, Just track ) ->
-                       -- Trickier refactor because of extra graph option state.
-                       let
-                           oldToolOptions =
-                               model.toolOptions
-
-                           oldGraphOptions =
-                               oldToolOptions.graphOptions
-
-                           ( newGraphOptions, newTree ) =
-                               Tools.Graph.combineNearbyPoints
-                                   oldGraphOptions
-                                   track
-
-                           newToolOptions =
-                               { oldToolOptions | graphOptions = newGraphOptions }
-
-                           pointerReposition =
-                               --Let's reposition by distance, not uncommon.
-                               DomainModel.preserveDistanceFromStart track.trackTree newTree
-
-                           ( newOrange, newPurple ) =
-                               ( pointerReposition track.currentPosition
-                               , Maybe.map pointerReposition track.markerPosition
-                               )
-
-                           newTrack =
-                               { track
-                                   | trackTree = newTree
-                                   , currentPosition = newOrange
-                                   , markerPosition = newPurple
-                               }
-                       in
-                       updateActiveTrack newTrack foldedModel
-                -}
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
                         ( modelWithNewTrack, _ ) =
@@ -2124,7 +1940,9 @@ performActionsOnModel actions model =
                     --TODO: Isolate what this is supposed to achieve, and just do it.
                     let
                         ( refreshedToolOptions, secondaryActions ) =
-                            ToolsController.refreshOpenTools foldedModel.activeTrack foldedModel.toolOptions
+                            ToolsController.refreshOpenTools
+                                (Tracks.getActiveTrack foldedModel.toolOptions.tracksOptions)
+                                foldedModel.toolOptions
 
                         innerModelWithNewToolSettings =
                             { foldedModel | toolOptions = refreshedToolOptions }
@@ -2142,7 +1960,9 @@ performActionsOnModel actions model =
                     --TODO: Isolate what this is supposed to achieve, and just do it.
                     let
                         ( refreshedToolOptions, secondaryActions ) =
-                            ToolsController.refreshOpenTools foldedModel.activeTrack foldedModel.toolOptions
+                            ToolsController.refreshOpenTools
+                                (Tracks.getActiveTrack foldedModel.toolOptions.tracksOptions)
+                                foldedModel.toolOptions
 
                         innerModelWithNewToolSettings =
                             { foldedModel | toolOptions = refreshedToolOptions }
@@ -2270,30 +2090,6 @@ performActionsOnModel actions model =
                     { foldedModel | toolOptions = newTools }
 
                 ( UndoLastAction, Just track ) ->
-                    -- Without massive replumbing, I'm making the "graph walker" undo special.
-                    -- We'll see how this goes; a better solution may arise.
-                    {-
-                       let
-                           topUndoAction =
-                               track.undos |> List.head |> Maybe.map .action
-                       in
-                       case topUndoAction of
-                           Just Actions.MakeRouteFromGraph ->
-                               let
-                                   toolOptions =
-                                       foldedModel.toolOptions
-                                   newToolOptions =
-                                       { toolOptions | graphOptions = newGraphOptions }
-                               in
-                               case Tools.Graph.getTrack 0 newGraphOptions of
-                                   Just newTrack ->
-                                       updateActiveTrack newTrack foldedModel
-
-                                   Nothing ->
-                                       foldedModel
-
-                           _ ->
-                    -}
                     updateActiveTrack
                         (TrackLoaded.undoLastAction track)
                         foldedModel
@@ -2312,7 +2108,7 @@ performActionsOnModel actions model =
                                         ]
                                         model
                             in
-                            case modelAfterRedo.activeTrack of
+                            case Tracks.getActiveTrack modelAfterRedo.toolOptions.tracksOptions of
                                 Just trackAfterRedo ->
                                     updateActiveTrack
                                         { trackAfterRedo | redos = moreRedos }
@@ -2326,14 +2122,9 @@ performActionsOnModel actions model =
                             foldedModel
 
                 ( FlushUndo, Just track ) ->
-                    { foldedModel
-                        | activeTrack =
-                            Just
-                                { track
-                                    | undos = []
-                                    , redos = []
-                                }
-                    }
+                    updateActiveTrack
+                        { track | undos = [], redos = [] }
+                        foldedModel
 
                 _ ->
                     foldedModel
@@ -2372,7 +2163,7 @@ performActionCommands actions model =
 
         performAction : ToolAction Msg -> Cmd Msg
         performAction action =
-            case ( action, model.activeTrack ) of
+            case ( action, Tracks.getActiveTrack model.toolOptions.tracksOptions ) of
                 ( SetActiveTrack _, _ ) ->
                     performAction TrackHasChanged
 

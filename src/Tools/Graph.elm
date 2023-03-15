@@ -17,6 +17,7 @@ module Tools.Graph exposing
     ,  snapToClusters
        --, undoWalkRoute
 
+    , trackFromIndex
     , updatedEdge
     )
 
@@ -133,6 +134,18 @@ renameEdge oldName newName graph =
 
         Nothing ->
             graph
+
+
+trackFromIndex : Int -> Graph msg -> Maybe (TrackLoaded msg)
+trackFromIndex index graph =
+    -- Support Tracks list in UI
+    case List.Extra.getAt index (Dict.keys graph.edges) of
+        Just isKey ->
+            Dict.get isKey graph.edges
+                |> Maybe.map .track
+
+        Nothing ->
+            Nothing
 
 
 
