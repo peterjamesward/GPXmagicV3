@@ -16,15 +16,12 @@ BUG: Right split not being saved/restored.
 
 ## Promote Graph
 
-> STOP keeping List TrackLoaded in Tracks, always get from Dict in Graph!
-> DITTO ditch Main.activeTrack. Save name of active track; always look it up in update and view.
-> PREVENT renaming from causing a name conflict.
-
-4. New track with offset, creates a new track from route.
-5. Should still be able to revert to pre-routing tracks, right until convert back to single.
-6. Undo for create new track from route.
-7. Any change to track collection must invalidate nodes.
-8. Remove all logging.
+1. Fix track rename.
+2. New track with offset, creates a new track from route.
+3. Should still be able to revert to pre-routing tracks, right until convert back to single.
+4. Undo for create new track from route.
+5. Any change to track collection must invalidate nodes.
+6. Remove all logging.
 
 ---
 
