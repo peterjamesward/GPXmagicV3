@@ -125,14 +125,25 @@ renameEdge oldName newName graph =
     -- Replace edge in dict with new name.
     case Dict.get oldName graph.edges of
         Just entry ->
+            let
+                containedTrack =
+                    entry.track
+
+                renamedTrack =
+                    { containedTrack | trackName = newName }
+            in
             { graph
                 | edges =
                     graph.edges
                         |> Dict.remove oldName
-                        |> Dict.insert newName entry
+                        |> Dict.insert newName { entry | track = renamedTrack }
             }
 
         Nothing ->
+            let
+                _ =
+                    Debug.log "RENAME FAILED" newName
+            in
             graph
 
 

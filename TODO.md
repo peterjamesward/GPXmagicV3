@@ -16,7 +16,6 @@ BUG: Right split not being saved/restored.
 
 ## Promote Graph
 
-1. Fix track rename.
 2. New track with offset, creates a new track from route.
 3. Should still be able to revert to pre-routing tracks, right until convert back to single.
 4. Undo for create new track from route.

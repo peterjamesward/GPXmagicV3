@@ -436,28 +436,24 @@ addTraversal newEdge options =
 
 renameActiveTrack : String -> Options msg -> Options msg
 renameActiveTrack newName options =
-    case options.activeTrackName of
-        Just name ->
-            case Dict.get name options.graph.edges of
-                Just oldTrack ->
-                    let
-                        renameEdge traversal =
-                            if traversal.edge == name then
-                                { edge = newName, direction = traversal.direction }
+    case getActiveTrack options of
+        Just oldTrack ->
+            let
+                renameEdge traversal =
+                    if traversal.edge == oldTrack.trackName then
+                        { edge = newName, direction = traversal.direction }
 
-                            else
-                                traversal
+                    else
+                        traversal
 
-                        newGraph =
-                            Graph.renameEdge name newName options.graph
-                    in
-                    { options
-                        | graph = newGraph
-                        , userRoute = List.map renameEdge options.userRoute
-                    }
-
-                Nothing ->
-                    options
+                newGraph =
+                    Graph.renameEdge oldTrack.trackName newName options.graph
+            in
+            { options
+                | graph = newGraph
+                , activeTrackName = Just newName
+                , userRoute = List.map renameEdge options.userRoute
+            }
 
         Nothing ->
             options
