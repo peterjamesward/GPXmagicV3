@@ -801,7 +801,6 @@ profileViewHandlesClick container trackDistance options track =
 viewPanes :
     SystemSettings
     -> (Msg -> msg)
-    -> Maybe (TrackLoaded msg)
     -> Tracks.Options msg
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -809,8 +808,11 @@ viewPanes :
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes settings msgWrapper mTrack tracksOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFlythrough previews =
     let
+        mTrack =
+            Tracks.getActiveTrack tracksOptions
+
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
 

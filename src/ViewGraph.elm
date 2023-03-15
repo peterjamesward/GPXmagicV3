@@ -53,7 +53,7 @@ import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions as Graph exposing (Edge, Graph)
 import Tools.Tracks as Tracks
-import Tools.TracksOptions as Tracks exposing (ClickDetect(..), Direction(..))
+import Tools.TracksOptions as Tracks exposing (ClickDetect(..), Direction(..), GraphState(..))
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
@@ -472,7 +472,13 @@ view settings context ( width, height ) options msgWrapper =
         , Border.color FlatColors.ChinesePalette.peace
         , Background.color FlatColors.FlatUIPalette.silver
         , inFront <| zoomButtons settings msgWrapper context
-        , inFront <| popupEditingMenu msgWrapper context options
+        , inFront <|
+            case options.graphState of
+                GraphWithEdges _ _ _ ->
+                    popupEditingMenu msgWrapper context options
+
+                _ ->
+                    none
         ]
     <|
         Element.html svgElement

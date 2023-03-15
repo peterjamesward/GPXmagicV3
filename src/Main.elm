@@ -1203,7 +1203,6 @@ viewPaneArea model =
         PaneLayoutManager.viewPanes
             model.systemSettings
             PaneMsg
-            (Tracks.getActiveTrack model.toolOptions.tracksOptions)
             model.toolOptions.tracksOptions
             model.toolOptions.displaySettings
             model.contentArea

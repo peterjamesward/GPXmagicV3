@@ -71,8 +71,8 @@ type Msg
     | ToggleVisibility String
     | UnloadActiveTrack
     | GraphAnalyse
-      --| CentreLineOffset (Quantity Float Meters)
-      --| MinimumRadius (Quantity Float Meters)
+    | CentreLineOffset (Quantity Float Meters)
+    | MinimumRadius (Quantity Float Meters)
       --| ConvertFromGraph
     | HighlightTraversal Int
     | RemoveLastTraversal
@@ -219,14 +219,11 @@ update msg options =
                     let
                         newGraph =
                             Graph.analyzeTracksAsGraph options.graph
-
-                        newTracks =
-                            Dict.values newGraph.edges
-                                |> List.map .track
                     in
                     ( { options
                         | graph = newGraph
                         , graphState = GraphWithNodes options.graph preSnapGraph
+                        , userRoute = []
                       }
                     , [ Actions.SetActiveTrack <|
                             Maybe.withDefault "" <|
@@ -311,14 +308,12 @@ update msg options =
         SetTolerance tolerance ->
             lookForClusters options tolerance
 
-        {-
-           CentreLineOffset float ->
-               ( { options | centreLineOffset = float }, [] )
-        -}
-        {-
-           MinimumRadius float ->
-               ( { options | minimumRadiusAtPlaces = float }, [] )
-        -}
+        CentreLineOffset float ->
+            ( { options | centreLineOffset = float }, [] )
+
+        MinimumRadius float ->
+            ( { options | minimumRadiusAtPlaces = float }, [] )
+
         {-
            ConvertFromGraph ->
                ( options
@@ -492,18 +487,6 @@ view settings wrapper options =
                         )
                         (List.map .track <| Dict.values options.graph.edges)
 
-        unloadButton =
-            el [ centerX, width fill ] <|
-                if options.activeTrackName /= Nothing then
-                    Input.button
-                        neatToolsBorder
-                        { label = helper "unload"
-                        , onPress = Just <| wrapper UnloadActiveTrack
-                        }
-
-                else
-                    none
-
         collapseExpandButton =
             if Dict.size options.graph.edges > 1 then
                 el [ centerX, width fill, paddingXY 20 0 ] <|
@@ -530,7 +513,6 @@ view settings wrapper options =
         column [ spacing 5 ]
             [ listOfTracks
             , collapseExpandButton
-            , unloadButton
             , viewGraph settings wrapper options options.graph
             ]
 
@@ -571,6 +553,21 @@ viewGraph settings wrapper options graph =
                             i18n "graphConverted"
                     ]
                 ]
+
+        helper =
+            I18N.text settings.location toolId
+
+        unloadButton =
+            el [ centerX, width fill ] <|
+                if options.activeTrackName /= Nothing then
+                    Input.button
+                        neatToolsBorder
+                        { label = helper "unload"
+                        , onPress = Just <| wrapper UnloadActiveTrack
+                        }
+
+                else
+                    none
     in
     column
         (CommonToolStyles.toolContentBoxStyle settings)
@@ -612,7 +609,8 @@ viewGraph settings wrapper options graph =
                             ]
                 in
                 column [ centerX, width fill, spacing 10 ]
-                    [ toleranceSlider
+                    [ unloadButton
+                    , toleranceSlider
                     , snapToNearbyButton
                     ]
 
@@ -698,53 +696,51 @@ viewGraph settings wrapper options graph =
                         row [ spacing 5 ]
                             [ none
                             , infoButton (wrapper <| DisplayInfo toolId "offset")
+                            , Input.slider
+                                commonShortHorizontalSliderStyles
+                                { onChange = wrapper << CentreLineOffset << Length.meters
+                                , label =
+                                    Input.labelBelow [] <|
+                                        text <|
+                                            String.Interpolate.interpolate
+                                                (I18N.localisedString settings.location toolId "isOffset")
+                                                [ showDecimal2 <| abs offset
+                                                , if offset < 0.0 then
+                                                    I18N.localisedString settings.location toolId "left"
 
-                            --, Input.slider
-                            --    commonShortHorizontalSliderStyles
-                            --    { onChange = wrapper << CentreLineOffset << Length.meters
-                            --    , label =
-                            --        Input.labelBelow [] <|
-                            --            text <|
-                            --                String.Interpolate.interpolate
-                            --                    (I18N.localisedString settings.location toolId "isOffset")
-                            --                    [ showDecimal2 <| abs offset
-                            --                    , if offset < 0.0 then
-                            --                        I18N.localisedString settings.location toolId "left"
-                            --
-                            --                      else if offset > 0.0 then
-                            --                        I18N.localisedString settings.location toolId "right"
-                            --
-                            --                      else
-                            --                        ""
-                            --                    ]
-                            --    , min = -5.0
-                            --    , max = 5.0
-                            --    , step = Just 0.25
-                            --    , value = offset
-                            --    , thumb = Input.defaultThumb
-                            --    }
+                                                  else if offset > 0.0 then
+                                                    I18N.localisedString settings.location toolId "right"
+
+                                                  else
+                                                    ""
+                                                ]
+                                , min = -5.0
+                                , max = 5.0
+                                , step = Just 0.25
+                                , value = offset
+                                , thumb = Input.defaultThumb
+                                }
                             ]
 
                     minRadiusSlider =
                         row [ spacing 5 ]
                             [ none
                             , infoButton (wrapper <| DisplayInfo toolId "radius")
-
-                            --, Input.slider
-                            --    commonShortHorizontalSliderStyles
-                            --    { onChange = wrapper << MinimumRadius << Length.meters
-                            --    , label =
-                            --        Input.labelBelow [] <|
-                            --            text <|
-                            --                String.Interpolate.interpolate
-                            --                    (I18N.localisedString settings.location toolId "isRadius")
-                            --                    [ showDecimal2 <| abs radius ]
-                            --    , min = 1.0
-                            --    , max = 15.0
-                            --    , step = Just 1.0
-                            --    , value = radius
-                            --    , thumb = Input.defaultThumb
-                            --    }
+                            , Input.slider
+                                commonShortHorizontalSliderStyles
+                                { onChange = wrapper << MinimumRadius << Length.meters
+                                , label =
+                                    Input.labelBelow [] <|
+                                        text <|
+                                            String.Interpolate.interpolate
+                                                (I18N.localisedString settings.location toolId "isRadius")
+                                                [ showDecimal2 <| abs radius ]
+                                , min = 1.0
+                                , max = 15.0
+                                , step = Just 1.0
+                                , value = radius
+                                , thumb = Input.defaultThumb
+                                }
                             ]
 
                     traversalNext =
@@ -1250,9 +1246,7 @@ deleteEdgeTraversal edge userRoute graph =
 
 addSelfLoop : String -> Options msg -> Options msg
 addSelfLoop node options =
-    case
-        List.Extra.last options.userRoute
-    of
+    case List.Extra.last options.userRoute of
         Just traversal ->
             case Dict.get traversal.edge options.graph.edges of
                 Just edgeInfo ->
@@ -1339,7 +1333,10 @@ addSelfLoop node options =
                                                         { lowNode = newEdgeInfo.lowNode
                                                         , highNode = newEdgeInfo.highNode
                                                         , via = Graph.nodeKey newEdgeInfo.via
-                                                        , track = newTrack
+                                                        , track =
+                                                            { newTrack
+                                                                | trackName = newEdgeIndex
+                                                            }
                                                         }
                                                         graph.edges
                                             }
