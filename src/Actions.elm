@@ -117,7 +117,6 @@ type
     | Straighten
     | DisplayInfo String String
     | Autofix (List Int)
-    | ChangeActiveTrack Int
     | MakeRouteFromGraph
     | WidenBend (List Int) (Quantity Float Meters)
     | AdjustTimes Tools.TimestampOptions.Options

@@ -1277,6 +1277,25 @@ canonicalise graph =
                 trackFromPutativeEdge : String -> PutativeEdge -> Maybe (TrackLoaded msg)
                 trackFromPutativeEdge name putative =
                     let
+                        midpoint : EarthPoint -> EarthPoint -> EarthPoint
+                        midpoint p1 p2 =
+                            { space = Point3d.midpoint p1.space p2.space
+                            , time = Nothing
+                            }
+
+                        atLeastThreePoints : List EarthPoint -> List EarthPoint
+                        atLeastThreePoints inputs =
+                            -- Makre sure there's a midpoint.
+                            case inputs of
+                                [ p1, p2 ] ->
+                                    [ p1
+                                    , midpoint p1 p2
+                                    , p2
+                                    ]
+
+                                _ ->
+                                    inputs
+
                         trackFromEarthPoints : List EarthPoint -> Maybe (TrackLoaded msg)
                         trackFromEarthPoints points =
                             points
@@ -1284,7 +1303,8 @@ canonicalise graph =
                                 |> TrackLoaded.trackFromPoints name
                                 |> Maybe.map (TrackLoaded.changeReferencePoint graph.referenceLonLat)
                     in
-                    trackFromEarthPoints putative.pointsIncludingNodes
+                    trackFromEarthPoints <|
+                        atLeastThreePoints putative.pointsIncludingNodes
 
                 correctEdgesAfterDeDupe :
                     ( String, String, String )

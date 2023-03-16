@@ -7,14 +7,14 @@
 
 BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
 
-BUG: Right split not being saved/restored.
+BUG: Right split not being saved/restored?
 
 --- 
 
 
 # WIP
 
-## Promote Graph
+## Route Builder
 
 3. "undo decomposition" should show original track.
 5. Undo for create new track from route.

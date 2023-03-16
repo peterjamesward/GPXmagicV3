@@ -208,13 +208,9 @@ update msg options =
             ( { options
                 | graph = newGraph
                 , graphState = GraphSnapped options.graph
+                , activeTrackName = List.head <| Dict.keys newGraph.edges
               }
-            , [ Actions.SetActiveTrack <|
-                    Maybe.withDefault "" <|
-                        Maybe.map .trackName <|
-                            Graph.trackFromIndex 0 newGraph
-              , Actions.HidePreview "graph"
-              ]
+            , [ Actions.HidePreview "graph" ]
             )
 
         GraphAnalyse ->
@@ -233,13 +229,10 @@ update msg options =
                         | graph = newGraph
                         , graphState = GraphWithNodes options.graph preSnapGraph
                         , userRoute = []
+                        , activeTrackName = List.head <| Dict.keys newGraph.edges
+                        , roadListCollapsed = False
                       }
-                    , [ Actions.SetActiveTrack <|
-                            Maybe.withDefault "" <|
-                                Maybe.map .trackName <|
-                                    Graph.trackFromIndex 0 newGraph
-                      , Actions.HidePreview "graph"
-                      ]
+                    , [ Actions.HidePreview "graph" ]
                     )
 
                 _ ->
@@ -251,8 +244,10 @@ update msg options =
                     ( { options
                         | graph = preAnalyze
                         , graphState = GraphSnapped preSnap
+                        , activeTrackName = List.head <| Dict.keys preAnalyze.edges
+                        , roadListCollapsed = False
                       }
-                    , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
+                    , [ Actions.TrackHasChanged ]
                     )
 
                 _ ->
@@ -264,10 +259,10 @@ update msg options =
                     ( { options
                         | graph = preCanon
                         , graphState = GraphWithNodes preAnalyze preSnap
+                        , activeTrackName = List.head <| Dict.keys preCanon.edges
+                        , roadListCollapsed = False
                       }
-                    , [ Actions.ChangeActiveTrack 0
-                      , Actions.TrackHasChanged
-                      ]
+                    , [ Actions.TrackHasChanged ]
                     )
 
                 _ ->
@@ -337,12 +332,10 @@ update msg options =
                     ( { options
                         | graph = previous
                         , graphState = GraphOriginalTracks
+                        , activeTrackName = List.head <| Dict.keys previous.edges
+                        , roadListCollapsed = False
                       }
-                    , [ Actions.SetActiveTrack <|
-                            Maybe.withDefault "" <|
-                                Maybe.map .trackName <|
-                                    Graph.trackFromIndex 0 options.graph
-                      ]
+                    , []
                     )
 
                 _ ->
