@@ -459,10 +459,6 @@ processMapPortMessage lastState mTrack json =
         Ok "elevations" ->
             case elevations of
                 Ok mapElevations ->
-                    let
-                        _ =
-                            Debug.log "elevations" mapElevations
-                    in
                     ( lastState, [ ApplyMapElevations mapElevations ] )
 
                 _ ->

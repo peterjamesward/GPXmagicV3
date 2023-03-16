@@ -139,10 +139,6 @@ renameEdge oldName newName graph =
             }
 
         Nothing ->
-            let
-                _ =
-                    Debug.log "RENAME FAILED" newName
-            in
             graph
 
 
@@ -1227,10 +1223,9 @@ canonicalise graph =
                     walkEdgeSplittingAtNodes
                     { currentEdge = Nothing, foundEdges = [] }
 
-        _ =
-            Debug.log "edgesWithConsistentEndNodes"
-                (List.map summaryPutativeEdge edgesWithConsistentEndNodes)
-
+        --_ =
+        --    Debug.log "edgesWithConsistentEndNodes"
+        --        (List.map summaryPutativeEdge edgesWithConsistentEndNodes)
         edgesWithConsistentEndNodes : List PutativeEdge
         edgesWithConsistentEndNodes =
             -- Just make sure that the start nodekey <= end nodekey, flippin edge if needed.
@@ -1250,9 +1245,8 @@ canonicalise graph =
             in
             List.map flipAsNeeded allEdgeInstances.foundEdges
 
-        _ =
-            Debug.log "edges" (Dict.map summaryEdge edges)
-
+        --_ =
+        --    Debug.log "edges" (Dict.map summaryEdge edges)
         edges : Dict String (Edge msg)
         edges =
             let
