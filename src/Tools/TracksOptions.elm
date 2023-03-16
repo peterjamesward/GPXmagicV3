@@ -25,7 +25,7 @@ type alias Options msg =
 
 type GraphState msg
     = GraphNoTracks
-    | GraphOriginalTracks (Maybe (Graph msg))
+    | GraphOriginalTracks
     | GraphSnapped (Graph msg)
     | GraphWithNodes (Graph msg) (Graph msg)
     | GraphWithEdges (Graph msg) (Graph msg) (Graph msg)

@@ -130,6 +130,7 @@ want to use the other features of Route maker to define your own route.""" )
                 , ( "undoAnalyze", """Undo find key places""" )
                 , ( "canonicalise", """Split into component tracks""" )
                 , ( "undoCanonicalise", """Undo decomposition""" )
+                , ( "undoNewRoute", """Go back to Route mode""" )
                 , ( "graphNone", """Welcome to Route Builder. You can now use more than one GPX file.
 Load one or more tracks, or draw some on the Map, with this tool open. The route appear in the list
 at the top of this tool.

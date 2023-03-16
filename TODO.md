@@ -21,6 +21,7 @@ BUG: Right split not being saved/restored?
 7. Any change to track collection must invalidate nodes.
 8. Remove all logging.
 9. Check all flows and accompanying text.
+10. Video(s).
 
 ---
 

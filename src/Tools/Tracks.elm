@@ -134,7 +134,7 @@ toolStateChange :
 toolStateChange opened options =
     if opened then
         case options.graphState of
-            GraphOriginalTracks _ ->
+            GraphOriginalTracks ->
                 update (SetTolerance options.matchingTolerance) options
 
             _ ->
@@ -331,7 +331,7 @@ update msg options =
                 GraphSnapped previous ->
                     ( { options
                         | graph = previous
-                        , graphState = GraphOriginalTracks Nothing
+                        , graphState = GraphOriginalTracks
                         , activeTrackName = List.head <| Dict.keys previous.edges
                         , roadListCollapsed = False
                       }
@@ -339,7 +339,7 @@ update msg options =
                     )
 
                 _ ->
-                    ( { options | graphState = GraphOriginalTracks Nothing }, [] )
+                    ( { options | graphState = GraphOriginalTracks }, [] )
 
         Canonicalise ->
             case options.graphState of
@@ -360,7 +360,7 @@ update msg options =
                     )
 
                 _ ->
-                    ( { options | graphState = GraphOriginalTracks Nothing }, [] )
+                    ( { options | graphState = GraphOriginalTracks }, [] )
 
         ToggleRoadList ->
             ( { options | roadListCollapsed = not options.roadListCollapsed }, [] )
@@ -537,7 +537,7 @@ viewGraph settings wrapper options graph =
                         GraphNoTracks ->
                             i18n "graphNone"
 
-                        GraphOriginalTracks _ ->
+                        GraphOriginalTracks ->
                             i18n "graphOriginal"
 
                         GraphSnapped _ ->
@@ -573,7 +573,7 @@ viewGraph settings wrapper options graph =
             GraphNoTracks ->
                 none
 
-            GraphOriginalTracks _ ->
+            GraphOriginalTracks ->
                 let
                     snapToNearbyButton =
                         row [ spacing 3, width fill ]
@@ -1010,7 +1010,7 @@ addTrack track options =
         , activeTrackName = Just track.trackName
         , commonReferenceGPX = newReferenceGPX
         , graph = Graph.addEdgeFromTrack trackWithUnambiguousName options.graph
-        , graphState = GraphOriginalTracks Nothing
+        , graphState = GraphOriginalTracks
     }
 
 
@@ -1062,7 +1062,7 @@ unloadActiveTrack options =
                         , graph = newGraph
                         , graphState =
                             if Dict.size newGraph.edges > 1 then
-                                GraphOriginalTracks Nothing
+                                GraphOriginalTracks
 
                             else
                                 GraphNoTracks
@@ -1674,7 +1674,7 @@ makeNewRoute userRoute options =
             { options
                 | graph = Graph.addEdgeFromTrack trackWithUndo emptyGraph
                 , selectedTraversal = 0
-                , graphState = GraphOriginalTracks Nothing
+                , graphState = GraphOriginalTracks
                 , activeTrackName = Just newTrackName
                 , roadListCollapsed = False
             }
