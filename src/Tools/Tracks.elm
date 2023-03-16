@@ -3,6 +3,7 @@ module Tools.Tracks exposing
     , addSelfLoop
     , addTrack
     , addTraversal
+    , boundingBox
     , defaultOptions
     , getActiveTrack
     , getKeyPlaces
@@ -25,6 +26,7 @@ import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
 import Axis3d
+import BoundingBox3d
 import Color
 import CommonToolStyles
 import Dict
@@ -208,7 +210,6 @@ update msg options =
             ( { options
                 | graph = newGraph
                 , graphState = GraphSnapped options.graph
-                , activeTrackName = List.head <| Dict.keys newGraph.edges
               }
             , [ Actions.HidePreview "graph" ]
             )
@@ -229,7 +230,6 @@ update msg options =
                         | graph = newGraph
                         , graphState = GraphWithNodes options.graph preSnapGraph
                         , userRoute = []
-                        , activeTrackName = List.head <| Dict.keys newGraph.edges
                         , roadListCollapsed = False
                       }
                     , [ Actions.HidePreview "graph" ]
@@ -351,12 +351,9 @@ update msg options =
                     ( { options
                         | graph = newGraph
                         , graphState = GraphWithEdges options.graph beforeNodes beforeSnap
+                        , activeTrackName = Just "Road 1"
                       }
-                    , [ Actions.SetActiveTrack <|
-                            Maybe.withDefault "" <|
-                                Maybe.map .trackName <|
-                                    Graph.trackFromIndex 0 newGraph
-                      ]
+                    , []
                     )
 
                 _ ->
@@ -1112,6 +1109,14 @@ mapOverInvisibleTracks f options =
                     Nothing
             )
         |> List.filterMap identity
+
+
+boundingBox : Options msg -> Maybe (BoundingBox3d.BoundingBox3d Meters LocalCoords)
+boundingBox options =
+    options.graph.edges
+        |> Dict.values
+        |> List.map (DomainModel.boundingBox << .trackTree << .track)
+        |> BoundingBox3d.aggregateN
 
 
 lookForClusters :

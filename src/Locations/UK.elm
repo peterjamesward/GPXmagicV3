@@ -23,6 +23,7 @@ textDictionary =
           , Dict.fromList
                 [ ( "loadgpx", """Load GPX file""" )
                 , ( "savegpx", """Save GPX file""" )
+                , ( "clear", """Clear loaded route(s)""" )
                 , ( "loadurl", """Load GPX from HTTP URL""" )
                 , ( "urlhelp", """Paste or type web address of GPX file here""" )
                 , ( "notrack", """No track loaded""" )

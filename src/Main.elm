@@ -101,6 +101,7 @@ type Msg
     = GpxRequested
     | GpxSelected File
     | GpxLoaded String
+    | ClearLoadedTracks
     | TryRemoteLoad
     | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
@@ -317,11 +318,9 @@ render model =
         let
             paneLayout =
                 -- This is all the DOM changes, WebGL, SVG.
-                --TODO: Should `previews` sit with 3D scene, which is in PaneLayout.
                 PaneLayoutManager.render
                     model.toolOptions
                     model.paneLayoutOptions
-                    (Tuple.first model.contentArea)
                     model.toolOptions.tracksOptions
                     model.previews
         in
@@ -592,6 +591,23 @@ update msg model =
 
         GpxLoaded content ->
             processGpxContent content
+
+        ClearLoadedTracks ->
+            let
+                toolOptions =
+                    model.toolOptions
+
+                tracks =
+                    toolOptions.tracksOptions
+
+                newToolOptions =
+                    { toolOptions | tracksOptions = Tracks.defaultOptions }
+            in
+            ( { model | toolOptions = newToolOptions }
+            , Cmd.batch <|
+                List.map MapPortController.removeTrackFromMapByName <|
+                    Dict.keys tracks.graph.edges
+            )
 
         --Delegate wrapped OAuthmessages.
         --For v3, we're copying the state into the Tool, which is not ideal
@@ -966,21 +982,7 @@ adoptTrackInModel track model =
             toolOptions.tracksOptions
 
         newTracksOptions =
-            --WARN: Maybe unwise.
-            if ToolsController.isToolOpen ToolsController.ToolTracks toolOptions.tools then
-                -- Subsequent track only adds if tool is open
-                Tracks.addTrack track tracksOptions
-
-            else if Tracks.getActiveTrack tracksOptions == Nothing then
-                -- First track always gets added.
-                Tracks.addTrack track tracksOptions
-
-            else
-                -- New track replaces current
-                tracksOptions
-                    |> Tracks.unloadActiveTrack
-                    |> Tuple.second
-                    |> Tracks.addTrack track
+            Tracks.addTrack track tracksOptions
 
         newToolOptions =
             { toolOptions
@@ -1260,6 +1262,16 @@ topLoadingBar model =
                 , label = localHelper "loadgpx"
                 }
 
+        clearButton =
+            button
+                [ padding 5
+                , Border.color FlatColors.FlatUIPalette.peterRiver
+                , Border.width 2
+                ]
+                { onPress = Just ClearLoadedTracks
+                , label = localHelper "clear"
+                }
+
         saveButton =
             row [ spacing 0, padding 0 ]
                 [ button
@@ -1335,6 +1347,7 @@ topLoadingBar model =
             Nothing ->
                 none
         , saveButton
+        , clearButton
         , row [ alignRight, spacing 5 ]
             [ Tools.OneClickQuickFix.oneClickQuickFixButton
                 model.systemSettings.location

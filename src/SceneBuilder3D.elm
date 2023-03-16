@@ -4,6 +4,7 @@ module SceneBuilder3D exposing
     , LocationContext(..)
     , TerrainFoldState
     , render3dView
+    , renderGroundPlane
     , renderInactiveView
     , renderKeyPlaces
     , renderPreviews
@@ -55,6 +56,37 @@ roadWidth =
     Length.meters 4.0
 
 
+renderGroundPlane :
+    Tools.DisplaySettingsOptions.Options
+    -> Maybe (BoundingBox3d Meters LocalCoords)
+    -> List (Entity LocalCoords)
+renderGroundPlane settings box =
+    case box of
+        Just isBox ->
+            let
+                minZ =
+                    -- Drop to prevent flicker.
+                    BoundingBox3d.minZ isBox |> Quantity.minus (Length.inches 6)
+
+                { minX, maxX, minY, maxY } =
+                    BoundingBox3d.extrema <|
+                        BoundingBox3d.expandBy (Length.meters 50) isBox
+            in
+            if settings.groundPlane && settings.terrainFineness == 0.0 then
+                [ Scene3d.quad (Material.color <| colorFromElmUiColour FlatColors.IndianPalette.keppel)
+                    (Point3d.xyz minX minY minZ)
+                    (Point3d.xyz minX maxY minZ)
+                    (Point3d.xyz maxX maxY minZ)
+                    (Point3d.xyz maxX minY minZ)
+                ]
+
+            else
+                []
+
+        Nothing ->
+            []
+
+
 render3dView :
     Tools.DisplaySettingsOptions.Options
     -> TrackLoaded msg
@@ -79,29 +111,6 @@ render3dView settings track =
                 , fullDepthRenderingBoxSize
                 )
                 (.space <| startPoint <| leafFromIndex track.currentPosition track.trackTree)
-
-        groundPlane =
-            let
-                { minX, maxX, minY, maxY } =
-                    BoundingBox3d.extrema nearbySpace
-            in
-            if settings.groundPlane && settings.terrainFineness == 0.0 then
-                let
-                    modelMinZ =
-                        -- Drop an inch to prevent flicker.
-                        boundingBox track.trackTree
-                            |> BoundingBox3d.minZ
-                            |> Quantity.minus (Length.inches 6)
-                in
-                [ Scene3d.quad (Material.color <| colorFromElmUiColour FlatColors.IndianPalette.keppel)
-                    (Point3d.xyz minX minY modelMinZ)
-                    (Point3d.xyz minX maxY modelMinZ)
-                    (Point3d.xyz maxX maxY modelMinZ)
-                    (Point3d.xyz maxX minY modelMinZ)
-                ]
-
-            else
-                []
 
         depthFn : RoadSection -> Maybe Int
         depthFn road =
@@ -231,7 +240,7 @@ render3dView settings track =
             0
             track.trackTree
             foldFn
-            (groundPlane ++ renderCurrentMarkers)
+            renderCurrentMarkers
 
 
 renderInactiveView : TrackLoaded msg -> List (Entity LocalCoords)

@@ -16,10 +16,13 @@ BUG: Right split not being saved/restored?
 
 ## Route Builder
 
-1. Undo for create new track from route.
-2. Any change to track collection must invalidate nodes.
-4. Check all flows and accompanying text.
-5. Video(s).
+1. ~~Clear/Close GPX button on top bar.~~
+2. ~~Snap/Analyse/Canonical actions should not change active track.~~
+3. ~~Ground plane should be below all tracks.~~
+4. Undo for create new track from route (?).
+5. Any change to track collection must invalidate nodes.
+6. Check all flows and accompanying text.
+7. Video(s).
 
 ---
 
