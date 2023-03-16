@@ -1663,6 +1663,7 @@ makeNewRoute userRoute options =
             let
                 newTrackName =
                     List.map .edge options.userRoute
+                        |> List.Extra.unique
                         |> String.join "-"
 
                 trackWithUndo =
