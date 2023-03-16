@@ -456,7 +456,7 @@ function storageMessageHandler(msg) {
 };
 
 function makeTheMap(msg) {
-    console.log('create the map');
+//    console.log('create the map');
 
     mapboxgl.accessToken = msg.token;
     var element = document.getElementById("map");
@@ -502,7 +502,7 @@ function addDecorations() {
     //console.log('ADD DECORATIONS', map.getSource('mapbox-dem'));
 
    if (isUnset(map.getSource('mapbox-dem'))) {
-      console.log('add source terrain');
+//      console.log('add source terrain');
       map.addSource('mapbox-dem', {
           'type': 'raster-dem',
           'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
@@ -606,7 +606,7 @@ function addLineToMap(label, data, points) {
 
 function removeTrack(label) {
 
-    console.log('Removing ', label);
+//    console.log('Removing ', label);
     lineLabel = "line:" + label;
     pointsLabel = "points:" + label;
 
