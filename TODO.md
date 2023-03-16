@@ -16,11 +16,11 @@ BUG: Right split not being saved/restored?
 
 ## Route Builder
 
-3. "undo decomposition" should show original track.
 5. Undo for create new track from route.
-6. Should still be able to revert to pre-routing tracks, right until convert back to single.
+> WIP adding optional previous graph state for base state, should work for this.
 7. Any change to track collection must invalidate nodes.
 8. Remove all logging.
+9. Check all flows and accompanying text.
 
 ---
 
