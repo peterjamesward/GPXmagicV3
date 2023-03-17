@@ -2290,6 +2290,10 @@ performActionCommands actions model =
                 ( FetchMapElevations, Just track ) ->
                     MapPortController.requestElevations track.trackName
 
+                ( RemoveAllFromMap names, _ ) ->
+                    Cmd.batch <|
+                        List.map MapPortController.removeTrackFromMapByName names
+
                 ( SetMapStyle url, _ ) ->
                     -- Deliberate pause here seems to allow map to quiesce.
                     Cmd.batch

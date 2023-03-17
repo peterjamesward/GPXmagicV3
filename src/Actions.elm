@@ -131,6 +131,7 @@ type
     | SetActiveTrack String
     | UpdateNamedSegments (List NamedSegment)
     | UnloadActiveTrack String
+    | RemoveAllFromMap (List String)
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

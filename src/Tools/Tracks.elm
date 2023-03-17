@@ -320,7 +320,9 @@ update msg options =
 
         ConvertFromGraph ->
             ( makeNewRoute options.userRoute options
-            , []
+            , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
+              , Actions.ReRender
+              ]
             )
 
         DisplayInfo tool tag ->

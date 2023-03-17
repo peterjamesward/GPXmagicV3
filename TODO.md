@@ -14,15 +14,21 @@ BUG: Right split not being saved/restored?
 
 # WIP
 
+## OUTPUT GPX
+
+Put track name in premble.
+
 ## Route Builder
 
 1. ~~Clear/Close GPX button on top bar.~~
 2. ~~Snap/Analyse/Canonical actions should not change active track.~~
 3. ~~Ground plane should be below all tracks.~~
-4. Undo for create new track from route (?).
-5. Any change to track collection must invalidate nodes.
-6. Check all flows and accompanying text.
-7. Video(s).
+4. Map view not re-rendering after route conversion.
+> May need a "remove all routes" in JS - or get edges from old track.
+5. Undo for create new track from route (?).
+6. Any change to track collection must invalidate nodes.
+7. Check all flows and accompanying text.
+8. Video(s).
 
 ---
 

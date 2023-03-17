@@ -18,9 +18,8 @@ preamble =
 <gpx version="1.1"
   creator="GPXmagic"
   xmlns="http://www.topografix.com/GPX/1/1"
-  xmlns:rgt="http://www.rgtcycling.com/XML/GpxExtensions/v1">
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.topografix.com/GPX/1/1
+  xmlns:rgt="http://www.rgtcycling.com/XML/GpxExtensions/v1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1
   http://www.topografix.com/GPX/1/1/gpx.xsd">
   <metadata>
     <name>Smoothed with GPXmagic</name>
