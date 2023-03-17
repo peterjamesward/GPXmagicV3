@@ -168,6 +168,7 @@ function mapMessageHandler(msg) {
 
         case 'Remove':
             if (isMapCreated) {
+                console.log('Remove', msg.label);
                 removeTrack(msg.label,);
             }
             break;
@@ -562,7 +563,7 @@ function safelyRemoveLayer(layer) {
 function addLineToMap(label, data, points) {
 
     lineLabel = "line:" + label;
-//    console.log('Adding ', lineLabel);
+    console.log('Adding ', lineLabel);
 
     // Attempt idempotency.
     safelyRemoveLayer(lineLabel);

@@ -14,18 +14,13 @@ BUG: Right split not being saved/restored?
 
 # WIP
 
-## OUTPUT GPX
-
-Put track name in premble.
-
 ## Route Builder
 
-1. ~~Clear/Close GPX button on top bar.~~
-2. ~~Snap/Analyse/Canonical actions should not change active track.~~
-3. ~~Ground plane should be below all tracks.~~
 4. Map view not re-rendering after route conversion.
-> May need a "remove all routes" in JS - or get edges from old track.
-5. Undo for create new track from route (?).
+> More a question of the original route not being removed after decomposition!
+> Some actions reliably show the right track on the map; be consistent!
+5. Undo for create new track from route.
+> Consider a Tracks level Undo mini-stack. Store Tracks not Graph.
 6. Any change to track collection must invalidate nodes.
 7. Check all flows and accompanying text.
 8. Video(s).
@@ -33,6 +28,19 @@ Put track name in premble.
 ---
 
 # BACKLOG
+
+## Segment output
+
+Semantically, endpoints should be duplicated between segments, but apparently RGT barfs.
+Thus, provide option to output duplicate points but leave default as is until RGT complies.
+(Dan Connelly)
+
+## Scientific notation in GPX
+
+If not too hard, support for import (not output) of really, really small longitude and latitude.
+May be as simple as changing the regex.
+> Decimal is (\+|-)?([0-9]+(\.[0-9]*)?|\.[0-9]+)
+> Float is (\+|-)?([0-9]+(\.[0-9]*)?|\.[0-9]+)([Ee](\+|-)?[0-9]+)? |(\+|-)?INF|NaN
 
 ## Tools summary
 
@@ -95,10 +103,6 @@ Provide info text capability on top bar and on view panes.
 ---
 
 # The cellar
-
-## Scientific notation in GPX
-
-If not too hard, support for import (not output) of really, really small longitude and latitude.
 
 ## Redo Profile (again)?
 

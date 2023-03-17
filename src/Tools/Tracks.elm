@@ -320,9 +320,7 @@ update msg options =
 
         ConvertFromGraph ->
             ( makeNewRoute options.userRoute options
-            , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
-              , Actions.ReRender
-              ]
+            , []
             )
 
         DisplayInfo tool tag ->
@@ -355,7 +353,7 @@ update msg options =
                         , graphState = GraphWithEdges options.graph beforeNodes beforeSnap
                         , activeTrackName = Just "Road 1"
                       }
-                    , []
+                    , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges ]
                     )
 
                 _ ->
