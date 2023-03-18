@@ -16,7 +16,8 @@ BUG: Right split not being saved/restored?
 
 ## Route Builder
 
-5. Undo for create new track from route.
+5. Make sure track name edit cannot duplicate any name.
+6. Undo for create new track from route.
 > Consider a Tracks level Undo mini-stack. Store Tracks not Graph.
 6. Any change to track collection must invalidate nodes.
 7. Check all flows and accompanying text.

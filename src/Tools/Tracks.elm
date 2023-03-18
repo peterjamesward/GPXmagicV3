@@ -320,7 +320,9 @@ update msg options =
 
         ConvertFromGraph ->
             ( makeNewRoute options.userRoute options
-            , []
+            , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
+              , Actions.TrackHasChanged
+              ]
             )
 
         DisplayInfo tool tag ->
@@ -427,27 +429,32 @@ addTraversal newEdge options =
 
 renameActiveTrack : String -> Options msg -> Options msg
 renameActiveTrack newName options =
-    case getActiveTrack options of
-        Just oldTrack ->
-            let
-                renameEdge traversal =
-                    if traversal.edge == oldTrack.trackName then
-                        { edge = newName, direction = traversal.direction }
+    -- Prevent inadvertant duplication
+    if Dict.member newName options.graph.edges then
+        options
 
-                    else
-                        traversal
+    else
+        case getActiveTrack options of
+            Just oldTrack ->
+                let
+                    renameEdge traversal =
+                        if traversal.edge == oldTrack.trackName then
+                            { edge = newName, direction = traversal.direction }
 
-                newGraph =
-                    Graph.renameEdge oldTrack.trackName newName options.graph
-            in
-            { options
-                | graph = newGraph
-                , activeTrackName = Just newName
-                , userRoute = List.map renameEdge options.userRoute
-            }
+                        else
+                            traversal
 
-        Nothing ->
-            options
+                    newGraph =
+                        Graph.renameEdge oldTrack.trackName newName options.graph
+                in
+                { options
+                    | graph = newGraph
+                    , activeTrackName = Just newName
+                    , userRoute = List.map renameEdge options.userRoute
+                }
+
+            Nothing ->
+                options
 
 
 updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( TrackLoaded msg, Options msg )
