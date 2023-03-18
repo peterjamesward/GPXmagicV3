@@ -16,9 +16,6 @@ BUG: Right split not being saved/restored?
 
 ## Route Builder
 
-4. Map view not re-rendering after route conversion.
-> More a question of the original route not being removed after decomposition!
-> Some actions reliably show the right track on the map; be consistent!
 5. Undo for create new track from route.
 > Consider a Tracks level Undo mini-stack. Store Tracks not Graph.
 6. Any change to track collection must invalidate nodes.
@@ -29,18 +26,6 @@ BUG: Right split not being saved/restored?
 
 # BACKLOG
 
-## Segment output
-
-Semantically, endpoints should be duplicated between segments, but apparently RGT barfs.
-Thus, provide option to output duplicate points but leave default as is until RGT complies.
-(Dan Connelly)
-
-## Scientific notation in GPX
-
-If not too hard, support for import (not output) of really, really small longitude and latitude.
-May be as simple as changing the regex.
-> Decimal is (\+|-)?([0-9]+(\.[0-9]*)?|\.[0-9]+)
-> Float is (\+|-)?([0-9]+(\.[0-9]*)?|\.[0-9]+)([Ee](\+|-)?[0-9]+)? |(\+|-)?INF|NaN
 ## Derive climbs from WKO file
 
 _Eric Spencer_
@@ -110,14 +95,9 @@ Provide info text capability on top bar and on view panes.
 
 # The cellar
 
-## Redo Profile (again)?
-
-https://package.elm-lang.org/packages/gampleman/elm-visualization/latest/
-No: renders to SVG not Canvas, so disappointing really.
-
 ## Street view
 
-Nope, can't be done in an iFrame. Google stops it.
+Nope, can't be done in an iFrame. Google stops it. Alternative APIs too costly.
 
 ## LIDAR
 
@@ -147,5 +127,12 @@ But, routing tools exist.
 
 Sync'd to Orange?
 https://www.w3schools.com/jsref/dom_obj_video.asp
+
+## Segment output
+
+Semantically, endpoints should be duplicated between segments, but apparently RGT barfs.
+Thus, provide option to output duplicate points but leave default as is until RGT complies.
+(Dan Connelly)
+
 
 

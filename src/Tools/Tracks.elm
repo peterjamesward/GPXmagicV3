@@ -335,7 +335,7 @@ update msg options =
                         , activeTrackName = List.head <| Dict.keys previous.edges
                         , roadListCollapsed = False
                       }
-                    , []
+                    , [ Actions.TrackHasChanged ]
                     )
 
                 _ ->
@@ -353,7 +353,9 @@ update msg options =
                         , graphState = GraphWithEdges options.graph beforeNodes beforeSnap
                         , activeTrackName = Just "Road 1"
                       }
-                    , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges ]
+                    , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
+                      , Actions.TrackHasChanged
+                      ]
                     )
 
                 _ ->
