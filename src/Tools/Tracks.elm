@@ -577,11 +577,22 @@ viewGraph settings wrapper options graph =
                                 , thumb = Input.defaultThumb
                                 }
                             ]
+
+                    revertButton =
+                        if List.length options.priors > 0 then
+                            Input.button neatToolsBorder
+                                { onPress = Just (wrapper Undo)
+                                , label = i18n "undoNewRoute"
+                                }
+
+                        else
+                            none
                 in
                 column [ centerX, width fill, spacing 10 ]
                     [ unloadButton
                     , toleranceSlider
                     , snapToNearbyButton
+                    , revertButton
                     ]
 
             GraphSnapped ->
@@ -1658,6 +1669,7 @@ makeNewRoute userRoute options =
                 , graphState = GraphOriginalTracks
                 , activeTrackName = Just newTrackName
                 , roadListCollapsed = False
+                , priors = OptionsUndo options :: options.priors
             }
 
         Nothing ->
