@@ -209,14 +209,15 @@ decodeSplitValues values model =
 
         decoded =
             D.decodeValue decoder values
+
+        _ =
+            Debug.log "splits" decoded
     in
     case decoded of
         Ok data ->
             let
-                ( width, _ ) =
-                    ( truncate <| Tuple.first model.windowSize
-                    , truncate <| Tuple.second model.windowSize
-                    )
+                width =
+                    truncate <| Tuple.first model.windowSize
             in
             { model
                 | leftDockRightEdge =

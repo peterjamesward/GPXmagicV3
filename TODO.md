@@ -7,8 +7,6 @@
 
 BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
 
-BUG: Right split not being saved/restored?
-
 --- 
 
 
@@ -26,8 +24,6 @@ BUG: Right split not being saved/restored?
 
 _Eric Spencer_
 i haven't fully thought this through yet, but just airing to determine if it's viable as there are some potentially obvious issues. I ride a lot of workouts in ERG mode but many of the roads I use visually don't match the workout segment I'm on (eg. I'm hitting 120% FTP whilst riding downhill). Is there something that could roughly use inputs of my FTP, and my weight, I then provide a wko file that has say 3 blocks of 10 mins at 250W, with 3 mins between at 150W and GPXmagic would create a route with constant climbs and flats that broadly mimic the workout structure for my parameters without needing to use ERG. It would never be the exact durations of the wko as I may put in more or less power but effort wise it will broadly be correct
-
-## Route maker -- combine routes
 
 ## Tools summary
 
