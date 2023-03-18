@@ -109,14 +109,14 @@ parseGPXPoints xml =
             Regex.find (asRegex "(<trkpt(.|\\s)*?)(trkpt>|\\/>)") xml
 
         latitude trkpt =
-            Regex.find (asRegex "lat=\\\"([\\d\\.-]*)\\\"") trkpt |> matches
+            Regex.find (asRegex "lat=\\\"([\\d*|\\+|-|-|E|e|\\.]*)\\\"") trkpt |> matches
 
         longitude trkpt =
-            Regex.find (asRegex "lon=\\\"([\\d\\.-]*)\\\"") trkpt |> matches
+            Regex.find (asRegex "lon=\\\"([\\d*|\\+|-|-|E|e|\\.]*)\\\"") trkpt |> matches
 
         elevation trkpt =
             case
-                Regex.find (asRegex "<ele>([\\d\\.-]*)<\\/ele>") trkpt |> matches
+                Regex.find (asRegex "<ele>([\\d*|\\+|-|-|E|e|\\.]*)<\\/ele>") trkpt |> matches
             of
                 (Just alt) :: _ ->
                     Length.meters alt

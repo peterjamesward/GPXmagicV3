@@ -3,11 +3,14 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.10.1 (75a8117d)
+# GPXmagic v3.10.2 (70103bf3)
 
-**GPXmagic V3 works best with Chrome (and some derivatives)**
+**GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
 
-**N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+## 3.10.2
+
+Correctly reads GPX files containing scientific notation (like 3.241487e-06). This is
+essential if you want to create a really tight crit course somewhere off the coast of Ghana ;)
 
 ## 3.10.1
 
