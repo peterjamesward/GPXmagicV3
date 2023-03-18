@@ -154,6 +154,8 @@ type alias Options msg =
     -- Tool specific options
     { tools : List ToolEntry
     , docks : Dict String DockSettings
+    , azSort : Bool
+    , compact : Bool
     , directionChangeOptions : DirectionChanges.Options
     , deleteOptions : DeletePoints.Options
     , essentialOptions : Tools.Essentials.Options
@@ -190,6 +192,8 @@ defaultOptions : Options msg
 defaultOptions =
     { tools = defaultTools
     , docks = Dict.fromList dockList
+    , azSort = False
+    , compact = False
     , directionChangeOptions = DirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
     , essentialOptions = Tools.Essentials.defaultOptions
@@ -225,6 +229,8 @@ defaultOptions =
 type ToolMsg
     = ToolPopupToggle ToolType
     | ToolDockSelect ToolType ToolDock
+    | ToolToggleSort Bool
+    | ToolToggleCompact Bool
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
     | DisplayInfo String String
@@ -1286,6 +1292,16 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolToggleSort azSort ->
+            ( { options | azSort = azSort }
+            , []
+            )
+
+        ToolToggleCompact compact ->
+            ( { options | compact = compact }
+            , []
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1704,8 +1720,11 @@ toolsForDock settings dock msgWrapper isTrack options =
 viewToolSettings : SystemSettings -> Options msg -> (ToolMsg -> msg) -> Element msg
 viewToolSettings settings options wrapper =
     let
+        i18n =
+            I18N.localisedString settings.location "tools"
+
         optionHelper =
-            compactRadioButton << I18N.localisedString settings.location "tools"
+            compactRadioButton << i18n
 
         fullOptionList tool =
             if (tool.toolType == ToolSettings) || (tool.toolType == ToolEssentials) then
@@ -1732,10 +1751,52 @@ viewToolSettings settings options wrapper =
                     Input.labelRight [ paddingXY 10 0 ] <|
                         row [ spacing 4 ]
                             [ infoButton (wrapper <| DisplayInfo tool.toolId "info")
-                            , I18N.text settings.location tool.toolId "label"
+                            , text <| I18N.localisedString settings.location tool.toolId "label"
                             ]
                 , options = fullOptionList tool
                 }
+
+        compactListing : ToolEntry -> Element msg
+        compactListing tool =
+            Input.button
+                [--spacing 5
+                 --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+                ]
+                { onPress = Nothing --wrapper <| ToolActivate tool.toolId
+                , label = text <| I18N.localisedString settings.location tool.toolId "label"
+                }
+
+        sortMethod : Element msg
+        sortMethod =
+            Input.checkbox []
+                { onChange = wrapper << ToolToggleSort
+                , icon = Input.defaultCheckbox
+                , checked = options.azSort
+                , label = Input.labelRight [] (text <| i18n "A-Z")
+                }
+
+        compact : Element msg
+        compact =
+            Input.checkbox []
+                { onChange = wrapper << ToolToggleCompact
+                , icon = Input.defaultCheckbox
+                , checked = options.compact
+                , label = Input.labelRight [] (text <| i18n "Compact")
+                }
+
+        displayStyle =
+            if options.compact then
+                compactListing
+
+            else
+                locationChoices
+
+        sorting =
+            if options.azSort then
+                List.sortBy (\tool -> I18N.localisedString settings.location tool.toolId "label")
+
+            else
+                identity
     in
     column
         ([ width fill
@@ -1747,7 +1808,9 @@ viewToolSettings settings options wrapper =
             ++ CommonToolStyles.toolContentBoxStyle settings
         )
     <|
-        List.map locationChoices options.tools
+        (wrappedRow [ width fill, centerX, spacing 4, padding 4 ] [ sortMethod, compact ]
+            :: (List.map displayStyle <| sorting <| options.tools)
+        )
 
 
 viewTool :
