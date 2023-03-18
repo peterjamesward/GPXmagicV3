@@ -20,15 +20,22 @@ type alias Options msg =
     , centreLineOffset : Length.Length
     , minimumRadiusAtPlaces : Length.Length
     , clustersForPreview : List Cluster
+    , priors : List (OptionsUndo msg)
     }
+
+
+type
+    OptionsUndo msg
+    --Shenanigans to work around Elm types
+    = OptionsUndo (Options msg)
 
 
 type GraphState msg
     = GraphNoTracks
     | GraphOriginalTracks
-    | GraphSnapped (Graph msg)
-    | GraphWithNodes (Graph msg) (Graph msg)
-    | GraphWithEdges (Graph msg) (Graph msg) (Graph msg)
+    | GraphSnapped --(Graph msg)
+    | GraphWithNodes --(Graph msg) (Graph msg)
+    | GraphWithEdges --(Graph msg) (Graph msg) (Graph msg)
 
 
 type ClickDetect

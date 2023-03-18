@@ -65,7 +65,7 @@ import Tools.GraphOptions as Graph exposing (Cluster, Graph)
 import Tools.I18N as I18N
 import Tools.Nudge
 import Tools.NudgeOptions
-import Tools.TracksOptions as Options exposing (Direction(..), GraphState(..), Options, Traversal, TraversalDisplay)
+import Tools.TracksOptions as Options exposing (Direction(..), GraphState(..), Options, OptionsUndo(..), Traversal, TraversalDisplay)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import Vector2d
@@ -90,12 +90,10 @@ type Msg
     | DisplayInfo String String
     | FlipDirection Int
     | ClearRoute
-    | UndoAnalyze
+    | Undo
     | SetTolerance (Quantity Float Meters)
     | SnapToNearby
-    | UndoSnap
     | Canonicalise
-    | UndoCanonicalise
     | ToggleRoadList
 
 
@@ -113,6 +111,7 @@ defaultOptions =
     , selectedTraversal = 0
     , clustersForPreview = []
     , userRoute = []
+    , priors = []
     }
 
 
@@ -209,7 +208,8 @@ update msg options =
             in
             ( { options
                 | graph = newGraph
-                , graphState = GraphSnapped options.graph
+                , graphState = GraphSnapped
+                , priors = OptionsUndo options :: options.priors
               }
             , [ Actions.HidePreview "graph" ]
             )
@@ -219,18 +219,19 @@ update msg options =
             -- We may safely proceed with neighbour counting to find nodes and edges.
             -- The found edges become the new tracks.
             -- We delegate to graph, then pull back the updated tracks.
-            -- Save the previous graph for simple reversion.
+            -- Save the previous state for simple reversion.
             case options.graphState of
-                GraphSnapped preSnapGraph ->
+                GraphSnapped ->
                     let
                         newGraph =
                             Graph.analyzeTracksAsGraph options.graph
                     in
                     ( { options
                         | graph = newGraph
-                        , graphState = GraphWithNodes options.graph preSnapGraph
+                        , graphState = GraphWithNodes
                         , userRoute = []
                         , roadListCollapsed = False
+                        , priors = OptionsUndo options :: options.priors
                       }
                     , [ Actions.HidePreview "graph" ]
                     )
@@ -238,30 +239,10 @@ update msg options =
                 _ ->
                     ( options, [] )
 
-        UndoAnalyze ->
-            case options.graphState of
-                GraphWithNodes preAnalyze preSnap ->
-                    ( { options
-                        | graph = preAnalyze
-                        , graphState = GraphSnapped preSnap
-                        , activeTrackName = List.head <| Dict.keys preAnalyze.edges
-                        , roadListCollapsed = False
-                      }
-                    , [ Actions.TrackHasChanged ]
-                    )
-
-                _ ->
-                    ( options, [] )
-
-        UndoCanonicalise ->
-            case options.graphState of
-                GraphWithEdges preCanon preAnalyze preSnap ->
-                    ( { options
-                        | graph = preCanon
-                        , graphState = GraphWithNodes preAnalyze preSnap
-                        , activeTrackName = List.head <| Dict.keys preCanon.edges
-                        , roadListCollapsed = False
-                      }
+        Undo ->
+            case options.priors of
+                (OptionsUndo prior) :: _ ->
+                    ( prior
                     , [ Actions.TrackHasChanged ]
                     )
 
@@ -328,32 +309,18 @@ update msg options =
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
 
-        UndoSnap ->
-            case options.graphState of
-                GraphSnapped previous ->
-                    ( { options
-                        | graph = previous
-                        , graphState = GraphOriginalTracks
-                        , activeTrackName = List.head <| Dict.keys previous.edges
-                        , roadListCollapsed = False
-                      }
-                    , [ Actions.TrackHasChanged ]
-                    )
-
-                _ ->
-                    ( { options | graphState = GraphOriginalTracks }, [] )
-
         Canonicalise ->
             case options.graphState of
-                GraphWithNodes beforeNodes beforeSnap ->
+                GraphWithNodes ->
                     let
                         newGraph =
                             Graph.canonicalise options.graph
                     in
                     ( { options
                         | graph = newGraph
-                        , graphState = GraphWithEdges options.graph beforeNodes beforeSnap
+                        , graphState = GraphWithEdges
                         , activeTrackName = Just "Road 1"
+                        , priors = OptionsUndo options :: options.priors
                       }
                     , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
                       , Actions.TrackHasChanged
@@ -546,13 +513,13 @@ viewGraph settings wrapper options graph =
                         GraphOriginalTracks ->
                             i18n "graphOriginal"
 
-                        GraphSnapped _ ->
+                        GraphSnapped ->
                             i18n "graphSnapped"
 
-                        GraphWithNodes _ _ ->
+                        GraphWithNodes ->
                             i18n "graphAnalyzed"
 
-                        GraphWithEdges _ _ _ ->
+                        GraphWithEdges ->
                             i18n "graphConverted"
                     ]
                 ]
@@ -617,7 +584,7 @@ viewGraph settings wrapper options graph =
                     , snapToNearbyButton
                     ]
 
-            GraphSnapped _ ->
+            GraphSnapped ->
                 let
                     analyseButton =
                         row [ spacing 3, width fill ]
@@ -632,7 +599,7 @@ viewGraph settings wrapper options graph =
                         row [ spacing 3 ]
                             [ Input.button
                                 neatToolsBorder
-                                { onPress = Just <| wrapper UndoSnap
+                                { onPress = Just <| wrapper Undo
                                 , label = i18n "undoSnap"
                                 }
                             ]
@@ -642,11 +609,11 @@ viewGraph settings wrapper options graph =
                     , analyseButton
                     ]
 
-            GraphWithNodes snappedGraph originalGraph ->
+            GraphWithNodes ->
                 let
                     revertButton =
                         Input.button neatToolsBorder
-                            { onPress = Just (wrapper UndoAnalyze)
+                            { onPress = Just (wrapper Undo)
                             , label = i18n "undoAnalyze"
                             }
 
@@ -661,7 +628,7 @@ viewGraph settings wrapper options graph =
                     , convertButton
                     ]
 
-            GraphWithEdges beforeEdges beforeNodes beforeSnap ->
+            GraphWithEdges ->
                 let
                     offset =
                         Length.inMeters options.centreLineOffset
@@ -671,7 +638,7 @@ viewGraph settings wrapper options graph =
 
                     revertButton =
                         Input.button neatToolsBorder
-                            { onPress = Just (wrapper UndoCanonicalise)
+                            { onPress = Just (wrapper Undo)
                             , label = i18n "undoCanonicalise"
                             }
 

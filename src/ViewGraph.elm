@@ -474,7 +474,7 @@ view settings context ( width, height ) options msgWrapper =
         , inFront <| zoomButtons settings msgWrapper context
         , inFront <|
             case options.graphState of
-                GraphWithEdges _ _ _ ->
+                GraphWithEdges ->
                     popupEditingMenu msgWrapper context options
 
                 _ ->
