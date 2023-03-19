@@ -1824,16 +1824,20 @@ viewToolSettings settings options wrapper =
 
         visible : ToolEntry -> Element msg
         visible tool =
-            if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
-                el [ width (px 20) ] none
+            Input.checkbox [ width (px 20) ]
+                { label = Input.labelHidden "visible"
+                , onChange =
+                    wrapper
+                        << always
+                            (if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
+                                ToolNoOp
 
-            else
-                Input.checkbox [ width (px 20) ]
-                    { label = Input.labelHidden "visible"
-                    , onChange = wrapper << always (ToolToggleVisible tool.toolType)
-                    , checked = tool.isVisible
-                    , icon = Input.defaultCheckbox
-                    }
+                             else
+                                ToolToggleVisible tool.toolType
+                            )
+                , checked = tool.isVisible
+                , icon = Input.defaultCheckbox
+                }
 
         locationChoices : ToolEntry -> Element msg
         locationChoices tool =
@@ -1860,10 +1864,14 @@ viewToolSettings settings options wrapper =
                  --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
                 ]
                 { onPress =
-                    Just <|
-                        wrapper <|
-                            ToolActivate tool.toolType <|
-                                nextToolState tool.state
+                    if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
+                        Nothing
+
+                    else
+                        Just <|
+                            wrapper <|
+                                ToolActivate tool.toolType <|
+                                    nextToolState tool.state
                 , label = text <| I18N.localisedString settings.location tool.toolId "label"
                 }
 
