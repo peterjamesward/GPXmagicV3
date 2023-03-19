@@ -427,6 +427,8 @@ You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure t
                 , ( "onleft", """Left""" )
                 , ( "onright", """Right""" )
                 , ( "hidden", """Hidden""" )
+                , ( "A-Z", """Sort alphabetically""" )
+                , ( "Compact", """Show names only""" )
                 , ( "notrack", """Controls will appear here when a track is loaded.""" )
                 , ( "blank", """           """ )
                 , ( "info", """

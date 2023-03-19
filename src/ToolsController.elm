@@ -233,6 +233,7 @@ type ToolMsg
     | ToolToggleCompact Bool
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
+    | ToolActivate ToolType ToolState
     | DisplayInfo String String
     | DirectionChanges DirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
@@ -752,6 +753,19 @@ setToolState toolType state tool =
         tool
 
 
+unHideTool : ToolType -> ToolEntry -> ToolEntry
+unHideTool toolType tool =
+    if tool.toolType == toolType then
+        if tool.dock == DockNone then
+            { tool | dock = DockUpperRight }
+
+        else
+            tool
+
+    else
+        tool
+
+
 nextToolState : ToolState -> ToolState
 nextToolState state =
     case state of
@@ -858,6 +872,18 @@ update toolMsg isTrack msgWrapper options =
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
             { options | tools = List.map (setToolState toolType newState) options.tools }
+                |> toolStateHasChanged toolType newState isTrack
+
+        ToolActivate toolType newState ->
+            -- Record the new state, but also let the tool know!
+            { options
+                | tools =
+                    List.map
+                        (setToolState toolType newState
+                            << unHideTool toolType
+                        )
+                        options.tools
+            }
                 |> toolStateHasChanged toolType newState isTrack
 
         DirectionChanges msg ->
@@ -1751,7 +1777,9 @@ viewToolSettings settings options wrapper =
                     Input.labelRight [ paddingXY 10 0 ] <|
                         row [ spacing 4 ]
                             [ infoButton (wrapper <| DisplayInfo tool.toolId "info")
-                            , text <| I18N.localisedString settings.location tool.toolId "label"
+                            , compactListing tool
+
+                            --, text <| I18N.localisedString settings.location tool.toolId "label"
                             ]
                 , options = fullOptionList tool
                 }
@@ -1762,7 +1790,11 @@ viewToolSettings settings options wrapper =
                 [--spacing 5
                  --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
                 ]
-                { onPress = Nothing --wrapper <| ToolActivate tool.toolId
+                { onPress =
+                    Just <|
+                        wrapper <|
+                            ToolActivate tool.toolType <|
+                                nextToolState tool.state
                 , label = text <| I18N.localisedString settings.location tool.toolId "label"
                 }
 
