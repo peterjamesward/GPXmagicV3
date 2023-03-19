@@ -341,20 +341,23 @@ updateActiveTrack newTrack model =
         toolsOptions =
             model.toolOptions
 
-        ( useTrack, newOptions ) =
-            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
+        tracks =
+            toolsOptions.tracksOptions
+
+        ( _, newTracks ) =
+            case Tracks.getActiveTrack tracks of
                 Just activeTrack ->
                     Tuple.mapFirst Just <|
                         Tracks.updateActiveTrack
                             activeTrack
                             newTrack
-                            model.toolOptions.tracksOptions
+                            tracks
 
                 Nothing ->
                     ( Nothing, model.toolOptions.tracksOptions )
 
         newToolsOptions =
-            { toolsOptions | tracksOptions = newOptions }
+            { toolsOptions | tracksOptions = newTracks }
     in
     { model
         | toolOptions = newToolsOptions
@@ -1529,7 +1532,7 @@ performActionsOnModel actions model =
 
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
-            case ( action, Tracks.getActiveTrack model.toolOptions.tracksOptions ) of
+            case ( action, Tracks.getActiveTrack foldedModel.toolOptions.tracksOptions ) of
                 ( UnloadActiveTrack _, Just _ ) ->
                     let
                         toolOptions =

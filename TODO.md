@@ -23,7 +23,8 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Tools Controller
 
-Code clean up. Not nice doing all those list maps.
+Code clean up. Not nice doing all those list maps. A Dict perhaps.
+Also, visibility should be separate from dock choice.
 
 ## Remove Actions
 
