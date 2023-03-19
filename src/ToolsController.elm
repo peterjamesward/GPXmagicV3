@@ -1901,7 +1901,7 @@ viewToolSettings settings options wrapper =
     in
     column
         ([ width fill
-         , height <| px 300
+         , height <| px 400
          , scrollbarY
          , padding 10
          , spacing 3
