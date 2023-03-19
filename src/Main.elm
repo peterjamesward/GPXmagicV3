@@ -1177,7 +1177,7 @@ upperLeftDockView model =
     <|
         ToolsController.toolsForDock
             model.systemSettings
-            ToolsController.DockUpperLeft
+            ToolsController.DockLeft
             ToolsMsg
             (Tracks.getActiveTrack model.toolOptions.tracksOptions)
             model.toolOptions
@@ -1190,7 +1190,7 @@ upperRightDockView model =
     <|
         ToolsController.toolsForDock
             model.systemSettings
-            ToolsController.DockUpperRight
+            ToolsController.DockRight
             ToolsMsg
             (Tracks.getActiveTrack model.toolOptions.tracksOptions)
             model.toolOptions

@@ -231,6 +231,7 @@ type ToolMsg
     | ToolDockSelect ToolType ToolDock
     | ToolToggleSort Bool
     | ToolToggleCompact Bool
+    | ToolToggleVisible ToolType
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
     | ToolActivate ToolType ToolState
@@ -273,6 +274,7 @@ type alias ToolEntry =
     , video : Maybe String
     , state : ToolState
     , dock : ToolDock
+    , isVisible : Bool
     , tabColour : Element.Color
     , textColour : Element.Color
     , isPopupOpen : Bool
@@ -321,7 +323,8 @@ toolSettings =
     , toolId = "tools"
     , video = Just "https://youtu.be/nQJtjDy_Qi4"
     , state = SettingsClosed
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = rgtPurple
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
@@ -335,7 +338,8 @@ trackInfoBox =
     , toolId = TrackInfoBox.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
@@ -349,7 +353,8 @@ displaySettingsTool =
     , toolId = Tools.DisplaySettings.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
@@ -363,7 +368,8 @@ directionChangeTool =
     , toolId = DirectionChanges.toolId
     , video = Just "https://youtu.be/IzjoHTQN0Lk"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
@@ -377,7 +383,8 @@ gradientChangeTool =
     , toolId = Tools.GradientProblems.toolId
     , video = Just "https://youtu.be/IMn-MkxYFtc"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.wetAsphalt
     , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
@@ -391,7 +398,8 @@ essentialsTool =
     , toolId = Tools.Essentials.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = AlwaysOpen
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.orange
     , textColour = contrastingColour FlatColors.FlatUIPalette.orange
     , isPopupOpen = False
@@ -405,7 +413,8 @@ deleteTool =
     , toolId = DeletePoints.toolId
     , video = Just "https://youtu.be/3qobNm46TQw"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.greenSea
     , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
     , isPopupOpen = False
@@ -419,7 +428,8 @@ bezierSplinesTool =
     , toolId = Tools.BezierSplines.toolId
     , video = Just "https://youtu.be/UuDfZYagvIU"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.nephritis
     , textColour = contrastingColour FlatColors.FlatUIPalette.nephritis
     , isPopupOpen = False
@@ -433,7 +443,8 @@ centroidAverageTool =
     , toolId = Tools.CentroidAverage.toolId
     , video = Just "https://youtu.be/1C8clUhpQ20"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.belizeHole
     , textColour = contrastingColour FlatColors.FlatUIPalette.belizeHole
     , isPopupOpen = False
@@ -447,7 +458,8 @@ curveFormerTool =
     , toolId = Tools.CurveFormer.toolId
     , video = Just "https://youtu.be/J81QZ6P6nV4"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.wisteria
     , textColour = contrastingColour FlatColors.FlatUIPalette.wisteria
     , isPopupOpen = False
@@ -461,7 +473,8 @@ bendSmootherTool =
     , toolId = Tools.BendSmoother.toolId
     , video = Just "https://youtu.be/Qahop5xkuP0"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.midnightBlue
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
@@ -475,7 +488,8 @@ smartSmootherTool =
     , toolId = Tools.SmartSmoother.toolId
     , video = Just "https://youtu.be/6cSTQgvcRuw"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.sunFlower
     , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
@@ -489,7 +503,8 @@ nudgeTool =
     , toolId = Tools.Nudge.toolId
     , video = Just "https://youtu.be/lZslQzyplPM"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.sunFlower
     , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
@@ -503,7 +518,8 @@ outAndBackTool =
     , toolId = Tools.OutAndBack.toolId
     , video = Just "https://youtu.be/7gh5-r5uuOs"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.carrot
     , textColour = contrastingColour FlatColors.FlatUIPalette.carrot
     , isPopupOpen = False
@@ -517,7 +533,8 @@ simplifyTool =
     , toolId = Tools.Simplify.toolId
     , video = Just "https://youtu.be/dmK9PIlH04c"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.alizarin
     , textColour = contrastingColour FlatColors.FlatUIPalette.alizarin
     , isPopupOpen = False
@@ -531,7 +548,8 @@ interpolateTool =
     , toolId = Tools.Interpolate.toolId
     , video = Just "https://youtu.be/i5rALJ_42n0"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.clouds
     , textColour = contrastingColour FlatColors.FlatUIPalette.clouds
     , isPopupOpen = False
@@ -545,7 +563,8 @@ profileSmoothTool =
     , toolId = Tools.ProfileSmooth.toolId
     , video = Just "https://youtu.be/XJGYt8LfTvQ"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -559,7 +578,8 @@ namedSegmentTool =
     , toolId = Tools.NamedSegment.toolId
     , video = Just "https://youtu.be/PaJeI8yahBI"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = rgtPurple
     , textColour = contrastingColour rgtPurple
     , isPopupOpen = False
@@ -573,7 +593,8 @@ moveScaleRotateTool =
     , toolId = Tools.MoveScaleRotate.toolId
     , video = Just "https://youtu.be/tWLm1vhASCQ"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.pomegranate
     , textColour = contrastingColour FlatColors.FlatUIPalette.pomegranate
     , isPopupOpen = False
@@ -587,7 +608,8 @@ flythroughTool =
     , toolId = Tools.Flythrough.toolId
     , video = Just "https://youtu.be/w9M2zund_6s"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.pumpkin
     , textColour = contrastingColour FlatColors.FlatUIPalette.pumpkin
     , isPopupOpen = False
@@ -601,7 +623,8 @@ stravaTool =
     , toolId = Tools.StravaTools.toolId
     , video = Just "https://youtu.be/plG5rP0bbug"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = stravaOrange
     , textColour = contrastingColour stravaOrange
     , isPopupOpen = False
@@ -615,7 +638,8 @@ moveAndStretchTool =
     , toolId = Tools.MoveAndStretch.toolId
     , video = Just "https://youtu.be/gnDlQMxf8wk"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.silver
     , textColour = contrastingColour FlatColors.FlatUIPalette.silver
     , isPopupOpen = False
@@ -629,7 +653,8 @@ startFinishTool =
     , toolId = Tools.StartFinish.toolId
     , video = Just "https://youtu.be/NPcFRKKfx0w"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.asbestos
     , textColour = contrastingColour FlatColors.FlatUIPalette.asbestos
     , isPopupOpen = False
@@ -643,7 +668,8 @@ splitAndJoinTool =
     , toolId = Tools.SplitAndJoin.toolId
     , video = Just "https://youtu.be/2dHqHWjyT7w"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
@@ -657,7 +683,8 @@ intersectionsTool =
     , toolId = Tools.Intersections.toolId
     , video = Just "https://youtu.be/iWI1ASujFR4"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
@@ -671,7 +698,8 @@ straightenTool =
     , toolId = Tools.Straightener.toolId
     , video = Just "https://youtu.be/B_LX9BmuoxE"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -685,7 +713,8 @@ landUseTool =
     , toolId = Tools.LandUse.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.wetAsphalt
     , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
@@ -699,7 +728,8 @@ timestampTool =
     , toolId = Tools.Timestamp.toolId
     , video = Nothing
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
@@ -713,7 +743,8 @@ routingTool =
     , toolId = Tools.MapMatchingRouter.toolId
     , video = Just "https://youtu.be/MYBTArdb_X0"
     , state = Contracted
-    , dock = DockUpperRight
+    , isVisible = True
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -727,12 +758,19 @@ tracksTool =
     , toolId = Tools.Tracks.toolId
     , video = Nothing
     , state = Contracted
-    , dock = DockUpperLeft
+    , isVisible = True
+    , dock = DockLeft
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
     , categories = [ TcInformation ]
     }
+
+
+toolIsSpecial : ToolEntry -> Bool
+toolIsSpecial tool =
+    -- Must not be allowed to remove these.
+    tool.toolType == ToolSettings || tool.toolType == ToolEssentials
 
 
 toggleToolPopup : ToolType -> ToolEntry -> ToolEntry
@@ -753,14 +791,23 @@ setToolState toolType state tool =
         tool
 
 
-unHideTool : ToolType -> ToolEntry -> ToolEntry
-unHideTool toolType tool =
+toggleToolVisible : ToolType -> ToolEntry -> ToolEntry
+toggleToolVisible toolType tool =
     if tool.toolType == toolType then
-        if tool.dock == DockNone then
-            { tool | dock = DockUpperRight }
+        if not <| toolIsSpecial tool then
+            { tool | isVisible = not tool.isVisible, isPopupOpen = False }
 
         else
             tool
+
+    else
+        tool
+
+
+unHideTool : ToolType -> ToolEntry -> ToolEntry
+unHideTool toolType tool =
+    if tool.toolType == toolType then
+        { tool | isVisible = True, isPopupOpen = False }
 
     else
         tool
@@ -879,9 +926,7 @@ update toolMsg isTrack msgWrapper options =
             { options
                 | tools =
                     List.map
-                        (setToolState toolType newState
-                            << unHideTool toolType
-                        )
+                        (setToolState toolType newState << unHideTool toolType)
                         options.tools
             }
                 |> toolStateHasChanged toolType newState isTrack
@@ -1328,6 +1373,12 @@ update toolMsg isTrack msgWrapper options =
             , []
             )
 
+        ToolToggleVisible toolType ->
+            -- Record the new state, but also let the tool know!
+            ( { options | tools = List.map (toggleToolVisible toolType) options.tools }
+            , []
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1715,10 +1766,14 @@ toolsForDock :
     -> Options msg
     -> Element msg
 toolsForDock settings dock msgWrapper isTrack options =
+    let
+        visibleTools =
+            List.filter .isVisible options.tools
+    in
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacing 5, scrollbarY ]
             [ column [ width fill, spacing 5 ]
-                (options.tools
+                (visibleTools
                     |> List.filter
                         (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
                     |> List.map (viewTool settings msgWrapper isTrack options)
@@ -1727,7 +1782,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 -- Open tools
                 []
               <|
-                (options.tools
+                (visibleTools
                     |> List.filter (\t -> t.dock == dock && t.state == Expanded)
                     |> List.map (viewTool settings msgWrapper isTrack options)
                 )
@@ -1735,7 +1790,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 -- Closed tools
                 []
               <|
-                (options.tools
+                (visibleTools
                     |> List.filter (\t -> t.dock == dock && t.state == Contracted)
                     |> List.map (viewTool settings msgWrapper isTrack options)
                 )
@@ -1754,16 +1809,27 @@ viewToolSettings settings options wrapper =
 
         fullOptionList tool =
             if (tool.toolType == ToolSettings) || (tool.toolType == ToolEssentials) then
-                [ Input.optionWith DockUpperLeft <| optionHelper "onleft"
-                , Input.optionWith DockUpperRight <| optionHelper "onright"
-                , Input.optionWith tool.dock <| optionHelper "blank"
+                [ Input.optionWith DockLeft <| optionHelper "onleft"
+                , Input.optionWith DockRight <| optionHelper "onright"
                 ]
 
             else
-                [ Input.optionWith DockUpperLeft <| optionHelper "onleft"
-                , Input.optionWith DockUpperRight <| optionHelper "onright"
-                , Input.optionWith DockNone <| optionHelper "hidden"
+                [ Input.optionWith DockLeft <| optionHelper "onleft"
+                , Input.optionWith DockRight <| optionHelper "onright"
                 ]
+
+        visible : ToolEntry -> Element msg
+        visible tool =
+            if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
+                el [ width (px 20) ] none
+
+            else
+                Input.checkbox [ width (px 20) ]
+                    { label = Input.labelHidden "visible"
+                    , onChange = wrapper << always (ToolToggleVisible tool.toolType)
+                    , checked = tool.isVisible
+                    , icon = Input.defaultCheckbox
+                    }
 
         locationChoices : ToolEntry -> Element msg
         locationChoices tool =
@@ -1776,10 +1842,9 @@ viewToolSettings settings options wrapper =
                 , label =
                     Input.labelRight [ paddingXY 10 0 ] <|
                         row [ spacing 4 ]
-                            [ infoButton (wrapper <| DisplayInfo tool.toolId "info")
+                            [ visible tool
+                            , infoButton (wrapper <| DisplayInfo tool.toolId "info")
                             , compactListing tool
-
-                            --, text <| I18N.localisedString settings.location tool.toolId "label"
                             ]
                 , options = fullOptionList tool
                 }
@@ -1790,11 +1855,7 @@ viewToolSettings settings options wrapper =
                 [--spacing 5
                  --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
                 ]
-                { onPress =
-                    Just <|
-                        wrapper <|
-                            ToolActivate tool.toolType <|
-                                nextToolState tool.state
+                { onPress = Just <| wrapper <| ToolToggleVisible tool.toolType
                 , label = text <| I18N.localisedString settings.location tool.toolId "label"
                 }
 
@@ -1977,12 +2038,12 @@ showDockOptions settings msgWrapper toolEntry =
             (spacing 4 :: neatToolsBorder)
             [ Input.button
                 [ tooltip below (localisedTooltip settings.location "tools" "left") ]
-                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLeft
                 , label = useIcon FeatherIcons.arrowLeft
                 }
             , Input.button
                 [ tooltip below (localisedTooltip settings.location "tools" "right") ]
-                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockRight
                 , label = useIcon FeatherIcons.arrowRight
                 }
             , if
@@ -1995,7 +2056,7 @@ showDockOptions settings msgWrapper toolEntry =
                     [ tooltip below (localisedTooltip settings.location "tools" "hide")
                     , paddingEach { left = 20, right = 0, top = 0, bottom = 0 }
                     ]
-                    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockNone
+                    { onPress = Just <| msgWrapper <| ToolToggleVisible toolEntry.toolType
                     , label = useIcon FeatherIcons.eyeOff
                     }
 
@@ -2521,48 +2582,24 @@ decodeState state =
 encodeDock : ToolDock -> String
 encodeDock dock =
     case dock of
-        DockUpperLeft ->
+        DockLeft ->
             "upperleft"
 
-        DockLowerLeft ->
-            "lowerleft"
-
-        DockUpperRight ->
+        DockRight ->
             "upperright"
-
-        DockLowerRight ->
-            "lowerright"
-
-        DockBottom ->
-            "bottom"
-
-        DockNone ->
-            "none"
 
 
 decodeDock : String -> ToolDock
 decodeDock dock =
     case dock of
         "upperleft" ->
-            DockUpperLeft
-
-        "lowerleft" ->
-            DockLowerLeft
+            DockLeft
 
         "upperright" ->
-            DockUpperRight
-
-        "lowerright" ->
-            DockLowerRight
-
-        "bottom" ->
-            DockBottom
-
-        "none" ->
-            DockNone
+            DockRight
 
         _ ->
-            DockUpperRight
+            DockRight
 
 
 encodeOneTool : ToolEntry -> E.Value
@@ -2684,12 +2721,8 @@ type alias DockSettings =
 
 
 type ToolDock
-    = DockUpperLeft
-    | DockLowerLeft
-    | DockUpperRight
-    | DockLowerRight
-    | DockBottom
-    | DockNone
+    = DockLeft
+    | DockRight
 
 
 defaultDockColour =
