@@ -3,9 +3,39 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.10.2 (70103bf3)
+# GPXmagic v3.11.0 (70103bf3)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.0
+
+**Tool Summary** enhancements
+
+- Separate settings for which dock a tool lives in and whether a tool is visible.
+- Click on the checkbox to hide or show a tool.
+- Click on the tool name to open that tool, even if hidden (closes the tool if open).
+- Option to sort tools alphabetically
+- Option to show only the tool names, with the same click-to-open behaviour.
+
+This means you can run a really lean setup with all the tools hidden until you need them.
+
+**Route Builder** replaces Route Maker
+
+- Opening a new track does not replace the current one
+- Drawing a track on the map does not replace the current track
+- Close button in the top bar clears loaded track(s)
+- Route Builder lists all tracks loaded, only one at a time is "active" for editing
+- Each track has its own Undo/Redo stacks
+- Routes can be hidden & revealed from the tool
+- All Route Builder functionality is now migrated to this tool
+- Detection of nearby points works over all (visible) tracks, making it easier to join them
+- "Snap to nearby" will align common sections of road, on one or more tracks
+- Analysis of common sections works across tracks; reducing multiple tracks to "atomic' parts
+- The Undo button within the tool applies across the collection of tracks
+
+The purpose is to allow for more flexibility in composing new routes by combining old routes
+and (when required) joining them by drawing on the Map. It's complicated but (I suggest) actually
+more consistent conceptually than its predecessor.
 
 ## 3.10.2
 
