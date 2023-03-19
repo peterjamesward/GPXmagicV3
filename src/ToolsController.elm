@@ -40,7 +40,7 @@ import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
-import Json.Decode as D exposing (field)
+import Json.Decode as D exposing (field, maybe)
 import Json.Encode as E
 import List.Extra
 import SystemSettings exposing (SystemSettings)
@@ -1375,8 +1375,12 @@ update toolMsg isTrack msgWrapper options =
 
         ToolToggleVisible toolType ->
             -- Record the new state, but also let the tool know!
-            ( { options | tools = List.map (toggleToolVisible toolType) options.tools }
-            , []
+            let
+                newOptions =
+                    { options | tools = List.map (toggleToolVisible toolType) options.tools }
+            in
+            ( newOptions
+            , [ StoreLocally "tools" <| encodeToolState newOptions ]
             )
 
 
@@ -1855,7 +1859,11 @@ viewToolSettings settings options wrapper =
                 [--spacing 5
                  --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
                 ]
-                { onPress = Just <| wrapper <| ToolToggleVisible tool.toolType
+                { onPress =
+                    Just <|
+                        wrapper <|
+                            ToolActivate tool.toolType <|
+                                nextToolState tool.state
                 , label = text <| I18N.localisedString settings.location tool.toolId "label"
                 }
 
@@ -2405,6 +2413,7 @@ type alias StoredTool =
     , dock : String
     , tab : ColourTriplet
     , text : ColourTriplet
+    , visible : Maybe Bool
     }
 
 
@@ -2610,6 +2619,7 @@ encodeOneTool tool =
         , ( "dock", E.string <| encodeDock tool.dock )
         , ( "tab", encodeColour tool.tabColour )
         , ( "text", encodeColour tool.textColour )
+        , ( "visible", E.bool tool.isVisible )
         ]
 
 
@@ -2626,12 +2636,13 @@ colourDecoder =
 
 
 toolDecoder =
-    D.map5 StoredTool
+    D.map6 StoredTool
         (field "type" D.string)
         (field "state" D.string)
         (field "dock" D.string)
         (field "tab" colourDecoder)
         (field "text" colourDecoder)
+        (maybe (field "visible" D.bool))
 
 
 restoreStoredValues : Options msg -> D.Value -> Options msg
@@ -2650,6 +2661,7 @@ restoreStoredValues options values =
                         , dock = decodeDock found.dock
                         , tabColour = decodeColour found.tab
                         , textColour = decodeColour found.text
+                        , isVisible = Maybe.withDefault True found.visible
                     }
 
                 Nothing ->
