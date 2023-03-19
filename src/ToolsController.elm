@@ -867,7 +867,7 @@ getColour toolType entries =
 isToolOpen : ToolType -> List ToolEntry -> Bool
 isToolOpen toolType entries =
     List.Extra.find
-        (\tab -> tab.toolType == toolType && tab.state == Expanded)
+        (\tab -> tab.toolType == toolType && tab.state == Expanded && tab.isVisible)
         entries
         /= Nothing
 

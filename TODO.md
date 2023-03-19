@@ -14,17 +14,18 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Route Builder
 
-1. Video(s).
-2. Merge to master.
-
----
-
-# BACKLOG
+2. Hide all previews for inactive routes.
+3. Video(s).
+4. Merge to master.
 
 ## Tools Controller
 
 Code clean up. Not nice doing all those list maps. A Dict perhaps.
-Also, visibility should be separate from dock choice.
+Hide previews for hidden tools.
+
+---
+
+# BACKLOG
 
 ## Remove Actions
 
