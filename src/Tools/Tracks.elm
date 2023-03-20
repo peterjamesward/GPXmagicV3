@@ -151,46 +151,26 @@ update : Msg -> Options msg -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options =
     case msg of
         SelectActiveTrack name ->
-            case Dict.get name options.graph.edges of
-                Just found ->
-                    let
-                        track =
-                            found.track
-                    in
-                    ( { options
-                        | graph =
-                            Graph.updatedEdge
-                                track
-                                { track | visible = True }
-                                options.graph
-                      }
-                    , [ Actions.SetActiveTrack found.track.trackName ]
-                    )
-
-                Nothing ->
-                    ( options, [] )
+            ( { options
+                | graph =
+                    Graph.updateTrackWith
+                        name
+                        (\track -> { track | visible = True })
+                        options.graph
+              }
+            , [ Actions.SetActiveTrack name ]
+            )
 
         ToggleVisibility name ->
-            case Dict.get name options.graph.edges of
-                Just found ->
-                    let
-                        track =
-                            found.track
-                    in
-                    ( { options
-                        | graph =
-                            Graph.updatedEdge
-                                track
-                                { track | visible = not track.visible }
-                                options.graph
-                      }
-                    , [ Actions.SetActiveTrack found.track.trackName ]
-                    )
-
-                Nothing ->
-                    ( options
-                    , [ Actions.HidePreview "graph" ]
-                    )
+            ( { options
+                | graph =
+                    Graph.updateTrackWith
+                        name
+                        (\track -> { track | visible = not track.visible })
+                        options.graph
+              }
+            , [ Actions.SetActiveTrack name ]
+            )
 
         UnloadActiveTrack ->
             case options.activeTrackName of
@@ -238,6 +218,7 @@ update msg options =
                         , graphState = GraphWithNodes
                         , userRoute = []
                         , roadListCollapsed = False
+                        , clustersForPreview = []
                         , priors = OptionsUndo options :: options.priors
                       }
                     , [ Actions.HidePreview "graph" ]
@@ -328,6 +309,8 @@ update msg options =
                         , graphState = GraphWithEdges
                         , activeTrackName = Just "Road 1"
                         , priors = OptionsUndo options :: options.priors
+                        , userRoute = []
+                        , clustersForPreview = []
                       }
                     , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
                       , Actions.TrackHasChanged

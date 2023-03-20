@@ -14,10 +14,11 @@ module Tools.Graph exposing
     , pointAsComparable
     , removeEdge
     , renameEdge
-    ,  snapToClusters
+    , snapToClusters
+    , trackFromIndex
+    ,  updateTrackWith
        --, undoWalkRoute
 
-    , trackFromIndex
     , updatedEdge
     )
 
@@ -113,6 +114,22 @@ updatedEdge oldTrack newTrack graph =
     graph |> removeEdge oldTrack |> addEdgeFromTrack newTrack
 
 
+updateTrackWith : String -> (TrackLoaded msg -> TrackLoaded msg) -> Graph msg -> Graph msg
+updateTrackWith name updateFn graph =
+    case Dict.get name graph.edges of
+        Just edge ->
+            { graph
+                | edges =
+                    Dict.insert
+                        name
+                        { edge | track = updateFn edge.track }
+                        graph.edges
+            }
+
+        Nothing ->
+            graph
+
+
 removeEdge : TrackLoaded msg -> Graph msg -> Graph msg
 removeEdge track graph =
     -- User has removed a track, so the graph must point to the newest version.
@@ -152,239 +169,6 @@ trackFromIndex index graph =
 
         Nothing ->
             Nothing
-
-
-
-{-
-   --TODO: Check edge is not used in route.
-   -- Remove edge from dictionary.
-   -- If either end node has no other edges, remove them as well.
-   case Dict.get edge graph.edges of
-       Just edgeInfo ->
-           { graph | edges = Dict.remove edge graph.edges }
-               |> pruneOrphanedNodes
-               |> removeIfRedundantPlace edgeInfo.lowNode
-               |> removeIfRedundantPlace edgeInfo.highNode
-
-       Nothing ->
-           graph
--}
-{-
-   pruneOrphanedNodes : Graph msg -> Graph msg
-   pruneOrphanedNodes graph =
-       -- Deletion of an edge may leave unconnected nodes, remove them.
-       let
-           nodeHasEdge k v =
-               not <| List.isEmpty <| combinedEdgesForNode k graph
-       in
-       { graph | nodes = Dict.filter nodeHasEdge graph.nodes }
--}
-
-
-joinTracks : TrackLoaded msg -> TrackLoaded msg -> TrackLoaded msg
-joinTracks track1 track2 =
-    let
-        ( asGpx1, asGpx2 ) =
-            ( DomainModel.getAllGPXPointsInNaturalOrder track1.trackTree
-            , DomainModel.getAllGPXPointsInNaturalOrder track2.trackTree
-            )
-    in
-    case
-        DomainModel.treeFromSourcesWithExistingReference
-            track1.referenceLonLat
-            (asGpx1 ++ asGpx2)
-    of
-        Just tree ->
-            { track1 | trackTree = tree }
-
-        Nothing ->
-            track1
-
-
-reverseTrack : TrackLoaded msg -> TrackLoaded msg
-reverseTrack track =
-    let
-        asGpx1 =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-    in
-    case
-        DomainModel.treeFromSourcesWithExistingReference
-            track.referenceLonLat
-            (List.reverse asGpx1)
-    of
-        Just tree ->
-            { track | trackTree = tree }
-
-        Nothing ->
-            track
-
-
-
-{-
-   removeIfRedundantPlace : Int -> Graph msg -> Graph msg
-   removeIfRedundantPlace node graph =
-       -- Deletion of edge may reduce end Places to having only two Roads, remove them.
-       -- Details depend on whether this node is the low or high numbered edge end.
-       -- `listEdgesForNode` now returns full edge details.
-       --TOOD: Defuglification.
-       case listEdgesForNode node graph of
-           ( [ asLow1, asLow2 ], [] ) ->
-               -- Combined edge is from lowest to highest of the "high ends", flipping the first.
-               let
-                   ( edge1Index, edge1Info ) =
-                       asLow1
-
-                   ( edge2Index, edge2Info ) =
-                       asLow2
-               in
-               if edge1Info.highNode <= edge2Info.highNode then
-                   let
-                       newEdge1 =
-                           { lowNode = edge1Info.highNode
-                           , highNode = edge2Info.highNode
-                           , via = edge1Info.via
-                           , track = joinTracks (reverseTrack edge1Info.track) edge2Info.track
-                           , originalDirection = edge2Info.originalDirection
-                           }
-                   in
-                   { graph
-                       | edges =
-                           graph.edges
-                               |> Dict.remove edge1Index
-                               |> Dict.remove edge2Index
-                               |> Dict.insert edge1Index newEdge1
-                       , nodes = Dict.remove node graph.nodes
-                   }
-
-               else
-                   --if high2 < high1 then
-                   let
-                       newEdge2 =
-                           { lowNode = edge2Info.highNode
-                           , highNode = edge1Info.highNode
-                           , via = edge2Info.via
-                           , track = joinTracks (reverseTrack edge2Info.track) edge1Info.track
-                           , originalDirection = edge1Info.originalDirection
-                           }
-                   in
-                   { graph
-                       | edges =
-                           graph.edges
-                               |> Dict.remove edge1Index
-                               |> Dict.remove edge2Index
-                               |> Dict.insert edge1Index newEdge2
-                       , nodes = Dict.remove node graph.nodes
-                   }
-
-           ( [], [ asHigh1, asHigh2 ] ) ->
-               let
-                   ( edge1Index, edge1Info ) =
-                       asHigh1
-
-                   ( edge2Index, edge2Info ) =
-                       asHigh2
-               in
-               if edge1Info.lowNode <= edge2Info.lowNode then
-                   let
-                       newEdge1 =
-                           { lowNode = edge1Info.lowNode
-                           , highNode = edge2Info.lowNode
-                           , via = edge1Info.via
-                           , track = joinTracks edge1Info.track (reverseTrack edge2Info.track)
-                           , originalDirection = edge1Info.originalDirection
-                           }
-                   in
-                   { graph
-                       | edges =
-                           graph.edges
-                               |> Dict.remove edge1Index
-                               |> Dict.remove edge2Index
-                               |> Dict.insert edge1Index newEdge1
-                       , nodes = Dict.remove node graph.nodes
-                   }
-
-               else
-                   --if low2 < low1 then
-                   let
-                       newEdge2 =
-                           { lowNode = edge2Info.lowNode
-                           , highNode = edge1Info.lowNode
-                           , via = edge2Info.via
-                           , track = joinTracks edge2Info.track (reverseTrack edge1Info.track)
-                           , originalDirection = edge1Info.originalDirection
-                           }
-                   in
-                   { graph
-                       | edges =
-                           graph.edges
-                               |> Dict.remove edge1Index
-                               |> Dict.remove edge2Index
-                               |> Dict.insert edge1Index newEdge2
-                       , nodes = Dict.remove node graph.nodes
-                   }
-
-           ( [ asLow ], [ asHigh ] ) ->
-               let
-                   ( edge1Index, edge1Info ) =
-                       asLow
-
-                   ( edge2Index, edge2Info ) =
-                       asHigh
-
-                   newEdge =
-                       { lowNode = edge1Info.lowNode
-                       , highNode = edge2Info.lowNode
-                       , via = edge1Info.via
-                       , track = joinTracks edge2Info.track edge1Info.track
-                       , originalDirection = edge1Info.originalDirection
-                       }
-               in
-               { graph
-                   | edges =
-                       graph.edges
-                           |> Dict.remove edge1Index
-                           |> Dict.remove edge2Index
-                           |> Dict.insert edge1Index newEdge
-                   , nodes =
-                       if node == edge1Info.highNode then
-                           -- Don't remove if self-loop
-                           graph.nodes
-
-                       else
-                           Dict.remove node graph.nodes
-               }
-
-           _ ->
-               -- Not exactly two edges, do nothing.
-               graph
--}
-{-
-   listEdgesForNode : Int -> Graph msg -> ( List ( Int, Edge msg ), List ( Int, Edge msg ) )
-   listEdgesForNode node graph =
-       let
-           withLowNode =
-               graph.edges
-                   |> Dict.filter
-                       (\_ edgeInfo -> edgeInfo.lowNode == node)
-                   |> Dict.toList
-
-           withHighNode =
-               graph.edges
-                   |> Dict.filter
-                       (\_ edgeInfo -> edgeInfo.highNode == node)
-                   |> Dict.toList
-       in
-       ( withLowNode, withHighNode )
--}
-{-
-   combinedEdgesForNode : Int -> Graph msg -> List ( Int, Edge msg )
-   combinedEdgesForNode node graph =
-       let
-           ( asLow, asHigh ) =
-               listEdgesForNode node graph
-       in
-       asLow ++ asHigh
--}
 
 
 type alias PointIndexEntry =
@@ -1421,7 +1205,9 @@ canonicalise graph =
                     -- Something went wrong!
                     foldState
     in
-    { graph | edges = edges }
+    { graph
+        | edges = edges
+    }
 
 
 
