@@ -14,8 +14,9 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Route Builder
 
-5. Video(s).
-6. Merge to master.
+5. Make the long info text into a modal popup.
+6. Video(s).
+8. Merge to master.
 
 ---
 
