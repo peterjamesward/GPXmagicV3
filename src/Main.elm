@@ -1580,6 +1580,7 @@ performActionsOnModel actions model =
                     in
                     { foldedModel
                         | needsRendering = True
+                        , previews = Dict.empty
                         , toolOptions = newToolOptions
                     }
 
@@ -2272,7 +2273,8 @@ performActionCommands actions model =
 
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch
-                        [ MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
+                        [ removeAllTracksFromMap model
+                        , MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
                             model.systemSettings

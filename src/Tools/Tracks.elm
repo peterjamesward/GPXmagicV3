@@ -152,7 +152,17 @@ update msg options =
         SelectActiveTrack name ->
             case Dict.get name options.graph.edges of
                 Just found ->
-                    ( options
+                    let
+                        track =
+                            found.track
+                    in
+                    ( { options
+                        | graph =
+                            Graph.updatedEdge
+                                track
+                                { track | visible = True }
+                                options.graph
+                      }
                     , [ Actions.SetActiveTrack found.track.trackName ]
                     )
 
@@ -165,17 +175,13 @@ update msg options =
                     let
                         track =
                             found.track
-
-                        updatedTrack =
-                            { track | visible = not track.visible }
                     in
                     ( { options
                         | graph =
-                            if updatedTrack.visible then
-                                Graph.addEdgeFromTrack updatedTrack options.graph
-
-                            else
-                                Graph.removeEdge updatedTrack options.graph
+                            Graph.updatedEdge
+                                track
+                                { track | visible = not track.visible }
+                                options.graph
                       }
                     , [ Actions.SetActiveTrack found.track.trackName ]
                     )
