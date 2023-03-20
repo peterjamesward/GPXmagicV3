@@ -14,9 +14,10 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Route Builder
 
-2. Hide all previews for inactive routes.
-3. Video(s).
-4. Merge to master.
+2. BUG: Hidden route not shown in route list.
+3. Hide previews for inactive routes.
+4. Video(s).
+5. Merge to master.
 
 ## Tools Controller
 

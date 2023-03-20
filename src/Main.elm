@@ -365,6 +365,23 @@ updateActiveTrack newTrack model =
     }
 
 
+removeNamedTrackFromMap model trackName =
+    let
+        hidePreviews =
+            model.previews
+                |> Dict.keys
+                |> List.map MapPortController.hidePreview
+    in
+    Cmd.batch <|
+        (MapPortController.removeTrackFromMapByName trackName :: hidePreviews)
+
+
+removeAllTracksFromMap model =
+    Cmd.batch <|
+        List.map (removeNamedTrackFromMap model) <|
+            Dict.keys model.toolOptions.tracksOptions.graph.edges
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -608,9 +625,7 @@ update msg model =
                     { toolOptions | tracksOptions = Tracks.defaultOptions }
             in
             ( { model | toolOptions = newToolOptions }
-            , Cmd.batch <|
-                List.map MapPortController.removeTrackFromMapByName <|
-                    Dict.keys tracks.graph.edges
+            , removeAllTracksFromMap model
             )
 
         --Delegate wrapped OAuthmessages.
@@ -2185,7 +2200,7 @@ performActionCommands actions model =
 
                 ( UnloadActiveTrack oldTrackName, _ ) ->
                     Cmd.batch
-                        [ MapPortController.removeTrackFromMapByName oldTrackName
+                        [ removeNamedTrackFromMap model oldTrackName
                         , performAction TrackHasChanged
                         ]
 
@@ -2295,8 +2310,7 @@ performActionCommands actions model =
                     MapPortController.requestElevations track.trackName
 
                 ( RemoveAllFromMap names, _ ) ->
-                    Cmd.batch <|
-                        List.map MapPortController.removeTrackFromMapByName names
+                    removeAllTracksFromMap model
 
                 ( SetMapStyle url, _ ) ->
                     -- Deliberate pause here seems to allow map to quiesce.
