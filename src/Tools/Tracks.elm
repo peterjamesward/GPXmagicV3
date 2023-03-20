@@ -42,6 +42,7 @@ import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.FlatUIPalette
 import Geometry101
+import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters, inMeters, meters)
 import LineSegment2d
 import LineSegment3d
@@ -70,7 +71,7 @@ import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import Vector2d
 import Vector3d
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon, useIconWithSize)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, stopProp, useIcon, useIconWithSize)
 
 
 toolId =
@@ -505,30 +506,39 @@ viewGraph settings wrapper options graph =
             I18N.text settings.location toolId
 
         guidanceText =
-            row
+            let
+                label =
+                    case options.graphState of
+                        GraphNoTracks ->
+                            "graphNone"
+
+                        GraphOriginalTracks ->
+                            "graphOriginal"
+
+                        GraphSnapped ->
+                            "graphSnapped"
+
+                        GraphWithNodes ->
+                            "graphAnalyzed"
+
+                        GraphWithEdges ->
+                            "graphConverted"
+            in
+            Input.button
                 [ Background.color FlatColors.FlatUIPalette.turquoise
                 , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
                 , Border.rounded 5
+                , width fill
+                , centerX
+                , padding 5
                 ]
-                [ useIconWithSize 20 FeatherIcons.info
-                , paragraph [ padding 4 ]
-                    [ case options.graphState of
-                        GraphNoTracks ->
-                            i18n "graphNone"
-
-                        GraphOriginalTracks ->
-                            i18n "graphOriginal"
-
-                        GraphSnapped ->
-                            i18n "graphSnapped"
-
-                        GraphWithNodes ->
-                            i18n "graphAnalyzed"
-
-                        GraphWithEdges ->
-                            i18n "graphConverted"
-                    ]
-                ]
+                { onPress = Just <| wrapper <| DisplayInfo toolId label
+                , label =
+                    row [ spacing 10, width fill ]
+                        [ useIconWithSize 18 FeatherIcons.info
+                        , text "Help"
+                        ]
+                }
 
         helper =
             I18N.text settings.location toolId
