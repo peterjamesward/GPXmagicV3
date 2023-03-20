@@ -14,19 +14,18 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Route Builder
 
-4. Show previews when track activated.
 5. Video(s).
 6. Merge to master.
-
-## Tools Controller
-
-Code clean up, optimisation (albeit very minor and localised). 
-Not nice doing all those list maps. A Dict perhaps.
-Hide previews for hidden tools.
 
 ---
 
 # BACKLOG
+
+## Tools Controller
+
+Code clean up, optimisation (albeit very minor and localised).
+Not nice doing all those list maps. A Dict perhaps.
+Hide previews for hidden tools.
 
 ## Remove Actions
 
