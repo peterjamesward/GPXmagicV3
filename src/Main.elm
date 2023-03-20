@@ -2273,8 +2273,7 @@ performActionCommands actions model =
 
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch
-                        [ removeAllTracksFromMap model
-                        , MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
+                        [ MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
                             model.systemSettings
