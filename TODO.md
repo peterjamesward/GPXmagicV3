@@ -14,7 +14,8 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Route Builder
 
-6. Video(s).
+6. More testing.
+7. Video(s).
 8. Merge to master.
 
 ---
@@ -29,7 +30,15 @@ Hide previews for hidden tools.
 
 ## Remove Actions
 
-One at a time.
+One at a time. I think the way into this is to reduce action codes to:
+- UpdatedTrack (Trackloaded msg)
+- UpdatedGraph (Graph msg)
+- MovedPointers (?)
+- etc
+
+Then Main.update reduces to a few cases where we can act directly.
+This may work bettwe with changes above to ToolsController.
+It's almost a V4, not quite as core structures are the same,
 
 ## Derive climbs from WKO file
 
