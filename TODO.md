@@ -25,7 +25,8 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 ## Tools Controller
 
 Code clean up, optimisation (albeit very minor and localised).
-Not nice doing all those list maps. A Dict perhaps.
+Not nice doing all those list maps. 
+A Dict perhaps, though large sum type involved which stopped me before.
 Hide previews for hidden tools.
 
 ## Remove Actions
@@ -35,9 +36,11 @@ One at a time. I think the way into this is to reduce action codes to:
 - UpdatedGraph (Graph msg)
 - MovedPointers (?)
 - etc
+  (export cycles permitting)
+- 
 
 Then Main.update reduces to a few cases where we can act directly.
-This may work bettwe with changes above to ToolsController.
+This may work better with changes above to ToolsController.
 It's almost a V4, not quite as core structures are the same,
 
 ## Derive climbs from WKO file
