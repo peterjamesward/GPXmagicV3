@@ -14,12 +14,17 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Route Builder
 
-6. More testing.
-7. Video(s).
+6. BUG: Components not removed from map after new route. Sometimes?
+8. More testing.
+9. Video(s).
 
 ---
 
 # BACKLOG
+
+## Save tools settings
+
+e.g. Tools Summary should remember its state.
 
 ## Tools Controller
 
