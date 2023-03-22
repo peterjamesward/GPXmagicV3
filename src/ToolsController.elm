@@ -18,6 +18,7 @@ module ToolsController exposing
     , refreshOpenTools
     , restoreDockSettings
     , restoreMeasure
+    , restoreSettings
     , restoreStoredValues
     , setToolState
     , toolsForDock
@@ -1364,13 +1365,21 @@ update toolMsg isTrack msgWrapper options =
             )
 
         ToolToggleSort azSort ->
-            ( { options | azSort = azSort }
-            , []
+            let
+                newOptions =
+                    { options | azSort = azSort }
+            in
+            ( newOptions
+            , [ StoreLocally "tool:tools" <| encodeToolSummaryState newOptions ]
             )
 
         ToolToggleCompact compact ->
-            ( { options | compact = compact }
-            , []
+            let
+                newOptions =
+                    { options | compact = compact }
+            in
+            ( newOptions
+            , [ StoreLocally "tool:tools" <| encodeToolSummaryState newOptions ]
             )
 
         ToolToggleVisible toolType ->
@@ -2636,6 +2645,14 @@ encodeToolState options =
     E.list identity <| List.map encodeOneTool options.tools
 
 
+encodeToolSummaryState : Options msg -> E.Value
+encodeToolSummaryState options =
+    E.object
+        [ ( "AZ", E.bool options.azSort )
+        , ( "compact", E.bool options.compact )
+        ]
+
+
 colourDecoder =
     D.map3 ColourTriplet
         (field "red" D.float)
@@ -2678,6 +2695,26 @@ restoreStoredValues options values =
     case toolsAsStored of
         Ok stored ->
             { options | tools = List.map (useStoredSettings stored) options.tools }
+
+        Err _ ->
+            options
+
+
+type alias MyOptions =
+    { compact : Bool, az : Bool }
+
+
+restoreSettings : Options msg -> D.Value -> Options msg
+restoreSettings options values =
+    let
+        asStored =
+            D.map2 MyOptions
+                (D.field "compact" D.bool)
+                (D.field "AZ" D.bool)
+    in
+    case D.decodeValue asStored values of
+        Ok { az, compact } ->
+            { options | azSort = az, compact = compact }
 
         Err _ ->
             options

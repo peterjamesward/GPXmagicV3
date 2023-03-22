@@ -303,6 +303,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "location"
         , LocalStorage.fetchMemoryUsage
         , LocalStorage.storageGetItem "welcome"
+        , LocalStorage.storageGetItem "tool:tools"
         , Delay.after 100 DisplayWelcome
         ]
     )
@@ -2044,6 +2045,12 @@ performActionsOnModel actions model =
                             { foldedModel
                                 | toolOptions =
                                     ToolsController.restoreStoredValues foldedModel.toolOptions value
+                            }
+
+                        "tool:tools" ->
+                            { foldedModel
+                                | toolOptions =
+                                    ToolsController.restoreSettings foldedModel.toolOptions value
                             }
 
                         "docks" ->
