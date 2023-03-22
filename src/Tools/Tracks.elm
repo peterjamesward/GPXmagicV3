@@ -201,7 +201,7 @@ update msg options =
             ( { options
                 | graph = newGraph
                 , graphState = GraphSnapped
-                , priors = OptionsUndo options :: options.priors
+                , priors = List.take 4 <| OptionsUndo options :: options.priors
               }
             , [ Actions.HidePreview "graph" ]
             )
@@ -224,7 +224,7 @@ update msg options =
                         , userRoute = []
                         , roadListCollapsed = False
                         , clustersForPreview = []
-                        , priors = OptionsUndo options :: options.priors
+                        , priors = List.take 4 <| OptionsUndo options :: options.priors
                       }
                     , [ Actions.HidePreview "graph" ]
                     )
@@ -313,7 +313,7 @@ update msg options =
                         | graph = newGraph
                         , graphState = GraphWithEdges
                         , activeTrackName = Just "Road 1"
-                        , priors = OptionsUndo options :: options.priors
+                        , priors = List.take 4 <| OptionsUndo options :: options.priors
                         , userRoute = []
                         , clustersForPreview = []
                       }
@@ -1673,7 +1673,7 @@ makeNewRoute userRoute options =
                 , graphState = GraphOriginalTracks
                 , activeTrackName = Just newTrackName
                 , roadListCollapsed = False
-                , priors = OptionsUndo options :: options.priors
+                , priors = List.take 4 <| OptionsUndo options :: options.priors
             }
 
         Nothing ->
