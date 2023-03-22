@@ -15,8 +15,13 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 ## Route Builder
 
 6. BUG: Components not removed from map after new route. Sometimes?
-8. More testing.
-9. Video(s).
+7. BUG: Two tracks loaded, hide active, other should become active.
+8. BUG: Making hidden route visible should not activate it.
+9. Route view should show only visible roads.
+10. BUG: Refresh elevation data on component brings back S & F endpoints
+> we know why, any track edit will do this, need to use `updateTrackWith` function.
+11. More testing.
+12. Video(s).
 
 ---
 
