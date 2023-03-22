@@ -169,7 +169,12 @@ update msg options =
                         (\track -> { track | visible = not track.visible })
                         options.graph
               }
-            , [ Actions.SetActiveTrack name ]
+            , case options.activeTrackName of
+                Just active ->
+                    [ Actions.SetActiveTrack active ]
+
+                Nothing ->
+                    []
             )
 
         UnloadActiveTrack ->

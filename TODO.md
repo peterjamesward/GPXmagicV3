@@ -14,10 +14,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 ## Route Builder
 
-* BUG: Components not removed from map after new route. Sometimes?
-* BUG: Two tracks loaded, hide active, other should become active.
-* BUG: Making hidden route visible should not activate it.
-* Route view should show only visible roads.
 * More testing.
 * Video(s).
 

@@ -290,6 +290,7 @@ view settings context ( width, height ) options msgWrapper =
         svgEdges =
             graph.edges
                 |> Dict.toList
+                |> List.filter (\( edgeName, edgeInfo ) -> edgeInfo.track.visible)
                 |> List.map
                     (\( index, edgeInfo ) ->
                         case context.edgeMode of
