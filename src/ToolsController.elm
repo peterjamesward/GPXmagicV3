@@ -1847,22 +1847,38 @@ viewToolSettings settings options wrapper =
                 , Input.optionWith DockRight <| optionHelper "onright"
                 ]
 
+        inactiveCheckbox =
+            Element.el
+                [ Element.width (Element.px 20)
+                , Element.height (Element.px 14)
+                , Element.centerY
+                , Font.size 9
+                , Font.center
+                , Border.rounded 3
+                , Border.color <| Element.rgb (59 / 255) (153 / 255) (252 / 255)
+                ]
+                none
+
         visible : ToolEntry -> Element msg
         visible tool =
-            Input.checkbox [ width (px 20) ]
-                { label = Input.labelHidden "visible"
-                , onChange =
-                    wrapper
-                        << always
-                            (if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
-                                ToolNoOp
+            if toolIsSpecial tool then
+                inactiveCheckbox
 
-                             else
-                                ToolToggleVisible tool.toolType
-                            )
-                , checked = tool.isVisible
-                , icon = Input.defaultCheckbox
-                }
+            else
+                Input.checkbox [ width (px 20) ]
+                    { label = Input.labelHidden "visible"
+                    , onChange =
+                        wrapper
+                            << always
+                                (if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
+                                    ToolNoOp
+
+                                 else
+                                    ToolToggleVisible tool.toolType
+                                )
+                    , checked = tool.isVisible
+                    , icon = Input.defaultCheckbox
+                    }
 
         locationChoices : ToolEntry -> Element msg
         locationChoices tool =

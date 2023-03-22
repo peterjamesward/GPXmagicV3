@@ -12,8 +12,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-BUG: Don't show visible checkbox for Essentials and Tool Summary.
-
 New Tools Summary video.
 
 New Route Builder video.
