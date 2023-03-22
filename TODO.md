@@ -12,7 +12,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-BUG: Hide preview when tool invisible.
 BUG: Don't show visible checkbox for Essentials and Tool Summary.
 
 New Tools Summary video.

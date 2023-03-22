@@ -868,7 +868,7 @@ getColour toolType entries =
 isToolOpen : ToolType -> List ToolEntry -> Bool
 isToolOpen toolType entries =
     List.Extra.find
-        (\tab -> tab.toolType == toolType && tab.state == Expanded && tab.isVisible)
+        (\tab -> tab.toolType == toolType && (tab.state == Expanded) && tab.isVisible)
         entries
         /= Nothing
 
@@ -912,25 +912,39 @@ update toolMsg isTrack msgWrapper options =
                     { options | tools = List.map (setColour toolType color) options.tools }
             in
             if isToolOpen toolType options.tools then
-                toolStateHasChanged toolType Expanded isTrack newOptions
+                toolStateHasChanged toolType True isTrack newOptions
 
             else
                 ( newOptions, [ StoreLocally "tools" <| encodeToolState newOptions ] )
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
-            { options | tools = List.map (setToolState toolType newState) options.tools }
-                |> toolStateHasChanged toolType newState isTrack
+            let
+                newOptions =
+                    { options | tools = List.map (setToolState toolType newState) options.tools }
+            in
+            toolStateHasChanged
+                toolType
+                (isToolOpen toolType newOptions.tools)
+                isTrack
+                newOptions
 
         ToolActivate toolType newState ->
             -- Record the new state, but also let the tool know!
-            { options
-                | tools =
-                    List.map
-                        (setToolState toolType newState << unHideTool toolType)
-                        options.tools
-            }
-                |> toolStateHasChanged toolType newState isTrack
+            let
+                newOptions =
+                    { options
+                        | tools =
+                            List.map
+                                (setToolState toolType newState << unHideTool toolType)
+                                options.tools
+                    }
+            in
+            toolStateHasChanged
+                toolType
+                (isToolOpen toolType newOptions.tools)
+                isTrack
+                newOptions
 
         DirectionChanges msg ->
             case isTrack of
@@ -1388,9 +1402,11 @@ update toolMsg isTrack msgWrapper options =
                 newOptions =
                     { options | tools = List.map (toggleToolVisible toolType) options.tools }
             in
-            ( newOptions
-            , [ StoreLocally "tools" <| encodeToolState newOptions ]
-            )
+            toolStateHasChanged
+                toolType
+                (isToolOpen toolType newOptions.tools)
+                isTrack
+                newOptions
 
 
 refreshOpenTools :
@@ -1402,10 +1418,10 @@ refreshOpenTools isTrack options =
     -- Same impact as tools being opened, so we'll re-use that.
     let
         refreshOpenTool entry ( inputOptions, collectingActions ) =
-            if entry.state == Expanded || entry.state == AlwaysOpen then
+            if isToolOpen entry.toolType options.tools then
                 let
                     ( incrementalModel, incrementalActions ) =
-                        toolStateHasChanged entry.toolType Expanded isTrack inputOptions
+                        toolStateHasChanged entry.toolType True isTrack inputOptions
                 in
                 ( incrementalModel, incrementalActions ++ collectingActions )
 
@@ -1417,11 +1433,11 @@ refreshOpenTools isTrack options =
 
 toolStateHasChanged :
     ToolType
-    -> ToolState
+    -> Bool
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> ( Options msg, List (ToolAction msg) )
-toolStateHasChanged toolType newState isTrack options =
+toolStateHasChanged toolType showPreviews isTrack options =
     case toolType of
         ToolTrackInfo ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
@@ -1432,7 +1448,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     DirectionChanges.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.directionChangeOptions
                         isTrack
@@ -1446,7 +1462,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     DeletePoints.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.deleteOptions
                         isTrack
@@ -1460,7 +1476,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, _ ) =
                     Tools.Essentials.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.essentialOptions
                         isTrack
@@ -1474,7 +1490,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.BezierSplines.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.bezierSplineOptions
                         isTrack
@@ -1488,7 +1504,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.CentroidAverage.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.centroidAverageOptions
                         isTrack
@@ -1502,7 +1518,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.CurveFormer.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.curveFormerOptions
                         isTrack
@@ -1516,7 +1532,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.BendSmoother.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.bendSmootherOptions
                         isTrack
@@ -1530,7 +1546,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.Nudge.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.nudgeOptions
                         isTrack
@@ -1544,7 +1560,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.GradientProblems.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.gradientProblemOptions
                         isTrack
@@ -1564,7 +1580,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.Simplify.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.simplifySettings
                         isTrack
@@ -1578,7 +1594,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.Interpolate.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.interpolateSettings
                         isTrack
@@ -1592,7 +1608,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.Timestamp.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.timestampOptions
                         isTrack
@@ -1606,7 +1622,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.ProfileSmooth.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.profileSmoothSettings
                         isTrack
@@ -1620,7 +1636,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.MoveScaleRotate.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.moveScaleRotateSettings
                         isTrack
@@ -1634,7 +1650,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.Flythrough.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.flythroughSettings
                         isTrack
@@ -1648,7 +1664,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.StravaTools.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.stravaSettings
                         isTrack
@@ -1662,7 +1678,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.MoveAndStretch.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.moveAndStretchSettings
                         isTrack
@@ -1676,7 +1692,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.StartFinish.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.startFinishOptions
                         isTrack
@@ -1690,7 +1706,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.SplitAndJoin.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.splitAndJoinOptions
                         isTrack
@@ -1704,7 +1720,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.Intersections.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.intersectionOptions
                         isTrack
@@ -1727,7 +1743,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.SmartSmoother.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.smartSmootherOptions
                         isTrack
@@ -1741,7 +1757,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.NamedSegment.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         (getColour toolType options.tools)
                         options.namedSegmentOptions
                         isTrack
@@ -1758,7 +1774,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newToolOptions, actions ) =
                     Tools.Tracks.toolStateChange
-                        (newState == Expanded)
+                        showPreviews
                         options.tracksOptions
 
                 newOptions =
