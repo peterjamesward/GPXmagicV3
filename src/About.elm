@@ -9,33 +9,40 @@ aboutText =
 
 ## 3.11.0
 
+### IMPORTANT
+
+In 3.11 you can load more than one track.
+Use the Clear button, or refresh your browser, to unload a previous track.
+
 **Tool Summary** enhancements
+
+This means you can run a really lean setup with all the tools hidden until you need them.
 
 - Separate settings for which dock a tool lives in and whether a tool is visible.
 - Click on the checkbox to hide or show a tool.
 - Click on the tool name to open that tool, even if hidden (closes the tool if open).
 - Option to sort tools alphabetically
 - Option to show only the tool names, with the same click-to-open behaviour.
-
-This means you can run a really lean setup with all the tools hidden until you need them.
+- These options are saved across sessions.
 
 **Route Builder** replaces Route Maker
-
-- Opening a new track does not replace the current one
-- Drawing a track on the map does not replace the current track
-- Close button in the top bar clears loaded track(s)
-- Route Builder lists all tracks loaded, only one at a time is "active" for editing
-- Each track has its own Undo/Redo stacks
-- Routes can be hidden & revealed from the tool
-- All Route Builder functionality is now migrated to this tool
-- Detection of nearby points works over all (visible) tracks, making it easier to join them
-- "Snap to nearby" will align common sections of road, on one or more tracks
-- Analysis of common sections works across tracks; reducing multiple tracks to "atomic' parts
-- The Undo button within the tool applies across the collection of tracks
 
 The purpose is to allow for more flexibility in composing new routes by combining old routes
 and (when required) joining them by drawing on the Map. It's complicated but (I suggest) actually
 more consistent conceptually than its predecessor.
+
+- Opening a new track does not replace the current one;
+- Drawing a track on the map does not replace the current track;
+- _Clear loaded route(s)_ button in the top bar clears loaded route(s);
+- Route Builder lists all tracks loaded, only one at a time is "active" for editing;
+- Each track has its own Undo/Redo stacks;
+- Routes can be hidden & revealed from the tool;
+- All Route Builder functionality is migrated to this tool;
+- Detection of nearby points works over all (visible) tracks, making it easier to join them;
+- "Snap to nearby" will align common sections of road, on one or more tracks;
+- Analysis of common sections works across tracks; reducing multiple tracks to "atomic' parts;
+- You can rename track sections by editing the track name at the top of the page;
+- The Undo button within the tool applies across the collection of tracks.
 
 ## 3.10.2
 
