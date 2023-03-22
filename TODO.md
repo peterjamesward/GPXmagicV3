@@ -23,16 +23,12 @@ New Route Builder video.
 
 # BACKLOG
 
-## Save tools settings
-
-e.g. Tools Summary should remember its state.
-
 ## Tools Controller
 
 Code clean up, optimisation (albeit very minor and localised).
 Not nice doing all those list maps. 
 A Dict perhaps, though large sum type involved which stopped me before.
-Hide previews for hidden tools.
+Tools Summary remembers its state, generalise this.
 
 ## Remove Actions
 
