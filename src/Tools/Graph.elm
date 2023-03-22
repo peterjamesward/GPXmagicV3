@@ -1,25 +1,16 @@
 module Tools.Graph exposing
-    (  PointIndexEntry
-       --, addSelfLoop
-       --, addTraversal
-       --, combineNearbyPoints
-
+    ( PointIndexEntry
     , addEdgeFromTrack
     , analyzeTracksAsGraph
     , canonicalise
-    ,  identifyPointsToBeMerged
-       --, makeNewRoute
-
+    , identifyPointsToBeMerged
     , nodeKey
     , pointAsComparable
     , removeEdge
     , renameEdge
     , snapToClusters
     , trackFromIndex
-    ,  updateTrackWith
-       --, undoWalkRoute
-
-    , updatedEdge
+    , updateTrackWith
     )
 
 -- Attempt to co-locate the logic to do with having a level of indirection
@@ -105,13 +96,6 @@ addEdgeFromTrack track graph =
         , edges = edgeDict
         , referenceLonLat = track.referenceLonLat
     }
-
-
-updatedEdge : TrackLoaded msg -> TrackLoaded msg -> Graph msg -> Graph msg
-updatedEdge oldTrack newTrack graph =
-    -- User has edited a track, so the graph must point to the newest version.
-    -- Easy and safe to remove old track and add new in case name changed.
-    graph |> removeEdge oldTrack |> addEdgeFromTrack newTrack
 
 
 updateTrackWith : String -> (TrackLoaded msg -> TrackLoaded msg) -> Graph msg -> Graph msg

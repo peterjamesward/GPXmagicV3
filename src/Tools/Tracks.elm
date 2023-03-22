@@ -418,10 +418,10 @@ updateActiveTrack : TrackLoaded msg -> TrackLoaded msg -> Options msg -> ( Track
 updateActiveTrack oldTrack newTrack options =
     -- Do not use for rename.
     case options.activeTrackName of
-        Just index ->
+        Just edgeKey ->
             ( newTrack
             , { options
-                | graph = Graph.updatedEdge oldTrack newTrack options.graph
+                | graph = Graph.updateTrackWith edgeKey (always newTrack) options.graph
               }
             )
 
