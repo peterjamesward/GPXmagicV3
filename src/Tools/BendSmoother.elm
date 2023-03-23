@@ -364,7 +364,7 @@ update :
     -> Options
     -> Element.Color
     -> TrackLoaded msg
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour track =
     case msg of
         SetBendTrackPointSpacing spacing ->
@@ -373,14 +373,13 @@ update msg options previewColour track =
                     { options | bendTrackPointSpacing = spacing }
                         |> tryBendSmoother track
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ApplySmoothBend ->
             ( options
-            , [ Actions.WithUndo (Actions.BendSmootherApplyWithOptions options)
-              , Actions.BendSmootherApplyWithOptions options
-              , Actions.TrackHasChanged
-              ]
+            , Actions.EditedTrack
+                toolId
+                (applyUsingOptions options track)
             )
 
         SetMode mode ->
@@ -388,14 +387,14 @@ update msg options previewColour track =
                 newOptions =
                     { options | mode = mode }
             in
-            ( newOptions, [] )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         SetSegments segments ->
             let
                 newOptions =
                     { options | segments = segments }
             in
-            ( newOptions, [] )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
 
 viewBendControls :

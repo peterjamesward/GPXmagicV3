@@ -1661,14 +1661,12 @@ makeNewRoute userRoute options =
                     List.map .edge options.userRoute
                         |> List.Extra.unique
                         |> String.join "-"
-
-                trackWithUndo =
-                    TrackLoaded.addToUndoStack
-                        Actions.MakeRouteFromGraph
-                        { track | trackName = newTrackName }
             in
             { options
-                | graph = Graph.addEdgeFromTrack trackWithUndo emptyGraph
+                | graph =
+                    Graph.addEdgeFromTrack
+                        { track | trackName = newTrackName }
+                        emptyGraph
                 , selectedTraversal = 0
                 , graphState = GraphOriginalTracks
                 , activeTrackName = Just newTrackName

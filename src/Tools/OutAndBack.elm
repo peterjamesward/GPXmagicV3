@@ -200,7 +200,7 @@ update msg options hasTrack =
 
         ( Just track, ApplyOutAndBack ) ->
             ( options
-            , Actions.UpdateActiveTrack toolId (apply options track)
+            , Actions.EditedTrack toolId (apply options track)
             )
 
         _ ->

@@ -993,7 +993,7 @@ update toolMsg isTrack msgWrapper options =
         DeletePoints msg ->
             -- Delegate to tool here...
             let
-                ( newOptions, actions ) =
+                ( newOptions, outcome ) =
                     DeletePoints.update
                         msg
                         options.deleteOptions
@@ -1001,7 +1001,7 @@ update toolMsg isTrack msgWrapper options =
                         isTrack
             in
             ( { options | deleteOptions = newOptions }
-            , actions
+            , [ outcome ]
             )
 
         ToolEssentialsMsg msg ->
@@ -1116,14 +1116,14 @@ update toolMsg isTrack msgWrapper options =
 
         ToolOutAndBackMsg msg ->
             let
-                ( newOptions, actions ) =
+                ( newOptions, outcome ) =
                     Tools.OutAndBack.update
                         msg
                         options.outAndBackSettings
                         isTrack
             in
             ( { options | outAndBackSettings = newOptions }
-            , actions
+            , [ outcome ]
             )
 
         ToolSimplifyMsg msg ->
@@ -1322,7 +1322,7 @@ update toolMsg isTrack msgWrapper options =
             case isTrack of
                 Just track ->
                     let
-                        ( newOptions, actions ) =
+                        ( newOptions, outcome ) =
                             Tools.SmartSmoother.update
                                 msg
                                 options.smartSmootherOptions
@@ -1330,7 +1330,7 @@ update toolMsg isTrack msgWrapper options =
                                 track
                     in
                     ( { options | smartSmootherOptions = newOptions }
-                    , actions
+                    , [ outcome ]
                     )
 
                 Nothing ->

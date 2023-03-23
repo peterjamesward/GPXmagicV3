@@ -183,7 +183,7 @@ update :
     -> Options
     -> Element.Color
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, SetBezierTension tension ) ->
@@ -191,21 +191,20 @@ update msg options previewColour hasTrack =
                 newOptions =
                     { options | bezierTension = tension }
             in
-            ( newOptions, actions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, SetBezierTolerance tolerance ) ->
             let
                 newOptions =
                     { options | bezierTolerance = tolerance }
             in
-            ( newOptions, actions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, BezierApplyWithOptions ) ->
             ( options
-            , [ WithUndo (Actions.BezierApplyWithOptions options)
-              , Actions.BezierApplyWithOptions options
-              , TrackHasChanged
-              ]
+            , Actions.EditedTrack
+                toolId
+                (applyUsingOptions options track)
             )
 
         ( Just track, SetBezierStyle style ) ->
@@ -213,10 +212,10 @@ update msg options previewColour hasTrack =
                 newOptions =
                     { options | bezierStyle = style }
             in
-            ( newOptions, actions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         _ ->
-            ( options, [] )
+            ( options, Actions.NoAction )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg

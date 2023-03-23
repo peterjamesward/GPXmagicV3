@@ -12,9 +12,18 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-New Tools Summary video.
+Restructuring the Actions so that:
+1. There aren't many, just enough to drive the core and output to map.
+2. Tools do all the work, and don't defer it.
 
-New Route Builder video.
+Probably goes hand in hand with restructuring the tools' state, possibly:
+1. `Dict String ToolState`, where
+2. `ToolState` is big sum type of all `Options` 
+3. We pass the Dict around, and everyone can "see" the dict
+4. Each tool gets its own state from this dict, instead of passing specific options.
+
+The above causes ToolsController to collapse to minimal `case`, assuming we follow the
+Elm practice, and avoid putting functions in the tool declarations (but why not do that?).
 
 ---
 

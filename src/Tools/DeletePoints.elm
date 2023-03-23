@@ -131,7 +131,7 @@ update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, DeletePointOrPoints ) ->
             ( options
-            , UpdateActiveTrack "delete" (deleteMarkedRange track)
+            , EditedTrack "delete" (deleteMarkedRange track)
             )
 
         _ ->

@@ -175,7 +175,7 @@ update :
     -> Options
     -> Element.Color
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, SetPushRadius radius ) ->
@@ -184,7 +184,7 @@ update msg options previewColour hasTrack =
                     { options | pushRadius = Length.meters radius }
                         |> makeCurveIfPossible track
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, SetDiscWidth width ) ->
             let
@@ -192,7 +192,7 @@ update msg options previewColour hasTrack =
                     { options | pullRadius = options.pushRadius |> Quantity.plus (Length.meters width) }
                         |> makeCurveIfPossible track
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, SetTransitionRadius radius ) ->
             let
@@ -200,7 +200,7 @@ update msg options previewColour hasTrack =
                     { options | transitionRadius = Length.meters radius }
                         |> makeCurveIfPossible track
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, SetSpacing spacing ) ->
             let
@@ -208,7 +208,7 @@ update msg options previewColour hasTrack =
                     { options | spacing = Length.meters spacing }
                         |> makeCurveIfPossible track
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, ToggleUsePullRadius _ ) ->
             let
@@ -216,7 +216,7 @@ update msg options previewColour hasTrack =
                     { options | usePullRadius = not options.usePullRadius }
                         |> makeCurveIfPossible track
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, SetGradientSmoothingMode mode ) ->
             let
@@ -224,19 +224,19 @@ update msg options previewColour hasTrack =
                     { options | smoothGradient = mode }
                         |> makeCurveIfPossible track
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, DraggerGrab offset ) ->
             let
                 newOptions =
                     { options | dragging = Just offset }
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, DraggerMove offset ) ->
             case options.dragging of
                 Nothing ->
-                    ( options, [] )
+                    ( options, Actions.NoAction )
 
                 Just dragStart ->
                     let
@@ -255,7 +255,7 @@ update msg options previewColour hasTrack =
                             }
                                 |> makeCurveIfPossible track
                     in
-                    ( newOptions, previewActions newOptions previewColour track )
+                    ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, DraggerRelease _ ) ->
             let
@@ -265,7 +265,7 @@ update msg options previewColour hasTrack =
                         , lastVector = options.vector
                     }
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, DraggerReset ) ->
             let
@@ -277,18 +277,17 @@ update msg options previewColour hasTrack =
                         , vector = Vector2d.zero
                     }
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, ApplyWithOptions ) ->
             ( options
-            , [ WithUndo (Actions.CurveFormerApplyWithOptions options)
-              , Actions.CurveFormerApplyWithOptions options
-              , TrackHasChanged
-              ]
+            , Actions.EditedTrack
+                toolId
+                (applyUsingOptions options track)
             )
 
         _ ->
-            ( options, [] )
+            ( options, Actions.NoAction )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg

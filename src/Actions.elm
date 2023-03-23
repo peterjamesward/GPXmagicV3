@@ -46,15 +46,17 @@ type alias UndoEntry msg =
 
 type
     ToolAction msg
-    --TODO: Untangled this tangled web I wove. Or at least try.
-    --Perhaps by just doing one at a time.
+    {-
+       Our new "consolidated" actions
+    -}
     = NoAction
-      -- Our new "daddy" actions
-    | UpdateActiveTrack String (TrackLoaded msg)
+    | EditedTrack String (TrackLoaded msg)
     | UpdatePreviewForTool String
-      -- Deprecated actions, or least to be justified in remaining.
+    | PositionPointers Int (Maybe Int)
+      {-
+         Deprecated actions, or least to be justified in remaining.
+      -}
     | ReRender
-    | WithUndo (ToolAction msg)
     | SetCurrent Int -- move the orange pointer
     | SetCurrentFromMapClick Int -- to avoid re-centering the map!
     | SaveLastMapClick Float Float

@@ -111,7 +111,7 @@ computeNewPoints excludeExisting options track =
         newPoints
 
 
-apply : Options -> TrackLoaded msg -> Maybe PeteTree
+apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
         ( fromStart, fromEnd ) =
@@ -134,7 +134,12 @@ apply options track =
                 newCourse
                 track.trackTree
     in
-    newTree
+    case newTree of
+        Just tree ->
+            { track | trackTree = tree }
+
+        Nothing ->
+            track
 
 
 toolStateChange :
@@ -187,7 +192,7 @@ update :
     -> Options
     -> Element.Color
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, SetSpacing spacing ) ->
@@ -195,7 +200,7 @@ update msg options previewColour hasTrack =
                 newOptions =
                     { options | minimumSpacing = Length.meters spacing }
             in
-            ( newOptions, actions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, Apply ) ->
             let
@@ -211,14 +216,11 @@ update msg options previewColour hasTrack =
                     }
             in
             ( ensureCorrectExtent
-            , [ WithUndo (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
-              , Actions.ApplyInterpolateWithOptions ensureCorrectExtent
-              , TrackHasChanged
-              ]
+            , Actions.EditedTrack toolId (apply options track)
             )
 
         _ ->
-            ( options, [] )
+            ( options, Actions.NoAction )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg

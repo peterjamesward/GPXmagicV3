@@ -592,7 +592,7 @@ update msg options previewColour track =
     case msg of
         Apply ->
             ( options
-            , Actions.UpdateActiveTrack toolId (applyUsingOptions options track)
+            , Actions.EditedTrack toolId (applyUsingOptions options track)
             )
 
         DisplayInfo tool tag ->

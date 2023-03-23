@@ -13,6 +13,7 @@ import Quantity
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.BendSmoother
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure)
@@ -299,7 +300,7 @@ update :
     -> Options
     -> Element.Color
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour hasTrack =
     let
         actions opts track =
@@ -332,14 +333,10 @@ update msg options previewColour hasTrack =
             case options.mode of
                 Flats ->
                     -- Place purple at end
-                    [ SetCurrent orange
-                    , SetMarker <| Just purple
-                    , PointerChange
-                    , MapCenterOnCurrent
-                    ]
+                    Actions.PositionPointers orange purple
 
                 _ ->
-                    [ SetCurrent orange, MapCenterOnCurrent ]
+                    Actions.PositionPointers orange Nothing
     in
     case msg of
         ViewNext ->
@@ -354,7 +351,7 @@ update msg options previewColour hasTrack =
                     Maybe.withDefault ( 0, 0 ) <|
                         List.Extra.getAt breachIndex newOptions.breaches
             in
-            ( newOptions, moveMarkers orange (truncate purple) )
+            ( newOptions, moveMarkers orange (Just <| truncate purple) )
 
         ViewPrevious ->
             let
@@ -372,14 +369,14 @@ update msg options previewColour hasTrack =
                 Flats ->
                     -- Place purple at end
                     ( options
-                    , moveMarkers orange (truncate purple)
+                    , moveMarkers orange (Just <| truncate purple)
                     )
 
                 _ ->
-                    ( newOptions, [ SetCurrent orange, MapCenterOnCurrent ] )
+                    ( newOptions, Actions.PositionPointers orange Nothing )
 
         PositionMarkerAtBreach orange purple ->
-            ( options, moveMarkers orange purple )
+            ( options, Actions.PositionPointers orange (Just purple) )
 
         SetThreshold value ->
             let
@@ -388,19 +385,15 @@ update msg options previewColour hasTrack =
             in
             case hasTrack of
                 Just track ->
-                    let
-                        populatedOptions =
-                            populateOptions newOptions track
-                    in
-                    ( populatedOptions
-                    , actions populatedOptions track
+                    ( populateOptions newOptions track
+                    , Actions.UpdatePreviewForTool toolId
                     )
 
                 Nothing ->
-                    ( newOptions, [] )
+                    ( newOptions, Actions.NoAction )
 
         SetResultMode mode ->
-            ( { options | resultMode = mode }, [] )
+            ( { options | resultMode = mode }, Actions.NoAction )
 
         SetMode mode ->
             let
@@ -409,32 +402,32 @@ update msg options previewColour hasTrack =
             in
             case hasTrack of
                 Just track ->
-                    let
-                        populatedOptions =
-                            populateOptions newOptions track
-                    in
-                    ( populatedOptions
-                    , actions populatedOptions track
+                    ( populateOptions newOptions track
+                    , Actions.UpdatePreviewForTool toolId
                     )
 
                 Nothing ->
-                    ( newOptions, [] )
+                    ( newOptions, Actions.NoAction )
 
         Autofix ->
             case hasTrack of
                 Just track ->
                     ( options
-                    , [ Actions.WithUndo (Actions.Autofix <| List.map Tuple.first options.breaches)
-                      , Actions.Autofix <| List.map Tuple.first options.breaches
-                      , TrackHasChanged
-                      ]
+                      --TODO: Figure out how we get Bend Smoother options in play here!
+                    , Actions.EditedTrack
+                        toolId
+                        (Tools.BendSmoother.applyAutofix
+                            model.toolOptions.bendSmootherOptions
+                            (List.map Tuple.first options.breaches)
+                            track
+                        )
                     )
 
                 Nothing ->
-                    ( options, [] )
+                    ( options, Actions.NoAction )
 
         DisplayInfo id tag ->
-            ( options, [ Actions.DisplayInfo id tag ] )
+            ( options, Actions.DisplayInfo id tag )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg

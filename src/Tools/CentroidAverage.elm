@@ -159,7 +159,7 @@ update :
     -> Options
     -> Element.Color
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, SetWeighting weight ) ->
@@ -167,32 +167,31 @@ update msg options previewColour hasTrack =
                 newOptions =
                     { options | weighting = weight }
             in
-            ( newOptions, actions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, ToggleAltitude _ ) ->
             let
                 newOptions =
                     { options | applyToAltitude = not options.applyToAltitude }
             in
-            ( newOptions, actions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, TogglePosition _ ) ->
             let
                 newOptions =
                     { options | applyToPosition = not options.applyToPosition }
             in
-            ( newOptions, actions newOptions previewColour track )
+            ( newOptions, Actions.UpdatePreviewForTool toolId )
 
         ( Just track, ApplyWithOptions ) ->
             ( options
-            , [ WithUndo (Actions.CentroidAverageApplyWithOptions options)
-              , Actions.CentroidAverageApplyWithOptions options
-              , TrackHasChanged
-              ]
+            , Actions.EditedTrack
+                toolId
+                (applyUsingOptions options track)
             )
 
         _ ->
-            ( options, [] )
+            ( options, Actions.NoAction )
 
 
 view :
