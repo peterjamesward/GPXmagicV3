@@ -31,6 +31,7 @@ import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaActivity, StravaActivityStreams, StravaRoute, StravaSegment, StravaSegmentStreams)
 import Tools.TimestampOptions
+import TrackLoaded exposing (TrackLoaded)
 import ViewProfileChartContext
 
 
@@ -48,6 +49,10 @@ type
     --TODO: Untangled this tangled web I wove. Or at least try.
     --Perhaps by just doing one at a time.
     = NoAction
+      -- Our new "daddy" actions
+    | UpdateActiveTrack String (TrackLoaded msg)
+    | UpdatePreviewForTool String
+      -- Deprecated actions, or least to be justified in remaining.
     | ReRender
     | WithUndo (ToolAction msg)
     | SetCurrent Int -- move the orange pointer
@@ -60,7 +65,6 @@ type
     | MapRefresh -- generally because layout has changed.
     | StoreLocally String E.Value -- save something in local storage
     | StoredValueRetrieved String E.Value -- retrieve from local storage
-    | DeletePointOrPoints Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Tools need to update to reflect any change in track
     | PointerChange -- Need to refresh views, but not replace the track on map
     | SetMarker (Maybe Int) -- position the purple marker
@@ -139,9 +143,6 @@ actionTextForUndo location action =
     -- Only needed for track modifying actions that go in the undo stack.
     I18N.localisedString location "action" <|
         case action of
-            DeletePointOrPoints _ _ ->
-                "delete1"
-
             BezierApplyWithOptions _ ->
                 "spline"
 

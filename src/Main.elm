@@ -1669,11 +1669,6 @@ performActionsOnModel actions model =
                         (Tools.BendSmoother.applyUsingOptions options track)
                         foldedModel
 
-                ( DeletePointOrPoints fromStart fromEnd, Just track ) ->
-                    updateActiveTrack
-                        (DeletePoints.delete fromStart fromEnd track)
-                        foldedModel
-
                 ( BezierApplyWithOptions options, Just track ) ->
                     updateActiveTrack
                         (Tools.BezierSplines.applyUsingOptions options track)

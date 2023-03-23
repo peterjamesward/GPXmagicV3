@@ -1,5 +1,6 @@
 module TrackLoaded exposing
     ( MarkerColour(..)
+    , PriorTrack(..)
     , TrackLoaded
     , addToUndoStack
     , adjustAltitude
@@ -19,7 +20,6 @@ module TrackLoaded exposing
     , useTreeWithRepositionedMarkers
     )
 
-import Actions exposing (ToolAction, UndoEntry)
 import DomainModel exposing (..)
 import LandUseDataTypes
 import LeafIndex exposing (LeafIndex)
@@ -40,14 +40,18 @@ type alias TrackLoaded msg =
     , renderDepth : Int
     , trackTree : PeteTree
     , trackName : String
-    , undos : List (UndoEntry msg)
-    , redos : List (UndoEntry msg)
+    , undos : List (PriorTrack msg)
+    , redos : List (PriorTrack msg)
     , lastMapClick : ( Float, Float )
     , landUseData : LandUseDataTypes.LandUseData
     , leafIndex : LeafIndex
     , visible : Bool
     , namedSegments : List NamedSegment
     }
+
+
+type PriorTrack msg
+    = PriorTrack String (TrackLoaded msg) -- This, our new Undo.
 
 
 newTrackFromTree : GPXSource -> PeteTree -> TrackLoaded msg
@@ -254,49 +258,27 @@ type MarkerColour
 
 
 addToUndoStack :
-    ToolAction msg
+    String
     -> TrackLoaded msg
     -> TrackLoaded msg
-addToUndoStack action oldTrack =
-    let
-        undoEntry : UndoEntry msg
-        undoEntry =
-            { action = action
-            , previousTree = oldTrack.trackTree
-            , previousReference = oldTrack.referenceLonLat
-            , currentPosition = oldTrack.currentPosition
-            , markerPosition = oldTrack.markerPosition
-            }
-    in
+    -> TrackLoaded msg
+addToUndoStack action oldTrack newTrack =
     { oldTrack
-        | undos = undoEntry :: oldTrack.undos
+        | undos = undoInfo action oldTrack :: newTrack.undos
         , redos = []
     }
 
 
-undoInfo : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
+undoInfo : String -> TrackLoaded msg -> PriorTrack msg
 undoInfo action track =
-    { action = action
-    , previousTree = track.trackTree
-    , previousReference = track.referenceLonLat
-    , currentPosition = track.currentPosition
-    , markerPosition = track.markerPosition
-    }
+    PriorTrack action track
 
 
 undoLastAction : TrackLoaded msg -> TrackLoaded msg
 undoLastAction track =
     case track.undos of
-        undo :: moreUndos ->
-            { track
-                | undos = moreUndos
-                , redos = undo :: track.redos
-                , trackTree = undo.previousTree
-                , referenceLonLat = undo.previousReference
-                , currentPosition = undo.currentPosition
-                , markerPosition = undo.markerPosition
-                , leafIndex = indexLeaves undo.previousTree
-            }
+        (PriorTrack _ prior) :: _ ->
+            prior
 
         _ ->
             track

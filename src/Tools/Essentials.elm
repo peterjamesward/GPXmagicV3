@@ -13,7 +13,7 @@ import FlatColors.AussiePalette
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import TrackLoaded exposing (TrackLoaded)
+import TrackLoaded exposing (PriorTrack(..), TrackLoaded)
 import UtilsForViews exposing (showLongMeasure)
 import ViewPureStyles exposing (neatToolsBorder, useIcon)
 
@@ -344,14 +344,14 @@ viewUndoRedo settings msgWrapper track =
                         , label = I18N.text settings.location toolId "noundo"
                         }
 
-                undo :: _ ->
+                (PriorTrack action prior) :: _ ->
                     Input.button (alignRight :: neatToolsBorder)
                         { onPress = Just (msgWrapper Undo)
                         , label =
                             text <|
                                 String.Interpolate.interpolate
                                     (I18N.localisedString settings.location toolId "undo")
-                                    [ Actions.actionTextForUndo settings.location undo.action ]
+                                    [ action ]
                         }
             , case track.redos of
                 [] ->
@@ -360,13 +360,13 @@ viewUndoRedo settings msgWrapper track =
                         , label = I18N.text settings.location toolId "noredo"
                         }
 
-                redo :: _ ->
+                (PriorTrack action newer) :: _ ->
                     Input.button (alignRight :: neatToolsBorder)
                         { onPress = Just (msgWrapper Redo)
                         , label =
                             text <|
                                 String.Interpolate.interpolate
                                     (I18N.localisedString settings.location toolId "redo")
-                                    [ Actions.actionTextForUndo settings.location redo.action ]
+                                    [ action ]
                         }
             ]

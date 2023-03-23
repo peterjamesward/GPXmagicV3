@@ -587,53 +587,36 @@ update :
     -> Options
     -> Element.Color
     -> TrackLoaded msg
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour track =
     case msg of
         Apply ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.SmartSmootherApplyWithOptions options)
-                        track
-            in
             ( options
-            , [ WithUndo (Actions.SmartSmootherApplyWithOptions options)
-              , Actions.SmartSmootherApplyWithOptions options
-              , TrackHasChanged
-              ]
+            , Actions.UpdateActiveTrack toolId (applyUsingOptions options track)
             )
 
         DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
+            ( options, Actions.DisplayInfo tool tag )
 
         SetMinRadius radius ->
-            let
-                newOptions =
-                    { options | minRadius = radius }
-            in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( { options | minRadius = radius }
+            , Actions.UpdatePreviewForTool toolId
+            )
 
         SetMinTransition transition ->
-            let
-                newOptions =
-                    { options | minTransition = transition }
-            in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( { options | minTransition = transition }
+            , Actions.UpdatePreviewForTool toolId
+            )
 
         SetMaxGradient gradient ->
-            let
-                newOptions =
-                    { options | maxGradient = gradient }
-            in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( { options | maxGradient = gradient }
+            , Actions.UpdatePreviewForTool toolId
+            )
 
         SetBlend blend ->
-            let
-                newOptions =
-                    { options | blend = blend }
-            in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( { options | blend = blend }
+            , Actions.UpdatePreviewForTool toolId
+            )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg

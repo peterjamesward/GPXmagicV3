@@ -4,7 +4,7 @@ module Tools.DeletePoints exposing
     ,  defaultOptions
        --, deletePointsBetween
 
-    , delete
+    , deleteMarkedRange
     , toolId
     , toolStateChange
     , update
@@ -126,23 +126,16 @@ update :
     -> Options
     -> Element.Color
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, DeletePointOrPoints ) ->
-            let
-                ( fromStart, fromEnd ) =
-                    TrackLoaded.getRangeFromMarkers track
-            in
             ( options
-            , [ WithUndo (Actions.DeletePointOrPoints fromStart fromEnd)
-              , Actions.DeletePointOrPoints fromStart fromEnd
-              , TrackHasChanged
-              ]
+            , UpdateActiveTrack "delete" (deleteMarkedRange track)
             )
 
         _ ->
-            ( options, [] )
+            ( options, Actions.NoAction )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
@@ -181,9 +174,12 @@ view settings msgWrapper options track =
 -- relative to the deleted part.
 
 
-delete : Int -> Int -> TrackLoaded msg -> TrackLoaded msg
-delete fromStart fromEnd track =
+deleteMarkedRange : TrackLoaded msg -> TrackLoaded msg
+deleteMarkedRange track =
     let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
         newTree =
             DomainModel.replaceRange
                 fromStart

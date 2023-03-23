@@ -192,32 +192,19 @@ update :
     Msg
     -> Options
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options, ToolAction msg )
 update msg options hasTrack =
     case ( hasTrack, msg ) of
         ( Just _, SetOffset offset ) ->
-            let
-                newOptions =
-                    { options | offset = offset }
-            in
-            ( newOptions, [] )
+            ( { options | offset = offset }, Actions.NoAction )
 
         ( Just track, ApplyOutAndBack ) ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfo
-                        (Actions.OutAndBackApplyWithOptions options)
-                        track
-            in
             ( options
-            , [ WithUndo (Actions.OutAndBackApplyWithOptions options)
-              , Actions.OutAndBackApplyWithOptions options
-              , TrackHasChanged
-              ]
+            , Actions.UpdateActiveTrack toolId (apply options track)
             )
 
         _ ->
-            ( options, [] )
+            ( options, Actions.NoAction )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
