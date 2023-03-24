@@ -322,7 +322,7 @@ toolSettings : ToolEntry
 toolSettings =
     { toolType = ToolSettings
     , toolId = "tools"
-    , video = Just "https://youtu.be/nQJtjDy_Qi4"
+    , video = Just "https://youtu.be/ZFpk8btZC_g"
     , state = SettingsClosed
     , isVisible = True
     , dock = DockRight
