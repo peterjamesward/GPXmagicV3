@@ -9,20 +9,11 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 --- 
 
-
 # WIP
-
-BUG: Modal dialog not readable in dark mode.
 
 ---
 
 # BACKLOG
-
-## Go Stateless?
-
-> https://www.crowdstrike.com/blog/tech-center/understanding-ui-components-in-elm/
-
-Obviates the next two ...
 
 ## Tools Controller
 
@@ -38,16 +29,6 @@ One at a time. I think the way into this is to reduce action codes to:
 - UpdatedGraph (Graph msg)
 - MovedPointers (?)
 - etc
-
->(export cycles permitting)
-
-> Not sure quite about subscriptions: mapPort, Flythrough, ...
-
-Then Main.update reduces to a few cases where we can act directly.
-This may work better with changes above to ToolsController.
-It's almost a V4, not quite as core structures are the same,
-
-## Read FIT file?
 
 ## Derive climbs from WKO file
 
