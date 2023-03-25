@@ -334,8 +334,12 @@ useIconWithSize size =
     html << FeatherIcons.toHtml [] << FeatherIcons.withSize size
 
 
-showModalMessage : I18NOptions.Location -> Int -> String -> msg -> Element msg
-showModalMessage location areaWidth content msg =
+showModalMessage : SystemSettings -> Int -> String -> msg -> Element msg
+showModalMessage settings areaWidth content msg =
+    let
+        location =
+            settings.location
+    in
     column
         [ centerY
         , centerX
@@ -343,18 +347,21 @@ showModalMessage location areaWidth content msg =
         , Border.width 6
         , Border.color FlatColors.AussiePalette.quinceJelly
         , Border.rounded 8
+        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
         ]
         [ row
             [ width fill
             , spacing 8
             , padding 4
-            , Background.color FlatColors.AussiePalette.quinceJelly
-            , Font.color FlatColors.AussiePalette.coastalBreeze
+            , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+            , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
             ]
             [ I18N.text location "main" "message"
             ]
         , column
-            [ Background.color FlatColors.AussiePalette.coastalBreeze
+            [ Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+            , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
             , height fill
             , width fill
             , spacing 20

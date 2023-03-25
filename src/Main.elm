@@ -1113,14 +1113,14 @@ view model =
                 case model.modalMessage of
                     Just message ->
                         showModalMessage
-                            model.systemSettings.location
+                            model.systemSettings
                             (Pixels.inPixels <| Tuple.first model.contentArea)
                             (I18N.localisedString model.systemSettings.location "main" message)
                             DismissModalMessage
 
                     Nothing ->
                         none
-             , inFront <| infoTextPopup model.systemSettings.location model.infoText
+             , inFront <| infoTextPopup model.systemSettings model.infoText
              , inFront <|
                 if model.languageEditorOpen then
                     I18N.editor I18NMsg model.systemSettings.location model.languageEditor
@@ -1393,28 +1393,37 @@ buyMeACoffeeButton =
 
 
 infoTextPopup :
-    I18NOptions.Location
+    SystemSettings
     -> Maybe ( String, String )
     -> Element Msg
-infoTextPopup location maybeSomething =
+infoTextPopup settings maybeSomething =
+    let
+        location =
+            settings.location
+    in
     case maybeSomething of
         Just ( tool, tag ) ->
             let
                 close =
-                    Input.button [ Font.color rgtPurple, alignRight ]
+                    Input.button
+                        [ Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+                        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
+                        , alignRight
+                        ]
                         { onPress = Just HideInfoPopup
                         , label = useIconWithSize 20 FeatherIcons.x
                         }
             in
             column
-                [ Background.color FlatColors.ChinesePalette.antiFlashWhite
-                , padding 10
+                [ padding 10
                 , centerY
                 , centerX
                 , width <| Element.px 400
                 , Border.color rgtPurple
                 , Border.width 4
                 , Border.rounded 10
+                , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+                , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
                 ]
                 [ close
                 , paragraph []

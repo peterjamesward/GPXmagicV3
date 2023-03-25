@@ -12,9 +12,7 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-BUG: Still not hiding components on map when new route published.
-
-New Route Builder video.
+BUG: Modal dialog not readable in dark mode.
 
 ---
 
