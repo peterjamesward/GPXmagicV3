@@ -376,7 +376,7 @@ removeNamedTrackFromMap model trackName =
 
 removeAllTracksFromMap model =
     Cmd.batch <|
-        List.map (removeNamedTrackFromMap model) <|
+        List.map MapPortController.removeTrackFromMapByName <|
             Dict.keys model.toolOptions.tracksOptions.graph.edges
 
 
@@ -1284,6 +1284,8 @@ topLoadingBar model =
                 [ padding 5
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
+                , Background.color <| Element.rgb255 255 0 0
+                , Font.color <| Element.rgb255 255 255 255
                 ]
                 { onPress = Just ClearLoadedTracks
                 , label = localHelper "clear"

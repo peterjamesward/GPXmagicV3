@@ -168,7 +168,7 @@ function mapMessageHandler(msg) {
 
         case 'Remove':
             if (isMapCreated) {
-                //console.log('Remove', msg.label);
+                console.log('Remove', msg.label);
                 removeTrack(msg.label,);
             }
             break;

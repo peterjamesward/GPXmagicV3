@@ -12,13 +12,19 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-New Tools Summary video.
+BUG: Still not hiding components on map when new route published.
 
 New Route Builder video.
 
 ---
 
 # BACKLOG
+
+## Go Stateless?
+
+> https://www.crowdstrike.com/blog/tech-center/understanding-ui-components-in-elm/
+
+Obviates the next two ...
 
 ## Tools Controller
 
@@ -42,6 +48,8 @@ One at a time. I think the way into this is to reduce action codes to:
 Then Main.update reduces to a few cases where we can act directly.
 This may work better with changes above to ToolsController.
 It's almost a V4, not quite as core structures are the same,
+
+## Read FIT file?
 
 ## Derive climbs from WKO file
 
