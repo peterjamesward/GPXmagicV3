@@ -18,7 +18,7 @@ Use the Clear button, or refresh your browser, to unload a previous track.
 
 This means you can run a really lean setup with all the tools hidden until you need them.
 
-> Thanks to David Ogle for these suggestions.
+> Thanks to David Ogle for suggestions.
 
 - Separate settings for which dock a tool lives in and whether a tool is visible.
 - Click on the checkbox to hide or show a tool.

@@ -757,7 +757,7 @@ tracksTool : ToolEntry
 tracksTool =
     { toolType = ToolTracks
     , toolId = Tools.Tracks.toolId
-    , video = Nothing
+    , video = Just "https://youtu.be/WOWuwMD7bO0"
     , state = Contracted
     , isVisible = True
     , dock = DockLeft
