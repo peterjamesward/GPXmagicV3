@@ -3,9 +3,13 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.0 (5d4915d4)
+# GPXmagic v3.11.1 (5d4915d4)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.1
+
+Popup windows match colour theme. (You can read the text in Dark mode.)
 
 ## 3.11.0
 
