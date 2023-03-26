@@ -210,10 +210,14 @@ computeNudgedPoints settings track =
         interpolatePoints interval start end =
             let
                 pointCount =
-                    floor <| Quantity.ratio (end |> Quantity.minus start) interval
+                    Quantity.ratio (end |> Quantity.minus start) interval |> floor
 
                 sampling =
-                    List.range 0 pointCount
+                    if pointCount > 0 then
+                        List.range 0 pointCount
+
+                    else
+                        []
 
                 interpolateSampleAt sample =
                     let
@@ -268,7 +272,7 @@ computeNudgedPoints settings track =
 
         ( firstReplacedPoint, lastReplacedPoint ) =
             if settings.fadeExtent |> Quantity.greaterThanZero then
-                ( DomainModel.indexFromDistanceRoundedUp fadeInStartDistance track.trackTree
+                ( DomainModel.indexFromDistanceRoundedDown fadeInStartDistance track.trackTree
                 , DomainModel.indexFromDistanceRoundedDown fadeOutEndDistance track.trackTree
                 )
 
