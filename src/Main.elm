@@ -1242,18 +1242,20 @@ topLoadingBar model =
                 [ padding 5
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
+                , Border.rounded 4
                 , tooltip below (localisedTooltip model.systemSettings.location "main" "import")
                 , inFront <|
                     if model.loadOptionsMenuOpen then
                         column
                             [ moveRight 30
-                            , Background.color FlatColors.ChinesePalette.antiFlashWhite
                             , htmlAttribute (style "z-index" "20")
                             , padding 5
                             , spacing 5
-                            , Border.color FlatColors.ChinesePalette.peace
-                            , Border.rounded 4
-                            , Border.width 2
+
+                            --, Background.color FlatColors.ChinesePalette.antiFlashWhite
+                            --, Border.color FlatColors.ChinesePalette.peace
+                            --, Border.rounded 4
+                            --, Border.width 2
                             ]
                             [ SvgPathExtractor.view SvgMsg model.ipInfo
 
@@ -1274,6 +1276,7 @@ topLoadingBar model =
                 [ padding 5
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
+                , Border.rounded 5
                 ]
                 { onPress = Just GpxRequested
                 , label = localHelper "loadgpx"
@@ -1286,6 +1289,7 @@ topLoadingBar model =
                 , Border.width 2
                 , Background.color <| Element.rgb255 255 0 0
                 , Font.color <| Element.rgb255 255 255 255
+                , Border.rounded 5
                 ]
                 { onPress = Just ClearLoadedTracks
                 , label = localHelper "clear"
@@ -1299,6 +1303,7 @@ topLoadingBar model =
                     , Border.color FlatColors.FlatUIPalette.peterRiver
                     , Font.color (CommonToolStyles.themeForeground SystemSettings.LightTheme)
                     , Border.width 2
+                    , Border.roundEach { topLeft = 5, topRight = 0, bottomLeft = 5, bottomRight = 0 }
                     ]
                     { onPress = Just WriteGpxFile
                     , label = localHelper "savegpx"
@@ -1309,6 +1314,7 @@ topLoadingBar model =
                     , Border.color FlatColors.FlatUIPalette.peterRiver
                     , Font.color (CommonToolStyles.themeForeground SystemSettings.LightTheme)
                     , Border.width 2
+                    , Border.roundEach { topLeft = 0, topRight = 5, bottomLeft = 0, bottomRight = 5 }
                     , tooltip below (localisedTooltip model.systemSettings.location "main" "saveOptions")
                     , inFront <|
                         if model.rgtOptionsVisible then

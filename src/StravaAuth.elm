@@ -8,6 +8,7 @@ import ColourPalette exposing (stravaOrange)
 import Delay
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input exposing (button)
 import FlatColors.ChinesePalette exposing (white)
@@ -316,7 +317,7 @@ stravaButton model msgWrapper =
         _ ->
             let
                 styles =
-                    [ height <| px 24, moveUp 10 ]
+                    [ height <| px 24, moveUp 5 ]
 
                 imgUrl =
                     Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
@@ -328,6 +329,7 @@ stravaButton model msgWrapper =
                     image
                         [ mouseOver [ alpha 0.7 ]
                         , width <| px 160
+                        , Border.rounded 5
                         ]
                         { src = imgUrl
                         , description = "Connect to Strava"

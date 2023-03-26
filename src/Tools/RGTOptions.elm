@@ -101,7 +101,6 @@ view location options wrap =
     column
         [ spacing 5
         , padding 5
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
         [ paragraph [] [ i18n "info" ]
         , elevation

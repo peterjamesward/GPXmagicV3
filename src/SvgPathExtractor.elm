@@ -10,6 +10,7 @@ import DomainModel
 import Element exposing (Element, padding, text)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import File exposing (File)
 import FlatColors.ChinesePalette
@@ -281,9 +282,11 @@ view : (Msg -> msg) -> Maybe GeoCodeDecoders.IpInfo -> Element msg
 view wrap ipInfo =
     Input.button
         [ padding 5
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , Border.color FlatColors.FlatUIPalette.peterRiver
+        , Background.color FlatColors.FlatUIPalette.clouds
+        , Font.color FlatColors.FlatUIPalette.peterRiver
         , Border.width 2
+        , Border.rounded 4
         ]
         { onPress = Just (wrap <| ReadFile ipInfo)
         , label = text "Extract paths from SVG file"
