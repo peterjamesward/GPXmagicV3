@@ -2287,7 +2287,7 @@ performActionCommands actions model =
                     Delay.after int msg
 
                 ( TrackHasChanged, Just track ) ->
-                    Cmd.batch
+                    Cmd.batch <|
                         [ MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
                         , PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
@@ -2295,6 +2295,7 @@ performActionCommands actions model =
                             track
                             model.previews
                         ]
+                            ++ List.map showPreviewOnMap (Dict.keys model.previews)
 
                 ( PointerChange, Just track ) ->
                     Cmd.batch <|

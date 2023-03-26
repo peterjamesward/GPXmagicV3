@@ -11,8 +11,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-BUG: Delete preview points not removed from Map. (All previews may be stale on Map.)
-
 ---
 
 # BACKLOG
