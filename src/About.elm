@@ -3,9 +3,13 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.2 (f9c1ee10)
+# GPXmagic v3.11.3 (f9c1ee10)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.3
+
+Fix colours of top bar popups in dark mode.
 
 ## 3.11.2
 
