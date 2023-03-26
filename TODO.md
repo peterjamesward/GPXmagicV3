@@ -18,7 +18,7 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 ## Tools Controller
 
 Code clean up, optimisation (albeit very minor and localised).
-Not nice doing all those list maps. 
+(Poor show doing all those list maps.) 
 A Dict perhaps, though large sum type involved which stopped me before.
 Tools Summary remembers its state, generalise this.
 
@@ -37,14 +37,6 @@ _Eric Spencer_
 
 Would do this with gradients and segments applied on to a base course.
 
-## Camera
-
-Full control of camera in relation to marker.
-
-## Picture button
-
-Add button to images to allow screen capture. Because "easy".
-
 ## Test cases for edits.
 
 You could do this you know, just not for the visuals.
@@ -54,15 +46,6 @@ You could do this you know, just not for the visuals.
 Awaiting French support.
 Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
-
-## Technical debt
-
-Tagged types for Point v Line indices to avoid confusion.
-
-Variant of "request from local storage" that takes a wrapped message so that the return value
-can be directed to a tool or a view.
-
-Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## Land use 3D rendering
 
@@ -89,6 +72,14 @@ Provide info text capability on top bar and on view panes.
 ---
 
 # The cellar
+
+## Camera
+
+Full control of camera in relation to marker.
+
+## Picture button
+
+Add button to images to allow screen capture. Because "easy".
 
 ## Street view
 

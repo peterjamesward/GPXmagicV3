@@ -3,9 +3,14 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.1 (a0d0db23)
+# GPXmagic v3.11.2 (a0d0db23)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.2
+
+Fix display of previews in Map view after each edit.
+Fix nasty Nudge bug when nudging the first point with non-zero fade.
 
 ## 3.11.1
 
