@@ -11,6 +11,10 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
+BUG: Just try repeated Nudge on Athens. Phuqs the track.
+
+BUG: Delete preview points not removed from Map. (All previews may be stale on Map.)
+
 ---
 
 # BACKLOG
