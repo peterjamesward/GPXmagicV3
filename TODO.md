@@ -11,16 +11,16 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
----
-
-# BACKLOG
-
 ## Tools Controller
 
 Code clean up, optimisation (albeit very minor and localised).
-(Poor show doing all those list maps.) 
+(Poor show doing all those list maps.)
 A Dict perhaps, though large sum type involved which stopped me before.
 Tools Summary remembers its state, generalise this.
+
+---
+
+# BACKLOG
 
 ## Remove Actions
 

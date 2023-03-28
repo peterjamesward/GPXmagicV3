@@ -1,13 +1,14 @@
 module ToolsController exposing
     ( ColourTriplet
     , DockSettings
-    , Options
+    ,  Options
+       --, ToolType(..)
+
     , ToolCategory(..)
     , ToolDock(..)
     , ToolEntry
     , ToolMsg(..)
     , ToolState(..)
-    , ToolType(..)
     , clearPopups
     , colourDecoder
     , decodeColour
@@ -36,7 +37,6 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Lazy
 import FeatherIcons
-import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
@@ -153,7 +153,7 @@ type ToolCategory
 
 type alias Options msg =
     -- Tool specific options
-    { tools : List ToolEntry
+    { tools : Dict String ToolEntry
     , docks : Dict String DockSettings
     , azSort : Bool
     , compact : Bool
@@ -228,14 +228,14 @@ defaultOptions =
 
 
 type ToolMsg
-    = ToolPopupToggle ToolType
-    | ToolDockSelect ToolType ToolDock
+    = ToolPopupToggle String
+    | ToolDockSelect String ToolDock
     | ToolToggleSort Bool
     | ToolToggleCompact Bool
-    | ToolToggleVisible ToolType
-    | ToolColourSelect ToolType Element.Color
-    | ToolStateToggle ToolType ToolState
-    | ToolActivate ToolType ToolState
+    | ToolToggleVisible String
+    | ToolColourSelect String Element.Color
+    | ToolStateToggle String ToolState
+    | ToolActivate String ToolState
     | DisplayInfo String String
     | DirectionChanges DirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
@@ -279,42 +279,47 @@ type alias ToolEntry =
     , tabColour : Element.Color
     , textColour : Element.Color
     , isPopupOpen : Bool
-    , categories : List ToolCategory
     }
 
 
-defaultTools : List ToolEntry
+defaultTools : Dict String ToolEntry
 defaultTools =
-    [ toolSettings
-    , essentialsTool
-    , trackInfoBox
-    , displaySettingsTool
-    , directionChangeTool
-    , gradientChangeTool
-    , deleteTool
-    , bezierSplinesTool
-    , centroidAverageTool
-    , curveFormerTool
-    , bendSmootherTool
-    , smartSmootherTool
-    , nudgeTool
-    , outAndBackTool
-    , simplifyTool
-    , interpolateTool
-    , profileSmoothTool
-    , namedSegmentTool
-    , moveScaleRotateTool
-    , flythroughTool
-    , stravaTool
-    , moveAndStretchTool
-    , startFinishTool
-    , splitAndJoinTool
-    , intersectionsTool
-    , straightenTool
-    , landUseTool
-    , timestampTool
-    , routingTool
-    , tracksTool
+    Dict.fromList orderedTools
+
+
+orderedTools : List ( String, ToolEntry )
+orderedTools =
+    -- So we can impose a familiar ordering on the display.
+    [ ( toolSettings.toolId, toolSettings )
+    , ( essentialsTool.toolId, essentialsTool )
+    , ( trackInfoBox.toolId, trackInfoBox )
+    , ( displaySettingsTool.toolId, displaySettingsTool )
+    , ( directionChangeTool.toolId, directionChangeTool )
+    , ( gradientChangeTool.toolId, gradientChangeTool )
+    , ( deleteTool.toolId, deleteTool )
+    , ( bezierSplinesTool.toolId, bezierSplinesTool )
+    , ( centroidAverageTool.toolId, centroidAverageTool )
+    , ( curveFormerTool.toolId, curveFormerTool )
+    , ( bendSmootherTool.toolId, bendSmootherTool )
+    , ( smartSmootherTool.toolId, smartSmootherTool )
+    , ( nudgeTool.toolId, nudgeTool )
+    , ( outAndBackTool.toolId, outAndBackTool )
+    , ( simplifyTool.toolId, simplifyTool )
+    , ( interpolateTool.toolId, interpolateTool )
+    , ( profileSmoothTool.toolId, profileSmoothTool )
+    , ( namedSegmentTool.toolId, namedSegmentTool )
+    , ( moveScaleRotateTool.toolId, moveScaleRotateTool )
+    , ( flythroughTool.toolId, flythroughTool )
+    , ( stravaTool.toolId, stravaTool )
+    , ( moveAndStretchTool.toolId, moveAndStretchTool )
+    , ( startFinishTool.toolId, startFinishTool )
+    , ( splitAndJoinTool.toolId, splitAndJoinTool )
+    , ( intersectionsTool.toolId, intersectionsTool )
+    , ( straightenTool.toolId, straightenTool )
+    , ( landUseTool.toolId, landUseTool )
+    , ( timestampTool.toolId, timestampTool )
+    , ( routingTool.toolId, routingTool )
+    , ( tracksTool.toolId, tracksTool )
     ]
 
 
@@ -329,7 +334,6 @@ toolSettings =
     , tabColour = rgtPurple
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -344,7 +348,6 @@ trackInfoBox =
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -359,7 +362,6 @@ displaySettingsTool =
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -374,7 +376,6 @@ directionChangeTool =
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -389,7 +390,6 @@ gradientChangeTool =
     , tabColour = FlatColors.FlatUIPalette.wetAsphalt
     , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
-    , categories = [ TcGradients ]
     }
 
 
@@ -404,7 +404,6 @@ essentialsTool =
     , tabColour = FlatColors.FlatUIPalette.orange
     , textColour = contrastingColour FlatColors.FlatUIPalette.orange
     , isPopupOpen = False
-    , categories = [] -- Always visible anyway
     }
 
 
@@ -419,7 +418,6 @@ deleteTool =
     , tabColour = FlatColors.FlatUIPalette.greenSea
     , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -434,7 +432,6 @@ bezierSplinesTool =
     , tabColour = FlatColors.FlatUIPalette.nephritis
     , textColour = contrastingColour FlatColors.FlatUIPalette.nephritis
     , isPopupOpen = False
-    , categories = [ TcWholeTrack, TcBends, TcGradients ]
     }
 
 
@@ -449,7 +446,6 @@ centroidAverageTool =
     , tabColour = FlatColors.FlatUIPalette.belizeHole
     , textColour = contrastingColour FlatColors.FlatUIPalette.belizeHole
     , isPopupOpen = False
-    , categories = [ TcGradients, TcBends, TcWholeTrack ]
     }
 
 
@@ -464,7 +460,6 @@ curveFormerTool =
     , tabColour = FlatColors.FlatUIPalette.wisteria
     , textColour = contrastingColour FlatColors.FlatUIPalette.wisteria
     , isPopupOpen = False
-    , categories = [ TcBends ]
     }
 
 
@@ -479,7 +474,6 @@ bendSmootherTool =
     , tabColour = FlatColors.FlatUIPalette.midnightBlue
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
-    , categories = [ TcBends ]
     }
 
 
@@ -494,7 +488,6 @@ smartSmootherTool =
     , tabColour = FlatColors.FlatUIPalette.sunFlower
     , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
-    , categories = [ TcBends, TcWholeTrack, TcGradients ]
     }
 
 
@@ -509,7 +502,6 @@ nudgeTool =
     , tabColour = FlatColors.FlatUIPalette.sunFlower
     , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -524,7 +516,6 @@ outAndBackTool =
     , tabColour = FlatColors.FlatUIPalette.carrot
     , textColour = contrastingColour FlatColors.FlatUIPalette.carrot
     , isPopupOpen = False
-    , categories = [ TcRoute ]
     }
 
 
@@ -539,7 +530,6 @@ simplifyTool =
     , tabColour = FlatColors.FlatUIPalette.alizarin
     , textColour = contrastingColour FlatColors.FlatUIPalette.alizarin
     , isPopupOpen = False
-    , categories = [ TcWholeTrack ]
     }
 
 
@@ -554,7 +544,6 @@ interpolateTool =
     , tabColour = FlatColors.FlatUIPalette.clouds
     , textColour = contrastingColour FlatColors.FlatUIPalette.clouds
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -569,7 +558,6 @@ profileSmoothTool =
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
-    , categories = [ TcGradients ]
     }
 
 
@@ -584,7 +572,6 @@ namedSegmentTool =
     , tabColour = rgtPurple
     , textColour = contrastingColour rgtPurple
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -599,7 +586,6 @@ moveScaleRotateTool =
     , tabColour = FlatColors.FlatUIPalette.pomegranate
     , textColour = contrastingColour FlatColors.FlatUIPalette.pomegranate
     , isPopupOpen = False
-    , categories = [ TcMisc, TcWholeTrack ]
     }
 
 
@@ -614,7 +600,6 @@ flythroughTool =
     , tabColour = FlatColors.FlatUIPalette.pumpkin
     , textColour = contrastingColour FlatColors.FlatUIPalette.pumpkin
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -629,7 +614,6 @@ stravaTool =
     , tabColour = stravaOrange
     , textColour = contrastingColour stravaOrange
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -644,7 +628,6 @@ moveAndStretchTool =
     , tabColour = FlatColors.FlatUIPalette.silver
     , textColour = contrastingColour FlatColors.FlatUIPalette.silver
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -659,7 +642,6 @@ startFinishTool =
     , tabColour = FlatColors.FlatUIPalette.asbestos
     , textColour = contrastingColour FlatColors.FlatUIPalette.asbestos
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -674,7 +656,6 @@ splitAndJoinTool =
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
-    , categories = [ TcMisc, TcWholeTrack ]
     }
 
 
@@ -689,7 +670,6 @@ intersectionsTool =
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -704,7 +684,6 @@ straightenTool =
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
-    , categories = [ TcMisc ]
     }
 
 
@@ -719,7 +698,6 @@ landUseTool =
     , tabColour = FlatColors.FlatUIPalette.wetAsphalt
     , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -734,7 +712,6 @@ timestampTool =
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -749,7 +726,6 @@ routingTool =
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
@@ -764,54 +740,55 @@ tracksTool =
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
-    , categories = [ TcInformation ]
     }
 
 
 toolIsSpecial : ToolEntry -> Bool
 toolIsSpecial tool =
     -- Must not be allowed to remove these.
-    tool.toolType == ToolSettings || tool.toolType == ToolEssentials
+    tool.toolId == toolSettings.toolId || tool.toolId == essentialsTool.toolId
 
 
-toggleToolPopup : ToolType -> ToolEntry -> ToolEntry
-toggleToolPopup toolType tool =
-    if tool.toolType == toolType then
+toggleToolPopup : String -> String -> ToolEntry -> ToolEntry
+toggleToolPopup targetToolId toolId tool =
+    -- This, we apply to all tools, to ensure only one popup is ever open.
+    if tool.toolId == targetToolId then
         { tool | isPopupOpen = not tool.isPopupOpen }
 
     else
         { tool | isPopupOpen = False }
 
 
-setToolState : ToolType -> ToolState -> ToolEntry -> ToolEntry
-setToolState toolType state tool =
-    if tool.toolType == toolType then
-        { tool | state = state }
-
-    else
-        tool
-
-
-toggleToolVisible : ToolType -> ToolEntry -> ToolEntry
-toggleToolVisible toolType tool =
-    if tool.toolType == toolType then
-        if not <| toolIsSpecial tool then
-            { tool | isVisible = not tool.isVisible, isPopupOpen = False }
-
-        else
-            tool
-
-    else
-        tool
+setToolState : String -> ToolState -> Dict String ToolEntry -> Dict String ToolEntry
+setToolState toolId state tools =
+    Dict.update
+        toolId
+        (Maybe.map (\tool -> { tool | state = state }))
+        tools
 
 
-unHideTool : ToolType -> ToolEntry -> ToolEntry
-unHideTool toolType tool =
-    if tool.toolType == toolType then
-        { tool | isVisible = True, isPopupOpen = False }
+toggleToolVisible : String -> Dict String ToolEntry -> Dict String ToolEntry
+toggleToolVisible toolId tools =
+    Dict.update
+        toolId
+        (Maybe.map
+            (\tool ->
+                if not <| toolIsSpecial tool then
+                    { tool | isVisible = not tool.isVisible, isPopupOpen = False }
 
-    else
-        tool
+                else
+                    tool
+            )
+        )
+        tools
+
+
+unHideTool : String -> Dict String ToolEntry -> Dict String ToolEntry
+unHideTool toolId tools =
+    Dict.update
+        toolId
+        (Maybe.map (\tool -> { tool | isVisible = True, isPopupOpen = False }))
+        tools
 
 
 nextToolState : ToolState -> ToolState
@@ -836,41 +813,43 @@ nextToolState state =
             SettingsOpen
 
 
-setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
-setDock toolType dock tool =
-    if tool.toolType == toolType then
-        { tool | dock = dock, isPopupOpen = False }
-
-    else
-        tool
-
-
-setColour : ToolType -> Element.Color -> ToolEntry -> ToolEntry
-setColour toolType colour tool =
-    if tool.toolType == toolType then
-        { tool
-            | tabColour = colour
-            , textColour = contrastingColour colour
-        }
-
-    else
-        tool
+setDock : String -> ToolDock -> Dict String ToolEntry -> Dict String ToolEntry
+setDock toolId dock tools =
+    Dict.update
+        toolId
+        (Maybe.map (\tool -> { tool | dock = dock, isPopupOpen = False }))
+        tools
 
 
-getColour : ToolType -> List ToolEntry -> Element.Color
-getColour toolType entries =
-    entries
-        |> List.Extra.find (\tab -> tab.toolType == toolType)
+setColour : String -> Element.Color -> Dict String ToolEntry -> Dict String ToolEntry
+setColour toolId colour tools =
+    Dict.update
+        toolId
+        (Maybe.map
+            (\tool ->
+                { tool
+                    | tabColour = colour
+                    , textColour = contrastingColour colour
+                }
+            )
+        )
+        tools
+
+
+getColour : String -> Dict String ToolEntry -> Element.Color
+getColour toolId tools =
+    tools
+        |> Dict.get toolId
         |> Maybe.map .tabColour
         |> Maybe.withDefault FlatColors.SwedishPalette.freeSpeechBlue
 
 
-isToolOpen : ToolType -> List ToolEntry -> Bool
-isToolOpen toolType entries =
-    List.Extra.find
-        (\tab -> tab.toolType == toolType && (tab.state == Expanded) && tab.isVisible)
-        entries
-        /= Nothing
+isToolOpen : String -> Dict String ToolEntry -> Bool
+isToolOpen toolId tools =
+    tools
+        |> Dict.get toolId
+        |> Maybe.map (\tab -> (tab.state == Expanded) && tab.isVisible)
+        |> Maybe.withDefault False
 
 
 update :
@@ -884,10 +863,10 @@ update toolMsg isTrack msgWrapper options =
         ToolNoOp ->
             ( options, [] )
 
-        ToolPopupToggle toolType ->
+        ToolPopupToggle toolId ->
             let
                 newOptions =
-                    { options | tools = List.map (toggleToolPopup toolType) options.tools }
+                    { options | tools = Dict.map (toggleToolPopup toolId) options.tools }
             in
             ( newOptions
             , [ StoreLocally "tools" <| encodeToolState newOptions ]
@@ -896,53 +875,52 @@ update toolMsg isTrack msgWrapper options =
         DisplayInfo id tag ->
             ( options, [ Actions.DisplayInfo id tag ] )
 
-        ToolDockSelect toolType toolDock ->
+        ToolDockSelect toolId toolDock ->
             let
                 newOptions =
-                    { options | tools = List.map (setDock toolType toolDock) options.tools }
+                    { options | tools = setDock toolId toolDock options.tools }
             in
             ( newOptions
             , [ StoreLocally "tools" <| encodeToolState newOptions ]
             )
 
-        ToolColourSelect toolType color ->
+        ToolColourSelect toolId color ->
             -- Instantly reflect colour changes in preview.
             let
                 newOptions =
-                    { options | tools = List.map (setColour toolType color) options.tools }
+                    { options | tools = setColour toolId color options.tools }
             in
-            if isToolOpen toolType options.tools then
-                toolStateHasChanged toolType True isTrack newOptions
+            if isToolOpen toolId options.tools then
+                toolStateHasChanged toolId True isTrack newOptions
 
             else
                 ( newOptions, [ StoreLocally "tools" <| encodeToolState newOptions ] )
 
-        ToolStateToggle toolType newState ->
+        ToolStateToggle toolId newState ->
             -- Record the new state, but also let the tool know!
             let
                 newOptions =
-                    { options | tools = List.map (setToolState toolType newState) options.tools }
+                    { options | tools = setToolState toolId newState options.tools }
             in
             toolStateHasChanged
-                toolType
-                (isToolOpen toolType newOptions.tools)
+                toolId
+                (isToolOpen toolId newOptions.tools)
                 isTrack
                 newOptions
 
-        ToolActivate toolType newState ->
+        ToolActivate toolId newState ->
             -- Record the new state, but also let the tool know!
             let
                 newOptions =
                     { options
                         | tools =
-                            List.map
-                                (setToolState toolType newState << unHideTool toolType)
-                                options.tools
+                            setToolState toolId newState <|
+                                unHideTool toolId options.tools
                     }
             in
             toolStateHasChanged
-                toolType
-                (isToolOpen toolType newOptions.tools)
+                toolId
+                (isToolOpen toolId newOptions.tools)
                 isTrack
                 newOptions
 
@@ -954,7 +932,7 @@ update toolMsg isTrack msgWrapper options =
                             DirectionChanges.update
                                 msg
                                 options.directionChangeOptions
-                                (getColour ToolAbruptDirectionChanges options.tools)
+                                (getColour directionChangeTool.toolId options.tools)
                                 track
                     in
                     ( { options | directionChangeOptions = newOptions }
@@ -970,7 +948,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.GradientProblems.update
                         msg
                         options.gradientProblemOptions
-                        (getColour ToolGradientProblems options.tools)
+                        (getColour gradientChangeTool.toolId options.tools)
                         isTrack
             in
             ( { options | gradientProblemOptions = newOptions }
@@ -983,7 +961,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.Timestamp.update
                         msg
                         options.timestampOptions
-                        (getColour ToolGradientProblems options.tools)
+                        (getColour gradientChangeTool.toolId options.tools)
                         isTrack
             in
             ( { options | timestampOptions = newOptions }
@@ -997,7 +975,7 @@ update toolMsg isTrack msgWrapper options =
                     DeletePoints.update
                         msg
                         options.deleteOptions
-                        (getColour ToolDeletePoints options.tools)
+                        (getColour deleteTool.toolId options.tools)
                         isTrack
             in
             ( { options | deleteOptions = newOptions }
@@ -1010,7 +988,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.Essentials.update
                         msg
                         options.essentialOptions
-                        (getColour ToolEssentials options.tools)
+                        (getColour essentialsTool.toolId options.tools)
                         isTrack
             in
             ( { options | essentialOptions = newOptions }
@@ -1023,7 +1001,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.BezierSplines.update
                         msg
                         options.bezierSplineOptions
-                        (getColour ToolBezierSplines options.tools)
+                        (getColour bezierSplinesTool.toolId options.tools)
                         isTrack
             in
             ( { options | bezierSplineOptions = newOptions }
@@ -1036,7 +1014,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.CentroidAverage.update
                         msg
                         options.centroidAverageOptions
-                        (getColour ToolCentroidAverage options.tools)
+                        (getColour centroidAverageTool.toolId options.tools)
                         isTrack
             in
             ( { options | centroidAverageOptions = newOptions }
@@ -1049,7 +1027,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.CurveFormer.update
                         msg
                         options.curveFormerOptions
-                        (getColour ToolCurveFormer options.tools)
+                        (getColour curveFormerTool.toolId options.tools)
                         isTrack
             in
             ( { options | curveFormerOptions = newOptions }
@@ -1064,7 +1042,7 @@ update toolMsg isTrack msgWrapper options =
                             Tools.BendSmoother.update
                                 msg
                                 options.bendSmootherOptions
-                                (getColour ToolBendSmoother options.tools)
+                                (getColour bendSmootherTool.toolId options.tools)
                                 track
                     in
                     ( { options | bendSmootherOptions = newOptions }
@@ -1082,7 +1060,7 @@ update toolMsg isTrack msgWrapper options =
                             Tools.Nudge.update
                                 msg
                                 options.nudgeOptions
-                                (getColour ToolNudge options.tools)
+                                (getColour nudgeTool.toolId options.tools)
                                 track
                     in
                     ( { options | nudgeOptions = newOptions }
@@ -1134,7 +1112,7 @@ update toolMsg isTrack msgWrapper options =
                             Tools.Simplify.update
                                 msg
                                 options.simplifySettings
-                                (getColour ToolSimplify options.tools)
+                                (getColour simplifyTool.toolId options.tools)
                                 track
                     in
                     ( { options | simplifySettings = newOptions }
@@ -1150,7 +1128,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.Interpolate.update
                         msg
                         options.interpolateSettings
-                        (getColour ToolInterpolate options.tools)
+                        (getColour interpolateTool.toolId options.tools)
                         isTrack
             in
             ( { options | interpolateSettings = newOptions }
@@ -1165,7 +1143,7 @@ update toolMsg isTrack msgWrapper options =
                             Tools.ProfileSmooth.update
                                 msg
                                 options.profileSmoothSettings
-                                (getColour ToolProfileSmooth options.tools)
+                                (getColour profileSmoothTool.toolId options.tools)
                                 track
                     in
                     ( { options | profileSmoothSettings = newOptions }
@@ -1181,7 +1159,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.MoveScaleRotate.update
                         msg
                         options.moveScaleRotateSettings
-                        (getColour ToolMoveScaleRotate options.tools)
+                        (getColour moveScaleRotateTool.toolId options.tools)
                         isTrack
             in
             ( { options | moveScaleRotateSettings = newOptions }
@@ -1227,7 +1205,7 @@ update toolMsg isTrack msgWrapper options =
                                 msg
                                 options.moveAndStretchSettings
                                 (ToolMoveAndStretchMsg >> msgWrapper)
-                                (getColour ToolMoveAndStretch options.tools)
+                                (getColour moveAndStretchTool.toolId options.tools)
                                 track
                     in
                     ( { options | moveAndStretchSettings = newOptions }
@@ -1326,7 +1304,7 @@ update toolMsg isTrack msgWrapper options =
                             Tools.SmartSmoother.update
                                 msg
                                 options.smartSmootherOptions
-                                (getColour ToolSmartSmoother options.tools)
+                                (getColour smartSmootherTool.toolId options.tools)
                                 track
                     in
                     ( { options | smartSmootherOptions = newOptions }
@@ -1345,7 +1323,7 @@ update toolMsg isTrack msgWrapper options =
                                 msg
                                 options.namedSegmentOptions
                                 track
-                                (getColour ToolNamedSegments options.tools)
+                                (getColour namedSegmentTool.toolId options.tools)
                                 (msgWrapper << ToolNamedSegmentMsg)
                     in
                     ( { options | namedSegmentOptions = newOptions }
@@ -1396,15 +1374,15 @@ update toolMsg isTrack msgWrapper options =
             , [ StoreLocally "tool:tools" <| encodeToolSummaryState newOptions ]
             )
 
-        ToolToggleVisible toolType ->
+        ToolToggleVisible toolId ->
             -- Record the new state, but also let the tool know!
             let
                 newOptions =
-                    { options | tools = List.map (toggleToolVisible toolType) options.tools }
+                    { options | tools = toggleToolVisible toolId options.tools }
             in
             toolStateHasChanged
-                toolType
-                (isToolOpen toolType newOptions.tools)
+                toolId
+                (isToolOpen toolId newOptions.tools)
                 isTrack
                 newOptions
 
@@ -1414,31 +1392,35 @@ refreshOpenTools :
     -> Options msg
     -> ( Options msg, List (ToolAction msg) )
 refreshOpenTools isTrack options =
-    -- Track, or something has changed; tool data is stale.
+    -- Track, or something, has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
     let
-        refreshOpenTool entry ( inputOptions, collectingActions ) =
-            if isToolOpen entry.toolType options.tools then
+        refreshOpenTool toolId entry ( inputOptions, collectingActions ) =
+            if entry.state == Expanded || entry.state == AlwaysOpen then
                 let
                     ( incrementalModel, incrementalActions ) =
-                        toolStateHasChanged entry.toolType True isTrack inputOptions
+                        toolStateHasChanged toolId True isTrack inputOptions
                 in
                 ( incrementalModel, incrementalActions ++ collectingActions )
 
             else
                 ( inputOptions, collectingActions )
     in
-    options.tools |> List.foldl refreshOpenTool ( options, [] )
+    options.tools |> Dict.foldl refreshOpenTool ( options, [] )
 
 
 toolStateHasChanged :
-    ToolType
+    String
     -> Bool
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> ( Options msg, List (ToolAction msg) )
-toolStateHasChanged toolType showPreviews isTrack options =
-    case toolType of
+toolStateHasChanged toolId showPreviews isTrack options =
+    case
+        Dict.get toolId options.tools
+            |> Maybe.map .toolType
+            |> Maybe.withDefault ToolTrackInfo
+    of
         ToolTrackInfo ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
@@ -1449,7 +1431,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     DirectionChanges.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.directionChangeOptions
                         isTrack
 
@@ -1463,7 +1445,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     DeletePoints.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.deleteOptions
                         isTrack
 
@@ -1477,7 +1459,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, _ ) =
                     Tools.Essentials.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.essentialOptions
                         isTrack
 
@@ -1491,7 +1473,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.BezierSplines.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.bezierSplineOptions
                         isTrack
 
@@ -1505,7 +1487,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.CentroidAverage.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.centroidAverageOptions
                         isTrack
 
@@ -1519,7 +1501,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.CurveFormer.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.curveFormerOptions
                         isTrack
 
@@ -1533,7 +1515,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.BendSmoother.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.bendSmootherOptions
                         isTrack
 
@@ -1547,7 +1529,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.Nudge.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.nudgeOptions
                         isTrack
 
@@ -1561,7 +1543,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.GradientProblems.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.gradientProblemOptions
                         isTrack
 
@@ -1581,7 +1563,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.Simplify.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.simplifySettings
                         isTrack
 
@@ -1595,7 +1577,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.Interpolate.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.interpolateSettings
                         isTrack
 
@@ -1609,7 +1591,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.Timestamp.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.timestampOptions
                         isTrack
 
@@ -1623,7 +1605,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.ProfileSmooth.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.profileSmoothSettings
                         isTrack
 
@@ -1637,7 +1619,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.MoveScaleRotate.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.moveScaleRotateSettings
                         isTrack
 
@@ -1651,7 +1633,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.Flythrough.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.flythroughSettings
                         isTrack
 
@@ -1665,7 +1647,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.StravaTools.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.stravaSettings
                         isTrack
 
@@ -1679,7 +1661,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.MoveAndStretch.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.moveAndStretchSettings
                         isTrack
 
@@ -1693,7 +1675,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.StartFinish.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.startFinishOptions
                         isTrack
 
@@ -1707,7 +1689,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.SplitAndJoin.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.splitAndJoinOptions
                         isTrack
 
@@ -1721,7 +1703,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.Intersections.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.intersectionOptions
                         isTrack
 
@@ -1744,7 +1726,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.SmartSmoother.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.smartSmootherOptions
                         isTrack
 
@@ -1758,7 +1740,7 @@ toolStateHasChanged toolType showPreviews isTrack options =
                 ( newToolOptions, actions ) =
                     Tools.NamedSegment.toolStateChange
                         showPreviews
-                        (getColour toolType options.tools)
+                        (getColour toolId options.tools)
                         options.namedSegmentOptions
                         isTrack
 
@@ -1797,7 +1779,9 @@ toolsForDock :
 toolsForDock settings dock msgWrapper isTrack options =
     let
         visibleTools =
-            List.filter .isVisible options.tools
+            orderedTools
+                |> List.filterMap (\( id, _ ) -> Dict.get id options.tools)
+                |> List.filter .isVisible
     in
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacing 5, scrollbarY ]
@@ -1874,7 +1858,7 @@ viewToolSettings settings options wrapper =
                                     ToolNoOp
 
                                  else
-                                    ToolToggleVisible tool.toolType
+                                    ToolToggleVisible tool.toolId
                                 )
                     , checked = tool.isVisible
                     , icon = Input.defaultCheckbox
@@ -1886,7 +1870,7 @@ viewToolSettings settings options wrapper =
                 [ spacing 5
                 , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
                 ]
-                { onChange = wrapper << ToolDockSelect tool.toolType
+                { onChange = wrapper << ToolDockSelect tool.toolId
                 , selected = Just tool.dock
                 , label =
                     Input.labelRight [ paddingXY 10 0 ] <|
@@ -1911,7 +1895,7 @@ viewToolSettings settings options wrapper =
                     else
                         Just <|
                             wrapper <|
-                                ToolActivate tool.toolType <|
+                                ToolActivate tool.toolId <|
                                     nextToolState tool.state
                 , label = text <| I18N.localisedString settings.location tool.toolId "label"
                 }
@@ -1940,13 +1924,6 @@ viewToolSettings settings options wrapper =
 
             else
                 locationChoices
-
-        sorting =
-            if options.azSort then
-                List.sortBy (\tool -> I18N.localisedString settings.location tool.toolId "label")
-
-            else
-                identity
     in
     column
         ([ width fill
@@ -1959,8 +1936,21 @@ viewToolSettings settings options wrapper =
         )
     <|
         (wrappedRow [ width fill, centerX, spacing 4, padding 4 ] [ sortMethod, compact ]
-            :: (List.map displayStyle <| sorting <| options.tools)
+            :: (List.map displayStyle <| sortedTools settings options)
         )
+
+
+sortedTools : SystemSettings -> Options msg -> List ToolEntry
+sortedTools settings options =
+    --If A-Z then sort by labels, otherwise use `orderedList`.
+    if options.azSort then
+        options.tools
+            |> Dict.values
+            |> List.sortBy (\tool -> I18N.localisedString settings.location tool.toolId "label")
+
+    else
+        orderedTools
+            |> List.filterMap (\( id, _ ) -> Dict.get id options.tools)
 
 
 viewTool :
@@ -2042,7 +2032,7 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                     { onPress =
                         Just <|
                             msgWrapper <|
-                                ToolStateToggle toolEntry.toolType <|
+                                ToolStateToggle toolEntry.toolId <|
                                     nextToolState toolEntry.state
                     , label =
                         row [ alignLeft, spacing 10 ]
@@ -2073,9 +2063,9 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                         Mouse.onWithOptions
                             "click"
                             stopProp
-                            (always << msgWrapper <| ToolPopupToggle toolEntry.toolType)
+                            (always << msgWrapper <| ToolPopupToggle toolEntry.toolId)
                     ]
-                    { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
+                    { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolId
                     , label = useIconWithSize 14 FeatherIcons.settings
                     }
                 ]
@@ -2095,25 +2085,20 @@ showDockOptions settings msgWrapper toolEntry =
             (spacing 4 :: neatToolsBorder)
             [ Input.button
                 [ tooltip below (localisedTooltip settings.location "tools" "left") ]
-                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLeft
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolId DockLeft
                 , label = useIcon FeatherIcons.arrowLeft
                 }
             , Input.button
                 [ tooltip below (localisedTooltip settings.location "tools" "right") ]
-                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockRight
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolId DockRight
                 , label = useIcon FeatherIcons.arrowRight
                 }
-            , if
-                toolEntry.toolType
-                    /= ToolSettings
-                    && toolEntry.toolType
-                    /= ToolEssentials
-              then
+            , if toolEntry.toolType /= ToolSettings && toolEntry.toolType /= ToolEssentials then
                 Input.button
                     [ tooltip below (localisedTooltip settings.location "tools" "hide")
                     , paddingEach { left = 20, right = 0, top = 0, bottom = 0 }
                     ]
-                    { onPress = Just <| msgWrapper <| ToolToggleVisible toolEntry.toolType
+                    { onPress = Just <| msgWrapper <| ToolToggleVisible toolEntry.toolId
                     , label = useIcon FeatherIcons.eyeOff
                     }
 
@@ -2128,10 +2113,10 @@ showDockOptions settings msgWrapper toolEntry =
 clearPopups : Options msg -> Options msg
 clearPopups options =
     let
-        clearPopup tool =
+        clearPopup _ tool =
             { tool | isPopupOpen = False }
     in
-    { options | tools = List.map clearPopup options.tools }
+    { options | tools = Dict.map clearPopup options.tools }
 
 
 showColourOptions : (ToolMsg -> msg) -> ToolEntry -> Element msg
@@ -2141,7 +2126,7 @@ showColourOptions msgWrapper toolEntry =
             Input.button
                 [ Background.color colour, width <| px 20, height <| px 20 ]
                 { label = none
-                , onPress = Just <| msgWrapper <| ToolColourSelect toolEntry.toolType colour
+                , onPress = Just <| msgWrapper <| ToolColourSelect toolEntry.toolId colour
                 }
     in
     if toolEntry.isPopupOpen then
@@ -2674,7 +2659,7 @@ encodeOneTool tool =
 
 encodeToolState : Options msg -> E.Value
 encodeToolState options =
-    E.list identity <| List.map encodeOneTool options.tools
+    E.list identity <| List.map encodeOneTool <| Dict.values options.tools
 
 
 encodeToolSummaryState : Options msg -> E.Value
@@ -2709,8 +2694,8 @@ restoreStoredValues options values =
         toolsAsStored =
             D.decodeValue (D.list toolDecoder) values
 
-        useStoredSettings : List StoredTool -> ToolEntry -> ToolEntry
-        useStoredSettings stored tool =
+        useStoredSettings : List StoredTool -> String -> ToolEntry -> ToolEntry
+        useStoredSettings stored toolId tool =
             case List.Extra.find (\fromStore -> fromStore.toolType == encodeType tool.toolType) stored of
                 Just found ->
                     { tool
@@ -2726,7 +2711,7 @@ restoreStoredValues options values =
     in
     case toolsAsStored of
         Ok stored ->
-            { options | tools = List.map (useStoredSettings stored) options.tools }
+            { options | tools = Dict.map (useStoredSettings stored) options.tools }
 
         Err _ ->
             options
