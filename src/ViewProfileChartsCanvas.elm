@@ -47,7 +47,7 @@ zoomButtons : SystemSettings -> (Msg -> msg) -> ProfileContext -> Element msg
 zoomButtons settings msgWrapper context =
     column
         [ alignTop
-        , alignRight
+        , alignLeft
         , moveDown 5
         , moveLeft 5
         , Font.size 40
@@ -62,7 +62,6 @@ zoomButtons settings msgWrapper context =
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
-        , htmlAttribute (style "z-index" "20")
         ]
         [ Input.button []
             { onPress = Just <| msgWrapper ImageZoomIn
@@ -300,41 +299,44 @@ view context settings paneId ( givenWidth, givenHeight ) msgWrapper =
         tenPercentHeight =
             inPixels givenHeight // 10
     in
-    column
-        ([ inFront <| zoomButtons settings msgWrapper context
-         , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-         , htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
-         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
-         , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
-         ]
-            ++ (case context.dragAction of
-                    DragPan _ ->
-                        [ htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
-                        , pointer
-                        ]
+    row [ padding 2, spacing 2, width fill ]
+        [ column
+            ([ width fill
+             , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+             , htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
+             , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
+             , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
+             , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
+             ]
+                ++ (case context.dragAction of
+                        DragPan _ ->
+                            [ htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+                            , pointer
+                            ]
 
-                    DragNone ->
-                        []
-               )
-        )
-        [ el
-            [ Element.width <| px <| inPixels givenWidth
-            , Element.height <| px <| 7 * tenPercentHeight
-            , alignLeft
-            , alignTop
-            , htmlAttribute (id <| "altitude." ++ paneIdToString paneId)
+                        DragNone ->
+                            []
+                   )
+            )
+            [ el
+                [ Element.width <| px <| inPixels givenWidth - 30
+                , Element.height <| px <| 7 * tenPercentHeight
+                , alignLeft
+                , alignTop
+                , htmlAttribute (id <| "altitude." ++ paneIdToString paneId)
+                ]
+                none
+            , el
+                [ Element.width <| px <| inPixels givenWidth - 30
+                , Element.height <| px <| 3 * tenPercentHeight
+                , alignLeft
+                , alignTop
+                , Border.color FlatColors.ChinesePalette.peace
+                , htmlAttribute (id <| "gradient." ++ paneIdToString paneId)
+                ]
+                none
             ]
-            none
-        , el
-            [ Element.width <| px <| inPixels givenWidth
-            , Element.height <| px <| 3 * tenPercentHeight
-            , alignLeft
-            , alignTop
-            , Border.color FlatColors.ChinesePalette.peace
-            , htmlAttribute (id <| "gradient." ++ paneIdToString paneId)
-            ]
-            none
+        , zoomButtons settings msgWrapper context
         ]
 
 
