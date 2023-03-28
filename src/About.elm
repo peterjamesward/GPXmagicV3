@@ -7,6 +7,8 @@ aboutText =
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
 
+Internal improvements in tool controller.
+
 ## 3.11.3
 
 Fix colours of top bar popups in dark mode.
