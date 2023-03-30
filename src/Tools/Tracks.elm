@@ -212,25 +212,24 @@ update msg options =
             -- The found edges become the new tracks.
             -- We delegate to graph, then pull back the updated tracks.
             -- Save the previous state for simple reversion.
-            case options.graphState of
-                GraphSnapped ->
-                    let
-                        newGraph =
-                            Graph.analyzeTracksAsGraph options.graph
-                    in
-                    ( { options
-                        | graph = newGraph
-                        , graphState = GraphWithNodes
-                        , userRoute = []
-                        , roadListCollapsed = False
-                        , clustersForPreview = []
-                        , priors = List.take 4 <| OptionsUndo options :: options.priors
-                      }
-                    , [ Actions.HidePreview "graph" ]
-                    )
+            if options.graphState == GraphSnapped || options.graphState == GraphOriginalTracks then
+                let
+                    newGraph =
+                        Graph.analyzeTracksAsGraph options.graph
+                in
+                ( { options
+                    | graph = newGraph
+                    , graphState = GraphWithNodes
+                    , userRoute = []
+                    , roadListCollapsed = False
+                    , clustersForPreview = []
+                    , priors = List.take 4 <| OptionsUndo options :: options.priors
+                  }
+                , [ Actions.HidePreview "graph" ]
+                )
 
-                _ ->
-                    ( options, [] )
+            else
+                ( options, [] )
 
         Undo ->
             case options.priors of
@@ -558,6 +557,10 @@ viewGraph settings wrapper options graph =
                             , Input.button neatToolsBorder
                                 { onPress = Just (wrapper SnapToNearby)
                                 , label = i18n "adopt"
+                                }
+                            , Input.button neatToolsBorder
+                                { onPress = Just (wrapper GraphAnalyse)
+                                , label = i18n "find"
                                 }
                             ]
 

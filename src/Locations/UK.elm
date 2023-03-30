@@ -107,7 +107,9 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
                 , ( "adopt", """Merge nearby points""" )
                 , ( "adoptInfo", """You may want to "snap" multiple passes of the track
 together to remove discrepancies, but you're content with the original route and don't
-want to use the other features of Route maker to define your own route.""" )
+want to use the other features of Route maker to define your own route.
+
+You can also skip this step and proceed to the Route Build phase.""" )
                 , ( "clear", """Clear the route""" )
                 , ( "revert", """Revert to original track""" )
                 , ( "convert", """Make a new track with this route""" )

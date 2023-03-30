@@ -3,9 +3,13 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.4 (4fea8808, 2023-03-28 20:33)
+# GPXmagic v3.11.5 (4fea8808, 2023-03-28 20:33)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.5
+
+Extra button in Route Builder allows you to skip the "Snap" step.
 
 ## 3.11.4
 
