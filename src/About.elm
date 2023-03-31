@@ -3,9 +3,13 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.5 (5071d6ff, 2023-03-30 16:00)
+# GPXmagic v3.11.6 (5071d6ff, 2023-03-30 16:00)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.6
+
+Improve hit detection when multiple tracks are loaded.
 
 ## 3.11.5
 
