@@ -186,8 +186,8 @@ getReferencePoint track =
 changeReferencePoint : GPXSource -> TrackLoaded msg -> TrackLoaded msg
 changeReferencePoint newReference track =
     --Note, failure leaves tree unchanged.
-    { track
-        | trackTree =
+    let
+        changedTree =
             case
                 DomainModel.treeFromSourcesWithExistingReference newReference <|
                     DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
@@ -197,6 +197,9 @@ changeReferencePoint newReference track =
 
                 Nothing ->
                     track.trackTree
+    in
+    { track
+        | trackTree = changedTree
         , referenceLonLat = newReference
     }
 

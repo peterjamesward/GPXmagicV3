@@ -11,9 +11,16 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
+BUG? Is track spatial index correct after load? 
+> Seems so, for other than the first track.
+
 ---
 
 # BACKLOG
+
+## Merge terrain and land use
+
+Using similar but less regular recursion scheme.
 
 ## Remove Actions
 

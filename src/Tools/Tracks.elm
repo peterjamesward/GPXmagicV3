@@ -986,7 +986,10 @@ addTrack track options =
                     track
 
         trackWithUnambiguousName =
-            { trackWithCommonReference | trackName = unambiguousName }
+            { trackWithCommonReference
+                | trackName = unambiguousName
+                , leafIndex = TrackLoaded.indexLeaves trackWithCommonReference.trackTree
+            }
 
         newReferenceGPX =
             case options.commonReferenceGPX of
