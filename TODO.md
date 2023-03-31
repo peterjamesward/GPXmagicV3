@@ -11,16 +11,44 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-BUG? Is track spatial index correct after load? 
-> Seems so, for other than the first track.
+## Merge terrain and land use painting
+
++ Fetch Land Use for subsequent track loads.
+
++ Make the Land Use tool actually do something.
+
+Using similar but less regular recursion scheme, use Land Use to colour terrain.
+Maybe put some buildings, trees, water in for suitable land types, provided not on road.
+Previous attempt at doing precise road occlusion was complex and not well done.
+Maybe would be OK to just paint any land use parts that don't intersect any roads,
+then devise some recursion scheme for those that do. Simple would be to split into
+four (NE,NW,SE,SW) and repeat, but perhaps could be more influenced by leaf index.
+
+1. The geometry
+More specifically, in SceneBuilder3D.makeLandUsePlanar(|Sloped), when we have the 
+triangulated polygon, we do this:
+- If the polygon (bounding box) intersects no roads, paint it.
+- If any of the polygon intersects any roads:
+- For all triangles in polygon:
+  - If triangle intersects any road then (recursively)
+    - if triangle area > some threshold, subdivide (by splitting longest edge)
+    - else discard the triangle
+    - Repeat intersection test on split triangles
+- This will cease recursion based on size or absence of overlaps
+- Paint revised triangulation.
+
+2. The rendering
+For Industrial, Retail, Residential, consider placing some grey or brown blocks in each triangle.
+For Wood, Forest, see if some cones would create a pleasing effect.
+For Water, Rock, Farmland, etc, consider some textures.
+
+On triangles, I think we could make Terrain look less blocky by starting out with a 
+simple triangulation based on bounding box centroid to each edge (with random perturbation?),
+then using the above triangle splitting recursion. Mmm.
 
 ---
 
 # BACKLOG
-
-## Merge terrain and land use
-
-Using similar but less regular recursion scheme.
 
 ## Remove Actions
 

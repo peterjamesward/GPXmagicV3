@@ -218,6 +218,7 @@ render3dView settings track =
                     makeLandUsePlanar track.landUseData spatialIndex track floorPlane
 
         terrain =
+            -- Using the updated spatial index should make sure terrain does not obscure land use.
             if settings.terrainFineness > 0.0 then
                 indexWithLandUse
                     |> terrainFromIndex
