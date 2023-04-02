@@ -26,13 +26,13 @@ four (NE,NW,SE,SW) and repeat, but perhaps could be more influenced by leaf inde
 
 1. The geometry
 More specifically, in SceneBuilder3D.makeLandUsePlanar(|Sloped), when we have the 
-triangulated polygon, we do this:
+triangulated polygon, do this:
 - If the polygon (bounding box) intersects no roads, paint it.
 - If any of the polygon intersects any roads:
 - For all triangles in polygon:
   - If triangle intersects any road then (recursively)
     - if triangle area > some threshold, subdivide (by splitting longest edge)
-    - else discard the triangle
+    - else make sure the triangle is _below_ the road section
     - Repeat intersection test on split triangles
 - This will cease recursion based on size or absence of overlaps
 - Paint revised triangulation.
