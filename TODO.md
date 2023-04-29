@@ -11,6 +11,17 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
+---
+
+# BACKLOG
+
+## Snap to Roads with TomTom
+
+https://developer.tomtom.com/snap-to-roads-api/documentation/product-information/introduction
+
+Free for small volumes.
+5000 point limit, much better than MapBox.
+
 ## Merge terrain and land use painting
 
 + Fetch Land Use for subsequent track loads.
@@ -25,8 +36,8 @@ then devise some recursion scheme for those that do. Simple would be to split in
 four (NE,NW,SE,SW) and repeat, but perhaps could be more influenced by leaf index.
 
 1. The geometry
-More specifically, in SceneBuilder3D.makeLandUsePlanar(|Sloped), when we have the 
-triangulated polygon, do this:
+   More specifically, in SceneBuilder3D.makeLandUsePlanar(|Sloped), when we have the
+   triangulated polygon, do this:
 - If the polygon (bounding box) intersects no roads, paint it.
 - If any of the polygon intersects any roads:
 - For all triangles in polygon:
@@ -38,17 +49,13 @@ triangulated polygon, do this:
 - Paint revised triangulation.
 
 2. The rendering
-For Industrial, Retail, Residential, consider placing some grey or brown blocks in each triangle.
-For Wood, Forest, see if some cones would create a pleasing effect.
-For Water, Rock, Farmland, etc, consider some textures.
+   For Industrial, Retail, Residential, consider placing some grey or brown blocks in each triangle.
+   For Wood, Forest, see if some cones would create a pleasing effect.
+   For Water, Rock, Farmland, etc, consider some textures.
 
-On triangles, I think we could make Terrain look less blocky by starting out with a 
+On triangles, I think we could make Terrain look less blocky by starting out with a
 simple triangulation based on bounding box centroid to each edge (with random perturbation?),
 then using the above triangle splitting recursion. Mmm.
-
----
-
-# BACKLOG
 
 ## Remove Actions
 

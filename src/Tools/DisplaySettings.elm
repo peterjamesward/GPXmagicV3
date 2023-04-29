@@ -8,6 +8,7 @@ import Element.Input as Input
 import FlatColors.ChinesePalette
 import Json.Decode as D
 import LandUseDataTypes
+import MapPortController
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions exposing (..)
 import Tools.I18N as I18N
@@ -29,6 +30,8 @@ defaultOptions =
     , landUse = LandUseDataTypes.LandUseHidden
     , placeNames = False
     , showConstraintsAtLevel = Nothing
+    , mapProjection = "globe"
+    , mapAllowTilt = True
     }
 
 
@@ -41,6 +44,8 @@ type Msg
     | SetTerrainFineness Float
     | DisplayInfo String String
     | SetPlaceNames Bool
+    | AllowMapTilt Bool
+    | UseGlobeProjection Bool
 
 
 restoreSettings : D.Value -> Options -> Options
@@ -111,6 +116,34 @@ update msg options =
 
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
+
+        AllowMapTilt allowed ->
+            let
+                newOptions =
+                    { options | mapAllowTilt = allowed }
+            in
+            ( newOptions
+            , Actions.SetMapAllowTilt allowed
+                :: actions newOptions
+            )
+
+        UseGlobeProjection useGlobe ->
+            let
+                newOptions =
+                    { options
+                        | mapProjection =
+                            case useGlobe of
+                                False ->
+                                    "mercator"
+
+                                True ->
+                                    "globe"
+                    }
+            in
+            ( newOptions
+            , Actions.SetMapProjection newOptions.mapProjection
+                :: actions newOptions
+            )
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Element msg
@@ -210,5 +243,23 @@ view settings wrap options =
             , step = Nothing
             , value = options.terrainFineness
             , thumb = Input.defaultThumb
+            }
+        , Input.checkbox
+            [ padding 5
+            , spacing 5
+            ]
+            { onChange = wrap << UseGlobeProjection
+            , checked = options.mapProjection == "globe"
+            , label = Input.labelRight [] <| text "Use Globe map"
+            , icon = Input.defaultCheckbox
+            }
+        , Input.checkbox
+            [ padding 5
+            , spacing 5
+            ]
+            { onChange = wrap << AllowMapTilt
+            , checked = options.mapAllowTilt
+            , label = Input.labelRight [] <| text "Map can tilt"
+            , icon = Input.defaultCheckbox
             }
         ]

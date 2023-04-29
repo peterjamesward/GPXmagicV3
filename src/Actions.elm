@@ -132,6 +132,8 @@ type
     | UpdateNamedSegments (List NamedSegment)
     | UnloadActiveTrack String
     | RemoveAllFromMap (List String)
+    | SetMapAllowTilt Bool
+    | SetMapProjection String
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

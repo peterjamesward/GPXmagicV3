@@ -16,6 +16,8 @@ type alias Options =
     , landUse : LandUseDataTypes.LandUseDisplay
     , placeNames : Bool
     , showConstraintsAtLevel : Maybe Int
+    , mapProjection : String
+    , mapAllowTilt : Bool
     }
 
 
@@ -24,6 +26,8 @@ type alias StoredOptions =
     , groundPlane : Bool
     , centreLine : Bool
     , curtainStyle : String
+    , mapProjection : Maybe String
+    , mapAllowTilt : Maybe Bool
     }
 
 
@@ -40,15 +44,19 @@ encode options =
         , ( "ground", E.bool options.groundPlane )
         , ( "centre", E.bool options.centreLine )
         , ( "curtain", encodeCurtain options.curtainStyle )
+        , ( "tilt", E.bool options.mapAllowTilt )
+        , ( "projection", E.string options.mapProjection )
         ]
 
 
 decoder =
-    D.map4 StoredOptions
+    D.map6 StoredOptions
         (D.field "surface" D.bool)
         (D.field "ground" D.bool)
         (D.field "centre" D.bool)
         (D.field "curtain" D.string)
+        (D.maybe (D.field "projection" D.string))
+        (D.maybe (D.field "tilt" D.bool))
 
 
 decode : E.Value -> Options -> Options
@@ -63,6 +71,8 @@ decode json current =
             , landUse = LandUseDataTypes.LandUseHidden
             , placeNames = False
             , showConstraintsAtLevel = Nothing
+            , mapAllowTilt = decoded.mapAllowTilt |> Maybe.withDefault True
+            , mapProjection = decoded.mapProjection |> Maybe.withDefault "globe"
             }
 
         Err _ ->

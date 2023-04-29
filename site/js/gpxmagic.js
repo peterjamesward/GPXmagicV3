@@ -12,6 +12,7 @@ function rememberedBytes() {
     return bytes ? bytes.split(",").map(x => parseInt(x,10)) : null;
 }
 
+
 function isUnset(x) {
     if (typeof(x) === 'undefined' || x === null) {
         return true;
@@ -286,6 +287,17 @@ function mapMessageHandler(msg) {
                 updateRoute();
             }
             break;
+
+        case 'AllowTilt':
+            if (isMapCreated) {
+                 map.setMaxPitch( msg.Tilt ? 85 : 0 );
+
+            }
+
+        case 'Projection':
+            if (isMapCreated) {
+                map.setProjection(msg.Projection);
+            }
     };
 };
 

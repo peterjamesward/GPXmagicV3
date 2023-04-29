@@ -2258,6 +2258,12 @@ performActionCommands actions model =
                             model.previews
                         ]
 
+                ( SetMapAllowTilt allowed, _ ) ->
+                    MapPortController.setAllowTilt allowed
+
+                ( SetMapProjection projection, _ ) ->
+                    MapPortController.setProjection projection
+
                 ( MapRefresh, Nothing ) ->
                     -- Lazy, use this to refresh profile as well.
                     MapPortController.refreshMap

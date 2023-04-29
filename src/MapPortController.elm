@@ -147,6 +147,24 @@ enablePlanning =
             [ ( "Cmd", E.string "Planning" ) ]
 
 
+setAllowTilt : Bool -> Cmd msg
+setAllowTilt allowed =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "AllowTilt" )
+            , ( "Tilt", E.bool allowed )
+            ]
+
+
+setProjection : String -> Cmd msg
+setProjection projection =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Projection" )
+            , ( "Projection", E.string projection )
+            ]
+
+
 getPoints : Cmd msg
 getPoints =
     mapCommands <|
