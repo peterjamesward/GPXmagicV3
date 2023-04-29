@@ -293,11 +293,13 @@ function mapMessageHandler(msg) {
                  map.setMaxPitch( msg.Tilt ? 85 : 0 );
 
             }
+            break;
 
         case 'Projection':
             if (isMapCreated) {
                 map.setProjection(msg.Projection);
             }
+            break;
     };
 };
 
