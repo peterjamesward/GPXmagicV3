@@ -133,6 +133,7 @@ type
     | UnloadActiveTrack String
     | RemoveAllFromMap (List String)
     | SetMapAllowTilt Bool
+    | SetMapAllowRotate Bool
     | SetMapProjection String
 
 

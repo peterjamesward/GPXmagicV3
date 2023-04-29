@@ -32,6 +32,7 @@ defaultOptions =
     , showConstraintsAtLevel = Nothing
     , mapProjection = "globe"
     , mapAllowTilt = True
+    , mapAllowRotate = True
     }
 
 
@@ -46,6 +47,7 @@ type Msg
     | SetPlaceNames Bool
     | AllowMapTilt Bool
     | UseGlobeProjection Bool
+    | AllowMapRotate Bool
 
 
 restoreSettings : D.Value -> Options -> Options
@@ -124,6 +126,16 @@ update msg options =
             in
             ( newOptions
             , Actions.SetMapAllowTilt allowed
+                :: actions newOptions
+            )
+
+        AllowMapRotate allowed ->
+            let
+                newOptions =
+                    { options | mapAllowRotate = allowed }
+            in
+            ( newOptions
+            , Actions.SetMapAllowRotate allowed
                 :: actions newOptions
             )
 
@@ -260,6 +272,15 @@ view settings wrap options =
             { onChange = wrap << AllowMapTilt
             , checked = options.mapAllowTilt
             , label = Input.labelRight [] <| text "Map can tilt"
+            , icon = Input.defaultCheckbox
+            }
+        , Input.checkbox
+            [ padding 5
+            , spacing 5
+            ]
+            { onChange = wrap << AllowMapRotate
+            , checked = options.mapAllowRotate
+            , label = Input.labelRight [] <| text "Map can rotate"
             , icon = Input.defaultCheckbox
             }
         ]

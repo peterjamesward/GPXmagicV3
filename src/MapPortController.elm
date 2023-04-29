@@ -156,6 +156,15 @@ setAllowTilt allowed =
             ]
 
 
+setAllowRotate : Bool -> Cmd msg
+setAllowRotate allowed =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "AllowRotate" )
+            , ( "Rotate", E.bool allowed )
+            ]
+
+
 setProjection : String -> Cmd msg
 setProjection projection =
     mapCommands <|

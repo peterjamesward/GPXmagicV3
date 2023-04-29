@@ -3,13 +3,18 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.7 (b1ca5757, 2023-04-29 09:00)
+# GPXmagic v3.11.8 (b1ca5757, 2023-04-29 09:00)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
 
+## 3.11.8
+
+Another Display Setting disables map rotation. Note that disabling this will not clear
+any current rotation, but you can do that by clicking on the compass icon on the map.
+
 ## 3.11.7
 
-New Display Options settings allow you to:
+New Display Settings allow you to:
 
 * Choose Globe or Mercator map projection
 * Allow or prevent map from being tilted

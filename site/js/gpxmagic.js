@@ -295,6 +295,16 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'AllowRotate':
+            if (isMapCreated) {
+                if (msg.Rotate) {
+                    map.dragRotate.enable();
+                } else {
+                    map.dragRotate.disable();
+                }
+            }
+            break;
+
         case 'Projection':
             if (isMapCreated) {
                 map.setProjection(msg.Projection);

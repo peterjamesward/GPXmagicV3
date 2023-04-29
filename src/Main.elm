@@ -2261,6 +2261,9 @@ performActionCommands actions model =
                 ( SetMapAllowTilt allowed, _ ) ->
                     MapPortController.setAllowTilt allowed
 
+                ( SetMapAllowRotate allowed, _ ) ->
+                    MapPortController.setAllowRotate allowed
+
                 ( SetMapProjection projection, _ ) ->
                     MapPortController.setProjection projection
 

@@ -18,6 +18,7 @@ type alias Options =
     , showConstraintsAtLevel : Maybe Int
     , mapProjection : String
     , mapAllowTilt : Bool
+    , mapAllowRotate : Bool
     }
 
 
@@ -28,6 +29,7 @@ type alias StoredOptions =
     , curtainStyle : String
     , mapProjection : Maybe String
     , mapAllowTilt : Maybe Bool
+    , mapAllowRotate : Maybe Bool
     }
 
 
@@ -46,17 +48,19 @@ encode options =
         , ( "curtain", encodeCurtain options.curtainStyle )
         , ( "tilt", E.bool options.mapAllowTilt )
         , ( "projection", E.string options.mapProjection )
+        , ( "rotate", E.bool options.mapAllowRotate )
         ]
 
 
 decoder =
-    D.map6 StoredOptions
+    D.map7 StoredOptions
         (D.field "surface" D.bool)
         (D.field "ground" D.bool)
         (D.field "centre" D.bool)
         (D.field "curtain" D.string)
         (D.maybe (D.field "projection" D.string))
         (D.maybe (D.field "tilt" D.bool))
+        (D.maybe (D.field "rotate" D.bool))
 
 
 decode : E.Value -> Options -> Options
@@ -73,6 +77,7 @@ decode json current =
             , showConstraintsAtLevel = Nothing
             , mapAllowTilt = decoded.mapAllowTilt |> Maybe.withDefault True
             , mapProjection = decoded.mapProjection |> Maybe.withDefault "globe"
+            , mapAllowRotate = decoded.mapAllowRotate |> Maybe.withDefault True
             }
 
         Err _ ->
