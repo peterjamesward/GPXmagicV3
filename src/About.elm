@@ -3,9 +3,16 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.6 (87b18645, 2023-03-31 15:28)
+# GPXmagic v3.11.7 (87b18645, 2023-03-31 15:28)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.7
+
+New Display Options settings allow you to:
+
+* Choose Globe or Mercator map projection
+* Allow or prevent map from being tilted
 
 ## 3.11.6
 
