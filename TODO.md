@@ -11,6 +11,8 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
+Put logging in again with postgrest & RDS.
+
 ---
 
 # BACKLOG
