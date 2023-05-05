@@ -547,11 +547,11 @@ update msg model =
             )
 
         PageLoadRecorded _ ->
-            ( model
-            , PageLoadLog.getRecentLocations
-                |> P.toCmd (jwt signedToken) RecentLocations
-            )
+            ( model, Cmd.none )
 
+        --, PageLoadLog.getRecentLocations
+        --    |> P.toCmd (jwt signedToken) RecentLocations
+        --)
         RecentLocations response ->
             case response of
                 Err _ ->
