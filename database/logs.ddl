@@ -35,6 +35,8 @@ CREATE TABLE iplogs (
     recorded timestamp without time zone DEFAULT now()
 );
 
+create view recent as select distinct latitude, longitude from iplogs where recorded + interval '7 days' > now();
+
 -- Indices -------------------------------------------------------
 
 CREATE UNIQUE INDEX iplogs_pkey ON iplogs(id int4_ops);

@@ -11,10 +11,6 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 # WIP
 
-Put logging in again with postgrest & RDS.
-
-- Need to run remote postgrest image.
-
 ---
 
 # BACKLOG
