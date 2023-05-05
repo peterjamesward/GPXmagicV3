@@ -146,6 +146,12 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'Locations':
+            if (!isMapCreated) {
+                showLocations(msg.locations);
+            }
+            break;
+
         case 'Repaint':
             if (isMapCreated) {
                 map.resize();
@@ -158,6 +164,7 @@ function mapMessageHandler(msg) {
             if (isMapCreated) {
                 addLineToMap(msg.label, msg.data, msg.points);
                 setClickMode(msg.label, false, msg.points);
+                clearLocations();
             }
             break;
 
@@ -314,7 +321,7 @@ function mapMessageHandler(msg) {
 };
 
 // Create the draw control once only.
-var draw= new MapboxDraw({
+var draw = new MapboxDraw({
       // Instead of showing all the draw tools, show only the line string and delete tools.
       displayControlsDefault: false,
       controls: {
@@ -409,6 +416,25 @@ function updateRoute() {
       });
 }
 
+
+var markedPlaces = [];
+
+function showLocations(locations) {
+    // Locations should be a list of "LngLat" pairs.
+    locations.forEach ( location => {
+        // Create a new marker, set the longitude and latitude, and add it to the map.
+        markedPlaces.push(
+            new mapboxgl.Marker()
+            .setLngLat(location)
+            .addTo(map)
+        );
+    });
+}
+
+function clearLocations () {
+    markedPlaces.forEach ( marker => marker.remove() );
+    markedPlaces = [];
+}
 
 function storageMessageHandler(msg) {
 //    console.log('behold, a message from the land of Elm');

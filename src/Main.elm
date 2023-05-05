@@ -112,6 +112,7 @@ type Msg
     | AdjustTimeZone Time.Zone
     | ReceivedIpDetails (Result Http.Error IpInfo)
     | PageLoadRecorded (Result P.Error IpInfo)
+    | RecentLocations (Result P.Error (List PageLoadLog.Location))
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitRightDockLeftEdge SplitPane.Msg
@@ -546,7 +547,20 @@ update msg model =
             )
 
         PageLoadRecorded _ ->
-            ( model, Cmd.none )
+            ( model
+            , PageLoadLog.getRecentLocations
+                |> P.toCmd (jwt signedToken) RecentLocations
+            )
+
+        RecentLocations response ->
+            case response of
+                Err _ ->
+                    ( model, Cmd.none )
+
+                Ok locations ->
+                    ( model
+                    , MapPortController.showLocations locations
+                    )
 
         ReceivedIpDetails response ->
             let

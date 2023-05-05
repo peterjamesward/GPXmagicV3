@@ -1,29 +1,23 @@
-module PageLoadLog exposing (post)
+module PageLoadLog exposing (Location, getRecentLocations, post)
 
 import GeoCodeDecoders exposing (IpInfo, ipInfoDecoder)
+import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE
 import Postgrest
 import Postgrest.Client as P
 
 
+type alias Location =
+    { longitude : Float
+    , latitude : Float
+    }
 
-{-
-      -- We don't read the page logs here, we use IpInfo for writing.
-      type alias Login =
-          { userId : String
-          , familyName : String
-          , givenName : String
-          , loggedIn : String -- TODO: Timestamp
-          }
 
-   decodeLogin : Decoder Login
-   decodeLogin =
-       map4 Login
-           (field "userId" string)
-           (field "familyName" string)
-           (field "givenName" string)
-           (field "loggedIn" string)
--}
+locationDecoder : Decoder Location
+locationDecoder =
+    JD.map2 Location
+        (JD.field "longitude" JD.float)
+        (JD.field "latitude" JD.float)
 
 
 encodeLogin : IpInfo -> JE.Value
@@ -40,17 +34,22 @@ encodeLogin info =
         ]
 
 
-endpoint : P.Endpoint IpInfo
-endpoint =
+ipInfoEndpoint : P.Endpoint IpInfo
+ipInfoEndpoint =
     P.endpoint (Postgrest.base ++ "iplogs") ipInfoDecoder
 
 
+locationEndpoint : P.Endpoint Location
+locationEndpoint =
+    P.endpoint (Postgrest.base ++ "recent") locationDecoder
 
-{-
-   getMany : P.Request (List Login)
-   getMany =
-       P.getMany endpoint
--}
+
+getRecentLocations : P.Request (List Location)
+getRecentLocations =
+    P.getMany locationEndpoint
+
+
+
 {-
    asTable : List Login -> E.Element msg
    asTable logins =
@@ -72,4 +71,4 @@ endpoint =
 
 post : IpInfo -> P.Request IpInfo
 post =
-    P.postOne endpoint << encodeLogin
+    P.postOne ipInfoEndpoint << encodeLogin
