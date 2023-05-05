@@ -31,6 +31,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Http
 import Json.Decode as D
 import Json.Encode as E
+import JwtStuff exposing (signedToken)
 import LandUseDataOSM
 import LandUseDataTypes
 import Length
@@ -42,9 +43,11 @@ import Markdown
 import MyIP
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
+import PageLoadLog
 import PaneContext
 import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
+import Postgrest.Client as P exposing (jwt)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SceneBuilderMap
@@ -62,7 +65,6 @@ import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.DirectionChanges
 import Tools.DisplaySettings
-import Tools.Graph
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
@@ -109,6 +111,7 @@ type Msg
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | ReceivedIpDetails (Result Http.Error IpInfo)
+    | PageLoadRecorded (Result P.Error IpInfo)
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitRightDockLeftEdge SplitPane.Msg
@@ -542,6 +545,9 @@ update msg model =
             , Cmd.none
             )
 
+        PageLoadRecorded _ ->
+            ( model, Cmd.none )
+
         ReceivedIpDetails response ->
             let
                 ipInfo =
@@ -560,12 +566,24 @@ update msg model =
                             , centreLon = 0.0
                             , centreLat = 0.0
                             }
+
+                databasePost =
+                    case ipInfo of
+                        Just ip ->
+                            PageLoadLog.post ip
+                                |> P.toCmd (jwt signedToken) PageLoadRecorded
+
+                        Nothing ->
+                            Cmd.none
             in
             ( { model | ipInfo = ipInfo }
-            , MapPortController.createMap
-                ViewMap.defaultStyleUrl
-                mapInfoWithLocation
-                model.contentArea
+            , Cmd.batch
+                [ MapPortController.createMap
+                    ViewMap.defaultStyleUrl
+                    mapInfoWithLocation
+                    model.contentArea
+                , databasePost
+                ]
             )
 
         TryRemoteLoad ->

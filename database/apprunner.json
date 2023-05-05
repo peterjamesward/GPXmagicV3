@@ -1,0 +1,26 @@
+{
+  "ServiceName": "postgrest_server",
+  "SourceConfiguration": {
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "arn:aws:iam::008379646340:role/service-role/AppRunnerECRAccessRole"
+    },
+    "AutoDeploymentsEnabled": false,
+    "ImageRepository": {
+      "ImageIdentifier": "008379646340.dkr.ecr.eu-west-1.amazonaws.com/peterjamesward:postgrest",
+      "ImageConfiguration": {
+        "Port": "3000",
+        "RuntimeEnvironmentVariables":
+          {
+            "PGRST_DB_ANON_ROLE": "webuser",
+            "PGRST_DB_URI": "postgres://gpxmagic:gpxmagic==3.14159@gpxmagic.cluster-cl4auwgzmsvx.eu-west-1.rds.amazonaws.com:5432/peter",
+            "PGRST_JWT_SECRET": "hereismyspecial32charactersecret",
+            "PGRST_JWT_SECRET_IS_BASE64": "false",
+            "PGRST_SERVER_PORT": "3000",
+            "PGRST_LOG_LEVEL": "info"
+          }
+
+      },
+      "ImageRepositoryType": "ECR"
+    }
+  }
+}
