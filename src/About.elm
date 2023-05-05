@@ -3,9 +3,14 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.8 (d544fa93, 2023-04-29 09:24)
+# GPXmagic v3.11.9 (d544fa93, 2023-05-05 16:36)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.9
+
+Logs your IP details for the sole purpose of aggregate usage recording.
+(No personal details are stored, there is no GDPR implication.)
 
 ## 3.11.8
 

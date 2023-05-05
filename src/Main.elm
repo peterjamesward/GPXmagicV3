@@ -559,7 +559,8 @@ update msg model =
 
                 Ok locations ->
                     ( model
-                    , MapPortController.showLocations locations
+                    , Cmd.none
+                      --, MapPortController.showLocations locations
                     )
 
         ReceivedIpDetails response ->
