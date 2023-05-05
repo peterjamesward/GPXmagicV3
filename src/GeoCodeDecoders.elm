@@ -28,6 +28,7 @@ import Json.Decode as D exposing (Decoder)
 type alias IpInfo =
     { ip : String
     , country : String
+    , countryCode : String
     , region : String
     , city : String
     , zip : String
@@ -38,9 +39,10 @@ type alias IpInfo =
 
 ipInfoDecoder : Decoder IpInfo
 ipInfoDecoder =
-    D.map7 IpInfo
+    D.map8 IpInfo
         (D.at [ "query" ] D.string)
         (D.at [ "country" ] D.string)
+        (D.at [ "countryCode" ] D.string)
         (D.at [ "region" ] D.string)
         (D.at [ "city" ] D.string)
         (D.at [ "zip" ] D.string)

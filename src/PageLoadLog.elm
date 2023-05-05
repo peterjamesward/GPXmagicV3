@@ -30,7 +30,7 @@ encodeLogin : IpInfo -> JE.Value
 encodeLogin info =
     JE.object
         [ ( "country", JE.string info.country )
-        , ( "country_code", JE.string "" )
+        , ( "country_code", JE.string info.countryCode )
         , ( "region", JE.string info.region )
         , ( "city", JE.string info.city )
         , ( "zip", JE.string info.zip )
