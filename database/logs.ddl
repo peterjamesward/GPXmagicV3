@@ -35,7 +35,10 @@ CREATE TABLE iplogs (
     recorded timestamp without time zone DEFAULT now()
 );
 
+-- View for GPXmagic to get recent locations only.
 create view recent as select distinct latitude, longitude from iplogs where recorded + interval '7 days' > now();
+grant all on recent to webuser;
+
 
 -- Indices -------------------------------------------------------
 
