@@ -13,7 +13,7 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 Put logging in again with postgrest & RDS.
 
-Need `logins.elm` from elmBioPassport as model for using PostgREST.
+- Need to run remote postgrest image.
 
 ---
 

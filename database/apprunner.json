@@ -1,5 +1,5 @@
 {
-  "ServiceName": "postgrest_server",
+  "ServiceName": "gpxmagic_postgrest",
   "SourceConfiguration": {
     "AuthenticationConfiguration": {
       "AccessRoleArn": "arn:aws:iam::008379646340:role/service-role/AppRunnerECRAccessRole"
@@ -12,7 +12,7 @@
         "RuntimeEnvironmentVariables":
           {
             "PGRST_DB_ANON_ROLE": "webuser",
-            "PGRST_DB_URI": "postgres://gpxmagic:gpxmagic==3.14159@gpxmagic.cluster-cl4auwgzmsvx.eu-west-1.rds.amazonaws.com:5432/peter",
+            "PGRST_DB_URI": "postgres://gpxmagic:gpxmagic==3.14159@gpxmagic.cluster-cl4auwgzmsvx.eu-west-1.rds.amazonaws.com:5432/gpxmagic",
             "PGRST_JWT_SECRET": "hereismyspecial32charactersecret",
             "PGRST_JWT_SECRET_IS_BASE64": "false",
             "PGRST_SERVER_PORT": "3000",
