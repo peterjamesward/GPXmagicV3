@@ -125,6 +125,7 @@ type Msg
     | SetColourTheme SystemSettings.ColourTheme
     | Language I18NOptions.Location
     | ToggleLanguageEditor
+    | UserLocationsVisible Bool
     | RestoreDefaultToolLayout
     | WriteGpxFile
     | FilenameChange String
@@ -158,6 +159,10 @@ type alias Model =
 
     -- State machine for map synchronisation
     , mapState : MapState
+
+    -- User locations, to be visible on map.
+    , userLocations : List PageLoadLog.Location
+    , userLocationsVisible : Bool
 
     -- Track stuff now all in Tools.Tracks.
     --, activeTrack : Maybe String
@@ -271,6 +276,8 @@ init mflags origin navigationKey =
       , loadFromUrl = remoteUrl
       , mapState = MapDivNeeded
       , mapPointsDraggable = False
+      , userLocations = []
+      , userLocationsVisible = False
       , previews = Dict.empty
       , needsRendering = False
       , flythroughRunning = False
@@ -433,6 +440,23 @@ update msg model =
             , LocalStorage.storageSetItem "measure" <| E.bool newSettings.imperial
             )
 
+        UserLocationsVisible visible ->
+            ( { model | userLocationsVisible = visible }
+            , Cmd.batch
+                [ if visible then
+                    MapPortController.showLocations model.userLocations
+
+                  else
+                    MapPortController.showLocations []
+                , if visible && model.userLocations == [] then
+                    PageLoadLog.getRecentLocations
+                        |> P.toCmd (jwt signedToken) RecentLocations
+
+                  else
+                    Cmd.none
+                ]
+            )
+
         DisplayWelcome ->
             let
                 -- Try loading remote data now, after map may have initialised
@@ -549,18 +573,18 @@ update msg model =
         PageLoadRecorded _ ->
             ( model, Cmd.none )
 
-        --, PageLoadLog.getRecentLocations
-        --    |> P.toCmd (jwt signedToken) RecentLocations
-        --)
         RecentLocations response ->
             case response of
                 Err _ ->
                     ( model, Cmd.none )
 
                 Ok locations ->
-                    ( model
-                    , Cmd.none
-                      --, MapPortController.showLocations locations
+                    ( { model | userLocations = locations }
+                    , if model.userLocationsVisible then
+                        MapPortController.showLocations locations
+
+                      else
+                        MapPortController.showLocations []
                     )
 
         ReceivedIpDetails response ->
@@ -1533,16 +1557,24 @@ showOptionsMenu model =
                     else
                         I18N.text location "main" "imperial"
                 }
+
+        languageEditor =
+            Input.button
+                subtleToolStyles
+                { label = text "Show/Hide language file editor"
+                , onPress = Just ToggleLanguageEditor
+                }
+
+        showUserLocations =
+            Input.checkbox
+                subtleToolStyles
+                { label = Input.labelRight [] <| text "Show user locations"
+                , onChange = UserLocationsVisible
+                , icon = Input.defaultCheckbox
+                , checked = model.userLocationsVisible
+                }
     in
     if model.isPopupOpen then
-        let
-            languageEditor =
-                Input.button
-                    subtleToolStyles
-                    { label = text "Show/Hide language file editor"
-                    , onPress = Just ToggleLanguageEditor
-                    }
-        in
         column (spacing 4 :: subtleToolStyles)
             [ row (alignRight :: width fill :: subtleToolStyles)
                 [ colourBlock SystemSettings.LightTheme
@@ -1558,6 +1590,7 @@ showOptionsMenu model =
             , row [ spaceEvenly, width fill ] <|
                 List.map chooseLanguage I18N.availableI18N
             , languageEditor
+            , showUserLocations
             ]
 
     else

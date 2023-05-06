@@ -147,7 +147,7 @@ function mapMessageHandler(msg) {
             break;
 
         case 'Locations':
-            if (!isMapCreated) {
+            if (isMapCreated) {
                 showLocations(msg.locations);
             }
             break;
@@ -164,7 +164,7 @@ function mapMessageHandler(msg) {
             if (isMapCreated) {
                 addLineToMap(msg.label, msg.data, msg.points);
                 setClickMode(msg.label, false, msg.points);
-                clearLocations();
+//                clearLocations();
             }
             break;
 
@@ -420,6 +420,9 @@ function updateRoute() {
 var markedPlaces = [];
 
 function showLocations(locations) {
+    // Use this function to remove from display by passing empty list.
+    clearLocations();
+
     // Locations should be a list of "LngLat" pairs.
     locations.forEach ( location => {
         // Create a new marker, set the longitude and latitude, and add it to the map.
