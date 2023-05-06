@@ -9,6 +9,8 @@ BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers thi
 
 BUG: Map style menu has no background and can be invisible against satellite view.
 
+BUG: Map projection not restored correctly on reload.
+
 --- 
 
 # WIP
