@@ -3,9 +3,14 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.9 (d7408d57, 2023-05-05 16:36)
+# GPXmagic v3.11.10 (d7408d57, 2023-05-05 16:36)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.10
+
+New option in global settings (the gear wheel at top left) will show on the map the approximate
+locations of GPXmagis users in the last 7 days (unless they use https).
 
 ## 3.11.9
 
