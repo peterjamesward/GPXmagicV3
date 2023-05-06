@@ -50,14 +50,7 @@ type alias IpInfoReceived =
 
 lonLat : IpInfoReceived -> Maybe ( Float, Float )
 lonLat info =
-    let
-        latLon =
-            info.loc |> String.split "," |> List.map String.toFloat
-
-        _ =
-            Debug.log "latlon" latLon
-    in
-    case latLon of
+    case info.loc |> String.split "," |> List.map String.toFloat of
         [ Just lat, Just lon ] ->
             Just ( lon, lat )
 
