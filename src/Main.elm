@@ -23,7 +23,7 @@ import File.Select as Select
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
-import GeoCodeDecoders exposing (IpInfo)
+import GeoCodeDecoders exposing (IpInfoReceived, lonLat)
 import GpxParser
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
@@ -40,6 +40,7 @@ import LocalStorage
 import MapPortController
 import MapTypes exposing (MapState(..))
 import Markdown
+import Maybe.Extra
 import MyIP
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
@@ -110,8 +111,8 @@ type Msg
     | ToggleRGTOptions
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
-    | ReceivedIpDetails (Result Http.Error IpInfo)
-    | PageLoadRecorded (Result P.Error IpInfo)
+    | ReceivedIpDetails (Result Http.Error IpInfoReceived)
+    | PageLoadRecorded (Result P.Error IpInfoReceived)
     | RecentLocations (Result P.Error (List PageLoadLog.Location))
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
@@ -150,7 +151,7 @@ type Msg
 type alias Model =
     { time : Time.Posix
     , zone : Time.Zone
-    , ipInfo : Maybe IpInfo
+    , ipInfo : Maybe IpInfoReceived
     , stravaAuthentication : O.Model
     , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
@@ -593,11 +594,11 @@ update msg model =
                     MyIP.processIpInfo response
 
                 mapInfoWithLocation =
-                    case ipInfo of
-                        Just ip ->
+                    case Maybe.map lonLat ipInfo |> Maybe.Extra.join of
+                        Just ( lon, lat ) ->
                             { mapZoom = 10.0
-                            , centreLon = ip.longitude
-                            , centreLat = ip.latitude
+                            , centreLon = lon
+                            , centreLat = lat
                             }
 
                         Nothing ->

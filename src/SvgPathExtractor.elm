@@ -15,12 +15,13 @@ import Element.Input as Input
 import File exposing (File)
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
-import GeoCodeDecoders
+import GeoCodeDecoders exposing (lonLat)
 import GpxParser exposing (asRegex)
 import Length exposing (Meters, inMeters, meters)
 import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
+import Maybe.Extra
 import Path.LowLevel exposing (DrawTo(..), Mode(..), MoveTo(..), SubPath)
 import Path.LowLevel.Parser as PathParser
 import Plane3d
@@ -35,7 +36,7 @@ import XmlParser exposing (Node(..))
 
 type alias Options =
     { svgFilename : String
-    , ipInfo : Maybe GeoCodeDecoders.IpInfo
+    , ipInfo : Maybe GeoCodeDecoders.IpInfoReceived
     }
 
 
@@ -47,7 +48,7 @@ defaultOptions =
 
 
 type Msg
-    = ReadFile (Maybe GeoCodeDecoders.IpInfo)
+    = ReadFile (Maybe GeoCodeDecoders.IpInfoReceived)
     | FileSelected File
     | FileLoaded String
 
@@ -185,12 +186,10 @@ processXML options content =
             XmlParser.parse content
 
         ( lon, lat ) =
-            case options.ipInfo of
-                Just ipInfo ->
-                    ( ipInfo.longitude, ipInfo.latitude )
-
-                Nothing ->
-                    ( 0, 52 )
+            options.ipInfo
+                |> Maybe.map lonLat
+                |> Maybe.Extra.join
+                |> Maybe.withDefault ( 0, 52 )
     in
     case xmlParse of
         Ok { root } ->
@@ -278,7 +277,7 @@ getAttribute attribute node =
             Nothing
 
 
-view : (Msg -> msg) -> Maybe GeoCodeDecoders.IpInfo -> Element msg
+view : (Msg -> msg) -> Maybe GeoCodeDecoders.IpInfoReceived -> Element msg
 view wrap ipInfo =
     Input.button
         [ padding 5

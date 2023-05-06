@@ -1,6 +1,6 @@
 module PageLoadLog exposing (Location, getRecentLocations, post)
 
-import GeoCodeDecoders exposing (IpInfo, ipInfoDecoder)
+import GeoCodeDecoders exposing (IpInfoReceived, ipInfoReceivedDecoder, lonLat)
 import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE
 import Postgrest
@@ -20,23 +20,28 @@ locationDecoder =
         (JD.field "latitude" JD.float)
 
 
-encodeLogin : IpInfo -> JE.Value
+encodeLogin : IpInfoReceived -> JE.Value
 encodeLogin info =
-    JE.object
-        [ ( "country", JE.string info.country )
-        , ( "country_code", JE.string info.countryCode )
-        , ( "region", JE.string info.region )
-        , ( "city", JE.string info.city )
-        , ( "zip", JE.string info.zip )
-        , ( "ip", JE.string info.ip )
-        , ( "latitude", JE.float info.latitude )
-        , ( "longitude", JE.float info.longitude )
-        ]
+    case lonLat info of
+        Just ( longitude, latitude ) ->
+            JE.object
+                [ ( "country", JE.string info.countryCode )
+                , ( "country_code", JE.string info.countryCode )
+                , ( "region", JE.string info.region )
+                , ( "city", JE.string info.city )
+                , ( "zip", JE.string info.zip )
+                , ( "ip", JE.string info.ip )
+                , ( "latitude", JE.float latitude )
+                , ( "longitude", JE.float longitude )
+                ]
+
+        _ ->
+            JE.null
 
 
-ipInfoEndpoint : P.Endpoint IpInfo
+ipInfoEndpoint : P.Endpoint IpInfoReceived
 ipInfoEndpoint =
-    P.endpoint (Postgrest.base ++ "iplogs") ipInfoDecoder
+    P.endpoint (Postgrest.base ++ "iplogs") ipInfoReceivedDecoder
 
 
 locationEndpoint : P.Endpoint Location
@@ -69,6 +74,6 @@ getRecentLocations =
 -}
 
 
-post : IpInfo -> P.Request IpInfo
+post : IpInfoReceived -> P.Request IpInfoReceived
 post =
     P.postOne ipInfoEndpoint << encodeLogin

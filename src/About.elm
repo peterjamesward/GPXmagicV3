@@ -3,9 +3,13 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.10 (360fb735, 2023-05-06 12:19)
+# GPXmagic v3.11.11 (360fb735, 2023-05-06 14:22)
 
 **GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+
+## 3.11.11
+
+Changed IP info provide to ip-info.io, which seems to support https for free, within limits.
 
 ## 3.11.10
 
