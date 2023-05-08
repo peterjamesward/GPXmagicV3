@@ -3,9 +3,13 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.11.11 (72a1181a, 2023-05-06 16:45)
+# GPXmagic v3.11.12 (72a1181a, 2023-05-08 14:30)
 
-**GPXmagic V3 works best with Chrome (and some derivatives), pretty good on Safari.**
+**GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
+
+## 3.11.12
+
+Fixed bug in Route Builder that was causing too many "Key Places". It's better, not perfect.
 
 ## 3.11.11
 

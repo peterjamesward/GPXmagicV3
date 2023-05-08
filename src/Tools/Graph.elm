@@ -754,6 +754,16 @@ snapToClusters tolerance graph =
 snapTrackToClusters : List Cluster -> TrackLoaded msg -> TrackLoaded msg
 snapTrackToClusters clusters updatingTrack =
     let
+        -- Modified track may have resulted in nearby points being moved to centroid and duplicated.
+        -- Here is quick test to see if that is happening, by unrolling and de-duping the new track.
+        removeAnyDuplicatedPointsAfterClustering : PeteTree -> PeteTree
+        removeAnyDuplicatedPointsAfterClustering inputTree =
+            inputTree
+                |> DomainModel.getAllGPXPointsInNaturalOrder
+                |> UtilsForViews.deDupe (==)
+                |> DomainModel.treeFromSourcesWithExistingReference updatingTrack.referenceLonLat
+                |> Maybe.withDefault inputTree
+
         treeWithCentroidsApplied : PeteTree
         treeWithCentroidsApplied =
             let
@@ -796,7 +806,7 @@ snapTrackToClusters clusters updatingTrack =
                 updatingTrack.trackTree
                 clusters
     in
-    { updatingTrack | trackTree = treeWithCentroidsApplied }
+    { updatingTrack | trackTree = removeAnyDuplicatedPointsAfterClustering treeWithCentroidsApplied }
 
 
 type alias EdgeFinder msg =
