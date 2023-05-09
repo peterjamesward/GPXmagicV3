@@ -1971,6 +1971,47 @@ viewTool settings msgWrapper isTrack options toolEntry =
         toolEntry
 
 
+applySettings :
+    SystemSettings
+    -> ToolEntry
+    -> (ToolMsg -> msg)
+    -> List (Attribute msg)
+applySettings settings toolEntry msgWrapper =
+    if settings.v2Skin then
+        [ spacing 2
+        , padding 4
+        , width fill
+        , Font.center
+        , Font.size 14
+        , Border.widthEach { left = 2, right = 2, top = 2, bottom = 0 }
+        , Border.roundEach { topLeft = 5, bottomLeft = 0, topRight = 5, bottomRight = 0 }
+        ]
+
+    else
+        [ width fill
+        , alignTop
+        , htmlAttribute (style "vertical-align" "top")
+        , spacing 0
+        , Border.width 4
+        , Border.color toolEntry.tabColour
+        , Border.rounded 8
+        , Background.color toolEntry.tabColour
+        , inFront <|
+            column
+                [ alignRight
+                , moveDown 26
+                , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute (style "z-index" "20")
+                ]
+                [ showDockOptions settings msgWrapper toolEntry
+                , showColourOptions msgWrapper toolEntry
+                ]
+        ]
+
+
 viewToolLazy :
     SystemSettings
     -> (ToolMsg -> msg)
@@ -1981,28 +2022,7 @@ viewToolLazy :
 viewToolLazy settings msgWrapper isTrack options toolEntry =
     el [ padding 2, width fill, alignTop ] <|
         column
-            [ width fill
-            , alignTop
-            , htmlAttribute (style "vertical-align" "top")
-            , spacing 0
-            , Border.width 4
-            , Border.color toolEntry.tabColour
-            , Border.rounded 8
-            , Background.color toolEntry.tabColour
-            , inFront <|
-                column
-                    [ alignRight
-                    , moveDown 26
-                    , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToolNoOp >> msgWrapper)
-                    , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ToolNoOp >> msgWrapper)
-                    , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ToolNoOp >> msgWrapper)
-                    , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
-                    , htmlAttribute (style "z-index" "20")
-                    ]
-                    [ showDockOptions settings msgWrapper toolEntry
-                    , showColourOptions msgWrapper toolEntry
-                    ]
-            ]
+            (applySettings settings toolEntry msgWrapper)
             [ row
                 [ width fill
                 , spacing 8

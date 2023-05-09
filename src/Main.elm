@@ -1162,6 +1162,39 @@ bestTrackName model =
 
 view : Model -> Browser.Document Msg
 view model =
+    if model.systemSettings.v2Skin then
+        viewV2Skin model
+
+    else
+        viewV3Skin model
+
+
+viewV2Skin : Model -> Browser.Document Msg
+viewV2Skin model =
+    { title = composeTitle model
+    , body =
+        [ layout
+            commonLayoutStyles
+          <|
+            column
+                [ width fill, height fill ]
+                [ topLoadingBar model
+                , html <|
+                    div
+                        [ style "width" "100%", style "height" "100%" ]
+                        [ SplitPane.view
+                            rightDockConfig
+                            (centralAreaView model)
+                            (rightDockView model)
+                            model.rightDockLeftEdge
+                        ]
+                ]
+        ]
+    }
+
+
+viewV3Skin : Model -> Browser.Document Msg
+viewV3Skin model =
     { title = composeTitle model
     , body =
         [ layout
@@ -1309,17 +1342,8 @@ topLoadingBar model =
                             , htmlAttribute (style "z-index" "20")
                             , padding 5
                             , spacing 5
-
-                            --, Background.color FlatColors.ChinesePalette.antiFlashWhite
-                            --, Border.color FlatColors.ChinesePalette.peace
-                            --, Border.rounded 4
-                            --, Border.width 2
                             ]
-                            [ SvgPathExtractor.view SvgMsg model.ipInfo
-
-                            -- Can't have "open" URL field, as server must have CORS support.
-                            --, loadFromUrl
-                            ]
+                            [ SvgPathExtractor.view SvgMsg model.ipInfo ]
 
                     else
                         none
@@ -1430,7 +1454,11 @@ topLoadingBar model =
             Nothing ->
                 none
         , saveButton
-        , clearButton
+        , if model.systemSettings.v2Skin then
+            none
+
+          else
+            clearButton
         , row [ alignRight, spacing 5 ]
             [ Tools.OneClickQuickFix.oneClickQuickFixButton
                 model.systemSettings.location
@@ -1576,23 +1604,34 @@ showOptionsMenu model =
                 }
     in
     if model.isPopupOpen then
-        column (spacing 4 :: subtleToolStyles)
-            [ row (alignRight :: width fill :: subtleToolStyles)
-                [ colourBlock SystemSettings.LightTheme
-                , colourBlock SystemSettings.DarkTheme
+        if model.systemSettings.v2Skin then
+            column (spacing 4 :: subtleToolStyles)
+                [ el (alignRight :: width fill :: subtleToolStyles) <|
+                    Input.button [ alignRight ]
+                        { onPress = Just <| RestoreDefaultToolLayout
+                        , label = I18N.text model.systemSettings.location "main" "default"
+                        }
+                , showUserLocations
                 ]
-            , el (alignRight :: width fill :: subtleToolStyles) <|
-                Input.button [ alignRight ]
-                    { onPress = Just <| RestoreDefaultToolLayout
-                    , label = I18N.text model.systemSettings.location "main" "default"
-                    }
-            , el (alignRight :: width fill :: subtleToolStyles) <|
-                imperialToggleMenuEntry model.systemSettings.location
-            , row [ spaceEvenly, width fill ] <|
-                List.map chooseLanguage I18N.availableI18N
-            , languageEditor
-            , showUserLocations
-            ]
+
+        else
+            column (spacing 4 :: subtleToolStyles)
+                [ row (alignRight :: width fill :: subtleToolStyles)
+                    [ colourBlock SystemSettings.LightTheme
+                    , colourBlock SystemSettings.DarkTheme
+                    ]
+                , el (alignRight :: width fill :: subtleToolStyles) <|
+                    Input.button [ alignRight ]
+                        { onPress = Just <| RestoreDefaultToolLayout
+                        , label = I18N.text model.systemSettings.location "main" "default"
+                        }
+                , el (alignRight :: width fill :: subtleToolStyles) <|
+                    imperialToggleMenuEntry model.systemSettings.location
+                , row [ spaceEvenly, width fill ] <|
+                    List.map chooseLanguage I18N.availableI18N
+                , languageEditor
+                , showUserLocations
+                ]
 
     else
         none

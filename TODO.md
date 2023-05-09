@@ -11,19 +11,20 @@ BUG: Map style menu has no background and can be invisible against satellite vie
 
 BUG: Map projection not restored correctly on reload.
 
+BUG: Route Builder previews not hiding when tool closed.
+
 --- 
 
 # WIP
 
-BUG: Route Builder previews not hiding when tool closed.
+## 2.9.5
+
+Is it possible to make 3.x look like 2.9.5, so we have the same engine?
+> Need skin options for layout in main, tools controller, pane layout.
 
 ---
 
 # BACKLOG
-
-## 2.9.5
-
-Is it possible to make 3.x look like 2.9.5, so we have the same engine?
 
 ## Snap to Roads with TomTom
 
