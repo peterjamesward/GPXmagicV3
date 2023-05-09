@@ -1356,7 +1356,7 @@ topLoadingBar model =
         loadGpxButton =
             if model.systemSettings.v2Skin then
                 button
-                    ViewPureStyles.v2ButtonStyles
+                    (Element.height (Element.px 40) :: ViewPureStyles.v2ButtonStyles)
                     { onPress = Just GpxRequested
                     , label = localHelper "loadgpx"
                     }
@@ -1369,22 +1369,28 @@ topLoadingBar model =
                     }
 
         clearButton =
-            button
-                [ padding 5
-                , Border.color FlatColors.FlatUIPalette.peterRiver
-                , Border.width 2
-                , Background.color <| Element.rgb255 255 0 0
-                , Font.color <| Element.rgb255 255 255 255
-                , Border.rounded 5
-                ]
-                { onPress = Just ClearLoadedTracks
-                , label = localHelper "clear"
-                }
+            if model.systemSettings.v2Skin then
+                none
+
+            else
+                button
+                    [ padding 5
+                    , height <| Element.px 40
+                    , Border.color FlatColors.FlatUIPalette.peterRiver
+                    , Border.width 2
+                    , Background.color <| Element.rgb255 255 0 0
+                    , Font.color <| Element.rgb255 255 255 255
+                    , Border.rounded 5
+                    ]
+                    { onPress = Just ClearLoadedTracks
+                    , label = localHelper "clear"
+                    }
 
         saveButton =
-            row [ spacing 0, padding 0 ]
+            row [ spacing 0, padding 0, height <| Element.px 40 ]
                 [ button
                     [ padding 5
+                    , height fill
                     , Background.color FlatColors.AussiePalette.juneBud
                     , Border.color FlatColors.FlatUIPalette.peterRiver
                     , Font.color (CommonToolStyles.themeForeground SystemSettings.LightTheme)
@@ -1396,6 +1402,7 @@ topLoadingBar model =
                     }
                 , button
                     [ padding 5
+                    , height fill
                     , Background.color FlatColors.AussiePalette.juneBud
                     , Border.color FlatColors.FlatUIPalette.peterRiver
                     , Font.color (CommonToolStyles.themeForeground SystemSettings.LightTheme)
@@ -1475,7 +1482,7 @@ buyMeACoffeeButton =
         ]
         { url = "https://www.buymeacoffee.com/Peterward"
         , label =
-            image [ height (Element.px 30), width (Element.px 130) ]
+            image [ height (Element.px 40), width (Element.px 150) ]
                 { src = "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
                 , description = "Buy Me A Coffee"
                 }

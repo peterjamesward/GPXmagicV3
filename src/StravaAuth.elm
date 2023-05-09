@@ -306,7 +306,6 @@ stravaButton model msgWrapper =
                 , Font.size 12
                 , Font.family [ Font.typeface "Helvetica", Font.sansSerif ]
                 , padding 2
-                , width (maximum 150 <| fill)
                 ]
                 [ paragraph []
                     [ text "Connected to Strava as "
@@ -315,23 +314,17 @@ stravaButton model msgWrapper =
                 ]
 
         _ ->
-            let
-                styles =
-                    [ height <| px 24, moveUp 5 ]
-
-                imgUrl =
-                    Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
-            in
             button
-                styles
+                []
                 { onPress = Just <| msgWrapper SignInRequested
                 , label =
                     image
                         [ mouseOver [ alpha 0.7 ]
                         , width <| px 160
+                        , height <| px 40
                         , Border.rounded 5
                         ]
-                        { src = imgUrl
+                        { src = Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
                         , description = "Connect to Strava"
                         }
                 }

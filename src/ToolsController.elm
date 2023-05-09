@@ -2005,6 +2005,7 @@ applySettings settings toolEntry msgWrapper =
         , htmlAttribute (style "vertical-align" "top")
         , spacing 0
         , popup
+        , Border.color FlatColors.FlatUIPalette.asbestos
         ]
 
     else
@@ -2029,30 +2030,43 @@ viewToolLazy :
     -> ToolEntry
     -> Element msg
 viewToolLazy settings msgWrapper isTrack options toolEntry =
-    --TODO: Video link and popup only visible when tool open (V2).
-    --TODO: V2: Essentials is frameless
+    --TODO: Popup only visible when tool open (V2).
     --TODO: V2: Modified Tool Summary show/hide only.
+    --TODO: Rename "Essentials" to "Markers"
+    --TODO: "Restore defaults" button in Tool Summary (not global options).
+    --TODO: Possibly, track slider in Essentials as per v2.
     el [ padding 2, width fill, alignTop ] <|
         column
             (applySettings settings toolEntry msgWrapper)
             [ row
                 (if settings.v2Skin then
-                    if toolEntry.state == Expanded then
-                        [ width fill
-                        , spacing 8
-                        , padding 7
-                        , Font.color FlatColors.FlatUIPalette.midnightBlue
-                        , Background.color toolEntry.tabColour
-                        ]
+                    case toolEntry.state of
+                        Expanded ->
+                            [ width fill
+                            , spacing 8
+                            , padding 7
+                            , Font.color FlatColors.FlatUIPalette.midnightBlue
+                            , Background.color toolEntry.tabColour
+                            , Border.widthEach { left = 2, right = 2, top = 2, bottom = 0 }
+                            , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
+                            , Border.color FlatColors.FlatUIPalette.asbestos
+                            ]
 
-                    else
-                        [ width fill
-                        , spacing 8
-                        , padding 7
-                        , Background.color FlatColors.ChinesePalette.grisaille
-                        , Font.color toolEntry.tabColour
-                        , Border.roundEach { topLeft = 5, topRight = 0, bottomLeft = 5, bottomRight = 0 }
-                        ]
+                        AlwaysOpen ->
+                            [ width fill
+                            , height <| px 0
+                            ]
+
+                        _ ->
+                            [ width fill
+                            , spacing 8
+                            , padding 7
+                            , Background.color FlatColors.ChinesePalette.grisaille
+                            , Font.color toolEntry.tabColour
+                            , Border.widthEach { left = 2, right = 0, top = 2, bottom = 0 }
+                            , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
+                            , Border.color FlatColors.FlatUIPalette.concrete
+                            ]
 
                  else
                     [ width fill
@@ -2062,8 +2076,8 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                     , Font.color toolEntry.textColour
                     ]
                 )
-                [ case toolEntry.video of
-                    Just video ->
+                [ case ( toolEntry.video, toolEntry.state ) of
+                    ( Just video, Expanded ) ->
                         newTabLink
                             [ alignLeft
                             , tooltip below (myTooltip "Watch the video")
@@ -2077,7 +2091,7 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                             , label = useIconWithSize 18 FeatherIcons.youtube
                             }
 
-                    Nothing ->
+                    _ ->
                         none
                 , Input.button
                     [ centerX ]
@@ -2113,17 +2127,21 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                                 , I18N.text settings.location toolEntry.toolId "label"
                                 ]
                     }
-                , Input.button
-                    [ alignRight
-                    , htmlAttribute <|
-                        Mouse.onWithOptions
-                            "click"
-                            stopProp
-                            (always << msgWrapper <| ToolPopupToggle toolEntry.toolId)
-                    ]
-                    { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolId
-                    , label = useIconWithSize 14 FeatherIcons.settings
-                    }
+                , if toolEntry.state == Expanded then
+                    Input.button
+                        [ alignRight
+                        , htmlAttribute <|
+                            Mouse.onWithOptions
+                                "click"
+                                stopProp
+                                (always << msgWrapper <| ToolPopupToggle toolEntry.toolId)
+                        ]
+                        { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolId
+                        , label = useIconWithSize 14 FeatherIcons.settings
+                        }
+
+                  else
+                    none
                 ]
             , el [ Border.rounded 8, width fill, height fill ] <|
                 if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then

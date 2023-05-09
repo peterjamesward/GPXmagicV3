@@ -85,7 +85,7 @@ commonLayoutStyles =
 
 
 v2ButtonStyles =
-    [ padding 5
+    [ padding 10
     , Border.width 2
     , Border.rounded 10
     , Border.color FlatColors.FlatUIPalette.belizeHole
