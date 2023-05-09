@@ -23,6 +23,7 @@ module ViewPureStyles exposing
     , ukraineYellow
     , useIcon
     , useIconWithSize
+    , v2ButtonStyles
     , wideSliderStylesWithWidth
     )
 
@@ -37,6 +38,7 @@ import Element.Input as Input exposing (Thumb, thumb)
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
+import FlatColors.FlatUIPalette
 import Html.Attributes exposing (style)
 import Html.Events
 import Html.Events.Extra.Mouse as Mouse
@@ -79,6 +81,17 @@ commonLayoutStyles =
         [ Font.typeface "Open Sans"
         , Font.sansSerif
         ]
+    ]
+
+
+v2ButtonStyles =
+    [ padding 5
+    , Border.width 2
+    , Border.rounded 10
+    , Border.color FlatColors.FlatUIPalette.belizeHole
+    , Background.color FlatColors.FlatUIPalette.belizeHole
+    , Font.color white
+    , Font.size 14
     ]
 
 

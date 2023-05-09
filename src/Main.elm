@@ -1354,15 +1354,23 @@ topLoadingBar model =
                 }
 
         loadGpxButton =
-            button
-                [ padding 5
-                , Border.color FlatColors.FlatUIPalette.peterRiver
-                , Border.width 2
-                , Border.rounded 5
-                ]
-                { onPress = Just GpxRequested
-                , label = localHelper "loadgpx"
-                }
+            if model.systemSettings.v2Skin then
+                button
+                    ViewPureStyles.v2ButtonStyles
+                    { onPress = Just GpxRequested
+                    , label = localHelper "loadgpx"
+                    }
+
+            else
+                button
+                    [ padding 5
+                    , Border.color FlatColors.FlatUIPalette.peterRiver
+                    , Border.width 2
+                    , Border.rounded 5
+                    ]
+                    { onPress = Just GpxRequested
+                    , label = localHelper "loadgpx"
+                    }
 
         clearButton =
             button
@@ -1454,11 +1462,7 @@ topLoadingBar model =
             Nothing ->
                 none
         , saveButton
-        , if model.systemSettings.v2Skin then
-            none
-
-          else
-            clearButton
+        , clearButton
         , row [ alignRight, spacing 5 ]
             [ Tools.OneClickQuickFix.oneClickQuickFixButton
                 model.systemSettings.location

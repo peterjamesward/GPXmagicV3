@@ -37,6 +37,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Lazy
 import FeatherIcons
+import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
@@ -1977,14 +1978,33 @@ applySettings :
     -> (ToolMsg -> msg)
     -> List (Attribute msg)
 applySettings settings toolEntry msgWrapper =
+    let
+        popup =
+            inFront <|
+                column
+                    [ alignRight
+                    , moveDown 26
+                    , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute (style "z-index" "20")
+                    ]
+                <|
+                    if settings.v2Skin then
+                        [ showColourOptions msgWrapper toolEntry ]
+
+                    else
+                        [ showDockOptions settings msgWrapper toolEntry
+                        , showColourOptions msgWrapper toolEntry
+                        ]
+    in
     if settings.v2Skin then
-        [ spacing 2
-        , padding 4
-        , width fill
-        , Font.center
-        , Font.size 14
-        , Border.widthEach { left = 2, right = 2, top = 2, bottom = 0 }
-        , Border.roundEach { topLeft = 5, bottomLeft = 0, topRight = 5, bottomRight = 0 }
+        [ width fill
+        , alignTop
+        , htmlAttribute (style "vertical-align" "top")
+        , spacing 0
+        , popup
         ]
 
     else
@@ -1996,19 +2016,8 @@ applySettings settings toolEntry msgWrapper =
         , Border.color toolEntry.tabColour
         , Border.rounded 8
         , Background.color toolEntry.tabColour
-        , inFront <|
-            column
-                [ alignRight
-                , moveDown 26
-                , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute (style "z-index" "20")
-                ]
-                [ showDockOptions settings msgWrapper toolEntry
-                , showColourOptions msgWrapper toolEntry
-                ]
+        , Font.color toolEntry.textColour
+        , popup
         ]
 
 
@@ -2024,12 +2033,32 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
         column
             (applySettings settings toolEntry msgWrapper)
             [ row
-                [ width fill
-                , spacing 8
-                , height <| px 24
-                , Background.color toolEntry.tabColour
-                , Font.color toolEntry.textColour
-                ]
+                (if settings.v2Skin then
+                    if toolEntry.state == Expanded then
+                        [ width fill
+                        , spacing 8
+                        , padding 4
+                        , Font.color FlatColors.FlatUIPalette.midnightBlue
+                        , Background.color toolEntry.tabColour
+                        ]
+
+                    else
+                        [ width fill
+                        , spacing 8
+                        , padding 4
+                        , Background.color FlatColors.ChinesePalette.grisaille
+                        , Font.color toolEntry.tabColour
+                        , Border.roundEach { topLeft = 5, topRight = 0, bottomLeft = 5, bottomRight = 0 }
+                        ]
+
+                 else
+                    [ width fill
+                    , spacing 8
+                    , height <| px 24
+                    , Background.color toolEntry.tabColour
+                    , Font.color toolEntry.textColour
+                    ]
+                )
                 [ case toolEntry.video of
                     Just video ->
                         newTabLink
@@ -2055,27 +2084,31 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                                 ToolStateToggle toolEntry.toolId <|
                                     nextToolState toolEntry.state
                     , label =
-                        row [ alignLeft, spacing 10 ]
-                            [ case toolEntry.state of
-                                Expanded ->
-                                    useIconWithSize 16 <| FeatherIcons.chevronsUp
+                        if settings.v2Skin then
+                            I18N.text settings.location toolEntry.toolId "label"
 
-                                Contracted ->
-                                    useIconWithSize 16 <| FeatherIcons.chevronsDown
+                        else
+                            row [ alignLeft, spacing 10 ]
+                                [ case toolEntry.state of
+                                    Expanded ->
+                                        useIconWithSize 16 <| FeatherIcons.chevronsUp
 
-                                Disabled ->
-                                    useIconWithSize 16 <| FeatherIcons.slash
+                                    Contracted ->
+                                        useIconWithSize 16 <| FeatherIcons.chevronsDown
 
-                                AlwaysOpen ->
-                                    none
+                                    Disabled ->
+                                        useIconWithSize 16 <| FeatherIcons.slash
 
-                                SettingsOpen ->
-                                    useIconWithSize 16 <| FeatherIcons.chevronsUp
+                                    AlwaysOpen ->
+                                        none
 
-                                SettingsClosed ->
-                                    useIconWithSize 16 <| FeatherIcons.chevronsDown
-                            , I18N.text settings.location toolEntry.toolId "label"
-                            ]
+                                    SettingsOpen ->
+                                        useIconWithSize 16 <| FeatherIcons.chevronsUp
+
+                                    SettingsClosed ->
+                                        useIconWithSize 16 <| FeatherIcons.chevronsDown
+                                , I18N.text settings.location toolEntry.toolId "label"
+                                ]
                     }
                 , Input.button
                     [ alignRight
