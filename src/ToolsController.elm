@@ -2029,6 +2029,9 @@ viewToolLazy :
     -> ToolEntry
     -> Element msg
 viewToolLazy settings msgWrapper isTrack options toolEntry =
+    --TODO: Video link and popup only visible when tool open (V2).
+    --TODO: V2: Essentials is frameless
+    --TODO: V2: Modified Tool Summary show/hide only.
     el [ padding 2, width fill, alignTop ] <|
         column
             (applySettings settings toolEntry msgWrapper)
@@ -2037,7 +2040,7 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                     if toolEntry.state == Expanded then
                         [ width fill
                         , spacing 8
-                        , padding 4
+                        , padding 7
                         , Font.color FlatColors.FlatUIPalette.midnightBlue
                         , Background.color toolEntry.tabColour
                         ]
@@ -2045,7 +2048,7 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                     else
                         [ width fill
                         , spacing 8
-                        , padding 4
+                        , padding 7
                         , Background.color FlatColors.ChinesePalette.grisaille
                         , Font.color toolEntry.tabColour
                         , Border.roundEach { topLeft = 5, topRight = 0, bottomLeft = 5, bottomRight = 0 }

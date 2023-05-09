@@ -1363,11 +1363,7 @@ topLoadingBar model =
 
             else
                 button
-                    [ padding 5
-                    , Border.color FlatColors.FlatUIPalette.peterRiver
-                    , Border.width 2
-                    , Border.rounded 5
-                    ]
+                    neatToolsBorder
                     { onPress = Just GpxRequested
                     , label = localHelper "loadgpx"
                     }
@@ -1443,6 +1439,8 @@ topLoadingBar model =
                ]
         )
         [ globalOptions model
+        , clearButton
+        , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
         , loadGpxButton
         , moreOptionsButton
         , case Tracks.getActiveTrack model.toolOptions.tracksOptions of
@@ -1462,15 +1460,11 @@ topLoadingBar model =
             Nothing ->
                 none
         , saveButton
-        , clearButton
-        , row [ alignRight, spacing 5 ]
-            [ Tools.OneClickQuickFix.oneClickQuickFixButton
-                model.systemSettings.location
-                OneClickMsg
-                (Tracks.getActiveTrack model.toolOptions.tracksOptions)
-            , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
-            , buyMeACoffeeButton
-            ]
+        , Tools.OneClickQuickFix.oneClickQuickFixButton
+            model.systemSettings.location
+            OneClickMsg
+            (Tracks.getActiveTrack model.toolOptions.tracksOptions)
+        , buyMeACoffeeButton
         ]
 
 
