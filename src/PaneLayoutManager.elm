@@ -124,17 +124,20 @@ type Msg
 
 paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
 paneLayoutMenu location msgWrapper options =
-    Input.button
-        [ padding 5
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , Border.color FlatColors.FlatUIPalette.peterRiver
-        , Border.width 2
-        , inFront <| showOptionsMenu location msgWrapper options
-        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always TogglePopup >> msgWrapper)
-        ]
-        { onPress = Just <| msgWrapper TogglePopup
-        , label = I18N.text location "panes" "layout"
-        }
+    el
+        [ alignRight, alignTop ]
+    <|
+        Input.button
+            [ padding 5
+            , Background.color FlatColors.ChinesePalette.antiFlashWhite
+            , Border.color FlatColors.FlatUIPalette.peterRiver
+            , Border.width 2
+            , inFront <| showOptionsMenu location msgWrapper options
+            , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always TogglePopup >> msgWrapper)
+            ]
+            { onPress = Just <| msgWrapper TogglePopup
+            , label = I18N.text location "panes" "layout"
+            }
 
 
 showOptionsMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
@@ -643,31 +646,24 @@ viewModeChoices settings msgWrapper context options =
             I18N.localisedString settings.location "panes"
 
         fullOptionList =
-            [ Input.optionWith ViewMap <| optionTab First <| localise "Map"
-            , Input.optionWith ViewThird <| optionTab Mid <| localise "Perspective"
-            , Input.optionWith ViewFirst <| optionTab Mid <| localise "Rider"
-            , Input.optionWith ViewProfileCanvas <| optionTab Mid <| localise "Profile"
-            , Input.optionWith ViewProfileWebGL <| optionTab Mid <| localise "OldProfile"
-            , Input.optionWith ViewPlan <| optionTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| optionTab Mid <| localise "Route"
-            , Input.optionWith ViewInfo <| optionTab Last <| localise "About"
+            [ Input.optionWith ViewMap <| viewModeTab First <| localise "Map"
+            , Input.optionWith ViewThird <| viewModeTab Mid <| localise "Perspective"
+            , Input.optionWith ViewFirst <| viewModeTab Mid <| localise "Rider"
+            , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
+            , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
+            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
+
+            --, Input.optionWith ViewInfo <| viewModeTab Last <| localise "About"
             ]
     in
-    row [ width fill, Font.size 12 ]
-        [ Input.radioRow
-            []
-            { onChange = msgWrapper << SetViewMode context.paneId
-            , selected = Just context.activeView
-            , label = Input.labelHidden "Choose view"
-            , options = fullOptionList
-            }
-        , el
-            [ alignRight
-            , paddingEach { top = 4, left = 4, bottom = 0, right = 10 }
-            ]
-          <|
-            paneLayoutMenu settings.location msgWrapper options
-        ]
+    Input.radioRow
+        []
+        { onChange = msgWrapper << SetViewMode context.paneId
+        , selected = Just context.activeView
+        , label = Input.labelHidden "Choose view"
+        , options = fullOptionList
+        }
 
 
 viewModeChoicesNoMap : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> Element msg
@@ -677,23 +673,21 @@ viewModeChoicesNoMap location msgWrapper pane =
             I18N.localisedString location "panes"
 
         reducedOptionList =
-            [ Input.optionWith ViewThird <| optionTab First <| localise "Perspective"
-            , Input.optionWith ViewFirst <| optionTab Mid <| localise "Rider"
-            , Input.optionWith ViewProfileCanvas <| optionTab Mid <| localise "Profile"
-            , Input.optionWith ViewProfileWebGL <| optionTab Mid <| localise "OldProfile"
-            , Input.optionWith ViewPlan <| optionTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| optionTab Last <| localise "Route"
+            [ Input.optionWith ViewThird <| viewModeTab First <| localise "Perspective"
+            , Input.optionWith ViewFirst <| viewModeTab Mid <| localise "Rider"
+            , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
+            , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
+            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
             ]
     in
-    row [ width fill, Font.size 12 ]
-        [ Input.radioRow
-            []
-            { onChange = msgWrapper << SetViewMode pane.paneId
-            , selected = Just pane.activeView
-            , label = Input.labelHidden "Choose view"
-            , options = reducedOptionList
-            }
-        ]
+    Input.radioRow
+        []
+        { onChange = msgWrapper << SetViewMode pane.paneId
+        , selected = Just pane.activeView
+        , label = Input.labelHidden "Choose view"
+        , options = reducedOptionList
+        }
 
 
 takeHalf qty =
@@ -935,48 +929,46 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                             }
 
                 Nothing ->
-                    el [ centerX, centerY ] <| text "Please load a route"
+                    none
     in
-    column [ alignTop, width fill ]
-        [ wrappedRow [ centerX, width fill ] <|
-            --if mTrack == Nothing then
-            --    [ viewPaneZeroWithMap defaultOptions.pane1
-            --    , slider
-            --    ]
-            --
-            --else
-            case options.paneLayout of
-                PanesOne ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , slider
-                    ]
-
-                PanesLeftRight ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    , slider
-                    ]
-
-                PanesUpperLower ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    , slider
-                    ]
-
-                PanesGrid ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    , viewPaneNoMap options.pane3
-                    , viewPaneNoMap options.pane4
-                    , slider
-                    ]
-
-                PanesOnePlusTwo ->
-                    -- Later.
-                    [ viewPaneZeroWithMap options.pane1
-                    , slider
-                    ]
+    wrappedRow
+        [ centerX
+        , width fill
+        , spacing 5
+        , inFront <| paneLayoutMenu settings.location msgWrapper options
         ]
+    <|
+        case options.paneLayout of
+            PanesOne ->
+                [ viewPaneZeroWithMap options.pane1
+                , slider
+                ]
+
+            PanesLeftRight ->
+                [ viewPaneZeroWithMap options.pane1
+                , viewPaneNoMap options.pane2
+                , slider
+                ]
+
+            PanesUpperLower ->
+                [ viewPaneZeroWithMap options.pane1
+                , viewPaneNoMap options.pane2
+                , slider
+                ]
+
+            PanesGrid ->
+                [ viewPaneZeroWithMap options.pane1
+                , viewPaneNoMap options.pane2
+                , viewPaneNoMap options.pane3
+                , viewPaneNoMap options.pane4
+                , slider
+                ]
+
+            PanesOnePlusTwo ->
+                -- Later.
+                [ viewPaneZeroWithMap options.pane1
+                , slider
+                ]
 
 
 encodePaneState : PaneLayoutOptions -> E.Value

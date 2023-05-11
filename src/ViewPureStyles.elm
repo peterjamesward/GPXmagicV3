@@ -11,7 +11,6 @@ module ViewPureStyles exposing
     , infoButton
     , neatToolsBorder
     , onEnter
-    , optionTab
     , prettyButtonStyles
     , radioButton
     , rgtDark
@@ -26,6 +25,7 @@ module ViewPureStyles exposing
     , useIcon
     , useIconWithSize
     , v2ButtonStyles
+    , viewModeTab
     , wideSliderStylesWithWidth
     )
 
@@ -417,18 +417,18 @@ type TabPosition
     | Last
 
 
-optionTab position label state =
+viewModeTab position label state =
     let
         borders =
             case position of
                 First ->
-                    { left = 2, right = 2, top = 2, bottom = 0 }
+                    { left = 2, right = 1, top = 2, bottom = 0 }
 
                 Mid ->
-                    { left = 0, right = 2, top = 2, bottom = 0 }
+                    { left = 1, right = 1, top = 2, bottom = 0 }
 
                 Last ->
-                    { left = 0, right = 2, top = 2, bottom = 0 }
+                    { left = 1, right = 2, top = 2, bottom = 0 }
 
         corners =
             case position of
@@ -443,6 +443,54 @@ optionTab position label state =
     in
     el
         [ paddingEach { left = 10, right = 10, top = 5, bottom = 5 }
+        , Border.roundEach corners
+        , Border.widthEach borders
+        , Border.color FlatColors.FlatUIPalette.silver
+        , Background.color <|
+            if state == Input.Selected then
+                FlatColors.FlatUIPalette.emerald
+
+            else
+                FlatColors.FlatUIPalette.asbestos
+        , Font.size 14
+        , Font.color <|
+            if state == Input.Selected then
+                FlatColors.FlatUIPalette.midnightBlue
+
+            else
+                FlatColors.FlatUIPalette.clouds
+        ]
+    <|
+        el [ centerX, centerY ] <|
+            text label
+
+
+layoutModeTab position label state =
+    let
+        borders =
+            case position of
+                First ->
+                    { left = 2, right = 1, top = 2, bottom = 2 }
+
+                Mid ->
+                    { left = 1, right = 1, top = 2, bottom = 2 }
+
+                Last ->
+                    { left = 1, right = 2, top = 2, bottom = 2 }
+
+        corners =
+            case position of
+                First ->
+                    { topLeft = 6, bottomLeft = 6, topRight = 0, bottomRight = 0 }
+
+                Mid ->
+                    { topLeft = 0, bottomLeft = 0, topRight = 0, bottomRight = 0 }
+
+                Last ->
+                    { topLeft = 0, bottomLeft = 0, topRight = 6, bottomRight = 6 }
+    in
+    el
+        [ paddingEach { left = 5, right = 5, top = 5, bottom = 5 }
         , Border.roundEach corners
         , Border.widthEach borders
         , Border.color FlatColors.FlatUIPalette.silver
