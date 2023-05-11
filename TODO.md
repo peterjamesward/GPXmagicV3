@@ -24,8 +24,6 @@ Need skin options for layout in main, tools controller, pane layout.
 
 TODO: Have consistent gap under mode tabs depending on pane and active view.
 TODO: Find new home for "About..."
-TODO: Simpler unified (V2,V3) layout chooser.
-    > I think a small radio row floating top right in front of the panes area.
 TODO: Fix the right splitter restore.
 TODO: Make the skin a colour theme.
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).

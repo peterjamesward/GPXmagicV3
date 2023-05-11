@@ -125,46 +125,14 @@ type Msg
 paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
 paneLayoutMenu location msgWrapper options =
     el
-        [ alignRight, alignTop ]
+        [ alignRight, alignTop, moveLeft 30 ]
     <|
-        Input.button
-            [ padding 5
-            , Background.color FlatColors.ChinesePalette.antiFlashWhite
-            , Border.color FlatColors.FlatUIPalette.peterRiver
-            , Border.width 2
-            , inFront <| showOptionsMenu location msgWrapper options
-            , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always TogglePopup >> msgWrapper)
-            ]
-            { onPress = Just <| msgWrapper TogglePopup
-            , label = I18N.text location "panes" "layout"
+        Input.radioRow []
+            { options = optionList location
+            , onChange = msgWrapper << SetPaneLayout
+            , selected = Just options.paneLayout
+            , label = Input.labelHidden "layout"
             }
-
-
-showOptionsMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
-showOptionsMenu location msgWrapper options =
-    if options.popupVisible then
-        el
-            [ moveDown 30
-            , moveLeft 80
-            , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always PaneNoOp >> msgWrapper)
-            , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always PaneNoOp >> msgWrapper)
-            , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always PaneNoOp >> msgWrapper)
-            , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always PaneNoOp >> msgWrapper)
-            , htmlAttribute (style "z-index" "20")
-            ]
-        <|
-            Input.radio
-                (subtleToolStyles
-                    ++ [ padding 10, spacing 10 ]
-                )
-                { options = optionList location
-                , onChange = msgWrapper << SetPaneLayout
-                , selected = Just options.paneLayout
-                , label = Input.labelHidden "layout"
-                }
-
-    else
-        none
 
 
 optionList location =
@@ -172,10 +140,17 @@ optionList location =
         localise =
             I18N.text location "panes"
     in
-    [ Input.option PanesOne <| row [ spacing 20 ] [ useIcon FeatherIcons.square, localise "one" ]
-    , Input.option PanesLeftRight <| row [ spacing 20 ] [ useIcon FeatherIcons.columns, localise "tall" ]
-    , Input.option PanesUpperLower <| row [ spacing 20 ] [ useIcon FeatherIcons.server, localise "flat" ]
-    , Input.option PanesGrid <| row [ spacing 20 ] [ useIcon FeatherIcons.grid, localise "grid" ]
+    [ Input.optionWith PanesOne <| layoutModeTab First (useIconWithSize 12 FeatherIcons.square)
+    , Input.optionWith PanesLeftRight <| layoutModeTab Mid (useIconWithSize 12 FeatherIcons.columns)
+    , Input.optionWith PanesUpperLower <|
+        layoutModeTab Mid
+            (el
+                [ rotate (pi / 2) ]
+                (useIconWithSize 12 FeatherIcons.columns)
+            )
+
+    -- TODO: Rotate!
+    , Input.optionWith PanesGrid <| layoutModeTab Last (useIconWithSize 12 FeatherIcons.grid)
     ]
 
 

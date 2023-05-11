@@ -9,6 +9,7 @@ module ViewPureStyles exposing
     , displayName
     , edges
     , infoButton
+    , layoutModeTab
     , neatToolsBorder
     , onEnter
     , prettyButtonStyles
@@ -500,7 +501,6 @@ layoutModeTab position label state =
 
             else
                 FlatColors.FlatUIPalette.asbestos
-        , Font.size 14
         , Font.color <|
             if state == Input.Selected then
                 FlatColors.FlatUIPalette.midnightBlue
@@ -509,5 +509,4 @@ layoutModeTab position label state =
                 FlatColors.FlatUIPalette.clouds
         ]
     <|
-        el [ centerX, centerY ] <|
-            text label
+        el [ centerX, centerY ] label
