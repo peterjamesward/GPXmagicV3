@@ -640,24 +640,22 @@ viewModeChoices :
 viewModeChoices settings msgWrapper context options =
     let
         localise =
-            radioButton << I18N.localisedString settings.location "panes"
+            I18N.localisedString settings.location "panes"
 
         fullOptionList =
-            [ Input.optionWith ViewMap <| localise "Map"
-            , Input.optionWith ViewThird <| localise "Perspective"
-            , Input.optionWith ViewFirst <| localise "Rider"
-            , Input.optionWith ViewProfileCanvas <| localise "Profile"
-            , Input.optionWith ViewProfileWebGL <| localise "OldProfile"
-            , Input.optionWith ViewPlan <| localise "Plan"
-            , Input.optionWith ViewGraph <| localise "Route"
-            , Input.optionWith ViewInfo <| localise "About"
+            [ Input.optionWith ViewMap <| optionTab First <| localise "Map"
+            , Input.optionWith ViewThird <| optionTab Mid <| localise "Perspective"
+            , Input.optionWith ViewFirst <| optionTab Mid <| localise "Rider"
+            , Input.optionWith ViewProfileCanvas <| optionTab Mid <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| optionTab Mid <| localise "OldProfile"
+            , Input.optionWith ViewPlan <| optionTab Mid <| localise "Plan"
+            , Input.optionWith ViewGraph <| optionTab Mid <| localise "Route"
+            , Input.optionWith ViewInfo <| optionTab Last <| localise "About"
             ]
     in
     row [ width fill, Font.size 12 ]
         [ Input.radioRow
-            [ spacing 5
-            , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
-            ]
+            []
             { onChange = msgWrapper << SetViewMode context.paneId
             , selected = Just context.activeView
             , label = Input.labelHidden "Choose view"
@@ -676,22 +674,20 @@ viewModeChoicesNoMap : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> El
 viewModeChoicesNoMap location msgWrapper pane =
     let
         localise =
-            radioButton << I18N.localisedString location "panes"
+            I18N.localisedString location "panes"
 
         reducedOptionList =
-            [ Input.optionWith ViewThird <| localise "Perspective"
-            , Input.optionWith ViewFirst <| localise "Rider"
-            , Input.optionWith ViewProfileCanvas <| localise "Profile"
-            , Input.optionWith ViewProfileWebGL <| localise "OldProfile"
-            , Input.optionWith ViewPlan <| localise "Plan"
-            , Input.optionWith ViewGraph <| localise "Route"
+            [ Input.optionWith ViewThird <| optionTab First <| localise "Perspective"
+            , Input.optionWith ViewFirst <| optionTab Mid <| localise "Rider"
+            , Input.optionWith ViewProfileCanvas <| optionTab Mid <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| optionTab Mid <| localise "OldProfile"
+            , Input.optionWith ViewPlan <| optionTab Mid <| localise "Plan"
+            , Input.optionWith ViewGraph <| optionTab Last <| localise "Route"
             ]
     in
     row [ width fill, Font.size 12 ]
         [ Input.radioRow
-            [ spacing 5
-            , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
-            ]
+            []
             { onChange = msgWrapper << SetViewMode pane.paneId
             , selected = Just pane.activeView
             , label = Input.labelHidden "Choose view"

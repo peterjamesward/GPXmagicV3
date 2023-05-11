@@ -428,6 +428,7 @@ You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure t
                 , ( "hide", """Hide (restore in Tools Summary)""" )
                 , ( "onleft", """Left""" )
                 , ( "onright", """Right""" )
+                , ( "visible", """Visible""" )
                 , ( "hidden", """Hidden""" )
                 , ( "A-Z", """Sort alphabetically""" )
                 , ( "Compact", """Show names only""" )

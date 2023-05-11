@@ -1830,10 +1830,8 @@ viewToolSettings settings options wrapper =
             compactRadioButton << i18n
 
         fullOptionList tool =
-            if (tool.toolType == ToolSettings) || (tool.toolType == ToolEssentials) then
-                [ Input.optionWith DockLeft <| optionHelper "onleft"
-                , Input.optionWith DockRight <| optionHelper "onright"
-                ]
+            if settings.v2Skin then
+                []
 
             else
                 [ Input.optionWith DockLeft <| optionHelper "onleft"
@@ -2038,7 +2036,6 @@ viewToolLazy :
     -> ToolEntry
     -> Element msg
 viewToolLazy settings msgWrapper isTrack options toolEntry =
-    --TODO: Popup only visible when tool open (V2).
     --TODO: V2: Modified Tool Summary show/hide only.
     --TODO: Rename "Essentials" to "Markers"
     --TODO: "Restore defaults" button in Tool Summary (not global options).

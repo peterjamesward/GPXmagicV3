@@ -1,5 +1,6 @@
 module ViewPureStyles exposing
-    ( commonLayoutStyles
+    ( TabPosition(..)
+    , commonLayoutStyles
     , commonShortHorizontalSliderStyles
     , commonShortVerticalSliderStyles
     , compactRadioButton
@@ -10,6 +11,7 @@ module ViewPureStyles exposing
     , infoButton
     , neatToolsBorder
     , onEnter
+    , optionTab
     , prettyButtonStyles
     , radioButton
     , rgtDark
@@ -27,7 +29,7 @@ module ViewPureStyles exposing
     , wideSliderStylesWithWidth
     )
 
-import Color exposing (blue)
+import Color exposing (black, blue)
 import ColourPalette exposing (scrollbarBackground)
 import CommonToolStyles
 import Element exposing (..)
@@ -407,3 +409,57 @@ onEnter msg =
                     )
             )
         )
+
+
+type TabPosition
+    = First
+    | Mid
+    | Last
+
+
+optionTab position label state =
+    let
+        borders =
+            case position of
+                First ->
+                    { left = 2, right = 2, top = 2, bottom = 0 }
+
+                Mid ->
+                    { left = 0, right = 2, top = 2, bottom = 0 }
+
+                Last ->
+                    { left = 0, right = 2, top = 2, bottom = 0 }
+
+        corners =
+            case position of
+                First ->
+                    { topLeft = 6, bottomLeft = 0, topRight = 0, bottomRight = 0 }
+
+                Mid ->
+                    { topLeft = 0, bottomLeft = 0, topRight = 0, bottomRight = 0 }
+
+                Last ->
+                    { topLeft = 0, bottomLeft = 0, topRight = 6, bottomRight = 0 }
+    in
+    el
+        [ paddingEach { left = 10, right = 10, top = 5, bottom = 5 }
+        , Border.roundEach corners
+        , Border.widthEach borders
+        , Border.color FlatColors.FlatUIPalette.silver
+        , Background.color <|
+            if state == Input.Selected then
+                FlatColors.FlatUIPalette.emerald
+
+            else
+                FlatColors.FlatUIPalette.asbestos
+        , Font.size 14
+        , Font.color <|
+            if state == Input.Selected then
+                FlatColors.FlatUIPalette.midnightBlue
+
+            else
+                FlatColors.FlatUIPalette.clouds
+        ]
+    <|
+        el [ centerX, centerY ] <|
+            text label

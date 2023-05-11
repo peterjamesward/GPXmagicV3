@@ -22,10 +22,9 @@ BUG: Route Builder previews not hiding when tool closed.
 Is it possible to make 3.x look like 2.9.5, so we have the same engine?
 Need skin options for layout in main, tools controller, pane layout.
 
-TODO: Equal heights across top bar!
+TODO: Inconsistent gap under mode tabs depending on pane and active view.
 TODO: Simpler unified (V2,V3) layout chooser.
-TODO: Purloin tool colours from v2.
-TODO: Fix the right splitter (restore).
+TODO: Fix the right splitter restore.
 TODO: Make the skin a colour theme.
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
 
