@@ -37,9 +37,13 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Lazy
 import FeatherIcons
+import FlatColors.AmericanPalette
+import FlatColors.AussiePalette
+import FlatColors.CanadianPalette
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
+import FlatColors.TurkishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field, maybe)
@@ -333,9 +337,13 @@ toolSettings =
     , isVisible = True
     , dock = DockRight
     , tabColour = rgtPurple
-    , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
+    , textColour = contrastingColour rgtPurple
     , isPopupOpen = False
     }
+
+
+defaultToolColour =
+    FlatColors.FlatUIPalette.peterRiver
 
 
 trackInfoBox : ToolEntry
@@ -360,8 +368,8 @@ displaySettingsTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.emerald
-    , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
+    , tabColour = FlatColors.AussiePalette.greenlandGreen
+    , textColour = contrastingColour FlatColors.AussiePalette.greenlandGreen
     , isPopupOpen = False
     }
 
@@ -374,8 +382,8 @@ directionChangeTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.amethyst
-    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -388,8 +396,8 @@ gradientChangeTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.wetAsphalt
-    , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -458,8 +466,8 @@ curveFormerTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.wisteria
-    , textColour = contrastingColour FlatColors.FlatUIPalette.wisteria
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -472,8 +480,8 @@ bendSmootherTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.midnightBlue
-    , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -500,8 +508,8 @@ nudgeTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.sunFlower
-    , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
+    , tabColour = FlatColors.TurkishPalette.mandarinSorbet
+    , textColour = contrastingColour FlatColors.TurkishPalette.mandarinSorbet
     , isPopupOpen = False
     }
 
@@ -528,8 +536,8 @@ simplifyTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.alizarin
-    , textColour = contrastingColour FlatColors.FlatUIPalette.alizarin
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -542,8 +550,8 @@ interpolateTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.clouds
-    , textColour = contrastingColour FlatColors.FlatUIPalette.clouds
+    , tabColour = FlatColors.CanadianPalette.jigglypuff
+    , textColour = contrastingColour FlatColors.CanadianPalette.jigglypuff
     , isPopupOpen = False
     }
 
@@ -570,8 +578,8 @@ namedSegmentTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = rgtPurple
-    , textColour = contrastingColour rgtPurple
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -584,8 +592,8 @@ moveScaleRotateTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.pomegranate
-    , textColour = contrastingColour FlatColors.FlatUIPalette.pomegranate
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -598,8 +606,8 @@ flythroughTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.pumpkin
-    , textColour = contrastingColour FlatColors.FlatUIPalette.pumpkin
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -626,8 +634,8 @@ moveAndStretchTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.silver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.silver
+    , tabColour = FlatColors.TurkishPalette.spiroDiscoBall
+    , textColour = contrastingColour FlatColors.TurkishPalette.spiroDiscoBall
     , isPopupOpen = False
     }
 
@@ -640,8 +648,8 @@ startFinishTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.asbestos
-    , textColour = contrastingColour FlatColors.FlatUIPalette.asbestos
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -682,8 +690,8 @@ straightenTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.peterRiver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , tabColour = FlatColors.AussiePalette.spicedNectarine
+    , textColour = contrastingColour FlatColors.AussiePalette.spicedNectarine
     , isPopupOpen = False
     }
 
@@ -696,8 +704,8 @@ landUseTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.wetAsphalt
-    , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
+    , tabColour = defaultToolColour
+    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -724,8 +732,8 @@ routingTool =
     , state = Contracted
     , isVisible = True
     , dock = DockRight
-    , tabColour = FlatColors.FlatUIPalette.peterRiver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , tabColour = FlatColors.TurkishPalette.neonBlue
+    , textColour = contrastingColour FlatColors.TurkishPalette.neonBlue
     , isPopupOpen = False
     }
 
@@ -1785,8 +1793,8 @@ toolsForDock settings dock msgWrapper isTrack options =
                 |> List.filter .isVisible
     in
     column [ width fill, height fill ]
-        [ column [ width fill, height fill, spacing 5, scrollbarY ]
-            [ column [ width fill, spacing 5 ]
+        [ column [ width fill, height fill, spacingXY 5 0, scrollbarY ]
+            [ column [ width fill, spacingXY 5 0 ]
                 (visibleTools
                     |> List.filter
                         (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
@@ -2045,11 +2053,9 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                             [ width fill
                             , spacing 8
                             , padding 7
-                            , Font.color FlatColors.FlatUIPalette.midnightBlue
+                            , Font.color <| contrastingColour toolEntry.tabColour
                             , Background.color toolEntry.tabColour
-                            , Border.widthEach { left = 2, right = 2, top = 2, bottom = 0 }
                             , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
-                            , Border.color FlatColors.FlatUIPalette.asbestos
                             ]
 
                         AlwaysOpen ->
@@ -2061,8 +2067,13 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                             [ width fill
                             , spacing 8
                             , padding 7
-                            , Background.color FlatColors.ChinesePalette.grisaille
+                            , Background.color FlatColors.FlatUIPalette.silver
                             , Font.color toolEntry.tabColour
+                            , Font.shadow
+                                { offset = ( 0.5, 0.5 )
+                                , blur = 1
+                                , color = FlatColors.FlatUIPalette.midnightBlue
+                                }
                             , Border.widthEach { left = 2, right = 0, top = 2, bottom = 0 }
                             , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
                             , Border.color FlatColors.FlatUIPalette.concrete

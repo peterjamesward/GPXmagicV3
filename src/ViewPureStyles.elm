@@ -85,13 +85,13 @@ commonLayoutStyles =
 
 
 v2ButtonStyles =
-    [ padding 10
-    , Border.width 2
+    [ Border.width 2
     , Border.rounded 10
     , Border.color FlatColors.FlatUIPalette.belizeHole
     , Background.color FlatColors.FlatUIPalette.belizeHole
     , Font.color white
     , Font.size 14
+    , paddingEach { left = 8, right = 8, top = 0, bottom = 0 }
     ]
 
 

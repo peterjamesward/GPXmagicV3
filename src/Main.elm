@@ -1326,7 +1326,9 @@ topLoadingBar model =
     let
         localHelper : String -> Element msg
         localHelper =
-            text << I18N.localisedString model.systemSettings.location "main"
+            el [ centerY, centerX ]
+                << text
+                << I18N.localisedString model.systemSettings.location "main"
 
         moreOptionsButton =
             button
@@ -1356,7 +1358,7 @@ topLoadingBar model =
         loadGpxButton =
             if model.systemSettings.v2Skin then
                 button
-                    (Element.height (Element.px 40) :: ViewPureStyles.v2ButtonStyles)
+                    (Element.height (Element.px 34) :: ViewPureStyles.v2ButtonStyles)
                     { onPress = Just GpxRequested
                     , label = localHelper "loadgpx"
                     }
@@ -1387,7 +1389,7 @@ topLoadingBar model =
                     }
 
         saveButton =
-            row [ spacing 0, padding 0, height <| Element.px 40 ]
+            row [ spacing 0, padding 0, height <| Element.px 34 ]
                 [ button
                     [ padding 5
                     , height fill

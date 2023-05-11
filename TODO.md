@@ -33,6 +33,12 @@ TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query
 
 # BACKLOG
 
+## Bends
+
+Not sure the Bend problem tool works as intended.
+Desire to simplify, unify the various tools.
+Make explicit the before & after radius, say.
+
 ## Snap to Roads with TomTom
 
 https://developer.tomtom.com/snap-to-roads-api/documentation/product-information/introduction
