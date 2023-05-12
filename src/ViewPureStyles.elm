@@ -10,6 +10,7 @@ module ViewPureStyles exposing
     , edges
     , infoButton
     , layoutModeTab
+    , mediumSliderStyles
     , neatToolsBorder
     , onEnter
     , prettyButtonStyles
@@ -320,6 +321,25 @@ shortSliderStyles =
         -- Slider track
         el
             [ width <| px 150
+            , height <| px 2
+            , centerY
+            , centerX
+            , Background.color scrollbarBackground
+            , Border.rounded 6
+            ]
+            Element.none
+    ]
+
+
+mediumSliderStyles =
+    [ height <| px 24
+    , width <| px 250
+    , centerY
+    , centerX
+    , behindContent <|
+        -- Slider track
+        el
+            [ width <| px 250
             , height <| px 2
             , centerY
             , centerX

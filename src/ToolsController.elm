@@ -1801,7 +1801,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 |> List.filter .isVisible
     in
     column [ width fill, height fill ]
-        [ column [ width fill, height fill, spacing 5, scrollbarY ]
+        [ column [ width fill, height fill, spacing 5, padding 10, scrollbarY ]
             [ column [ width fill, spacing 4 ]
                 (visibleTools
                     |> List.filter

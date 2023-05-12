@@ -4,7 +4,6 @@ import Actions exposing (ToolAction(..))
 import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (PeteTree, skipCount)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
@@ -15,7 +14,7 @@ import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showLongMeasure)
-import ViewPureStyles exposing (neatToolsBorder, useIcon)
+import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
 
 
 toolId =
@@ -45,6 +44,7 @@ type Msg
     | MarkerBackwardOne
     | Undo
     | Redo
+    | PointerPosition Int
 
 
 toolStateChange :
@@ -89,6 +89,11 @@ update msg options previewColour hasTrack =
                     track.currentPosition
             in
             case msg of
+                PointerPosition position ->
+                    ( { options | orange = position }
+                    , [ SetCurrent position, PointerChange ]
+                    )
+
                 PointerForwardOne ->
                     let
                         position =
@@ -253,6 +258,17 @@ viewPointers settings msgWrapper options track =
                 , onPress = Just <| msgWrapper <| PointerFastForward
                 }
             ]
+        , el [ centerX ] <|
+            Input.slider
+                ViewPureStyles.mediumSliderStyles
+                { onChange = round >> PointerPosition >> msgWrapper
+                , value = toFloat track.currentPosition
+                , label = Input.labelHidden "position"
+                , min = 0
+                , max = toFloat <| skipCount track.trackTree
+                , step = Just 1
+                , thumb = sliderThumb
+                }
         , el [ centerX, width fill ] <|
             case options.purple of
                 Just _ ->
