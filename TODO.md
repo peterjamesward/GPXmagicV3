@@ -20,11 +20,19 @@ BUG: Route Builder previews not hiding when tool closed.
 ## 2.9.5 UI.
 
 Is it possible to make 3.x look like 2.9.5, so we have the same engine?
+
 Need skin options for layout in main, tools controller, pane layout.
 
+TODO: Maybe v2 skin toolbox doesn't need to be _that_ different from v3.
+> No icons on closed tools, grey background, but same shape.
+> Put the colour choosers in the Tool Summary tool (keep them in open tools).
+> Tool list, names only, doesn't have to be a column.
+
+TODO: Purple bar across marker button is excessive.
+TODO: Maybe have orange scroller in essentials for v2 skin.
 TODO: Have consistent gap under mode tabs depending on pane and active view.
 TODO: Find new home for "About..."
-TODO: Fix the right splitter restore.
+TODO: Fix the right splitter restore (is it because of the left being ignored).
 TODO: Make the skin a colour theme.
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
 

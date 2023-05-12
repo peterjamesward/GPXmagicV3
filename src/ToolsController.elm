@@ -1794,7 +1794,7 @@ toolsForDock settings dock msgWrapper isTrack options =
     in
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacingXY 5 0, scrollbarY ]
-            [ column [ width fill, spacingXY 5 0 ]
+            [ column [ width fill, spacing 4 ]
                 (visibleTools
                     |> List.filter
                         (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
@@ -1802,7 +1802,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 )
             , wrappedRow
                 -- Open tools
-                []
+                [ spacing 4 ]
               <|
                 (visibleTools
                     |> List.filter (\t -> t.dock == dock && t.state == Expanded)
@@ -1810,7 +1810,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 )
             , wrappedRow
                 -- Closed tools
-                []
+                [ spacing 4 ]
               <|
                 (visibleTools
                     |> List.filter (\t -> t.dock == dock && t.state == Contracted)
@@ -1978,12 +1978,18 @@ viewTool settings msgWrapper isTrack options toolEntry =
         toolEntry
 
 
-applySettings :
+viewToolLazy :
     SystemSettings
-    -> ToolEntry
     -> (ToolMsg -> msg)
-    -> List (Attribute msg)
-applySettings settings toolEntry msgWrapper =
+    -> Maybe (TrackLoaded msg)
+    -> Options msg
+    -> ToolEntry
+    -> Element msg
+viewToolLazy settings msgWrapper isTrack options toolEntry =
+    --TODO: V2: Modified Tool Summary show/hide only.
+    --TODO: Rename "Essentials" to "Markers"
+    --TODO: "Restore defaults" button in Tool Summary (not global options).
+    --TODO: Possibly, track slider in Essentials as per v2.
     let
         popup =
             inFront <|
@@ -2005,84 +2011,38 @@ applySettings settings toolEntry msgWrapper =
                         , showColourOptions msgWrapper toolEntry
                         ]
     in
-    if settings.v2Skin then
-        [ width fill
-        , alignTop
-        , htmlAttribute (style "vertical-align" "top")
-        , spacing 0
-        , popup
-        , Border.color FlatColors.FlatUIPalette.asbestos
-        ]
-
-    else
-        [ width fill
-        , alignTop
-        , htmlAttribute (style "vertical-align" "top")
-        , spacing 0
-        , Border.width 4
-        , Border.color toolEntry.tabColour
-        , Border.rounded 8
-        , Background.color toolEntry.tabColour
-        , Font.color toolEntry.textColour
-        , popup
-        ]
-
-
-viewToolLazy :
-    SystemSettings
-    -> (ToolMsg -> msg)
-    -> Maybe (TrackLoaded msg)
-    -> Options msg
-    -> ToolEntry
-    -> Element msg
-viewToolLazy settings msgWrapper isTrack options toolEntry =
-    --TODO: V2: Modified Tool Summary show/hide only.
-    --TODO: Rename "Essentials" to "Markers"
-    --TODO: "Restore defaults" button in Tool Summary (not global options).
-    --TODO: Possibly, track slider in Essentials as per v2.
-    el [ padding 2, width fill, alignTop ] <|
+    el [ width fill, alignTop ] <|
         column
-            (applySettings settings toolEntry msgWrapper)
+            [ width fill
+            , alignTop
+            , htmlAttribute (style "vertical-align" "top")
+            , spacing 0
+            , popup
+            ]
             [ row
-                (if settings.v2Skin then
-                    case toolEntry.state of
-                        Expanded ->
-                            [ width fill
-                            , spacing 8
-                            , padding 7
-                            , Font.color <| contrastingColour toolEntry.tabColour
-                            , Background.color toolEntry.tabColour
-                            , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
-                            ]
+                (case toolEntry.state of
+                    Expanded ->
+                        [ width fill
+                        , spacing 8
+                        , padding 7
+                        , Font.color <| contrastingColour toolEntry.tabColour
+                        , Background.color toolEntry.tabColour
+                        , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
+                        ]
 
-                        AlwaysOpen ->
-                            [ width fill
-                            , height <| px 0
-                            ]
+                    AlwaysOpen ->
+                        [ width fill
+                        , height <| px 0
+                        ]
 
-                        _ ->
-                            [ width fill
-                            , spacing 8
-                            , padding 7
-                            , Background.color FlatColors.FlatUIPalette.silver
-                            , Font.color toolEntry.tabColour
-                            , Font.shadow
-                                { offset = ( 0.5, 0.5 )
-                                , blur = 1
-                                , color = FlatColors.FlatUIPalette.midnightBlue
-                                }
-                            , Border.widthEach { left = 2, right = 0, top = 2, bottom = 0 }
-                            , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
-                            , Border.color FlatColors.FlatUIPalette.concrete
-                            ]
-
-                 else
-                    [ width fill
-                    , spacing 8
-                    , height <| px 24
-                    , Background.color toolEntry.tabColour
-                    , Font.color toolEntry.textColour
-                    ]
+                    _ ->
+                        [ width fill
+                        , spacing 8
+                        , padding 7
+                        , Font.color <| contrastingColour toolEntry.tabColour
+                        , Background.color toolEntry.tabColour
+                        , Border.rounded 8
+                        ]
                 )
                 [ case ( toolEntry.video, toolEntry.state ) of
                     ( Just video, Expanded ) ->
@@ -2102,38 +2062,13 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                     _ ->
                         none
                 , Input.button
-                    [ centerX ]
+                    [ centerX, centerY ]
                     { onPress =
                         Just <|
                             msgWrapper <|
                                 ToolStateToggle toolEntry.toolId <|
                                     nextToolState toolEntry.state
-                    , label =
-                        if settings.v2Skin then
-                            I18N.text settings.location toolEntry.toolId "label"
-
-                        else
-                            row [ alignLeft, spacing 10 ]
-                                [ case toolEntry.state of
-                                    Expanded ->
-                                        useIconWithSize 16 <| FeatherIcons.chevronsUp
-
-                                    Contracted ->
-                                        useIconWithSize 16 <| FeatherIcons.chevronsDown
-
-                                    Disabled ->
-                                        useIconWithSize 16 <| FeatherIcons.slash
-
-                                    AlwaysOpen ->
-                                        none
-
-                                    SettingsOpen ->
-                                        useIconWithSize 16 <| FeatherIcons.chevronsUp
-
-                                    SettingsClosed ->
-                                        useIconWithSize 16 <| FeatherIcons.chevronsDown
-                                , I18N.text settings.location toolEntry.toolId "label"
-                                ]
+                    , label = I18N.text settings.location toolEntry.toolId "label"
                     }
                 , if toolEntry.state == Expanded then
                     Input.button
@@ -2151,12 +2086,11 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                   else
                     none
                 ]
-            , el [ Border.rounded 8, width fill, height fill ] <|
-                if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
-                    viewToolByType settings msgWrapper toolEntry isTrack options
+            , if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
+                viewToolByType settings msgWrapper toolEntry isTrack options
 
-                else
-                    none
+              else
+                none
             ]
 
 
