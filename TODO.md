@@ -24,8 +24,7 @@ Is it possible to make 3.x look like 2.9.5, so we have the same engine?
 Need skin options for layout in main, tools controller, pane layout.
 
 TODO: Maybe v2 skin toolbox doesn't need to be _that_ different from v3.
-> No icons on closed tools, grey background, but same shape.
-> Put the colour choosers in the Tool Summary tool (keep them in open tools).
+> Can't change colour in v2 skin
 > Tool list, names only, doesn't have to be a column.
 
 TODO: Purple bar across marker button is excessive.

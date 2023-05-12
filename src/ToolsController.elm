@@ -2011,87 +2011,86 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                         , showColourOptions msgWrapper toolEntry
                         ]
     in
-    el [ width fill, alignTop ] <|
-        column
-            [ width fill
-            , alignTop
-            , htmlAttribute (style "vertical-align" "top")
-            , spacing 0
-            , popup
-            ]
-            [ row
-                (case toolEntry.state of
-                    Expanded ->
-                        [ width fill
-                        , spacing 8
-                        , padding 7
-                        , Font.color <| contrastingColour toolEntry.tabColour
-                        , Background.color toolEntry.tabColour
-                        , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
-                        ]
+    column
+        [ width fill
+        , alignTop
+        , htmlAttribute (style "vertical-align" "top")
+        , spacing 0
+        , popup
+        ]
+        [ row
+            (case toolEntry.state of
+                Expanded ->
+                    [ width fill
+                    , spacing 8
+                    , padding 7
+                    , Font.color <| contrastingColour toolEntry.tabColour
+                    , Background.color toolEntry.tabColour
+                    , Border.roundEach { topRight = 8, topLeft = 8, bottomRight = 0, bottomLeft = 0 }
+                    ]
 
-                    AlwaysOpen ->
-                        [ width fill
-                        , height <| px 0
-                        ]
+                AlwaysOpen ->
+                    [ width fill
+                    , height <| px 0
+                    ]
 
-                    _ ->
-                        [ width fill
-                        , spacing 8
-                        , padding 7
-                        , Font.color <| contrastingColour toolEntry.tabColour
-                        , Background.color toolEntry.tabColour
-                        , Border.rounded 8
-                        ]
-                )
-                [ case ( toolEntry.video, toolEntry.state ) of
-                    ( Just video, Expanded ) ->
-                        newTabLink
-                            [ alignLeft
-                            , tooltip below (myTooltip "Watch the video")
-                            , htmlAttribute <|
-                                Mouse.onWithOptions
-                                    "click"
-                                    stopProp
-                                    (always << msgWrapper <| ToolNoOp)
-                            ]
-                            { url = video
-                            , label = useIconWithSize 18 FeatherIcons.youtube
-                            }
-
-                    _ ->
-                        none
-                , Input.button
-                    [ centerX, centerY ]
-                    { onPress =
-                        Just <|
-                            msgWrapper <|
-                                ToolStateToggle toolEntry.toolId <|
-                                    nextToolState toolEntry.state
-                    , label = I18N.text settings.location toolEntry.toolId "label"
-                    }
-                , if toolEntry.state == Expanded then
-                    Input.button
-                        [ alignRight
+                _ ->
+                    [ width fill
+                    , spacing 8
+                    , padding 7
+                    , Font.color <| contrastingColour toolEntry.tabColour
+                    , Background.color toolEntry.tabColour
+                    , Border.rounded 8
+                    ]
+            )
+            [ case ( toolEntry.video, toolEntry.state ) of
+                ( Just video, Expanded ) ->
+                    newTabLink
+                        [ alignLeft
+                        , tooltip below (myTooltip "Watch the video")
                         , htmlAttribute <|
                             Mouse.onWithOptions
                                 "click"
                                 stopProp
-                                (always << msgWrapper <| ToolPopupToggle toolEntry.toolId)
+                                (always << msgWrapper <| ToolNoOp)
                         ]
-                        { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolId
-                        , label = useIconWithSize 14 FeatherIcons.settings
+                        { url = video
+                        , label = useIconWithSize 18 FeatherIcons.youtube
                         }
 
-                  else
+                _ ->
                     none
-                ]
-            , if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
-                viewToolByType settings msgWrapper toolEntry isTrack options
+            , Input.button
+                [ centerX, centerY ]
+                { onPress =
+                    Just <|
+                        msgWrapper <|
+                            ToolStateToggle toolEntry.toolId <|
+                                nextToolState toolEntry.state
+                , label = I18N.text settings.location toolEntry.toolId "label"
+                }
+            , if toolEntry.state == Expanded then
+                Input.button
+                    [ alignRight
+                    , htmlAttribute <|
+                        Mouse.onWithOptions
+                            "click"
+                            stopProp
+                            (always << msgWrapper <| ToolPopupToggle toolEntry.toolId)
+                    ]
+                    { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolId
+                    , label = useIconWithSize 14 FeatherIcons.settings
+                    }
 
               else
                 none
             ]
+        , if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
+            viewToolByType settings msgWrapper toolEntry isTrack options
+
+          else
+            none
+        ]
 
 
 showDockOptions : SystemSettings -> (ToolMsg -> msg) -> ToolEntry -> Element msg
@@ -2191,7 +2190,7 @@ viewToolByType :
     -> Element msg
 viewToolByType settings msgWrapper entry isTrack options =
     el
-        [ centerX, padding 2, width fill, Border.rounded 4 ]
+        (CommonToolStyles.toolContentBoxStyle settings)
     <|
         case entry.toolType of
             ToolTimestamps ->

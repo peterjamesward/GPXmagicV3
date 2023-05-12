@@ -2,6 +2,7 @@ module CommonToolStyles exposing (..)
 
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
@@ -27,6 +28,7 @@ toolContentBoxStyle settings =
             , centerX
             , Background.color FlatColors.ChinesePalette.antiFlashWhite
             , Font.color FlatColors.ChinesePalette.prestigeBlue
+            , Border.roundEach { topLeft = 0, topRight = 0, bottomLeft = 8, bottomRight = 8 }
             ]
 
         SystemSettings.DarkTheme ->
@@ -36,6 +38,7 @@ toolContentBoxStyle settings =
             , centerX
             , Font.color FlatColors.ChinesePalette.antiFlashWhite
             , Background.color FlatColors.ChinesePalette.prestigeBlue
+            , Border.roundEach { topLeft = 0, topRight = 0, bottomLeft = 8, bottomRight = 8 }
             ]
 
 
