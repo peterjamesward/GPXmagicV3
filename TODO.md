@@ -25,19 +25,22 @@ Need skin options for layout in main, tools controller, pane layout.
 
 TODO: Maybe v2 skin toolbox doesn't need to be _that_ different from v3.
 > Can't change colour in v2 skin
-> Tool list, names only, doesn't have to be a column.
 
+TODO: v2 skin must show tools from both docks.
 TODO: Purple bar across marker button is excessive.
 TODO: Maybe have orange scroller in essentials for v2 skin.
-TODO: Have consistent gap under mode tabs depending on pane and active view.
 TODO: Find new home for "About..."
 TODO: Fix the right splitter restore (is it because of the left being ignored).
 TODO: Make the skin a colour theme.
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
+TODO: Put back Imperial/Metric selection.
+TODO: Put back "Clear routes".
 
 ---
 
 # BACKLOG
+
+## Turn off logging & show locations
 
 ## Bends
 

@@ -1787,17 +1787,25 @@ toolsForDock :
     -> Element msg
 toolsForDock settings dock msgWrapper isTrack options =
     let
+        filterForDock =
+            if settings.v2Skin then
+                always True
+
+            else
+                \( _, t ) -> t.dock == dock
+
         visibleTools =
             orderedTools
+                |> List.filter filterForDock
                 |> List.filterMap (\( id, _ ) -> Dict.get id options.tools)
                 |> List.filter .isVisible
     in
     column [ width fill, height fill ]
-        [ column [ width fill, height fill, spacingXY 5 0, scrollbarY ]
+        [ column [ width fill, height fill, spacing 5, scrollbarY ]
             [ column [ width fill, spacing 4 ]
                 (visibleTools
                     |> List.filter
-                        (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
+                        (\t -> t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed)
                     |> List.map (viewTool settings msgWrapper isTrack options)
                 )
             , wrappedRow
@@ -1805,7 +1813,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 [ spacing 4 ]
               <|
                 (visibleTools
-                    |> List.filter (\t -> t.dock == dock && t.state == Expanded)
+                    |> List.filter (\t -> t.state == Expanded)
                     |> List.map (viewTool settings msgWrapper isTrack options)
                 )
             , wrappedRow
@@ -1813,7 +1821,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 [ spacing 4 ]
               <|
                 (visibleTools
-                    |> List.filter (\t -> t.dock == dock && t.state == Contracted)
+                    |> List.filter (\t -> t.state == Contracted)
                     |> List.map (viewTool settings msgWrapper isTrack options)
                 )
             ]
@@ -1892,8 +1900,12 @@ viewToolSettings settings options wrapper =
         compactListing : ToolEntry -> Element msg
         compactListing tool =
             Input.button
-                [--spacing 5
-                 --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+                [ --spacing 5
+                  --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+                  Border.width 1
+                , Border.color FlatColors.FlatUIPalette.silver
+                , Border.rounded 4
+                , padding 2
                 ]
                 { onPress =
                     if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
@@ -1934,17 +1946,25 @@ viewToolSettings settings options wrapper =
     in
     column
         ([ width fill
-         , height <| px 400
+         , height <|
+            if options.compact then
+                px 250
+
+            else
+                px 400
          , scrollbarY
          , padding 10
          , spacing 3
          ]
             ++ CommonToolStyles.toolContentBoxStyle settings
         )
-    <|
-        (wrappedRow [ width fill, centerX, spacing 4, padding 4 ] [ sortMethod, compact ]
-            :: (List.map displayStyle <| sortedTools settings options)
-        )
+        [ wrappedRow [ width fill, centerX, spacing 4, padding 4 ] [ sortMethod, compact ]
+        , if options.compact then
+            wrappedRow [ spacing 6 ] (List.map compactListing <| sortedTools settings options)
+
+          else
+            column [] (List.map locationChoices <| sortedTools settings options)
+        ]
 
 
 sortedTools : SystemSettings -> Options msg -> List ToolEntry

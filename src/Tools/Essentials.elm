@@ -214,6 +214,7 @@ viewPointers settings msgWrapper options track =
             , padding 6
             , centerY
             , centerX
+            , height <| px 40
             ]
 
         orangeStyle =
@@ -255,27 +256,24 @@ viewPointers settings msgWrapper options track =
         , el [ centerX, width fill ] <|
             case options.purple of
                 Just _ ->
-                    el
-                        [ Background.color FlatColors.AussiePalette.blurple
-                        , Font.color FlatColors.AussiePalette.coastalBreeze
-                        , width fill
-                        , height <| px 34
-                        , centerX
-                        , centerY
+                    row
+                        [ centerX
+                        , spacing 10
+                        , Font.color FlatColors.AussiePalette.blurple
                         ]
-                    <|
-                        Input.button
-                            [ Background.color FlatColors.AussiePalette.blurple
-                            , Border.color FlatColors.AussiePalette.coastalBreeze
-                            , Border.rounded 4
-                            , Border.width 2
-                            , padding 8
-                            , centerY
-                            , centerX
-                            ]
+                        [ Input.button purpleStyle
+                            { label = useIcon FeatherIcons.chevronLeft
+                            , onPress = Just <| msgWrapper <| MarkerBackwardOne
+                            }
+                        , Input.button purpleStyle
                             { label = I18N.text settings.location toolId "lift"
                             , onPress = Just <| msgWrapper <| LiftMarker
                             }
+                        , Input.button purpleStyle
+                            { label = useIcon FeatherIcons.chevronRight
+                            , onPress = Just <| msgWrapper <| MarkerForwardOne
+                            }
+                        ]
 
                 Nothing ->
                     el
@@ -290,39 +288,7 @@ viewPointers settings msgWrapper options track =
                             { label = I18N.text settings.location toolId "drop"
                             , onPress = Just <| msgWrapper <| DropMarker
                             }
-        , case options.purple of
-            Just _ ->
-                row
-                    [ centerX
-                    , spacing 10
-                    , Font.color FlatColors.AussiePalette.blurple
-                    ]
-                    [ Input.button purpleStyle
-                        { label = useIcon FeatherIcons.chevronLeft
-                        , onPress = Just <| msgWrapper <| MarkerBackwardOne
-                        }
-                    , Input.button purpleStyle
-                        { label = useIcon FeatherIcons.chevronRight
-                        , onPress = Just <| msgWrapper <| MarkerForwardOne
-                        }
-                    ]
-
-            Nothing ->
-                row
-                    [ centerX
-                    , spacing 10
-                    , Font.color FlatColors.AussiePalette.coastalBreeze
-                    ]
-                    [ Input.button purpleStyle
-                        { label = useIcon FeatherIcons.chevronLeft
-                        , onPress = Nothing
-                        }
-                    , Input.button purpleStyle
-                        { label = useIcon FeatherIcons.chevronRight
-                        , onPress = Nothing
-                        }
-                    ]
-        , el [ centerX ] <|
+        , el [ centerX, padding 5 ] <|
             case options.purple of
                 Just something ->
                     text <| positionDescription settings something track.trackTree
