@@ -6,6 +6,8 @@ import Browser exposing (application)
 import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation exposing (Key)
+import Color exposing (white)
+import ColourPalette exposing (stravaOrange)
 import CommonToolStyles
 import Delay
 import Dict exposing (Dict)
@@ -1459,7 +1461,18 @@ topLoadingBar model =
         )
         [ globalOptions model
         , clearButton
-        , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
+        , if Tracks.getActiveTrack model.toolOptions.tracksOptions == Nothing then
+            StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
+
+          else
+            paragraph
+                [ Background.color FlatColors.FlatUIPalette.silver
+                , Font.color stravaOrange
+                , Font.size 12
+                , Font.family [ Font.typeface "Helvetica", Font.sansSerif ]
+                , padding 2
+                ]
+                [ text """Connect with Strava before loading a track.""" ]
         , loadGpxButton
         , moreOptionsButton
         , case Tracks.getActiveTrack model.toolOptions.tracksOptions of
