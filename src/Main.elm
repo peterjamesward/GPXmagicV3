@@ -1191,22 +1191,12 @@ view model =
                 , html <|
                     div
                         [ style "width" "100%", style "height" "100%" ]
-                    <|
-                        if model.systemSettings.singleDock then
-                            [ SplitPane.view
-                                rightDockConfig
-                                (centralAreaView model)
-                                (rightDockView model)
-                                model.rightDockLeftEdge
-                            ]
-
-                        else
-                            [ SplitPane.view
-                                rightDockConfig
-                                (notTheRightDockView model)
-                                (rightDockView model)
-                                model.rightDockLeftEdge
-                            ]
+                        [ SplitPane.view
+                            rightDockConfig
+                            (notTheRightDockView model)
+                            (rightDockView model)
+                            model.rightDockLeftEdge
+                        ]
                 ]
         ]
     }
@@ -1230,11 +1220,21 @@ rightDockConfig =
 
 notTheRightDockView : Model -> Html Msg
 notTheRightDockView model =
+    let
+        noSplitter =
+            SplitPane.init Horizontal
+                |> configureSplitter (SplitPane.px 0 (Just ( 0, 0 )))
+    in
     SplitPane.view
         leftDockConfig
         (leftDockView model)
         (centralAreaView model)
-        model.leftDockRightEdge
+    <|
+        if model.systemSettings.singleDock then
+            noSplitter
+
+        else
+            model.leftDockRightEdge
 
 
 leftDockView : Model -> Html Msg
