@@ -26,7 +26,6 @@ TODO: Fix the right splitter restore (is it because of the left being ignored).
 TODO: Make the skin a colour theme.
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
 TODO: Put "last version loaded" in storage so we can force display release notes.
-TODO: Info popups must work in v2 skin.
 
 ---
 

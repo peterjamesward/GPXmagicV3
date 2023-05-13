@@ -1171,10 +1171,25 @@ view model =
 
 viewV2Skin : Model -> Browser.Document Msg
 viewV2Skin model =
+    -- V2 skin has only the right dock, and maybe a few other simplifications.
     { title = composeTitle model
     , body =
         [ layout
-            commonLayoutStyles
+            ([ inFront <|
+                case model.modalMessage of
+                    Just message ->
+                        showModalMessage
+                            model.systemSettings
+                            (Pixels.inPixels <| Tuple.first model.contentArea)
+                            (I18N.localisedString model.systemSettings.location "main" message)
+                            DismissModalMessage
+
+                    Nothing ->
+                        none
+             , inFront <| infoTextPopup model.systemSettings model.infoText
+             ]
+                ++ commonLayoutStyles
+            )
           <|
             column
                 [ width fill, height fill ]
