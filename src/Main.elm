@@ -1457,7 +1457,7 @@ buyMeACoffeeButton =
         ]
         { url = "https://www.buymeacoffee.com/Peterward"
         , label =
-            image [ height (Element.px 40), width (Element.px 150) ]
+            image [ height (Element.px 34), width (Element.px 150) ]
                 { src = "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
                 , description = "Buy Me A Coffee"
                 }

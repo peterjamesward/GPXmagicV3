@@ -104,7 +104,7 @@ oneClickQuickFixButton location wrapper track =
     case track of
         Just _ ->
             Input.button
-                (height (px 30) :: centerY :: prettyButtonStyles)
+                (height (px 34) :: centerY :: prettyButtonStyles)
                 { onPress = Just (wrapper Apply)
                 , label = I18N.text location "main" "1CQF"
                 }

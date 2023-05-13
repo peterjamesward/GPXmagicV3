@@ -19,7 +19,7 @@ BUG: Route Builder previews not hiding when tool closed.
 
 Have now reached the stage where v2 skin is really light mode with one dock.
 
-TODO: To avoid messing up anyone's dock settings, if there is any tool in the left dock, use 2 dock mode.
+TODO: To avoid messing up anyone's dock settings, if there is any (stored) tool in the left dock, use 2 dock mode.
 
 ---
 
