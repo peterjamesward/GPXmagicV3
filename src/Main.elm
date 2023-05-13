@@ -632,7 +632,8 @@ update msg model =
                     ViewMap.defaultStyleUrl
                     mapInfoWithLocation
                     model.contentArea
-                , databasePost
+
+                --, databasePost
                 ]
             )
 
@@ -1132,7 +1133,7 @@ adjustSpaceForContent model =
 
         ( reservedWidth, reservedHeight ) =
             -- This by experiment, not ideal.
-            ( 20, 160 )
+            ( 30, 160 )
     in
     { model
         | contentArea =

@@ -5,25 +5,26 @@
 
 **Delete** Delete should display "Sorry" message unless one leaf remains.
 
-BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
-
 BUG: Map projection not restored correctly on reload.
 
 BUG: Route Builder previews not hiding when tool closed.
+
+BUG: reload gets right split wrong, but shift-reload gets it correct.
+> What does this mean? Look at messages in debugger.
+
+BUG: Profile 1 views need to redraw/rescale when pane size changes.
 
 --- 
 
 # WIP
 
-## 2.9.5 UI.
-
-TODO: Initialise left dock to zero if in single dock mode.
-
 ---
 
 # BACKLOG
 
-## Turn off logging & show locations
+## Land Use
+
+Refetch data when more tracks loaded. Or provide button in the eponymous tool.
 
 ## Bends
 
@@ -31,12 +32,13 @@ Not sure the Bend problem tool works as intended.
 Desire to simplify, unify the various tools.
 Make explicit the before & after radius, say.
 
-## Snap to Roads with TomTom
+## Remove Actions
 
-https://developer.tomtom.com/snap-to-roads-api/documentation/product-information/introduction
-
-Free for small volumes.
-5000 point limit, much better than MapBox.
+One at a time. I think the way into this is to reduce action codes to:
+- UpdatedTrack (Trackloaded msg)
+- UpdatedGraph (Graph msg)
+- MovedPointers (?)
+- etc
 
 ## Merge terrain and land use painting
 
@@ -73,14 +75,6 @@ On triangles, I think we could make Terrain look less blocky by starting out wit
 simple triangulation based on bounding box centroid to each edge (with random perturbation?),
 then using the above triangle splitting recursion. Mmm.
 
-## Remove Actions
-
-One at a time. I think the way into this is to reduce action codes to:
-- UpdatedTrack (Trackloaded msg)
-- UpdatedGraph (Graph msg)
-- MovedPointers (?)
-- etc
-
 ## Test cases for edits.
 
 You could do this you know, just not for the visuals.
@@ -116,6 +110,13 @@ Provide info text capability on top bar and on view panes.
 ---
 
 # The cellar
+
+## Snap to Roads with TomTom
+
+https://developer.tomtom.com/snap-to-roads-api/documentation/product-information/introduction
+
+Free for small volumes.
+5000 point limit, much better than MapBox.
 
 ## Derive climbs from WKO file
 

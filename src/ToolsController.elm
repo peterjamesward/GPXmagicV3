@@ -337,8 +337,8 @@ toolSettings =
     , state = SettingsClosed
     , isVisible = True
     , dock = DockRight
-    , tabColour = rgtPurple
-    , textColour = contrastingColour rgtPurple
+    , tabColour = FlatColors.ChinesePalette.grisaille
+    , textColour = contrastingColour FlatColors.ChinesePalette.grisaille
     , isPopupOpen = False
     }
 

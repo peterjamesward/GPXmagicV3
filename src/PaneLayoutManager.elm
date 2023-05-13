@@ -390,6 +390,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
             updatePaneWith paneId paneUpdateFunction
 
         ProfileViewMessage paneId imageMsg ->
+            --TODO: Stop sharing this message type between two profile types.
             let
                 paneUpdateFunction :
                     PaneContext
@@ -910,6 +911,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
         [ centerX
         , width fill
         , spacing 5
+        , paddingEach { left = 10, right = 0, top = 0, bottom = 0 }
         , inFront <| paneLayoutMenu settings.location msgWrapper options
         ]
     <|
