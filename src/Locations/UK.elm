@@ -1,5 +1,6 @@
 module Locations.UK exposing (location)
 
+import About
 import Countries exposing (Country)
 import Dict exposing (Dict)
 import FormatNumber.Locales exposing (usLocale)
@@ -24,6 +25,8 @@ textDictionary =
                 [ ( "loadgpx", """Load GPX file""" )
                 , ( "savegpx", """Save GPX file""" )
                 , ( "clear", """Clear loaded route(s)""" )
+                , ( "about", """About this...""" )
+                , ( "aboutText", About.aboutText )
                 , ( "loadurl", """Load GPX from HTTP URL""" )
                 , ( "urlhelp", """Paste or type web address of GPX file here""" )
                 , ( "notrack", """No track loaded""" )

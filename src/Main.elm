@@ -1,5 +1,6 @@
 module Main exposing (Model, Msg, main)
 
+import About
 import Actions exposing (ToolAction(..))
 import Angle
 import Browser exposing (application)
@@ -107,7 +108,7 @@ type Msg
     | GpxSelected File
     | GpxLoaded String
     | ClearLoadedTracks
-    | TryRemoteLoad
+    | DisplayAboutMessage
     | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
@@ -460,21 +461,16 @@ update msg model =
                 ]
             )
 
+        DisplayAboutMessage ->
+            ( { model | modalMessage = Just "aboutText" }, Cmd.none )
+
         DisplayWelcome ->
-            let
-                -- Try loading remote data now, after map may have initialised
-                loadCmd =
-                    Delay.after 500 TryRemoteLoad
-            in
             if model.welcomeDisplayed then
-                ( model, loadCmd )
+                ( model, Cmd.none )
 
             else
                 ( { model | infoText = Just ( "main", "welcome" ) }
-                , Cmd.batch
-                    [ LocalStorage.storageSetItem "welcome" (E.bool True)
-                    , loadCmd
-                    ]
+                , LocalStorage.storageSetItem "welcome" (E.bool True)
                 )
 
         RGTOptions options ->
@@ -626,19 +622,6 @@ update msg model =
                     model.contentArea
                 , databasePost
                 ]
-            )
-
-        TryRemoteLoad ->
-            ( model
-            , case model.loadFromUrl of
-                Nothing ->
-                    Cmd.none
-
-                Just url ->
-                    Http.get
-                        { url = Url.toString url
-                        , expect = Http.expectString GpxFromUrl
-                        }
             )
 
         GpxFromUrl result ->
@@ -1182,7 +1165,7 @@ viewV2Skin model =
                     Just message ->
                         showModalMessage
                             model.systemSettings
-                            (Pixels.inPixels <| Tuple.first model.contentArea)
+                            model.contentArea
                             (I18N.localisedString model.systemSettings.location "main" message)
                             DismissModalMessage
 
@@ -1222,7 +1205,7 @@ viewV3Skin model =
                     Just message ->
                         showModalMessage
                             model.systemSettings
-                            (Pixels.inPixels <| Tuple.first model.contentArea)
+                            model.contentArea
                             (I18N.localisedString model.systemSettings.location "main" message)
                             DismissModalMessage
 
@@ -1400,6 +1383,18 @@ topLoadingBar model =
                 , label = localHelper "clear"
                 }
 
+        aboutButton =
+            button
+                [ padding 5
+                , height <| Element.px 34
+                , Background.color FlatColors.FlatUIPalette.wisteria
+                , Font.color FlatColors.FlatUIPalette.silver
+                , Border.rounded 5
+                ]
+                { onPress = Just DisplayAboutMessage
+                , label = localHelper "about"
+                }
+
         saveButton =
             row [ spacing 0, padding 0, height <| Element.px 34 ]
                 [ button
@@ -1450,6 +1445,9 @@ topLoadingBar model =
                     , label = useIconWithSize 14 FeatherIcons.list
                     }
                 ]
+
+        trackLoaded =
+            Tracks.getActiveTrack model.toolOptions.tracksOptions /= Nothing
     in
     wrappedRow
         (commonLayoutStyles
@@ -1460,9 +1458,13 @@ topLoadingBar model =
                ]
         )
         [ globalOptions model
-        , clearButton
+        , if trackLoaded then
+            clearButton
+
+          else
+            aboutButton
         , StravaAuth.stravaButton
-            (Tracks.getActiveTrack model.toolOptions.tracksOptions /= Nothing)
+            trackLoaded
             model.stravaAuthentication
             OAuthMessage
         , loadGpxButton

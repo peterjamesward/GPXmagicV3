@@ -370,8 +370,13 @@ useIconWithSize size =
     html << FeatherIcons.toHtml [] << FeatherIcons.withSize size
 
 
-showModalMessage : SystemSettings -> Int -> String -> msg -> Element msg
-showModalMessage settings areaWidth content msg =
+showModalMessage :
+    SystemSettings
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> String
+    -> msg
+    -> Element msg
+showModalMessage settings contentArea content msg =
     let
         location =
             settings.location
@@ -379,39 +384,24 @@ showModalMessage settings areaWidth content msg =
     column
         [ centerY
         , centerX
-        , width <| px areaWidth
+        , width <| px <| (Pixels.inPixels <| Tuple.first contentArea) - 200
+        , height <| px <| (Pixels.inPixels <| Tuple.second contentArea) - 100
+        , scrollbarY
+        , padding 20
+        , spacing 20
         , Border.width 6
         , Border.color FlatColors.AussiePalette.quinceJelly
         , Border.rounded 8
         , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
         , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
         ]
-        [ row
-            [ width fill
-            , spacing 8
-            , padding 4
-            , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
-            , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
-            ]
-            [ I18N.text location "main" "message"
-            ]
-        , column
-            [ Background.color (CommonToolStyles.themeBackground settings.colourTheme)
-            , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
-            , height fill
-            , width fill
-            , spacing 20
-            , padding 20
-            ]
-            [ paragraph
-                [ width fill ]
-              <|
-                [ html <| Markdown.toHtml [] content ]
-            , Input.button neatToolsBorder
-                { onPress = Just msg
-                , label = I18N.text location "main" "dismiss"
-                }
-            ]
+        [ Input.button (alignRight :: neatToolsBorder)
+            { onPress = Just msg
+            , label = I18N.text location "main" "dismiss"
+            }
+        , paragraph
+            [ width fill ]
+            [ html <| Markdown.toHtml [] content ]
         ]
 
 

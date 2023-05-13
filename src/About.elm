@@ -2,8 +2,7 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """
-# GPXmagic v3.11.12 (26f36e2e, 2023-05-08 14:30)
+    """# GPXmagic v3.11.12 (26f36e2e, 2023-05-08 14:30)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
 
@@ -397,6 +396,4 @@ Icons from www.flaticon.com/free-icons/.
 Your IP address may be logged for the purpose of aggregate usage recording; no personal details are stored.
 
 Cookie policy is "use no cookies". This may not apply to third-party components.
-
-
     """
