@@ -2194,6 +2194,21 @@ performActionsOnModel actions model =
                                 _ ->
                                     foldedModel
 
+                        "singleDock" ->
+                            case D.decodeValue D.bool value of
+                                Ok True ->
+                                    let
+                                        settings =
+                                            foldedModel.systemSettings
+
+                                        newSettings =
+                                            { settings | singleDock = True }
+                                    in
+                                    { foldedModel | systemSettings = newSettings }
+
+                                _ ->
+                                    foldedModel
+
                         "visuals" ->
                             let
                                 toolOptions =

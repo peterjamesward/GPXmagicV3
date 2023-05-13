@@ -21,12 +21,10 @@ BUG: Route Builder previews not hiding when tool closed.
 
 Have now reached the stage where v2 skin is really light mode with one dock.
 
-This means we can now just have a single/twin dock option and unify the colours.
-> Decode single dock from local storage.
 > !! Switching dock modes breaks the map. Must not change DOM structure !!
+> Dock side selection not working.
 
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
-TODO: Put "last version loaded" in storage so we can force display release notes.
 
 ---
 

@@ -46,7 +46,7 @@ themeBackground : ColourTheme -> Element.Color
 themeBackground theme =
     case theme of
         LightTheme ->
-            FlatColors.ChinesePalette.antiFlashWhite
+            FlatColors.ChinesePalette.white
 
         DarkTheme ->
             FlatColors.FlatUIPalette.midnightBlue
@@ -59,7 +59,7 @@ themeForeground theme =
             FlatColors.FlatUIPalette.midnightBlue
 
         DarkTheme ->
-            FlatColors.ChinesePalette.antiFlashWhite
+            FlatColors.ChinesePalette.white
 
 
 encodeTheme : ColourTheme -> E.Value
