@@ -13,7 +13,7 @@ type alias SystemSettings =
     { imperial : Bool
     , colourTheme : ColourTheme
     , location : I18NOptions.Location
-    , v2Skin : Bool
+    , singleDock : Bool
     }
 
 
@@ -21,5 +21,5 @@ default =
     { imperial = False
     , colourTheme = LightTheme
     , location = I18NOptions.defaultLocation
-    , v2Skin = True
+    , singleDock = True
     }

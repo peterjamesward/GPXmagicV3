@@ -145,6 +145,7 @@ type Msg
     | RGTOptions Tools.RGTOptions.Msg
     | ProfilePaint
     | ToggleImperial
+    | ToggleSingleDock
     | MatchingRoute (Result Http.Error Tools.MapMatchingRouterOptions.Matchings)
     | NoOp
 
@@ -440,6 +441,18 @@ update msg model =
             in
             ( { model | systemSettings = newSettings }
             , LocalStorage.storageSetItem "measure" <| E.bool newSettings.imperial
+            )
+
+        ToggleSingleDock ->
+            let
+                settings =
+                    model.systemSettings
+
+                newSettings =
+                    { settings | singleDock = not settings.singleDock }
+            in
+            ( { model | systemSettings = newSettings }
+            , LocalStorage.storageSetItem "singleDock" <| E.bool newSettings.singleDock
             )
 
         UserLocationsVisible visible ->
@@ -1107,7 +1120,7 @@ adjustSpaceForContent model =
             )
 
         availableWidthPixels =
-            if model.systemSettings.v2Skin then
+            if model.systemSettings.singleDock then
                 SplitPane.getPosition model.rightDockLeftEdge
                     - reservedWidth
 
@@ -1150,20 +1163,13 @@ bestTrackName model =
 
 view : Model -> Browser.Document Msg
 view model =
-    if model.systemSettings.v2Skin then
-        viewV2Skin model
-
-    else
-        viewV3Skin model
-
-
-viewV2Skin : Model -> Browser.Document Msg
-viewV2Skin model =
     -- V2 skin has only the right dock, and maybe a few other simplifications.
     { title = composeTitle model
     , body =
         [ layout
-            ([ inFront <|
+            ([ Background.color (CommonToolStyles.themeBackground model.systemSettings.colourTheme)
+             , Font.color (CommonToolStyles.themeForeground model.systemSettings.colourTheme)
+             , inFront <|
                 case model.modalMessage of
                     Just message ->
                         showModalMessage
@@ -1185,58 +1191,22 @@ viewV2Skin model =
                 , html <|
                     div
                         [ style "width" "100%", style "height" "100%" ]
-                        [ SplitPane.view
-                            rightDockConfig
-                            (centralAreaView model)
-                            (rightDockView model)
-                            model.rightDockLeftEdge
-                        ]
-                ]
-        ]
-    }
+                    <|
+                        if model.systemSettings.singleDock then
+                            [ SplitPane.view
+                                rightDockConfig
+                                (centralAreaView model)
+                                (rightDockView model)
+                                model.rightDockLeftEdge
+                            ]
 
-
-viewV3Skin : Model -> Browser.Document Msg
-viewV3Skin model =
-    { title = composeTitle model
-    , body =
-        [ layout
-            ([ Background.color (CommonToolStyles.themeBackground model.systemSettings.colourTheme)
-             , Font.color (CommonToolStyles.themeForeground model.systemSettings.colourTheme)
-             , inFront <|
-                case model.modalMessage of
-                    Just message ->
-                        showModalMessage
-                            model.systemSettings
-                            model.contentArea
-                            (I18N.localisedString model.systemSettings.location "main" message)
-                            DismissModalMessage
-
-                    Nothing ->
-                        none
-             , inFront <| infoTextPopup model.systemSettings model.infoText
-             , inFront <|
-                if model.languageEditorOpen then
-                    I18N.editor I18NMsg model.systemSettings.location model.languageEditor
-
-                else
-                    none
-             ]
-                --:: (htmlAttribute <| Mouse.onClick BackgroundClick)
-                ++ commonLayoutStyles
-            )
-          <|
-            column [ width fill, height fill ]
-                [ topLoadingBar model
-                , html <|
-                    div
-                        [ style "width" "100%", style "height" "100%" ]
-                        [ SplitPane.view
-                            rightDockConfig
-                            (notTheRightDockView model)
-                            (rightDockView model)
-                            model.rightDockLeftEdge
-                        ]
+                        else
+                            [ SplitPane.view
+                                rightDockConfig
+                                (notTheRightDockView model)
+                                (rightDockView model)
+                                model.rightDockLeftEdge
+                            ]
                 ]
         ]
     }
@@ -1258,11 +1228,6 @@ rightDockConfig =
         }
 
 
-rightDockView : Model -> Html Msg
-rightDockView model =
-    upperRightDockView model
-
-
 notTheRightDockView : Model -> Html Msg
 notTheRightDockView model =
     SplitPane.view
@@ -1274,11 +1239,6 @@ notTheRightDockView model =
 
 leftDockView : Model -> Html Msg
 leftDockView model =
-    upperLeftDockView model
-
-
-upperLeftDockView : Model -> Html Msg
-upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
@@ -1290,8 +1250,8 @@ upperLeftDockView model =
             model.toolOptions
 
 
-upperRightDockView : Model -> Html Msg
-upperRightDockView model =
+rightDockView : Model -> Html Msg
+rightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
@@ -1359,19 +1319,11 @@ topLoadingBar model =
                 }
 
         loadGpxButton =
-            if model.systemSettings.v2Skin then
-                button
-                    (Element.height (Element.px 34) :: ViewPureStyles.v2ButtonStyles)
-                    { onPress = Just GpxRequested
-                    , label = localHelper "loadgpx"
-                    }
-
-            else
-                button
-                    neatToolsBorder
-                    { onPress = Just GpxRequested
-                    , label = localHelper "loadgpx"
-                    }
+            button
+                (Element.height (Element.px 34) :: ViewPureStyles.v2ButtonStyles)
+                { onPress = Just GpxRequested
+                , label = localHelper "loadgpx"
+                }
 
         clearButton =
             button
@@ -1604,7 +1556,7 @@ showOptionsMenu model =
                 }
 
         imperialToggleMenuEntry location =
-            Input.button [ alignRight ]
+            Input.button [ centerX ]
                 { onPress = Just ToggleImperial
                 , label =
                     if model.systemSettings.imperial then
@@ -1612,6 +1564,17 @@ showOptionsMenu model =
 
                     else
                         I18N.text location "main" "imperial"
+                }
+
+        singleDockToggleButton location =
+            Input.button [ centerX ]
+                { onPress = Just ToggleSingleDock
+                , label =
+                    if model.systemSettings.singleDock then
+                        I18N.text location "main" "double"
+
+                    else
+                        I18N.text location "main" "single"
                 }
 
         languageEditor =
@@ -1631,34 +1594,24 @@ showOptionsMenu model =
                 }
     in
     if model.isPopupOpen then
-        if model.systemSettings.v2Skin then
-            column (spacing 4 :: subtleToolStyles)
-                [ el (alignRight :: width fill :: subtleToolStyles) <|
-                    Input.button [ alignRight ]
-                        { onPress = Just <| RestoreDefaultToolLayout
-                        , label = I18N.text model.systemSettings.location "main" "default"
-                        }
-                , el (alignRight :: width fill :: subtleToolStyles) <|
-                    imperialToggleMenuEntry model.systemSettings.location
+        column (spacing 4 :: subtleToolStyles)
+            [ row (alignRight :: width fill :: subtleToolStyles)
+                [ colourBlock SystemSettings.LightTheme
+                , colourBlock SystemSettings.DarkTheme
                 ]
-
-        else
-            column (spacing 4 :: subtleToolStyles)
-                [ row (alignRight :: width fill :: subtleToolStyles)
-                    [ colourBlock SystemSettings.LightTheme
-                    , colourBlock SystemSettings.DarkTheme
-                    ]
-                , el (alignRight :: width fill :: subtleToolStyles) <|
-                    Input.button [ alignRight ]
-                        { onPress = Just <| RestoreDefaultToolLayout
-                        , label = I18N.text model.systemSettings.location "main" "default"
-                        }
-                , el (alignRight :: width fill :: subtleToolStyles) <|
-                    imperialToggleMenuEntry model.systemSettings.location
-                , row [ spaceEvenly, width fill ] <|
-                    List.map chooseLanguage I18N.availableI18N
-                , languageEditor
-                ]
+            , el (alignRight :: width fill :: subtleToolStyles) <|
+                singleDockToggleButton model.systemSettings.location
+            , el (alignRight :: width fill :: subtleToolStyles) <|
+                Input.button [ alignRight ]
+                    { onPress = Just <| RestoreDefaultToolLayout
+                    , label = I18N.text model.systemSettings.location "main" "default"
+                    }
+            , el (alignRight :: width fill :: subtleToolStyles) <|
+                imperialToggleMenuEntry model.systemSettings.location
+            , row [ spaceEvenly, width fill ] <|
+                List.map chooseLanguage I18N.availableI18N
+            , languageEditor
+            ]
 
     else
         none

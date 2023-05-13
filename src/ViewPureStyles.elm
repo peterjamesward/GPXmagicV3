@@ -309,6 +309,7 @@ subtleToolStyles =
     , Border.width 2
     , padding 4
     , Font.color FlatColors.ChinesePalette.prestigeBlue
+    , centerX
     ]
 
 

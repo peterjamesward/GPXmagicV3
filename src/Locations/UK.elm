@@ -50,6 +50,8 @@ points are too far from the nearest road.""" )
                 , ( "default", """Restore default tool layout""" )
                 , ( "imperial", """Use Imperial measures""" )
                 , ( "metric", """Use Metric measures""" )
+                , ( "single", """Use right dock (v2)""" )
+                , ( "double", """Use two docks (v3)""" )
                 , ( "welcome", """
 # Welcome to GPXmagic
 

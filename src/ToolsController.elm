@@ -1788,7 +1788,7 @@ toolsForDock :
 toolsForDock settings dock msgWrapper isTrack options =
     let
         filterForDock =
-            if settings.v2Skin then
+            if settings.singleDock then
                 always True
 
             else
@@ -1838,7 +1838,7 @@ viewToolSettings settings options wrapper =
             compactRadioButton << i18n
 
         fullOptionList tool =
-            if settings.v2Skin then
+            if settings.singleDock then
                 []
 
             else
@@ -2022,14 +2022,9 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                     , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
                     , htmlAttribute (style "z-index" "20")
                     ]
-                <|
-                    if settings.v2Skin then
-                        [ showColourOptions msgWrapper toolEntry ]
-
-                    else
-                        [ showDockOptions settings msgWrapper toolEntry
-                        , showColourOptions msgWrapper toolEntry
-                        ]
+                    [ showDockOptions settings msgWrapper toolEntry
+                    , showColourOptions msgWrapper toolEntry
+                    ]
     in
     column
         [ width fill
