@@ -198,8 +198,8 @@ defaultOptions : Options msg
 defaultOptions =
     { tools = defaultTools
     , docks = Dict.fromList dockList
-    , azSort = False
-    , compact = False
+    , azSort = True
+    , compact = True
     , directionChangeOptions = DirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
     , essentialOptions = Tools.Essentials.defaultOptions
