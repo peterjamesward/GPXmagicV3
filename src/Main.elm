@@ -316,9 +316,9 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "visuals"
         , LocalStorage.storageGetItem "docks"
         , LocalStorage.storageGetItem "location"
-        , LocalStorage.fetchMemoryUsage
         , LocalStorage.storageGetItem "welcome"
         , LocalStorage.storageGetItem "tool:tools"
+        , LocalStorage.fetchMemoryUsage
         , Delay.after 100 DisplayWelcome
         ]
     )
@@ -478,10 +478,11 @@ update msg model =
 
         DisplayWelcome ->
             if model.welcomeDisplayed then
-                ( model, Cmd.none )
+                ( model |> adjustSpaceForContent, Cmd.none )
 
             else
                 ( { model | infoText = Just ( "main", "welcome" ) }
+                    |> adjustSpaceForContent
                 , LocalStorage.storageSetItem "welcome" (E.bool True)
                 )
 

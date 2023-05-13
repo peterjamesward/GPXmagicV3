@@ -28,6 +28,9 @@ Visual clutter is reduced by showing the video link and colour options only on o
 
 The pane layout menu is replaced by a simple, and I hope obvious, set of buttons.
 
+The "About" view has gone. The release notes can be accessed from the "About this..." button
+on the top bar, until you load a track when it is replaced by "Clear loaded route(s)".
+
 ## 3.11.12
 
 Fixed bug in Route Builder that was causing too many "Key Places". It's better, not perfect.
