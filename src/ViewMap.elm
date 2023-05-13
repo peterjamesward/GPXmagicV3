@@ -195,6 +195,7 @@ view settings track ( viewWidth, viewHeight ) mContext msgWrapper =
                     , alignRight
                     , moveLeft 40
                     , Background.color FlatColors.FlatUIPalette.silver
+                    , Border.rounded 8
                     ]
                     { onChange = msgWrapper << ChooseMapStyle
                     , options =
