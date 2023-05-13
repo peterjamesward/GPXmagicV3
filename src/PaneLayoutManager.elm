@@ -125,7 +125,7 @@ type Msg
 paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
 paneLayoutMenu location msgWrapper options =
     el
-        [ alignRight, alignTop, moveLeft 30 ]
+        [ alignRight, alignTop, moveLeft 20 ]
     <|
         Input.radioRow []
             { options = optionList location

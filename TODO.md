@@ -19,15 +19,14 @@ BUG: Route Builder previews not hiding when tool closed.
 
 ## 2.9.5 UI.
 
-Is it possible to make 3.x look like 2.9.5, so we have the same engine?
+Make 3.x look less unlike 2.9.5, so we have the same engine?
 
-TODO: Put back Imperial/Metric selection.
-TODO: Put back "Clear routes".
 TODO: Find new home for "About..."
 TODO: Fix the right splitter restore (is it because of the left being ignored).
 TODO: Make the skin a colour theme.
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
 TODO: Put "last version loaded" in storage so we can force display release notes.
+TODO: Info popups must work in v2 skin.
 
 ---
 

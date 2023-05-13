@@ -4,6 +4,7 @@ import Actions exposing (ToolAction(..))
 import CommonToolStyles
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import Json.Decode as D
@@ -161,14 +162,18 @@ update msg options =
 view : SystemSettings -> (Msg -> msg) -> Options -> Element msg
 view settings wrap options =
     let
+        groupStyle =
+            [ padding 5
+            , spacing 5
+            , Border.width 1
+            , Border.rounded 4
+            ]
+
         i18n =
             I18N.text settings.location toolId
 
         curtainChoice =
-            Input.radio
-                [ padding 5
-                , spacing 5
-                ]
+            Input.radio groupStyle
                 { onChange = wrap << SetCurtainStyle
                 , selected = Just options.curtainStyle
                 , label = Input.labelBelow [] (i18n "Curtain")
@@ -180,10 +185,7 @@ view settings wrap options =
                 }
 
         landUseChoice =
-            Input.radio
-                [ padding 5
-                , spacing 5
-                ]
+            Input.radio groupStyle
                 { onChange = wrap << SetLandUse
                 , selected = Just options.landUse
                 , label =
@@ -202,7 +204,8 @@ view settings wrap options =
     wrappedRow
         (CommonToolStyles.toolContentBoxStyle settings)
         [ curtainChoice
-        , column []
+        , landUseChoice
+        , column groupStyle
             [ Input.checkbox
                 [ padding 5
                 , spacing 5
@@ -240,7 +243,35 @@ view settings wrap options =
                 , icon = Input.defaultCheckbox
                 }
             ]
-        , landUseChoice
+        , column groupStyle
+            [ Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << UseGlobeProjection
+                , checked = options.mapProjection == "globe"
+                , label = Input.labelRight [] <| text "Use Globe map"
+                , icon = Input.defaultCheckbox
+                }
+            , Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << AllowMapTilt
+                , checked = options.mapAllowTilt
+                , label = Input.labelRight [] <| text "Map can tilt"
+                , icon = Input.defaultCheckbox
+                }
+            , Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << AllowMapRotate
+                , checked = options.mapAllowRotate
+                , label = Input.labelRight [] <| text "Map can rotate"
+                , icon = Input.defaultCheckbox
+                }
+            ]
         , Input.slider commonShortHorizontalSliderStyles
             { onChange = wrap << SetTerrainFineness
             , label =
@@ -255,32 +286,5 @@ view settings wrap options =
             , step = Nothing
             , value = options.terrainFineness
             , thumb = Input.defaultThumb
-            }
-        , Input.checkbox
-            [ padding 5
-            , spacing 5
-            ]
-            { onChange = wrap << UseGlobeProjection
-            , checked = options.mapProjection == "globe"
-            , label = Input.labelRight [] <| text "Use Globe map"
-            , icon = Input.defaultCheckbox
-            }
-        , Input.checkbox
-            [ padding 5
-            , spacing 5
-            ]
-            { onChange = wrap << AllowMapTilt
-            , checked = options.mapAllowTilt
-            , label = Input.labelRight [] <| text "Map can tilt"
-            , icon = Input.defaultCheckbox
-            }
-        , Input.checkbox
-            [ padding 5
-            , spacing 5
-            ]
-            { onChange = wrap << AllowMapRotate
-            , checked = options.mapAllowRotate
-            , label = Input.labelRight [] <| text "Map can rotate"
-            , icon = Input.defaultCheckbox
             }
         ]

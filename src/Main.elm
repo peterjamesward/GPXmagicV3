@@ -1371,22 +1371,17 @@ topLoadingBar model =
                     }
 
         clearButton =
-            if model.systemSettings.v2Skin then
-                none
-
-            else
-                button
-                    [ padding 5
-                    , height <| Element.px 40
-                    , Border.color FlatColors.FlatUIPalette.peterRiver
-                    , Border.width 2
-                    , Background.color <| Element.rgb255 255 0 0
-                    , Font.color <| Element.rgb255 255 255 255
-                    , Border.rounded 5
-                    ]
-                    { onPress = Just ClearLoadedTracks
-                    , label = localHelper "clear"
-                    }
+            button
+                [ padding 5
+                , height <| Element.px 34
+                , Border.color FlatColors.FlatUIPalette.peterRiver
+                , Background.color <| Element.rgb255 255 0 0
+                , Font.color <| Element.rgb255 255 255 255
+                , Border.rounded 5
+                ]
+                { onPress = Just ClearLoadedTracks
+                , label = localHelper "clear"
+                }
 
         saveButton =
             row [ spacing 0, padding 0, height <| Element.px 34 ]
@@ -1618,7 +1613,8 @@ showOptionsMenu model =
                         { onPress = Just <| RestoreDefaultToolLayout
                         , label = I18N.text model.systemSettings.location "main" "default"
                         }
-                , showUserLocations
+                , el (alignRight :: width fill :: subtleToolStyles) <|
+                    imperialToggleMenuEntry model.systemSettings.location
                 ]
 
         else
@@ -1637,7 +1633,6 @@ showOptionsMenu model =
                 , row [ spaceEvenly, width fill ] <|
                     List.map chooseLanguage I18N.availableI18N
                 , languageEditor
-                , showUserLocations
                 ]
 
     else
