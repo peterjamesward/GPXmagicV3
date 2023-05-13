@@ -9,6 +9,7 @@ module ToolsController exposing
     , ToolEntry
     , ToolMsg(..)
     , ToolState(..)
+    , anyToolsInLeftDock
     , clearPopups
     , colourDecoder
     , decodeColour
@@ -745,7 +746,7 @@ tracksTool =
     , video = Just "https://youtu.be/WOWuwMD7bO0"
     , state = Contracted
     , isVisible = True
-    , dock = DockLeft
+    , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -1772,6 +1773,15 @@ toolStateHasChanged toolId showPreviews isTrack options =
                     { options | tracksOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+
+anyToolsInLeftDock : Options msg -> Bool
+anyToolsInLeftDock options =
+    orderedTools
+        |> List.filterMap (\( id, _ ) -> Dict.get id options.tools)
+        |> List.filter (\t -> t.dock == DockLeft)
+        |> List.isEmpty
+        |> not
 
 
 

@@ -2146,9 +2146,25 @@ performActionsOnModel actions model =
                             foldedModel |> decodeSplitValues value
 
                         "tools" ->
-                            { foldedModel
-                                | toolOptions =
-                                    ToolsController.restoreStoredValues foldedModel.toolOptions value
+                            let
+                                modelWithRestoredTools =
+                                    { foldedModel
+                                        | toolOptions =
+                                            ToolsController.restoreStoredValues foldedModel.toolOptions value
+                                    }
+
+                                currentSettings =
+                                    foldedModel.systemSettings
+
+                                settingsWithDerivedDockOption =
+                                    if ToolsController.anyToolsInLeftDock modelWithRestoredTools.toolOptions then
+                                        { currentSettings | singleDock = False }
+
+                                    else
+                                        currentSettings
+                            in
+                            { modelWithRestoredTools
+                                | systemSettings = settingsWithDerivedDockOption
                             }
 
                         "tool:tools" ->
