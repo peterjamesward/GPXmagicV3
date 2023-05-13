@@ -1461,18 +1461,10 @@ topLoadingBar model =
         )
         [ globalOptions model
         , clearButton
-        , if Tracks.getActiveTrack model.toolOptions.tracksOptions == Nothing then
-            StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
-
-          else
-            paragraph
-                [ Background.color FlatColors.FlatUIPalette.silver
-                , Font.color stravaOrange
-                , Font.size 12
-                , Font.family [ Font.typeface "Helvetica", Font.sansSerif ]
-                , padding 2
-                ]
-                [ text """Connect with Strava before loading a track.""" ]
+        , StravaAuth.stravaButton
+            (Tracks.getActiveTrack model.toolOptions.tracksOptions /= Nothing)
+            model.stravaAuthentication
+            OAuthMessage
         , loadGpxButton
         , moreOptionsButton
         , case Tracks.getActiveTrack model.toolOptions.tracksOptions of

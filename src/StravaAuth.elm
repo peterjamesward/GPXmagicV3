@@ -12,6 +12,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input exposing (button)
 import FlatColors.ChinesePalette exposing (white)
+import FlatColors.FlatUIPalette
 import Http
 import Json.Decode as Json
 import OAuth
@@ -296,38 +297,52 @@ defaultHttpsUrl =
     }
 
 
-stravaButton : Model -> (OAuthMsg -> msg) -> Element msg
-stravaButton model msgWrapper =
+stravaButton : Bool -> Model -> (OAuthMsg -> msg) -> Element msg
+stravaButton trackLoaded model msgWrapper =
     case model.flow of
         Done userInfo _ ->
             column
                 [ Background.color stravaOrange
+                , width <| px 160
+                , height <| px 40
                 , Font.color white
                 , Font.size 12
                 , Font.family [ Font.typeface "Helvetica", Font.sansSerif ]
                 , padding 2
                 ]
-                [ paragraph []
+                [ paragraph [ centerX, centerY ]
                     [ text "Connected to Strava as "
                     , text <| userInfo.firstname ++ " " ++ userInfo.lastname
                     ]
                 ]
 
         _ ->
-            button
-                []
-                { onPress = Just <| msgWrapper SignInRequested
-                , label =
-                    image
-                        [ mouseOver [ alpha 0.7 ]
-                        , width <| px 160
-                        , height <| px 40
-                        , Border.rounded 5
-                        ]
-                        { src = Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
-                        , description = "Connect to Strava"
-                        }
-                }
+            if trackLoaded then
+                paragraph
+                    [ Background.color FlatColors.FlatUIPalette.silver
+                    , Font.color stravaOrange
+                    , Font.size 12
+                    , width <| px 160
+                    , Font.family [ Font.typeface "Helvetica", Font.sansSerif ]
+                    , padding 2
+                    ]
+                    [ text """Connect with Strava before loading a track.""" ]
+
+            else
+                button
+                    []
+                    { onPress = Just <| msgWrapper SignInRequested
+                    , label =
+                        image
+                            [ mouseOver [ alpha 0.7 ]
+                            , width <| px 160
+                            , height <| px 40
+                            , Border.rounded 5
+                            ]
+                            { src = Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
+                            , description = "Connect to Strava"
+                            }
+                    }
 
 
 getStravaToken : Model -> Maybe OAuth.Token
