@@ -1795,7 +1795,8 @@ toolsForDock settings dock msgWrapper isTrack options =
                 \( _, t ) -> t.dock == dock
 
         visibleTools =
-            orderedTools
+            options.tools
+                |> Dict.toList
                 |> List.filter filterForDock
                 |> List.filterMap (\( id, _ ) -> Dict.get id options.tools)
                 |> List.filter .isVisible

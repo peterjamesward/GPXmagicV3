@@ -21,8 +21,6 @@ BUG: Route Builder previews not hiding when tool closed.
 
 Have now reached the stage where v2 skin is really light mode with one dock.
 
-> Dock side selection not working.
-
 TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
 
 ---
