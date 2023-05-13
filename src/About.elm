@@ -2,9 +2,31 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.11.12 (26f36e2e, 2023-05-08 14:30)
+    """# GPXmagic v3.12.0 (26f36e2e, 2023-05-13 20:30)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
+
+## 3.12.0
+
+The pixel fairies have crawled over the UI and given it a spring-clean. It's somewhat
+reminiscent of 2.9.5, which should please some. Under the "gear wheel" global options menu
+at top left, you can elect to have all the tools on the right (like v2) or have them
+left and right (v3). You can still have light or dark colour themes and all that.
+
+Top bar buttons have been slightly reorganised and harmonised.
+
+Strava button is disabled when tracks are loaded, to prevent accidents.
+
+Display settings is organised more tidily.
+
+"Tools summary" is now "Tools options". The "Names only" display is more compact. The
+tool reflect the single/dual dock option.
+
+The Orange and Purple marker tools ("Essentials") are cleaner, and have the old v2 scroller as well.
+
+Visual clutter is reduced by showing the video link and colour options only on open tools.
+
+The pane layout menu is replaced by a simple, and I hope obvious, set of buttons.
 
 ## 3.11.12
 
