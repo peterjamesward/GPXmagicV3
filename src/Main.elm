@@ -7,8 +7,6 @@ import Browser exposing (application)
 import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation exposing (Key)
-import Color exposing (white)
-import ColourPalette exposing (stravaOrange)
 import CommonToolStyles
 import Delay
 import Dict exposing (Dict)
@@ -1109,9 +1107,14 @@ adjustSpaceForContent model =
             )
 
         availableWidthPixels =
-            SplitPane.getPosition model.rightDockLeftEdge
-                - SplitPane.getPosition model.leftDockRightEdge
-                - reservedWidth
+            if model.systemSettings.v2Skin then
+                SplitPane.getPosition model.rightDockLeftEdge
+                    - reservedWidth
+
+            else
+                SplitPane.getPosition model.rightDockLeftEdge
+                    - SplitPane.getPosition model.leftDockRightEdge
+                    - reservedWidth
 
         ( reservedWidth, reservedHeight ) =
             -- This by experiment, not ideal.
