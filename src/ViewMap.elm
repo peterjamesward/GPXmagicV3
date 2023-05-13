@@ -16,6 +16,7 @@ import Element.Input as Input exposing (labelHidden)
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import Html.Attributes exposing (id, style)
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
@@ -193,6 +194,7 @@ view settings track ( viewWidth, viewHeight ) mContext msgWrapper =
                     , Font.size 12
                     , alignRight
                     , moveLeft 40
+                    , Background.color FlatColors.FlatUIPalette.silver
                     ]
                     { onChange = msgWrapper << ChooseMapStyle
                     , options =

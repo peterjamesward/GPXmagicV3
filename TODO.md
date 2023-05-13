@@ -7,8 +7,6 @@
 
 BUG: "Error: Invalid value for <circle> attribute cy="NaN"" -- what triggers this?
 
-BUG: Map style menu has no background and can be invisible against satellite view.
-
 BUG: Map projection not restored correctly on reload.
 
 BUG: Route Builder previews not hiding when tool closed.
@@ -21,7 +19,7 @@ BUG: Route Builder previews not hiding when tool closed.
 
 Have now reached the stage where v2 skin is really light mode with one dock.
 
-TODO: Provide a link in 2.9.5 that goes directly to v3 with this skin (url query parameter).
+TODO: To avoid messing up anyone's dock settings, if there is any tool in the left dock, use 2 dock mode.
 
 ---
 

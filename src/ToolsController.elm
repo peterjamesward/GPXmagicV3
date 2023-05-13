@@ -1792,19 +1792,18 @@ toolsForDock settings dock msgWrapper isTrack options =
                 always True
 
             else
-                \( _, t ) -> t.dock == dock
+                \t -> t.dock == dock
 
-        visibleTools =
-            options.tools
-                |> Dict.toList
-                |> List.filter filterForDock
+        visibleToolsInOrder =
+            orderedTools
                 |> List.filterMap (\( id, _ ) -> Dict.get id options.tools)
+                |> List.filter filterForDock
                 |> List.filter .isVisible
     in
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacing 5, padding 10, scrollbarY ]
             [ column [ width fill, spacing 4 ]
-                (visibleTools
+                (visibleToolsInOrder
                     |> List.filter
                         (\t -> t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed)
                     |> List.map (viewTool settings msgWrapper isTrack options)
@@ -1813,7 +1812,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 -- Open tools
                 [ spacing 4 ]
               <|
-                (visibleTools
+                (visibleToolsInOrder
                     |> List.filter (\t -> t.state == Expanded)
                     |> List.map (viewTool settings msgWrapper isTrack options)
                 )
@@ -1821,7 +1820,7 @@ toolsForDock settings dock msgWrapper isTrack options =
                 -- Closed tools
                 [ spacing 4 ]
               <|
-                (visibleTools
+                (visibleToolsInOrder
                     |> List.filter (\t -> t.state == Contracted)
                     |> List.map (viewTool settings msgWrapper isTrack options)
                 )

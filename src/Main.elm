@@ -307,6 +307,7 @@ init mflags origin navigationKey =
         [ authCmd
         , Task.perform AdjustTimeZone Time.here
         , Task.attempt GotWindowSize Dom.getViewport
+        , LocalStorage.storageGetItem "singleDock"
         , LocalStorage.storageGetItem "splits"
         , LocalStorage.storageGetItem "tools"
         , LocalStorage.storageGetItem "panes"
@@ -2196,13 +2197,13 @@ performActionsOnModel actions model =
 
                         "singleDock" ->
                             case D.decodeValue D.bool value of
-                                Ok True ->
+                                Ok setting ->
                                     let
                                         settings =
                                             foldedModel.systemSettings
 
                                         newSettings =
-                                            { settings | singleDock = True }
+                                            { settings | singleDock = setting }
                                     in
                                     { foldedModel | systemSettings = newSettings }
 
