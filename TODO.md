@@ -13,6 +13,12 @@ BUG: Route Builder previews not hiding when tool closed.
 
 # WIP
 
+## Bends
+
+Not sure the Bend problem tool works as intended.
+Desire to simplify, unify the various tools.
+Make explicit the before & after radius, say.
+
 ---
 
 # BACKLOG
@@ -20,12 +26,6 @@ BUG: Route Builder previews not hiding when tool closed.
 ## Land Use
 
 Refetch data when more tracks loaded. Or provide button in the eponymous tool.
-
-## Bends
-
-Not sure the Bend problem tool works as intended.
-Desire to simplify, unify the various tools.
-Make explicit the before & after radius, say.
 
 ## Remove Actions
 
