@@ -9,11 +9,6 @@ BUG: Map projection not restored correctly on reload.
 
 BUG: Route Builder previews not hiding when tool closed.
 
-BUG: reload gets right split wrong, but shift-reload gets it correct.
-> What does this mean? Look at messages in debugger.
-
-BUG: Profile 1 views need to redraw/rescale when pane size changes.
-
 --- 
 
 # WIP

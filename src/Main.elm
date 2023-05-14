@@ -452,7 +452,7 @@ update msg model =
                 newSettings =
                     { settings | singleDock = not settings.singleDock }
             in
-            ( { model | systemSettings = newSettings }
+            ( { model | systemSettings = newSettings } |> adjustSpaceForContent
             , LocalStorage.storageSetItem "singleDock" <| E.bool newSettings.singleDock
             )
 
@@ -477,6 +477,7 @@ update msg model =
             ( { model | modalMessage = Just "aboutText" }, Cmd.none )
 
         DisplayWelcome ->
+            -- We can be fairly sure now that all the local storage has been processed.
             if model.welcomeDisplayed then
                 ( model |> adjustSpaceForContent, Cmd.none )
 
