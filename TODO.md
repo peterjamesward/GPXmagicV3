@@ -19,6 +19,32 @@ Not sure the Bend problem tool works as intended.
 Desire to simplify, unify the various tools.
 Make explicit the before & after radius, say.
 
+> Start with a new view, like Profile1 but showing charts for theta and delta-theta (radius or curvature) - perhaps even theta''.
+
+> This will force me to think about measuring radius, especially at single points. It can then perhaps function  somewhat like the Profile in terms of having limits, which should clarify and unify the Bend problems tool initially and perhaps open a door to some simpler but more effective filters.
+
+Delta theta at any one point is spike of course. Radius/curvature requires some decided delta-distance (ds).
+But we can certainly set a minimum radius, maximum curvature, limiting the extent of any change within some ds. Provided
+ds is not infinitesmal (say, 1m), this is practical, and adequate where minimum radius is circa 4m.
+
+I still wonder if there is a **search** approach worth trying. Perhaps simulated annealing which seems to be the go-to.
+There would be a cost associated with input fundamentals:
+* Deviation from physical place (xyz);
+* Deviation from direction;
+* Deviation from gradient
+
+Also, costs associated with limite set by user:
+* Maximum gradient (ascent, descent);
+* Minimum radius;
+* Non-constant rate of change of curvature (favours clothoids) for directiom;
+* Maximum rate of change of gradient.
+
+Each of these having some extra loading (e.g. square of distance) and a user weighting.
+Search attenpts to minimise cost, across designated range of track.
+Assumes that the route is seeded with extra points, perhaps more dense near areas of change.
+
+(It's time I gave this a go, it's been floating around for a couple of years now.)
+
 ---
 
 # BACKLOG
