@@ -19,6 +19,8 @@ TODO: Why is the chart not taking up space and scrollbar is at top?
 
 > Maybe I'll just dive in and try the SA.
 
+--TODO: **Circumcircle** test fails with acute angle between long sides!!
+
 Not sure the Bend problem tool works as intended.
 Desire to simplify, unify the various tools.
 Make explicit the before & after radius, say.

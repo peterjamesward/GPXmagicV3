@@ -620,9 +620,9 @@ viewModeChoices settings msgWrapper context options =
             , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
             , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
             , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| viewModeTab Mid <| localise "Route"
-            , Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
+            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
 
+            --, Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
             --, Input.optionWith ViewInfo <| viewModeTab Last <| localise "About"
             ]
     in
@@ -647,8 +647,9 @@ viewModeChoicesNoMap location msgWrapper pane =
             , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
             , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
             , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| viewModeTab Mid <| localise "Route"
-            , Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
+            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
+
+            --, Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
             ]
     in
     Input.radioRow

@@ -2,24 +2,27 @@ module Tools.DirectionChanges exposing (DirectionChangeMode(..), Msg(..), Option
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import Circle2d
 import CommonToolStyles exposing (noTrackMessage)
-import Direction2d
+import Direction2d exposing (Direction2d)
 import DomainModel exposing (GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input
 import FeatherIcons
-import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
+import LocalCoords exposing (LocalCoords)
+import Point3d
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
+import SketchPlane3d
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
+import Triangle2d
 import UtilsForViews exposing (showAngle, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, sliderThumb, useIcon)
 
@@ -31,7 +34,7 @@ toolId =
 type alias Options =
     { threshold : Angle
     , singlePointBreaches : List ( Int, Angle )
-    , bendBreaches : List ( List Int, Quantity Float Meters )
+    , bendBreaches : List Int
     , currentPointBreach : Int
     , currentBendBreach : Int
     , mode : DirectionChangeMode
@@ -72,7 +75,6 @@ type Msg
     | SetMode DirectionChangeMode
     | SetResultMode ResultMode
     | Autofix
-    | NudgeOne
     | DisplayInfo String String
 
 
@@ -130,95 +132,41 @@ findDirectionChanges options tree =
             }
 
 
-findBendsWithRadius : PeteTree -> Options -> List ( List Int, Quantity Float Meters )
+findBendsWithRadius : PeteTree -> Options -> List Int
 findBendsWithRadius tree options =
-    {-
-       The UI says direction change and radius but we look for the given direction
-       change over a track length of radius * direction change in radians.
-    -}
+    -- Any point for which the circumcircle formed with neighbouring points has radius less than given.
+    --TODO: No, circumcircle test fails with acute angle between long sides!!
     let
-        windowLength =
-            options.radius |> Quantity.multiplyBy (Angle.inRadians options.threshold)
-
-        consumeLength :
-            ( Length.Length, List ( Int, RoadSection ) )
-            -> List ( Int, RoadSection )
-            -> List ( Int, RoadSection )
-        consumeLength ( runningLength, retainedRoads ) roads =
-            if runningLength |> Quantity.greaterThanOrEqualTo windowLength then
-                -- Got enough, but the accumulator is reversed bu consing.
-                List.reverse retainedRoads
-
-            else
-                -- Not enough, keep this one and recurse if possible
-                case roads of
-                    [] ->
-                        -- OK, no roads.
-                        List.reverse retainedRoads
-
-                    ( n, aRoad ) :: moreRoads ->
-                        consumeLength
-                            ( Quantity.plus runningLength aRoad.trueLength
-                            , ( n, aRoad ) :: retainedRoads
-                            )
-                            moreRoads
-
-        runningDirectionChange :
-            RoadSection
-            -> ( Int, List ( Int, RoadSection ), List ( List Int, Quantity Float Meters ) )
-            -> ( Int, List ( Int, RoadSection ), List ( List Int, Quantity Float Meters ) )
-        runningDirectionChange road ( newIndex, window, outputs ) =
-            {-
-               Think of this as a variable window function.
-               This list contains recent road segments adding up the length given
-               by angular change sought in radians times the radius.
-               For each leaf we add to the window, remove excess length from window,
-               assess turn across the window and if exceeds threshold, add to outputs.
-            -}
+        hasSmallCircumcircle : Int -> Bool
+        hasSmallCircumcircle pointIndex =
             let
-                newWindow =
-                    consumeLength
-                        ( Quantity.zero, [] )
-                        (( newIndex, road ) :: window)
+                thisPoint =
+                    DomainModel.earthPointFromIndex pointIndex tree
+                        |> .space
+                        |> Point3d.projectInto SketchPlane3d.xy
 
-                turnDuringWindow =
-                    radiansTurned newWindow
+                priorPoint =
+                    DomainModel.earthPointFromIndex (pointIndex - 1) tree
+                        |> .space
+                        |> Point3d.projectInto SketchPlane3d.xy
 
-                radiansTurned : List ( Int, RoadSection ) -> Float
-                radiansTurned sections =
-                    case sections of
-                        [] ->
-                            0
-
-                        [ _ ] ->
-                            0
-
-                        ( _, first ) :: ( n, second ) :: more ->
-                            second.directionAtStart
-                                |> Direction2d.angleFrom first.directionAtStart
-                                |> Angle.inRadians
-                                |> (+) (radiansTurned (( n, second ) :: more))
+                nextPoint =
+                    DomainModel.earthPointFromIndex (pointIndex + 1) tree
+                        |> .space
+                        |> Point3d.projectInto SketchPlane3d.xy
             in
-            if abs turnDuringWindow >= Angle.inRadians options.threshold then
-                -- NOTE: Adding 1 to the points, as these look like the ones that need a nudge.
-                ( newIndex + 1
-                , []
-                , ( newIndex + 1 :: newIndex :: List.map Tuple.first window
-                  , windowLength |> Quantity.divideBy turnDuringWindow
-                  )
-                    :: outputs
-                )
+            case
+                Triangle2d.from thisPoint priorPoint nextPoint
+                    |> Triangle2d.circumcircle
+            of
+                Just circumCircle ->
+                    Circle2d.radius circumCircle |> Quantity.lessThan options.radius
 
-            else
-                ( newIndex + 1, newWindow, outputs )
-
-        ( _, _, bendStarts ) =
-            DomainModel.foldOverRoute
-                runningDirectionChange
-                tree
-                ( 0, [], [] )
+                Nothing ->
+                    False
     in
-    List.reverse bendStarts
+    List.range 1 (DomainModel.skipCount tree - 1)
+        |> List.filter hasSmallCircumcircle
 
 
 toolStateChange :
@@ -300,12 +248,8 @@ update msg options previewColour track =
 
                         newOptions =
                             { options | currentBendBreach = breachIndex }
-
-                        ( points, _ ) =
-                            Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
-                                List.Extra.getAt breachIndex newOptions.bendBreaches
                     in
-                    case points of
+                    case newOptions.bendBreaches of
                         [] ->
                             ( newOptions, [] )
 
@@ -335,12 +279,8 @@ update msg options previewColour track =
 
                         newOptions =
                             { options | currentBendBreach = breachIndex }
-
-                        ( points, _ ) =
-                            Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
-                                List.Extra.getAt breachIndex newOptions.bendBreaches
                     in
-                    case points of
+                    case newOptions.bendBreaches of
                         [] ->
                             ( newOptions, [] )
 
@@ -387,26 +327,6 @@ update msg options previewColour track =
               ]
             )
 
-        NudgeOne ->
-            let
-                ( points, estimatedRadius ) =
-                    Maybe.withDefault ( [], Quantity.zero ) <|
-                        List.Extra.getAt options.currentBendBreach options.bendBreaches
-
-                desired =
-                    if estimatedRadius |> Quantity.greaterThanOrEqualToZero then
-                        options.radius
-
-                    else
-                        Quantity.negate options.radius
-            in
-            ( options
-            , [ Actions.WithUndo <| Actions.WidenBend points (Quantity.minus desired estimatedRadius)
-              , Actions.WidenBend points (Quantity.minus desired estimatedRadius)
-              , TrackHasChanged
-              ]
-            )
-
         DisplayInfo id tag ->
             ( options, [ Actions.DisplayInfo id tag ] )
 
@@ -425,7 +345,7 @@ actions options previewColour track =
 
                 DirectionChangeWithRadius ->
                     TrackLoaded.buildPreview
-                        (List.concatMap Tuple.first options.bendBreaches)
+                        options.bendBreaches
                         track.trackTree
         }
     ]
@@ -486,25 +406,21 @@ view settings msgWrapper options isTrack =
                     el [ centerX, centerY ] <| i18n "none"
 
                 _ :: _ ->
-                    let
-                        ( window, radius ) =
-                            Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
-                                List.Extra.getAt options.currentBendBreach options.bendBreaches
+                    case List.Extra.getAt options.currentBendBreach options.bendBreaches of
+                        Just at ->
+                            column [ spacing 4, centerX ]
+                                [ el [ centerX ] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString settings.location toolId ".radius.")
+                                            [ String.fromInt (options.currentBendBreach + 1)
+                                            , String.fromInt <| List.length options.bendBreaches
+                                            ]
+                                , commonButtons at
+                                ]
 
-                        at =
-                            Maybe.withDefault 0 <| List.head window
-                    in
-                    column [ spacing 4, centerX ]
-                        [ el [ centerX ] <|
-                            text <|
-                                String.Interpolate.interpolate
-                                    (I18N.localisedString settings.location toolId ".radius.")
-                                    [ String.fromInt (options.currentBendBreach + 1)
-                                    , String.fromInt <| List.length options.bendBreaches
-                                    , showShortMeasure settings.imperial (Quantity.abs radius)
-                                    ]
-                        , commonButtons at
-                        ]
+                        Nothing ->
+                            none
 
         singlePointLinkButton track point =
             Input.button (alignTop :: neatToolsBorder)
@@ -515,13 +431,8 @@ view settings msgWrapper options isTrack =
                             DomainModel.distanceFromIndex point track
                 }
 
-        bendLinkButton track ( window, _ ) =
-            case List.head window of
-                Just point ->
-                    singlePointLinkButton track point
-
-                Nothing ->
-                    none
+        bendLinkButton track point =
+            singlePointLinkButton track point
 
         wrappedRowStyle breaches =
             -- Pain getting this wrapped row to look OK.
@@ -560,6 +471,23 @@ view settings msgWrapper options isTrack =
                         , label = Input.labelHidden "Results mode"
                         }
 
+                radiusSelection =
+                    Input.slider
+                        ViewPureStyles.shortSliderStyles
+                        { onChange = Length.meters >> SetRadius >> msgWrapper
+                        , value = Length.inMeters options.radius
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString settings.location toolId "radius")
+                                        [ showShortMeasure settings.imperial options.radius ]
+                        , min = 4.0
+                        , max = 100.0
+                        , step = Just 1
+                        , thumb = sliderThumb
+                        }
+
                 angleSelection =
                     Input.slider
                         ViewPureStyles.shortSliderStyles
@@ -591,49 +519,16 @@ view settings msgWrapper options isTrack =
                                 , label = i18n "smooth"
                                 }
                             ]
-
-                bendButtonFix =
-                    if options.bendBreaches == [] || options.mode == DirectionChangeAbrupt then
-                        none
-
-                    else
-                        wrappedRow [ spacing 4 ]
-                            [ none
-                            , infoButton (msgWrapper <| DisplayInfo "bends" "widen")
-                            , Input.button
-                                (alignTop :: neatToolsBorder)
-                                { onPress = Just (msgWrapper NudgeOne)
-                                , label = i18n "adjust"
-                                }
-
-                            --    }
-                            ]
             in
             el (CommonToolStyles.toolContentBoxStyle settings) <|
                 column [ padding 4, spacing 6, width fill ]
                     [ modeSelection
-                    , angleSelection
                     , if options.mode == DirectionChangeWithRadius then
-                        Input.slider
-                            ViewPureStyles.shortSliderStyles
-                            { onChange = Length.meters >> SetRadius >> msgWrapper
-                            , value = Length.inMeters options.radius
-                            , label =
-                                Input.labelBelow [] <|
-                                    text <|
-                                        String.Interpolate.interpolate
-                                            (I18N.localisedString settings.location toolId "radius")
-                                            [ showShortMeasure settings.imperial options.radius ]
-                            , min = 4.0
-                            , max = 100.0
-                            , step = Just 1
-                            , thumb = sliderThumb
-                            }
+                        radiusSelection
 
                       else
-                        none
+                        angleSelection
                     , el [ centerX ] autofixButton
-                    , el [ centerX ] bendButtonFix
                     , el [ centerX ] resultModeSelection
                     , case ( options.mode, options.resultMode ) of
                         ( DirectionChangeAbrupt, ResultNavigation ) ->
