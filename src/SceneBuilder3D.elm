@@ -757,7 +757,7 @@ previewAsPoints color points =
             Material.color <| Color.fromRgba <| Element.toRgb color
 
         highlightPoint p =
-            Scene3d.point { radius = Pixels.pixels 7 } material p.space
+            Scene3d.point { radius = Pixels.pixels 2 } material p.space
     in
     List.map highlightPoint points
 
