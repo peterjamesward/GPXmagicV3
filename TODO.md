@@ -13,6 +13,12 @@ BUG: Route Builder previews not hiding when tool closed.
 
 # WIP
 
+## UI
+
+Use V2 gradient scale.
+
+Selective hiding of live previews for open tools.
+
 ## Bends
 
 Not sure the Bend problem tool works as intended.
