@@ -2,11 +2,11 @@ module ViewMode exposing (..)
 
 
 type ViewMode
-    = ViewInfo
-    | ViewThird
+    = ViewThird
     | ViewFirst
     | ViewPlan
     | ViewProfileCanvas
     | ViewProfileWebGL
     | ViewMap
     | ViewGraph
+    | ViewDerivatives

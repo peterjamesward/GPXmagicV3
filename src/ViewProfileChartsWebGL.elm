@@ -838,7 +838,7 @@ view context settings ( givenWidth, givenHeight ) track msgWrapper previews =
                 |> Frame2d.reverseY
 
         common3dSceneAttributes =
-            --TODO: Avoid copying these from common elemtns
+            --TODO: Avoid copying these from common elements
             [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
             , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
             , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)

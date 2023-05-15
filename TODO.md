@@ -13,13 +13,11 @@ BUG: Route Builder previews not hiding when tool closed.
 
 # WIP
 
-## UI
-
-Use V2 gradient scale.
-
-Selective hiding of live previews for open tools.
-
 ## Bends
+
+TODO: Why is the chart not taking up space and scrollbar is at top?
+
+> Maybe I'll just dive in and try the SA.
 
 Not sure the Bend problem tool works as intended.
 Desire to simplify, unify the various tools.
@@ -39,7 +37,7 @@ There would be a cost associated with input fundamentals:
 * Deviation from direction;
 * Deviation from gradient
 
-Also, costs associated with limite set by user:
+Also, costs associated with limits set by user:
 * Maximum gradient (ascent, descent);
 * Minimum radius;
 * Non-constant rate of change of curvature (favours clothoids) for directiom;
@@ -50,6 +48,8 @@ Search attenpts to minimise cost, across designated range of track.
 Assumes that the route is seeded with extra points, perhaps more dense near areas of change, perhaps every meter.
 
 (It's time I gave this a go, it's been floating around for a couple of years now.)
+
+Indeed, the Simulated Annealing (SA) algorithm seems very simple. Just jiggle points around in XYZ and assess the cost impact. May be able to use a local calculation, as changes would seem to be limited to within two points on each side.
 
 ---
 

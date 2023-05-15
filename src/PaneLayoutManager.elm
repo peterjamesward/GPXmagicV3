@@ -52,6 +52,7 @@ import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements
 import ViewAbout
+import ViewDerivatives
 import ViewFirstPerson
 import ViewGraph
 import ViewMap
@@ -76,13 +77,14 @@ type PaneType
 defaultPaneContext : PaneContext
 defaultPaneContext =
     { paneId = Pane1
-    , activeView = ViewInfo
+    , activeView = ViewThird
     , thirdPersonContext = Nothing
     , firstPersonContext = Nothing
     , mapContext = Nothing
     , profileContext = Nothing
     , planContext = Nothing
     , graphContext = Nothing
+    , derivativesContext = Nothing
     }
 
 
@@ -119,6 +121,7 @@ type Msg
     | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
+    | DerivativesViewMessage PaneId ViewDerivatives.Msg
     | PaneNoOp
 
 
@@ -273,6 +276,9 @@ update paneMsg msgWrapper tracks contentArea options previews =
               , StoreLocally "panes" <| encodePaneState newOptions
               ]
             )
+
+        DerivativesViewMessage paneId innerMsg ->
+            ( options, tracks, [] )
 
         ThirdPersonViewMessage paneId imageMsg ->
             let
@@ -580,33 +586,19 @@ initialise track options =
 initialisePane : TrackLoaded msg -> PaneLayoutOptions -> PaneContext -> PaneContext
 initialisePane track options pane =
     { pane
-        | activeView =
-            if pane.activeView == ViewInfo then
-                ViewThird
-
-            else
-                pane.activeView
-        , thirdPersonContext =
-            Just <|
-                ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
-        , firstPersonContext =
-            Just <|
-                ViewThirdPerson.initialiseView 0 track.trackTree pane.firstPersonContext
+        | activeView = pane.activeView
+        , thirdPersonContext = Just <| ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
+        , firstPersonContext = Just <| ViewThirdPerson.initialiseView 0 track.trackTree pane.firstPersonContext
         , profileContext =
             Just <|
                 ViewProfileChartsCanvas.initialiseView
                     (paneIdToString pane.paneId)
                     track.trackTree
                     pane.profileContext
-        , planContext =
-            Just <|
-                ViewPlan.initialiseView 0 track.trackTree pane.planContext
-        , graphContext =
-            Just <|
-                ViewGraph.initialiseView 0 track.trackTree pane.graphContext
-        , mapContext =
-            Just <|
-                ViewMap.initialiseContext pane.mapContext
+        , planContext = Just <| ViewPlan.initialiseView 0 track.trackTree pane.planContext
+        , graphContext = Just <| ViewGraph.initialiseView 0 track.trackTree pane.graphContext
+        , mapContext = Just <| ViewMap.initialiseContext pane.mapContext
+        , derivativesContext = Just ViewDerivatives.initialiseView
     }
 
 
@@ -628,7 +620,8 @@ viewModeChoices settings msgWrapper context options =
             , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
             , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
             , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
+            , Input.optionWith ViewGraph <| viewModeTab Mid <| localise "Route"
+            , Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
 
             --, Input.optionWith ViewInfo <| viewModeTab Last <| localise "About"
             ]
@@ -654,7 +647,8 @@ viewModeChoicesNoMap location msgWrapper pane =
             , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
             , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
             , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
+            , Input.optionWith ViewGraph <| viewModeTab Mid <| localise "Route"
+            , Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
             ]
     in
     Input.radioRow
@@ -862,8 +856,19 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewInfo) <|
-                    ViewAbout.view ( paneWidth, paneHeight ) settings
+                , conditionallyVisible (pane.activeView == ViewDerivatives) <|
+                    case ( pane.derivativesContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewDerivatives.view
+                                context
+                                settings
+                                displayOptions
+                                ( paneWidth, paneHeight )
+                                track
+                                (msgWrapper << DerivativesViewMessage pane.paneId)
+
+                        _ ->
+                            none
                 ]
 
         viewPaneZeroWithMap : PaneContext -> Element msg
@@ -892,7 +897,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
         slider =
             case mTrack of
                 Just track ->
-                    el [ centerX ] <|
+                    el [ centerX, alignBottom ] <|
                         Input.slider
                             (ViewPureStyles.wideSliderStylesWithWidth w)
                             { onChange = round >> SetCurrentPosition >> msgWrapper
@@ -907,45 +912,42 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                 Nothing ->
                     none
     in
-    wrappedRow
+    column
         [ centerX
         , width fill
         , spacing 5
         , paddingEach { left = 10, right = 0, top = 0, bottom = 0 }
         , inFront <| paneLayoutMenu settings.location msgWrapper options
         ]
-    <|
-        case options.paneLayout of
-            PanesOne ->
-                [ viewPaneZeroWithMap options.pane1
-                , slider
-                ]
+        [ wrappedRow
+            [ centerX, width fill, spacing 5 ]
+          <|
+            case options.paneLayout of
+                PanesOne ->
+                    [ viewPaneZeroWithMap options.pane1 ]
 
-            PanesLeftRight ->
-                [ viewPaneZeroWithMap options.pane1
-                , viewPaneNoMap options.pane2
-                , slider
-                ]
+                PanesLeftRight ->
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
+                    ]
 
-            PanesUpperLower ->
-                [ viewPaneZeroWithMap options.pane1
-                , viewPaneNoMap options.pane2
-                , slider
-                ]
+                PanesUpperLower ->
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
+                    ]
 
-            PanesGrid ->
-                [ viewPaneZeroWithMap options.pane1
-                , viewPaneNoMap options.pane2
-                , viewPaneNoMap options.pane3
-                , viewPaneNoMap options.pane4
-                , slider
-                ]
+                PanesGrid ->
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
+                    , viewPaneNoMap options.pane3
+                    , viewPaneNoMap options.pane4
+                    ]
 
-            PanesOnePlusTwo ->
-                -- Later.
-                [ viewPaneZeroWithMap options.pane1
-                , slider
-                ]
+                PanesOnePlusTwo ->
+                    -- Later.
+                    [ viewPaneZeroWithMap options.pane1 ]
+        , slider
+        ]
 
 
 encodePaneState : PaneLayoutOptions -> E.Value
@@ -1020,8 +1022,7 @@ decodePaneId paneId =
 
 viewHelper : List ( ViewMode, String )
 viewHelper =
-    [ ( ViewInfo, "info" )
-    , ( ViewThird, "third" )
+    [ ( ViewThird, "third" )
     , ( ViewFirst, "first" )
     , ( ViewPlan, "plan" )
     , ( ViewProfileCanvas, "profile" )
@@ -1035,7 +1036,7 @@ encodeView : ViewMode -> String
 encodeView view =
     viewHelper
         |> List.Extra.find (\entry -> Tuple.first entry == view)
-        |> Maybe.withDefault ( ViewInfo, "info" )
+        |> Maybe.withDefault ( ViewThird, "third" )
         |> Tuple.second
 
 
@@ -1043,7 +1044,7 @@ decodeView : String -> ViewMode
 decodeView view =
     viewHelper
         |> List.Extra.find (\entry -> Tuple.second entry == view)
-        |> Maybe.withDefault ( ViewInfo, "info" )
+        |> Maybe.withDefault ( ViewThird, "third" )
         |> Tuple.first
 
 

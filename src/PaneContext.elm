@@ -4,6 +4,7 @@ import LocalCoords exposing (LocalCoords)
 import MapTypes
 import Scene3d exposing (Entity)
 import View3dCommonElements
+import ViewDerivativesContext
 import ViewGraphContext
 import ViewMapContext
 import ViewMode exposing (ViewMode)
@@ -54,6 +55,7 @@ type alias PaneContext =
     , profileContext : Maybe ViewProfileChartContext.ProfileContext
     , planContext : Maybe ViewPlanContext.PlanContext
     , graphContext : Maybe ViewGraphContext.GraphContext
+    , derivativesContext : Maybe ViewDerivativesContext.DerivativesContext
     }
 
 
