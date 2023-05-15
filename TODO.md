@@ -25,7 +25,7 @@ Not sure the Bend problem tool works as intended.
 Desire to simplify, unify the various tools.
 Make explicit the before & after radius, say.
 
-> Start with a new view, like Profile1 but showing charts for theta and delta-theta (radius or curvature) - perhaps even theta''.
+> Start with a new view, like Profile1 but showing charts for theta and delta-theta, radius or curvature, perhaps theta''. (Using https://elm-charts.org).
 
 > This will force me to think about measuring radius, especially at single points. It can then perhaps function  somewhat like the Profile in terms of having limits, which should clarify and unify the Bend problems tool initially and perhaps open a door to some simpler but more effective filters.
 
@@ -47,7 +47,7 @@ Also, costs associated with limite set by user:
 
 Each of these having some extra loading (e.g. square of distance) and a user weighting.
 Search attenpts to minimise cost, across designated range of track.
-Assumes that the route is seeded with extra points, perhaps more dense near areas of change.
+Assumes that the route is seeded with extra points, perhaps more dense near areas of change, perhaps every meter.
 
 (It's time I gave this a go, it's been floating around for a couple of years now.)
 
