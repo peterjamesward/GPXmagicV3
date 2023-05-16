@@ -343,14 +343,15 @@ paintCanvasGradientChart profileContext settings track =
             ]
 
 
-showPreview : String -> String -> String -> E.Value -> Cmd msg
-showPreview tag shape colour geoJson =
+showPreview : Int -> String -> String -> String -> E.Value -> Cmd msg
+showPreview size tag shape colour geoJson =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "ShowPreview" )
             , ( "token", E.string mapboxKey )
             , ( "label", E.string tag )
             , ( "shape", E.string shape )
+            , ( "size", E.int size )
             , ( "colour", E.string colour )
             , ( "data", geoJson )
             ]

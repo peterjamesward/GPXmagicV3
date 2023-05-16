@@ -823,7 +823,7 @@ function showPreview(msg) {
             },
             'paint': {
                 'line-color': msg.colour,
-                'line-width': 4
+                'line-width': msg.size
             }
         });
     }
@@ -834,7 +834,7 @@ function showPreview(msg) {
             'type': 'circle',
             'source': msg.label,
             'paint': {
-                'circle-radius': 4,
+                'circle-radius': msg.size,
                 'circle-color': msg.colour
             }
         });

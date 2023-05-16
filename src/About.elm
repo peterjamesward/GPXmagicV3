@@ -2,9 +2,20 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.12.0 (3a48c678, 2023-05-14 20:00)
+    """# GPXmagic v3.12.1 (3a48c678, 2023-05-14 20:00)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
+
+## 3.12.1
+
+Late update from the pixel fairies. In **Display Settings** there is now a slider that changes the size of the
+dots used for live previews. Reducing the size makes them less obtrusive/offensive/obvious. Please note that
+this will change immediately in the 3D views but on the Map, will only update when the preview needs to be
+changed, such as when you change a tool setting or move the pointers.
+
+The code that finds tight radius bends in **Bend Problems** (radius mode) has been re-written and is now
+both clearer and more robust. It works, anyway. This is some essential groundwork for what might be an
+exciting new tool coming up (if you hear no more about it, it's because it failed to deliver on the excitement).
 
 ## 3.12.0
 

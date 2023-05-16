@@ -706,14 +706,14 @@ makeLandUseSloped landUse index tree groundPlane =
     ( wayStuff.scenes, wayStuff.updatedIndex )
 
 
-renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
-renderPreviews previews =
+renderPreviews : Tools.DisplaySettingsOptions.Options -> Dict String PreviewData -> List (Entity LocalCoords)
+renderPreviews options previews =
     let
         onePreview : PreviewData -> List (Entity LocalCoords)
         onePreview { tag, shape, colour, points } =
             case shape of
                 PreviewCircle ->
-                    previewAsPoints colour <| List.map .earthPoint points
+                    previewAsPoints colour options <| List.map .earthPoint points
 
                 PreviewLine ->
                     previewAsLine colour <| List.map .earthPoint points
@@ -729,9 +729,9 @@ renderPreviews previews =
     previews |> Dict.values |> List.concatMap onePreview
 
 
-renderKeyPlaces : List EarthPoint -> List (Entity LocalCoords)
-renderKeyPlaces places =
-    previewAsPoints FlatColors.FlatUIPalette.wisteria places
+renderKeyPlaces : Tools.DisplaySettingsOptions.Options -> List EarthPoint -> List (Entity LocalCoords)
+renderKeyPlaces options places =
+    previewAsPoints FlatColors.FlatUIPalette.wisteria options places
 
 
 previewAsLine : Element.Color -> List EarthPoint -> List (Entity LocalCoords)
@@ -750,14 +750,21 @@ previewAsLine color points =
     List.map2 preview points (List.drop 1 points) |> List.concat
 
 
-previewAsPoints : Element.Color -> List EarthPoint -> List (Entity LocalCoords)
-previewAsPoints color points =
+previewAsPoints :
+    Element.Color
+    -> Tools.DisplaySettingsOptions.Options
+    -> List EarthPoint
+    -> List (Entity LocalCoords)
+previewAsPoints color options points =
     let
         material =
             Material.color <| Color.fromRgba <| Element.toRgb color
 
         highlightPoint p =
-            Scene3d.point { radius = Pixels.pixels 3 } material p.space
+            Scene3d.point
+                { radius = Pixels.pixels <| toFloat options.previewSize }
+                material
+                p.space
     in
     List.map highlightPoint points
 

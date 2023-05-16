@@ -34,6 +34,7 @@ defaultOptions =
     , mapProjection = "globe"
     , mapAllowTilt = True
     , mapAllowRotate = True
+    , previewSize = 4
     }
 
 
@@ -49,6 +50,7 @@ type Msg
     | AllowMapTilt Bool
     | UseGlobeProjection Bool
     | AllowMapRotate Bool
+    | SetPreviewSize Int
 
 
 restoreSettings : D.Value -> Options -> Options
@@ -114,6 +116,13 @@ update msg options =
             let
                 newOptions =
                     { options | terrainFineness = terrain }
+            in
+            ( newOptions, actions newOptions )
+
+        SetPreviewSize size ->
+            let
+                newOptions =
+                    { options | previewSize = size }
             in
             ( newOptions, actions newOptions )
 
@@ -272,19 +281,31 @@ view settings wrap options =
                 , icon = Input.defaultCheckbox
                 }
             ]
-        , Input.slider commonShortHorizontalSliderStyles
-            { onChange = wrap << SetTerrainFineness
-            , label =
-                Input.labelBelow [] <|
-                    if options.terrainFineness == 0.0 then
-                        i18n "noterrain"
+        , column [ padding 5, spacing 10 ]
+            [ Input.slider commonShortHorizontalSliderStyles
+                { onChange = wrap << SetTerrainFineness
+                , label =
+                    Input.labelBelow [] <|
+                        if options.terrainFineness == 0.0 then
+                            i18n "noterrain"
 
-                    else
-                        i18n "quality"
-            , min = 0.0
-            , max = 3.0
-            , step = Nothing
-            , value = options.terrainFineness
-            , thumb = Input.defaultThumb
-            }
+                        else
+                            i18n "quality"
+                , min = 0.0
+                , max = 3.0
+                , step = Nothing
+                , value = options.terrainFineness
+                , thumb = Input.defaultThumb
+                }
+            , Input.slider commonShortHorizontalSliderStyles
+                { onChange = wrap << SetPreviewSize << round
+                , label =
+                    Input.labelBelow [] (text "Preview size")
+                , min = 1.0
+                , max = 7.0
+                , step = Just 1
+                , value = toFloat options.previewSize
+                , thumb = Input.defaultThumb
+                }
+            ]
         ]

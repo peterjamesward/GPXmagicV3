@@ -9,7 +9,7 @@ BUG: Map projection not restored correctly on reload.
 
 BUG: Route Builder previews not hiding when tool closed.
 
-TODO: Make size of preview dot user choice.
+TODO: Make size of preview dot user choice, 3D and Map views.
 
 --- 
 
@@ -19,7 +19,8 @@ TODO: Make size of preview dot user choice.
 
 > Updated bend problem tool should be launch ready.
 
-I still wonder if there is a **search** approach worth trying. Perhaps simulated annealing which seems to be the go-to.
+I still think there is a **search** approach worth trying. 
+Perhaps simulated annealing which seems to be the go-to.
 There would be a cost associated with input fundamentals:
 * Deviation from physical place (xyz);
 * Deviation from direction;
@@ -31,14 +32,21 @@ Also, costs associated with limits set by user:
 * Non-constant rate of change of curvature (favours clothoids) for directiom;
 * Maximum rate of change of gradient.
 
+Should also consider Orange and Purple to be fixed but perhaps optionally allow:
+* Position change
+* Altitude change
+* Gradient change
+* Direction change
+
 Each of these having some extra loading (e.g. square of distance) and a user weighting.
+
 Search attenpts to minimise cost, across designated range of track.
 Assumes that the route is seeded with extra points, perhaps more dense near areas of change, perhaps every meter.
 > These will be areas identified by Bend and Gradient problems tools.
 
-(It's time I gave this a go, it's been floating around for a couple of years now.)
-
-Indeed, the Simulated Annealing (SA) algorithm seems very simple. Just jiggle points around in XYZ and assess the cost impact. May be able to use a local calculation, as changes would seem to be limited to within two points on each side.
+Simulated Annealing (SA) algorithm seems very simple. 
+Just jiggle points around in XYZ and assess the cost impact. 
+May be able to use a local calculation, as changes should be limited to within two points on each side.
 
 ---
 

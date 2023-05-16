@@ -336,6 +336,7 @@ render model =
                     model.toolOptions
                     model.paneLayoutOptions
                     model.toolOptions.tracksOptions
+                    model.toolOptions.displaySettings
                     model.previews
         in
         { model
@@ -2316,6 +2317,7 @@ performActionCommands actions model =
                     case useThisData.shape of
                         PreviewCircle ->
                             MapPortController.showPreview
+                                model.toolOptions.displaySettings.previewSize
                                 useThisData.tag
                                 "circle"
                                 (uiColourHexString useThisData.colour)
@@ -2323,6 +2325,7 @@ performActionCommands actions model =
 
                         PreviewLine ->
                             MapPortController.showPreview
+                                model.toolOptions.displaySettings.previewSize
                                 useThisData.tag
                                 "line"
                                 (uiColourHexString useThisData.colour)

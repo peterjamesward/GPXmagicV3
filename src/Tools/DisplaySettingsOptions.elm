@@ -19,6 +19,7 @@ type alias Options =
     , mapProjection : String
     , mapAllowTilt : Bool
     , mapAllowRotate : Bool
+    , previewSize : Int
     }
 
 
@@ -30,6 +31,7 @@ type alias StoredOptions =
     , mapProjection : Maybe String
     , mapAllowTilt : Maybe Bool
     , mapAllowRotate : Maybe Bool
+    , previewSize : Maybe Int
     }
 
 
@@ -49,11 +51,12 @@ encode options =
         , ( "tilt", E.bool options.mapAllowTilt )
         , ( "projection", E.string options.mapProjection )
         , ( "rotate", E.bool options.mapAllowRotate )
+        , ( "preview", E.int options.previewSize )
         ]
 
 
 decoder =
-    D.map7 StoredOptions
+    D.map8 StoredOptions
         (D.field "surface" D.bool)
         (D.field "ground" D.bool)
         (D.field "centre" D.bool)
@@ -61,6 +64,7 @@ decoder =
         (D.maybe (D.field "projection" D.string))
         (D.maybe (D.field "tilt" D.bool))
         (D.maybe (D.field "rotate" D.bool))
+        (D.maybe (D.field "preview" D.int))
 
 
 decode : E.Value -> Options -> Options
@@ -78,6 +82,7 @@ decode json current =
             , mapAllowTilt = decoded.mapAllowTilt |> Maybe.withDefault True
             , mapProjection = decoded.mapProjection |> Maybe.withDefault "globe"
             , mapAllowRotate = decoded.mapAllowRotate |> Maybe.withDefault True
+            , previewSize = decoded.previewSize |> Maybe.withDefault 4
             }
 
         Err _ ->

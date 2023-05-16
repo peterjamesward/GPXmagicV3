@@ -161,9 +161,10 @@ render :
     ToolsController.Options msg
     -> PaneLayoutOptions
     -> Tracks.Options msg
+    -> Tools.DisplaySettingsOptions.Options
     -> Dict String PreviewData
     -> PaneLayoutOptions
-render toolSettings options tracks previews =
+render toolSettings options tracks display previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
     let
@@ -178,10 +179,10 @@ render toolSettings options tracks previews =
     in
     { options
         | scene3d =
-            SceneBuilder3D.renderPreviews previews
+            SceneBuilder3D.renderPreviews display previews
                 ++ (SceneBuilder3D.renderGroundPlane toolSettings.displaySettings <| Tracks.boundingBox tracks)
                 ++ (List.concat <| Tracks.mapOverVisibleTracks renderTrack tracks)
-                ++ (SceneBuilder3D.renderKeyPlaces <| Tracks.getKeyPlaces tracks)
+                ++ (SceneBuilder3D.renderKeyPlaces display <| Tracks.getKeyPlaces tracks)
     }
 
 
