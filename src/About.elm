@@ -2,7 +2,7 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.12.1 (bd93f595, 2023-05-16 20:20)
+    """# GPXmagic v3.12.1 (bd93f595, 2023-05-16 20:36)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
 
@@ -14,8 +14,7 @@ this will change immediately in the 3D views but on the Map, will only update wh
 changed, such as when you change a tool setting or move the pointers.
 
 The code that finds tight radius bends in **Bend Problems** (radius mode) has been re-written and is now
-both clearer and more robust. It works, anyway. This is some essential groundwork for what might be an
-exciting new tool coming up (if you hear no more about it, it's because it failed to deliver on the excitement).
+both clearer and more robust.
 
 ## 3.12.0
 
