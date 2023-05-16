@@ -2,7 +2,6 @@ module Tools.DirectionChanges exposing (DirectionChangeMode(..), Msg(..), Option
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import Circle2d
 import CommonToolStyles exposing (noTrackMessage)
 import Direction2d exposing (Direction2d)
 import DomainModel exposing (GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
@@ -11,19 +10,15 @@ import Element.Input as Input
 import FeatherIcons
 import Length exposing (Meters)
 import List.Extra
-import LocalCoords exposing (LocalCoords)
-import Point3d
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import Set exposing (Set)
-import SketchPlane3d
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
-import Triangle2d
 import UtilsForViews exposing (showAngle, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, sliderThumb, useIcon)
 
@@ -136,8 +131,7 @@ findDirectionChanges options tree =
 type BendWindow
     = NoRoads
     | OneRoad RoadSection
-    | TwoRoads RoadSection RoadSection
-    | ThreeRoads RoadSection RoadSection RoadSection
+    | TwoRoads Int RoadSection RoadSection
 
 
 findBendsWithRadius : PeteTree -> Options -> List (Set Int)
@@ -159,17 +153,72 @@ findBendsWithRadius tree options =
                     ( OneRoad road, outputs )
 
                 OneRoad roadOne ->
-                    ( TwoRoads roadOne road, outputs )
+                    ( TwoRoads 1 roadOne road, outputs )
 
-                TwoRoads roadOne roadTwo ->
-                    ( ThreeRoads roadOne roadTwo road, outputs )
+                TwoRoads roadStartIndex roadOne roadTwo ->
+                    {-
+                       Note: Avoid division.
+                       Curvature is direction change over length.
+                       Radius is length over direction change.
+                       So min radius * track length is max allowed direction change in radians.
+                    -}
+                    ( TwoRoads (roadStartIndex + 1) roadTwo road
+                    , checkCurvature roadStartIndex roadOne roadTwo road outputs
+                    )
 
-                ThreeRoads roadOne roadTwo roadThree ->
-                    --TODO: Check same directions and total change (in radians), is curvature excessive?
-                    --Note: Avoid division.
-                    ( state, outputs )
+        checkCurvature :
+            Int
+            -> RoadSection
+            -> RoadSection
+            -> RoadSection
+            -> List (Set Int)
+            -> List (Set Int)
+        checkCurvature roadStartIndex roadOne roadTwo roadThree outputs =
+            -- We're really interested in how much direction change occurs either end of roadTwo.
+            let
+                entryInflexion =
+                    Angle.inRadians <|
+                        Direction2d.angleFrom roadOne.directionAtStart roadTwo.directionAtStart
 
-        ( finalState, bendPoints ) =
+                exitInflexion =
+                    Angle.inRadians <|
+                        Direction2d.angleFrom roadTwo.directionAtStart roadThree.directionAtStart
+
+                maxPermittedChange =
+                    Length.inMeters options.radius * Length.inMeters roadTwo.trueLength
+
+                netDirectionChange =
+                    Angle.inRadians <|
+                        Direction2d.angleFrom roadOne.directionAtStart roadThree.directionAtStart
+            in
+            if entryInflexion * exitInflexion > 0 then
+                -- Bend in the same direction, this counts.
+                if netDirectionChange > maxPermittedChange then
+                    {-
+                       Ah-ha. Capture the endpoints. Which is a bit subtle.
+                       If the start point is already in the current (i.e. head) set,
+                       then add the end point to that set, as it is contiguous.
+                       Otherwise, put both points in a new set.
+                    -}
+                    case outputs of
+                        mostRecentSet :: otherSets ->
+                            if Set.member roadStartIndex mostRecentSet then
+                                Set.insert (roadStartIndex + 1) mostRecentSet :: otherSets
+
+                            else
+                                Set.fromList [ roadStartIndex, roadStartIndex + 1 ] :: outputs
+
+                        [] ->
+                            -- Just make a new set to start the list.
+                            [ Set.fromList [ roadStartIndex, roadStartIndex + 1 ] ]
+
+                else
+                    outputs
+
+            else
+                outputs
+
+        ( _, bendPoints ) =
             DomainModel.foldOverRoute
                 collectBendPoints
                 tree
@@ -264,8 +313,13 @@ update msg options previewColour track =
                         [] ->
                             ( newOptions, [] )
 
-                        position :: _ ->
-                            ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+                        group :: _ ->
+                            case List.head <| Set.toList group of
+                                Just position ->
+                                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+
+                                Nothing ->
+                                    ( newOptions, [] )
 
         ViewPrevious ->
             case options.mode of
@@ -295,8 +349,13 @@ update msg options previewColour track =
                         [] ->
                             ( newOptions, [] )
 
-                        position :: _ ->
-                            ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+                        group :: _ ->
+                            case List.head <| Set.toList group of
+                                Just position ->
+                                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+
+                                Nothing ->
+                                    ( newOptions, [] )
 
         SetCurrentPosition position ->
             case options.mode of
@@ -356,7 +415,7 @@ actions options previewColour track =
 
                 DirectionChangeWithRadius ->
                     TrackLoaded.buildPreview
-                        options.bendBreaches
+                        (List.concatMap Set.toList options.bendBreaches)
                         track.trackTree
         }
     ]
@@ -418,19 +477,24 @@ view settings msgWrapper options isTrack =
 
                 _ :: _ ->
                     case List.Extra.getAt options.currentBendBreach options.bendBreaches of
-                        Just at ->
-                            column [ spacing 4, centerX ]
-                                [ el [ centerX ] <|
-                                    text <|
-                                        String.Interpolate.interpolate
-                                            (I18N.localisedString settings.location toolId ".radius.")
-                                            [ String.fromInt (options.currentBendBreach + 1)
-                                            , String.fromInt <| List.length options.bendBreaches
-                                            ]
-                                , commonButtons at
-                                ]
+                        Just group ->
+                            case List.head <| Set.toList group of
+                                Just position ->
+                                    column [ spacing 4, centerX ]
+                                        [ el [ centerX ] <|
+                                            text <|
+                                                String.Interpolate.interpolate
+                                                    (I18N.localisedString settings.location toolId ".radius.")
+                                                    [ String.fromInt (options.currentBendBreach + 1)
+                                                    , String.fromInt <| List.length options.bendBreaches
+                                                    ]
+                                        , commonButtons position
+                                        ]
 
-                        Nothing ->
+                                Nothing ->
+                                    none
+
+                        _ ->
                             none
 
         singlePointLinkButton track point =
@@ -442,8 +506,13 @@ view settings msgWrapper options isTrack =
                             DomainModel.distanceFromIndex point track
                 }
 
-        bendLinkButton track point =
-            singlePointLinkButton track point
+        bendLinkButton track group =
+            case Set.toList group |> List.head of
+                Just point ->
+                    singlePointLinkButton track point
+
+                Nothing ->
+                    none
 
         wrappedRowStyle breaches =
             -- Pain getting this wrapped row to look OK.

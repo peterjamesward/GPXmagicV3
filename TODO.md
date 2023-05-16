@@ -9,23 +9,22 @@ BUG: Map projection not restored correctly on reload.
 
 BUG: Route Builder previews not hiding when tool closed.
 
+TODO: Make size of preview dot user choice.
+
 --- 
 
 # WIP
 
 ## Bends
 
-TODO: Why is the chart not taking up space and scrollbar is at top?
-
-> Maybe I'll just dive in and try the SA.
-
---TODO: **Circumcircle** test fails with acute angle between long sides!!
-
 Not sure the Bend problem tool works as intended.
 Desire to simplify, unify the various tools.
 Make explicit the before & after radius, say.
 
 > Start with a new view, like Profile1 but showing charts for theta and delta-theta, radius or curvature, perhaps theta''. (Using https://elm-charts.org).
+
+TODO: Why is the chart not taking up space and scrollbar is at top?
+> Maybe I'll just dive in and try the SA.
 
 > This will force me to think about measuring radius, especially at single points. It can then perhaps function  somewhat like the Profile in terms of having limits, which should clarify and unify the Bend problems tool initially and perhaps open a door to some simpler but more effective filters.
 
@@ -48,6 +47,7 @@ Also, costs associated with limits set by user:
 Each of these having some extra loading (e.g. square of distance) and a user weighting.
 Search attenpts to minimise cost, across designated range of track.
 Assumes that the route is seeded with extra points, perhaps more dense near areas of change, perhaps every meter.
+> These will be areas identified by Bend and Gradient problems tools.
 
 (It's time I gave this a go, it's been floating around for a couple of years now.)
 
