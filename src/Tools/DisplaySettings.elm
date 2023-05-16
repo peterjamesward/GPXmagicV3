@@ -216,36 +216,28 @@ view settings wrap options =
         , landUseChoice
         , column groupStyle
             [ Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
+                []
                 { onChange = wrap << SetRoadSurface
                 , checked = options.roadSurface
                 , label = Input.labelRight [] <| i18n "road"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
+                []
                 { onChange = wrap << SetGroundPlane
                 , checked = options.groundPlane
                 , label = Input.labelRight [] <| text "Ground"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
+                []
                 { onChange = wrap << SetCentreLine
                 , checked = options.centreLine
                 , label = Input.labelRight [] <| text "Centre line"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
+                []
                 { onChange = wrap << SetPlaceNames
                 , checked = options.placeNames
                 , label = Input.labelRight [] <| text "Place names"
@@ -254,27 +246,21 @@ view settings wrap options =
             ]
         , column groupStyle
             [ Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
+                []
                 { onChange = wrap << UseGlobeProjection
                 , checked = options.mapProjection == "globe"
                 , label = Input.labelRight [] <| text "Use Globe map"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
+                []
                 { onChange = wrap << AllowMapTilt
                 , checked = options.mapAllowTilt
                 , label = Input.labelRight [] <| text "Map can tilt"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
+                []
                 { onChange = wrap << AllowMapRotate
                 , checked = options.mapAllowRotate
                 , label = Input.labelRight [] <| text "Map can rotate"
