@@ -208,7 +208,7 @@ Any changes you make will be reflected here.
                 , ( "next", """Move to next""" )
                 , ( "none", """None found""" )
                 , ( ".of.", """{0} of {1}, {2}º""" )
-                , ( ".radius.", """{0} of {1}º""" )
+                , ( ".radius.", """{0} of {1}""" )
                 , ( "smooth", """Smooth these points""" )
                 , ( "adjust", """Widen current bend""" )
                 , ( "info", """

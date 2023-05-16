@@ -185,9 +185,10 @@ findBendsWithRadius tree options =
                         Direction2d.angleFrom roadTwo.directionAtStart roadThree.directionAtStart
 
                 maxPermittedChange =
-                    --TODO: Refactor to avoid division!
-                    Length.inMeters roadTwo.trueLength / Length.inMeters options.radius
+                    --Refactored to avoid division!
+                    Length.inMeters roadTwo.trueLength
 
+                --/ Length.inMeters options.radius
                 netDirectionChange =
                     abs <|
                         Angle.inRadians <|
@@ -195,7 +196,7 @@ findBendsWithRadius tree options =
             in
             if entryInflexion * exitInflexion > 0 then
                 -- Bend in the same direction, this counts.
-                if netDirectionChange > maxPermittedChange then
+                if netDirectionChange * Length.inMeters options.radius > maxPermittedChange then
                     {-
                        Ah-ha. Capture the endpoints. Which is a bit subtle.
                        If the start point is already in the current (i.e. head) set,
@@ -311,17 +312,17 @@ update msg options previewColour track =
                         newOptions =
                             { options | currentBendBreach = breachIndex }
                     in
-                    case newOptions.bendBreaches of
-                        [] ->
-                            ( newOptions, [] )
-
-                        group :: _ ->
+                    case List.Extra.getAt breachIndex newOptions.bendBreaches of
+                        Just group ->
                             case List.head <| Set.toList group of
                                 Just position ->
                                     ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
                                 Nothing ->
                                     ( newOptions, [] )
+
+                        Nothing ->
+                            ( newOptions, [] )
 
         ViewPrevious ->
             case options.mode of
@@ -347,17 +348,17 @@ update msg options previewColour track =
                         newOptions =
                             { options | currentBendBreach = breachIndex }
                     in
-                    case newOptions.bendBreaches of
-                        [] ->
-                            ( newOptions, [] )
-
-                        group :: _ ->
+                    case List.Extra.getAt breachIndex newOptions.bendBreaches of
+                        Just group ->
                             case List.head <| Set.toList group of
                                 Just position ->
                                     ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
                                 Nothing ->
                                     ( newOptions, [] )
+
+                        Nothing ->
+                            ( newOptions, [] )
 
         SetCurrentPosition position ->
             case options.mode of

@@ -17,20 +17,7 @@ TODO: Make size of preview dot user choice.
 
 ## Bends
 
-Not sure the Bend problem tool works as intended.
-Desire to simplify, unify the various tools.
-Make explicit the before & after radius, say.
-
-> Start with a new view, like Profile1 but showing charts for theta and delta-theta, radius or curvature, perhaps theta''. (Using https://elm-charts.org).
-
-TODO: Why is the chart not taking up space and scrollbar is at top?
-> Maybe I'll just dive in and try the SA.
-
-> This will force me to think about measuring radius, especially at single points. It can then perhaps function  somewhat like the Profile in terms of having limits, which should clarify and unify the Bend problems tool initially and perhaps open a door to some simpler but more effective filters.
-
-Delta theta at any one point is spike of course. Radius/curvature requires some decided delta-distance (ds).
-But we can certainly set a minimum radius, maximum curvature, limiting the extent of any change within some ds. Provided
-ds is not infinitesmal (say, 1m), this is practical, and adequate where minimum radius is circa 4m.
+> Updated bend problem tool should be launch ready.
 
 I still wonder if there is a **search** approach worth trying. Perhaps simulated annealing which seems to be the go-to.
 There would be a cost associated with input fundamentals:
