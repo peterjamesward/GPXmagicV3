@@ -187,6 +187,8 @@ findBendsWithRadius tree options =
                 maxPermittedChange =
                     --Refactored to avoid division!
                     Length.inMeters roadTwo.trueLength
+                        + 0.5
+                        * (Length.inMeters roadOne.trueLength + Length.inMeters roadThree.trueLength)
 
                 --/ Length.inMeters options.radius
                 netDirectionChange =
