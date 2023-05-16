@@ -15,6 +15,7 @@ import LocalCoords exposing (LocalCoords)
 import Point3d
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
+import Set exposing (Set)
 import SketchPlane3d
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
@@ -34,7 +35,7 @@ toolId =
 type alias Options =
     { threshold : Angle
     , singlePointBreaches : List ( Int, Angle )
-    , bendBreaches : List Int
+    , bendBreaches : List (Set Int)
     , currentPointBreach : Int
     , currentBendBreach : Int
     , mode : DirectionChangeMode
@@ -132,41 +133,36 @@ findDirectionChanges options tree =
             }
 
 
-findBendsWithRadius : PeteTree -> Options -> List Int
+type BendWindow
+    = NoRoads
+    | OneRoad RoadSection
+    | TwoRoads RoadSection RoadSection
+    | ThreeRoads RoadSection RoadSection RoadSection
+
+
+findBendsWithRadius : PeteTree -> Options -> List (Set Int)
 findBendsWithRadius tree options =
-    -- Any point for which the circumcircle formed with neighbouring points has radius less than given.
-    --TODO: No, circumcircle test fails with acute angle between long sides!!
+    -- looking for two adjacent points where the direction change is in the same direction
+    -- and the total change divided into the length is less than the radius specified.
+    -- We can quite neatly do this with a fold over the track that repeatedly examines
+    -- three neighbouring road sections.
+    -- Where we find a "run" of such points we put them in a set, as part of the same "bend".
+    -- It is a list of these "bend points" that we return.
     let
-        hasSmallCircumcircle : Int -> Bool
-        hasSmallCircumcircle pointIndex =
-            let
-                thisPoint =
-                    DomainModel.earthPointFromIndex pointIndex tree
-                        |> .space
-                        |> Point3d.projectInto SketchPlane3d.xy
+        collectBendPoints :
+            RoadSection
+            -> ( BendWindow, List (Set Int) )
+            -> ( BendWindow, List (Set Int) )
+        collectBendPoints road ( state, outputs ) =
+            ( state, outputs )
 
-                priorPoint =
-                    DomainModel.earthPointFromIndex (pointIndex - 1) tree
-                        |> .space
-                        |> Point3d.projectInto SketchPlane3d.xy
-
-                nextPoint =
-                    DomainModel.earthPointFromIndex (pointIndex + 1) tree
-                        |> .space
-                        |> Point3d.projectInto SketchPlane3d.xy
-            in
-            case
-                Triangle2d.from thisPoint priorPoint nextPoint
-                    |> Triangle2d.circumcircle
-            of
-                Just circumCircle ->
-                    Circle2d.radius circumCircle |> Quantity.lessThan options.radius
-
-                Nothing ->
-                    False
+        ( _, bendPoints ) =
+            DomainModel.foldOverRoute
+                collectBendPoints
+                tree
+                ( NoRoads, [] )
     in
-    List.range 1 (DomainModel.skipCount tree - 1)
-        |> List.filter hasSmallCircumcircle
+    List.reverse bendPoints
 
 
 toolStateChange :
