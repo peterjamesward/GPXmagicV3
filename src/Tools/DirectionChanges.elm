@@ -185,11 +185,16 @@ findBendsWithRadius tree options =
                         Direction2d.angleFrom roadTwo.directionAtStart roadThree.directionAtStart
 
                 maxPermittedChange =
-                    Length.inMeters options.radius * Length.inMeters roadTwo.trueLength
+                    --TODO: Refactor to avoid division!
+                    Length.inMeters roadTwo.trueLength / Length.inMeters options.radius
 
                 netDirectionChange =
-                    Angle.inRadians <|
-                        Direction2d.angleFrom roadOne.directionAtStart roadThree.directionAtStart
+                    abs <|
+                        Angle.inRadians <|
+                            Direction2d.angleFrom roadOne.directionAtStart roadThree.directionAtStart
+
+                _ =
+                    Debug.log "(allowed, actual)" ( maxPermittedChange, netDirectionChange )
             in
             if entryInflexion * exitInflexion > 0 then
                 -- Bend in the same direction, this counts.
@@ -200,6 +205,10 @@ findBendsWithRadius tree options =
                        then add the end point to that set, as it is contiguous.
                        Otherwise, put both points in a new set.
                     -}
+                    let
+                        _ =
+                            Debug.log "exceeds limit" ()
+                    in
                     case outputs of
                         mostRecentSet :: otherSets ->
                             if Set.member roadStartIndex mostRecentSet then
