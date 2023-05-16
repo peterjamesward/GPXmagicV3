@@ -154,13 +154,28 @@ findBendsWithRadius tree options =
             -> ( BendWindow, List (Set Int) )
             -> ( BendWindow, List (Set Int) )
         collectBendPoints road ( state, outputs ) =
-            ( state, outputs )
+            case state of
+                NoRoads ->
+                    ( OneRoad road, outputs )
 
-        ( _, bendPoints ) =
+                OneRoad roadOne ->
+                    ( TwoRoads roadOne road, outputs )
+
+                TwoRoads roadOne roadTwo ->
+                    ( ThreeRoads roadOne roadTwo road, outputs )
+
+                ThreeRoads roadOne roadTwo roadThree ->
+                    --TODO: Check same directions and total change (in radians), is curvature excessive?
+                    --Note: Avoid division.
+                    ( state, outputs )
+
+        ( finalState, bendPoints ) =
             DomainModel.foldOverRoute
                 collectBendPoints
                 tree
                 ( NoRoads, [] )
+
+        --TODO: Mop up final state.
     in
     List.reverse bendPoints
 
