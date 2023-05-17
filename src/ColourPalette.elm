@@ -7,7 +7,7 @@ import FlatColors.FlatUIPalette exposing (..)
 
 gradientColourPastel : Float -> Color.Color
 gradientColourPastel slope =
-    Color.hsl (gradientHue2 slope) 0.7 0.7
+    Color.hsl (gradientHue slope) 0.7 0.7
 
 
 gradientHue2 : Float -> Float
