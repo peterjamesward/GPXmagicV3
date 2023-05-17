@@ -51,8 +51,6 @@ import Tools.TracksOptions as Tracks
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements
-import ViewAbout
-import ViewDerivatives
 import ViewFirstPerson
 import ViewGraph
 import ViewMap
@@ -84,7 +82,6 @@ defaultPaneContext =
     , profileContext = Nothing
     , planContext = Nothing
     , graphContext = Nothing
-    , derivativesContext = Nothing
     }
 
 
@@ -121,7 +118,6 @@ type Msg
     | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
-    | DerivativesViewMessage PaneId ViewDerivatives.Msg
     | PaneNoOp
 
 
@@ -277,9 +273,6 @@ update paneMsg msgWrapper tracks contentArea options previews =
               , StoreLocally "panes" <| encodePaneState newOptions
               ]
             )
-
-        DerivativesViewMessage paneId innerMsg ->
-            ( options, tracks, [] )
 
         ThirdPersonViewMessage paneId imageMsg ->
             let
@@ -599,7 +592,6 @@ initialisePane track options pane =
         , planContext = Just <| ViewPlan.initialiseView 0 track.trackTree pane.planContext
         , graphContext = Just <| ViewGraph.initialiseView 0 track.trackTree pane.graphContext
         , mapContext = Just <| ViewMap.initialiseContext pane.mapContext
-        , derivativesContext = Just ViewDerivatives.initialiseView
     }
 
 
@@ -855,19 +847,6 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                                 track
                                 (msgWrapper << ProfileViewMessage pane.paneId)
                                 previews
-
-                        _ ->
-                            none
-                , conditionallyVisible (pane.activeView == ViewDerivatives) <|
-                    case ( pane.derivativesContext, mTrack ) of
-                        ( Just context, Just track ) ->
-                            ViewDerivatives.view
-                                context
-                                settings
-                                displayOptions
-                                ( paneWidth, paneHeight )
-                                track
-                                (msgWrapper << DerivativesViewMessage pane.paneId)
 
                         _ ->
                             none
