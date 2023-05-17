@@ -2,9 +2,13 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.12.2 (7925e972, 2023-05-17 10:40)
+    """# GPXmagic v3.12.3 (7925e972, 2023-05-17 15:16)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
+
+## 3.12.3
+
+Compromising on gradient colour palette by using the v3 basis but slightly improving saturation for clarity.
 
 ## 3.12.2
 
