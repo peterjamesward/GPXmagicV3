@@ -17,6 +17,8 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 ## Bends
 
+BUG: Fix **radiused bends**. It maybe works better in one direction.
+
 I still think there is a **search** approach worth trying. 
 Perhaps simulated annealing which seems to be the go-to.
 There would be a cost associated with input fundamentals:
