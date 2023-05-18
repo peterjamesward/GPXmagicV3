@@ -136,7 +136,7 @@ update msg options previewColour track wrapper =
 
         Search ->
             ( { options | saTrack = Just track }
-            , [ MapCmd <|
+            , [ ExternalCommand <|
                     Random.generate
                         (wrapper << Perturb)
                         (randomMove (DomainModel.skipCount track.trackTree))

@@ -2561,6 +2561,9 @@ performActionCommands actions model =
                 ( FetchMatchingRoute coordinates, _ ) ->
                     Tools.MapMatchingRouter.mapMatchingApi MatchingRoute coordinates
 
+                ( ExternalCommand command, _ ) ->
+                    command
+
                 _ ->
                     Cmd.none
     in
