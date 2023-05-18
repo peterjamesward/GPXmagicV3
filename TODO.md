@@ -51,12 +51,12 @@ Just jiggle points around in XYZ and assess the cost impact.
 May be able to use a local calculation, as changes should be limited to within two points on each side.
 
 Plan:
-1. Put together a scoring/costing calculation for the whole route. This may involve exposing (for example) the `findBendsWithRadius` function in DirectionChanges. Ditto gradient changes and other problems.
+1Provide a random perturbation generator.
+> Switch to vector direction & length, altitude delta.
 2. Figure out incremental score/cost change calculations if possible for point updates.
    > Might do this first ("is this move an improvement"?)
-Conceptually ? easier if we make a copy of the track tree for SA.
-3. Provide a random float generator.
-3. Implement the basic SA with default score/cost function and weight.
+3. Show the perturbed track (as preview line?)
+4. Implement the basic SA with default score/cost function and weight.
 4. If it doesn't work, stop.
 5. Add UI for weights etc.
 6. Start/stop search and apply new track.

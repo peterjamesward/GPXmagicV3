@@ -10,6 +10,7 @@ module Tools.Annealing exposing
 
 import Actions exposing (ToolAction(..))
 import CommonToolStyles exposing (noTrackMessage)
+import Direction2d exposing (Direction2d, random)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
 import Element exposing (..)
 import Element.Input as Input exposing (button)
@@ -50,9 +51,9 @@ defaultOptions =
 
 type alias Perturbation =
     { pointIndex : Int -- proportion of track distance
-    , x : Float -- proportion of max depending on temperature
-    , y : Float
-    , z : Float
+    , direction : Direction2d LocalCoords
+    , distance : Float -- meters horizontal displacement
+    , altitude : Float
     , p : Float -- Chance of accepting a "worse" option
     }
 
@@ -62,7 +63,7 @@ randomMove maxPoint =
     Random.map5
         Perturbation
         (Random.int 0 maxPoint)
-        (Random.float 0 1)
+        Direction2d.random
         (Random.float 0 1)
         (Random.float 0 1)
         (Random.float 0 1)
