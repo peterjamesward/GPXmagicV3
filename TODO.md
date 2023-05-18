@@ -54,6 +54,7 @@ Plan:
 1. Put together a scoring/costing calculation for the whole route. This may involve exposing (for example) the `findBendsWithRadius` function in DirectionChanges. Ditto gradient changes and other problems.
 2. Figure out incremental score/cost change calculations if possible for point updates.
    > Might do this first ("is this move an improvement"?)
+Conceptually ? easier if we make a copy of the track tree for SA.
 3. Provide a random float generator.
 3. Implement the basic SA with default score/cost function and weight.
 4. If it doesn't work, stop.

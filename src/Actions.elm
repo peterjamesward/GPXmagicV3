@@ -135,6 +135,7 @@ type
     | SetMapAllowTilt Bool
     | SetMapAllowRotate Bool
     | SetMapProjection String
+    | MapCmd (Cmd msg)
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

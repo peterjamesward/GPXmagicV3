@@ -14,10 +14,13 @@ import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
 import Element exposing (..)
 import Element.Input as Input exposing (button)
 import Length exposing (Meters)
+import LocalCoords exposing (LocalCoords)
+import Random
 import SystemSettings exposing (SystemSettings)
 import Tools.AnnealingOptions exposing (..)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
+import Vector3d exposing (..)
 import ViewPureStyles exposing (..)
 
 
@@ -25,7 +28,7 @@ toolId =
     "annealing"
 
 
-defaultOptions : Options
+defaultOptions : Options msg
 defaultOptions =
     { weightSamePosition = 1.0
     , weightSameAltitude = 1.0
@@ -38,16 +41,41 @@ defaultOptions =
     , minRadius = Length.meters 5
     , maxGradient = 15
     , maxDeltaGradient = 1
+    , saTrack = Nothing
+    , iterationsToRun = 1000
+    , scoreHistory = []
+    , currentIndex = 0
     }
+
+
+type alias Perturbation =
+    { pointIndex : Int -- proportion of track distance
+    , x : Float -- proportion of max depending on temperature
+    , y : Float
+    , z : Float
+    , p : Float -- Chance of accepting a "worse" option
+    }
+
+
+randomMove : Int -> Random.Generator Perturbation
+randomMove maxPoint =
+    Random.map5
+        Perturbation
+        (Random.int 0 maxPoint)
+        (Random.float 0 1)
+        (Random.float 0 1)
+        (Random.float 0 1)
+        (Random.float 0 1)
 
 
 type Msg
     = Search
     | Apply
     | StopSearching
+    | Perturb Perturbation
 
 
-apply : Options -> TrackLoaded msg -> TrackLoaded msg
+apply : Options msg -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
         newTree =
@@ -78,9 +106,9 @@ apply options track =
 toolStateChange :
     Bool
     -> Element.Color
-    -> Options
+    -> Options msg
     -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
+    -> ( Options msg, List (ToolAction msg) )
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
@@ -96,26 +124,36 @@ toolStateChange opened colour options track =
 
 update :
     Msg
-    -> Options
+    -> Options msg
     -> Element.Color
     -> TrackLoaded msg
-    -> ( Options, List (ToolAction msg) )
-update msg options previewColour track =
+    -> (Msg -> msg)
+    -> ( Options msg, List (ToolAction msg) )
+update msg options previewColour track wrapper =
     case msg of
         Apply ->
             ( options, [] )
 
         Search ->
-            ( options, [] )
+            ( { options | saTrack = Just track }
+            , [ MapCmd <|
+                    Random.generate
+                        (wrapper << Perturb)
+                        (randomMove (DomainModel.skipCount track.trackTree))
+              ]
+            )
 
         StopSearching ->
             ( options, [] )
+
+        Perturb perturbation ->
+            ( { options | currentIndex = perturbation.pointIndex }, [] )
 
 
 view :
     SystemSettings
     -> (Msg -> msg)
-    -> Options
+    -> Options msg
     -> Maybe (TrackLoaded msg)
     -> Element msg
 view settings wrapper options track =
@@ -140,112 +178,11 @@ view settings wrapper options track =
             noTrackMessage settings
 
 
-type
-    PointContext
-    -- We need four road sections to derive all the factors impacted by a single point move.
-    -- These types could be used in a fold over the track to get whole-track scores, similar to DirectionChanges.
-    -- Note that start and end of route (or section of route) are interesting.
-    = IsFirstPoint Int RoadSection RoadSection -- can only look forwards
-    | IsSecondPoint Int RoadSection RoadSection RoadSection -- can look back one
-    | IsGeneral Int RoadSection RoadSection RoadSection RoadSection -- not near either end
-    | IsPenultimate Int RoadSection RoadSection RoadSection -- Only one forward
-    | IsUltimate Int RoadSection RoadSection -- At end of route section
-
-
-scoreFromContext : Options -> PointContext -> Float
-scoreFromContext options context =
-    -- Note we don't even attempt SA without sufficient points to play with.
-    case context of
-        IsFirstPoint index f1 f2 ->
-            0
-
-        IsSecondPoint index b1 f1 f2 ->
-            0
-
-        IsGeneral index b2 b1 f1 f2 ->
-            0
-
-        IsPenultimate index b2 b1 f1 ->
-            0
-
-        IsUltimate index b2 b1 ->
-            0
-
-
-pointContextFromIndex : Int -> TrackLoaded msg -> PointContext
-pointContextFromIndex indexOfMovablePoint track =
-    -- Please don't use this for folding over the track.
-    if indexOfMovablePoint <= 0 then
-        IsFirstPoint 0
-            (DomainModel.leafFromIndex 0 track)
-            (DomainModel.leafFromIndex 1 track)
-
-    else if indexOfMovablePoint == 1 then
-        IsSecondPoint 1
-            (DomainModel.leafFromIndex 0 track)
-            (DomainModel.leafFromIndex 1 track)
-            (DomainModel.leafFromIndex 2 track)
-
-    else if indexOfMovablePoint == DomainModel.skipCount track.trackTree - 1 then
-        --TODO: Return partial context near track ends.
-        IsPenultimate indexOfMovablePoint
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint + 0) track)
-
-    else if indexOfMovablePoint >= DomainModel.skipCount track.trackTree then
-        --TODO: Return partial context near track ends.
-        IsUltimate indexOfMovablePoint
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
-
-    else
-        IsGeneral
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint + 0) track)
-            (DomainModel.leafFromIndex <| (indexOfMovablePoint + 1) track)
-
-
-deltaScoreForMovingPoint : Int -> Vector3d Meters LocalCoords -> TrackLoaded msg -> Options -> Float
-deltaScoreForMovingPoint pointIndex moveVector track options =
-    -- Don't worry, yet, about computing base score many times.
-    case pointContextFromIndex pointIndex track of
-        Just (GotFour back2 back1 forward0 forward1) ->
-            -- Get some from leaves, some from points, some we need to compute.
-            let
-                baseScore =
-                    scoreFromContext options back2 back1 forward0 forward1
-
-                perturbedPoint =
-                    forward0.startPoint.space |> Point3d.translateBy moveVector
-
-                perturbedAsGpx =
-                    DomainModel.gpxFromPointWithReference track.referenceLonLat perturbedPoint
-
-                newRouteletteGpx =
-                    [ Tuple.first back2.sourceData
-                    , Tuple.first back1.sourceData
-                    , perturbedAsGpx
-                    , Tuple.second forward0.sourceData
-                    , Tuple.second forward1.sourceData
-                    ]
-
-                miniTree =
-                    -- Cunningly make a minimal tree from perturbed inputs.
-                    DomainModel.treeFromSourcesWithExistingReference
-                        track.referenceLonLat
-                        newRouteletteGpx
-
-                contextAfterPerturbation =
-                    pointContextFromIndex 2 { track | trackTree = miniTree }
-            in
-            case contextAfterPerturbation of
-                Just (GotFour newBack2 newBack1 newForward0 newForward1) ->
-                    scoreFromContext options newBack2 newBack1 newForward0 newForward1 - baseScore
-
-                _ ->
-                    baseScore
-
-        _ ->
-            0
+saOneMove : Options msg -> Int -> Vector3d Meters LocalCoords -> TrackLoaded msg -> TrackLoaded msg
+saOneMove options pointIndex displacement baseTrack =
+    {-
+       We have a clone of the track (tree) that we update piecemeal in our Options to endure over several cycles & updates.
+       Will use in-situ tree updates and should be easy enough to derive scores based on metrics from baseline.
+       Locally assess impact of each perturbation (at worst extends two points each side).
+    -}
+    baseTrack

@@ -1,12 +1,11 @@
 module Tools.AnnealingOptions exposing (Options)
 
--- Putting these in a separate module means we can use with Action, without an import loop.
-
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
+import TrackLoaded exposing (TrackLoaded)
 
 
-type alias Options =
+type alias Options msg =
     -- Some combination of these will determine score for SA.
     { weightSamePosition : Float
     , weightSameAltitude : Float
@@ -19,4 +18,8 @@ type alias Options =
     , minRadius : Quantity Float Meters
     , maxGradient : Float
     , maxDeltaGradient : Float
+    , saTrack : Maybe (TrackLoaded msg)
+    , iterationsToRun : Int
+    , scoreHistory : List Float
+    , currentIndex : Int
     }
