@@ -138,3 +138,75 @@ view settings wrapper options track =
 
         Nothing ->
             noTrackMessage settings
+
+
+type
+    PointContext
+    -- We need four road sections to derive all the factors impacted by a single point move.
+    -- These types are used in a fold over the track to get whole-track scores.
+    = GotOne RoadSection
+    | GotTwo RoadSection RoadSection
+    | GotThree RoadSection RoadSection RoadSection
+    | GotFour Int RoadSection RoadSection RoadSection RoadSection
+
+
+pointContextFromIndex : Int -> TrackLoaded msg -> Maybe PointContext
+pointContextFromIndex indexOfMovablePoint track =
+    -- Please don't use this for folding over the track.
+    if indexOfMovablePoint < 0 then
+        Nothing
+
+    else if indexOfMovablePoint > DomainModel.skipCount track.trackTree - 2 then
+        Nothing
+
+    else
+        Just <|
+            GotFour
+                (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
+                (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
+                (DomainModel.leafFromIndex <| (indexOfMovablePoint + 0) track)
+                (DomainModel.leafFromIndex <| (indexOfMovablePoint + 1) track)
+
+
+deltaScoreForMovingPoint : Int -> Vector3d Meters LocalCoords -> TrackLoaded msg -> Float
+deltaScoreForMovingPoint pointIndex moveVector tree =
+    -- Don't worry, yet, about computing base score many times.
+    case pointContextFromIndex pointIndex tree of
+        Just (GotFour back2 back1 forward0 forward1) ->
+            -- Get some from leaves, some from points, some we need to compute.
+            let
+                baseScore =
+                    scoreFromContext back2 back1 forward0 forward1
+
+                perturbedPoint =
+                    forward0.startPoint.space |> Point3d.translateBy moveVector
+
+                perturbedAsGpx =
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat perturbedPoint
+
+                newRouteletteGpx =
+                    [ Tuple.first back2.sourceData
+                    , Tuple.first back1.sourceData
+                    , perturbedAsGpx
+                    , Tuple.second forward0.sourceData
+                    , Tuple.second forward1.sourceData
+                    ]
+
+                miniTree =
+                    -- Cunningly make a minimal tree from perturbed inputs.
+                    DomainModel.treeFromSourcesWithExistingReference
+                        track.referenceLonLat
+                        newRouteletteGpx
+
+                contextAfterPerturbation =
+                    pointContextFromIndex 2 { track | trackTree = miniTree }
+            in
+            case contextAfterPerturbation of
+                Just (GotFour newBack2 newBack1 newForward0 newForward1) ->
+                    scoreFromContext newBack2 newBack1 newForward0 newForward1 - baseScore
+
+                _ ->
+                    baseScore
+
+        _ ->
+            0
