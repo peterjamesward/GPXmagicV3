@@ -143,40 +143,79 @@ view settings wrapper options track =
 type
     PointContext
     -- We need four road sections to derive all the factors impacted by a single point move.
-    -- These types are used in a fold over the track to get whole-track scores.
-    = GotOne RoadSection
-    | GotTwo RoadSection RoadSection
-    | GotThree RoadSection RoadSection RoadSection
-    | GotFour Int RoadSection RoadSection RoadSection RoadSection
+    -- These types could be used in a fold over the track to get whole-track scores, similar to DirectionChanges.
+    -- Note that start and end of route (or section of route) are interesting.
+    = IsFirstPoint Int RoadSection RoadSection -- can only look forwards
+    | IsSecondPoint Int RoadSection RoadSection RoadSection -- can look back one
+    | IsGeneral Int RoadSection RoadSection RoadSection RoadSection -- not near either end
+    | IsPenultimate Int RoadSection RoadSection RoadSection -- Only one forward
+    | IsUltimate Int RoadSection RoadSection -- At end of route section
 
 
-pointContextFromIndex : Int -> TrackLoaded msg -> Maybe PointContext
+scoreFromContext : Options -> PointContext -> Float
+scoreFromContext options context =
+    -- Note we don't even attempt SA without sufficient points to play with.
+    case context of
+        IsFirstPoint index f1 f2 ->
+            0
+
+        IsSecondPoint index b1 f1 f2 ->
+            0
+
+        IsGeneral index b2 b1 f1 f2 ->
+            0
+
+        IsPenultimate index b2 b1 f1 ->
+            0
+
+        IsUltimate index b2 b1 ->
+            0
+
+
+pointContextFromIndex : Int -> TrackLoaded msg -> PointContext
 pointContextFromIndex indexOfMovablePoint track =
     -- Please don't use this for folding over the track.
-    if indexOfMovablePoint < 0 then
-        Nothing
+    if indexOfMovablePoint <= 0 then
+        IsFirstPoint 0
+            (DomainModel.leafFromIndex 0 track)
+            (DomainModel.leafFromIndex 1 track)
 
-    else if indexOfMovablePoint > DomainModel.skipCount track.trackTree - 2 then
-        Nothing
+    else if indexOfMovablePoint == 1 then
+        IsSecondPoint 1
+            (DomainModel.leafFromIndex 0 track)
+            (DomainModel.leafFromIndex 1 track)
+            (DomainModel.leafFromIndex 2 track)
+
+    else if indexOfMovablePoint == DomainModel.skipCount track.trackTree - 1 then
+        --TODO: Return partial context near track ends.
+        IsPenultimate indexOfMovablePoint
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint + 0) track)
+
+    else if indexOfMovablePoint >= DomainModel.skipCount track.trackTree then
+        --TODO: Return partial context near track ends.
+        IsUltimate indexOfMovablePoint
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
 
     else
-        Just <|
-            GotFour
-                (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
-                (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
-                (DomainModel.leafFromIndex <| (indexOfMovablePoint + 0) track)
-                (DomainModel.leafFromIndex <| (indexOfMovablePoint + 1) track)
+        IsGeneral
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 2) track)
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint - 1) track)
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint + 0) track)
+            (DomainModel.leafFromIndex <| (indexOfMovablePoint + 1) track)
 
 
-deltaScoreForMovingPoint : Int -> Vector3d Meters LocalCoords -> TrackLoaded msg -> Float
-deltaScoreForMovingPoint pointIndex moveVector tree =
+deltaScoreForMovingPoint : Int -> Vector3d Meters LocalCoords -> TrackLoaded msg -> Options -> Float
+deltaScoreForMovingPoint pointIndex moveVector track options =
     -- Don't worry, yet, about computing base score many times.
-    case pointContextFromIndex pointIndex tree of
+    case pointContextFromIndex pointIndex track of
         Just (GotFour back2 back1 forward0 forward1) ->
             -- Get some from leaves, some from points, some we need to compute.
             let
                 baseScore =
-                    scoreFromContext back2 back1 forward0 forward1
+                    scoreFromContext options back2 back1 forward0 forward1
 
                 perturbedPoint =
                     forward0.startPoint.space |> Point3d.translateBy moveVector
@@ -203,7 +242,7 @@ deltaScoreForMovingPoint pointIndex moveVector tree =
             in
             case contextAfterPerturbation of
                 Just (GotFour newBack2 newBack1 newForward0 newForward1) ->
-                    scoreFromContext newBack2 newBack1 newForward0 newForward1 - baseScore
+                    scoreFromContext options newBack2 newBack1 newForward0 newForward1 - baseScore
 
                 _ ->
                     baseScore
