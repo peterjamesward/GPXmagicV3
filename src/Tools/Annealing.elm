@@ -155,7 +155,7 @@ update msg options previewColour track wrapper =
                 | currentIndex = perturbation.pointIndex
                 , lastPerturbation = Just perturbation
               }
-            , [ DelayMessage 10 (wrapper Tick) ]
+            , [ DelayMessage 1 (wrapper Tick) ]
             )
 
         Tick ->
@@ -198,7 +198,7 @@ view settings wrapper options track =
             , "direction"
             , "distance"
             , "altitude"
-            , "p"
+            , "probably"
             ]
 
         accessors : List (Perturbation -> String)
