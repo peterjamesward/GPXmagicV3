@@ -303,6 +303,17 @@ view settings wrapper options track =
 
 applyPerturbationRegardless : Options -> Perturbation -> MinimalTrack -> MinimalTrack
 applyPerturbationRegardless options perturbation baseTrack =
+    {-
+       SA requires that we assess the impact of each perturbation.
+       There are variations; no easy way to know which is best for any situation.
+       This is my plan.
+       Find current score for target point and any immediate neighbours.
+       Find new score for these points.
+       If new score is lower, accept the perturbation.
+       When new score is higher, accept if the `p` value is less than `temperature`,
+       where temperature is `iterationsToRun / maxIterations'.
+       ** Should we be more likely to accept smaller changes??
+    -}
     let
         vector =
             Vector2d.withLength (Length.meters perturbation.distance) perturbation.direction
@@ -365,10 +376,10 @@ scorePoint index options currentTree baselineTree =
                     currentLeafFromPoint.directionAtStart
 
         gradientDifference =
-            baselineLeafFromPoint.gradientAtStart - currentLeafFromPoint.gradientAtStart
+            abs <| baselineLeafFromPoint.gradientAtStart - currentLeafFromPoint.gradientAtStart
 
         gradientExceedsThreshold =
-            abs baselineLeafFromPoint.gradientAtStart - options.maxGradient
+            baselineLeafFromPoint.gradientAtStart - options.maxGradient
 
         gradientChangeAtPointAboveThreshold =
             (abs <| currentLeafFromPoint.gradientAtStart - currentPriorLeaf.gradientAtStart)
