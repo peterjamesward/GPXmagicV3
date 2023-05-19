@@ -52,8 +52,8 @@ defaultOptions =
     , maxGradient = 15
     , maxDeltaGradient = 1
     , currentTrack = Nothing
-    , iterationsToRun = 1000
-    , maxIterations = 10000
+    , iterationsToRun = 100000
+    , maxIterations = 100000
     , scoreHistory = []
     , currentIndex = 0
     , searching = False
@@ -387,12 +387,21 @@ scorePoint index options baselineTree currentTree =
             , DomainModel.leafFromIndex (index - 1) currentTree |> DomainModel.asRecord
             )
 
-        scalarShift =
-            --(\x -> x ^ 2) <|
-            Length.inMeters <|
-                Point3d.distanceFrom
-                    baselineLeafFromPoint.startPoint.space
-                    currentLeafFromPoint.startPoint.space
+        horizontalDisplacement =
+            Vector3d.from
+                baselineLeafFromPoint.startPoint.space
+                currentLeafFromPoint.startPoint.space
+                |> Vector3d.projectInto SketchPlane3d.xy
+                |> Vector2d.length
+                |> Length.inMeters
+
+        verticalDisplacement =
+            Vector3d.from
+                baselineLeafFromPoint.startPoint.space
+                currentLeafFromPoint.startPoint.space
+                |> Vector3d.projectionIn Direction3d.z
+                |> Vector3d.length
+                |> Length.inMeters
 
         directionDifference =
             abs <|
@@ -427,7 +436,9 @@ scorePoint index options baselineTree currentTree =
                 curvatureAtPoint
                     - (Length.inMeters options.minRadius * effectiveDistance)
     in
-    scalarShift
+    horizontalDisplacement
+        + verticalDisplacement
+        * 10
         + directionDifference
         + gradientDifferenceFromBaseline
         + gradientExceedsThreshold
