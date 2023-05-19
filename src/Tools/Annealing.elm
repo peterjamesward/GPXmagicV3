@@ -75,34 +75,6 @@ type Msg
     | Tick
 
 
-apply : Options -> TrackLoaded msg -> TrackLoaded msg
-apply options track =
-    let
-        newTree =
-            Just track.trackTree
-    in
-    case newTree of
-        Just isTree ->
-            let
-                pointerReposition =
-                    DomainModel.preserveDistanceFromStart track.trackTree isTree
-
-                ( newOrange, newPurple ) =
-                    ( pointerReposition track.currentPosition
-                    , Maybe.map pointerReposition track.markerPosition
-                    )
-            in
-            { track
-                | trackTree = Maybe.withDefault track.trackTree newTree
-                , currentPosition = newOrange
-                , markerPosition = newPurple
-                , leafIndex = TrackLoaded.indexLeaves isTree
-            }
-
-        Nothing ->
-            track
-
-
 toolStateChange :
     Bool
     -> Element.Color
@@ -122,13 +94,14 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
-applyUsingOptions :
+apply :
     Options
     -> TrackLoaded msg
     -> TrackLoaded msg
-applyUsingOptions options track =
+apply options track =
     let
         ( fromStart, fromEnd ) =
+            --TODO: Allow for use over range.
             if track.markerPosition /= Nothing then
                 TrackLoaded.getRangeFromMarkers track
 
@@ -174,7 +147,7 @@ update msg options previewColour track wrapper =
     in
     case msg of
         Apply ->
-            ( { options | searching = False, saTrack = Nothing }
+            ( { options | searching = False }
             , [ WithUndo Actions.AnnealingApply
               , Actions.AnnealingApply
               , TrackHasChanged
