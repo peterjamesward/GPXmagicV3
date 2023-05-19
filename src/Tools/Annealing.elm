@@ -67,8 +67,8 @@ randomMove maxPoint =
         Perturbation
         (Random.int 0 maxPoint)
         Direction2d.random
-        Random.Float.standardNormal
-        Random.Float.standardNormal
+        (Random.float 0 1)
+        (Random.float -1 1)
         (Random.float 0 1)
 
 

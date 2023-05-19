@@ -21,10 +21,16 @@ BUG: Fix **radiused bends**. It maybe works better in one direction.
 
 Plan:
 4. If it doesn't work, stop.
+5. Try with inserted points.
+5. Hide preview.
+6. Show score history (useful diagnostic).
 5. Add UI for weights etc.
 6. Make preview optional or less frequent, for speed.
 6. Start/stop search and apply new track.
 7. Make it work for range.
+
+An interesting spin-off here is to compute all scores and move the points with the worst scores.
+
 
 ---
 
