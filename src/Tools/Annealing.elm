@@ -65,7 +65,7 @@ randomMove maxPoint =
         (Random.int 0 maxPoint)
         Direction2d.random
         (Random.float 0 1)
-        (Random.float 0 1)
+        (Random.float -1 1)
         (Random.float 0 1)
 
 

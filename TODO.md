@@ -51,9 +51,9 @@ Just jiggle points around in XYZ and assess the cost impact.
 May be able to use a local calculation, as changes should be limited to within two points on each side.
 
 Plan:
+> Gosh, this looks like it could even work, based on quick preview alone.
 2. Figure out incremental score/cost change calculations if possible for point updates.
-3. Show the perturbed track (as preview line?)
-4. Implement the basic SA with default score/cost function and weight.
+5. Implement the basic SA with default score/cost function and weight.
 4. If it doesn't work, stop.
 5. Add UI for weights etc.
 6. Start/stop search and apply new track.
