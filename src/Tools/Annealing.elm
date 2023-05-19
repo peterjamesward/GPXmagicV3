@@ -9,6 +9,7 @@ module Tools.Annealing exposing
     )
 
 import Actions exposing (ToolAction(..))
+import Angle
 import CommonToolStyles exposing (noTrackMessage)
 import Direction2d exposing (Direction2d, random)
 import Direction3d exposing (..)
@@ -19,6 +20,7 @@ import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (translateBy)
 import PreviewData exposing (..)
+import Quantity
 import Random
 import Random.Float
 import SketchPlane3d exposing (..)
@@ -322,3 +324,72 @@ applyPerturbationRegardless options perturbation baseTrack =
                 baseTrack.tree
     in
     { baseTrack | tree = newTree }
+
+
+scorePoint : Int -> Options -> PeteTree -> PeteTree -> Float
+scorePoint index options currentTree baselineTree =
+    {-
+       Can delay this no longer. Score for track is sum of all point scores.
+       High scores are worse in this game.
+       Without weightings, components of point score are:
+       * Scalar distance from baseline;
+       * Deviation from baseline direction;
+       * Deviation from baseline gradient;
+       * Extent to which gradient exceeds threshold;
+       * Extent to which gradient change at point exceeds threshold;
+       * Extent to which curvature at point exceeds threshold;
+       There is no more we can do at one point.
+       Note that a perturbation affects three points (except at boundary).
+    -}
+    let
+        ( baselineLeafFromPoint, currentLeafFromPoint ) =
+            ( DomainModel.leafFromIndex index baselineTree |> DomainModel.asRecord
+            , DomainModel.leafFromIndex index currentTree |> DomainModel.asRecord
+            )
+
+        ( baselinePriorLeaf, currentPriorLeaf ) =
+            ( DomainModel.leafFromIndex (index - 1) baselineTree |> DomainModel.asRecord
+            , DomainModel.leafFromIndex (index - 1) currentTree |> DomainModel.asRecord
+            )
+
+        scalarShift =
+            Length.inMeters <|
+                Point3d.distanceFrom
+                    baselineLeafFromPoint.startPoint.space
+                    currentLeafFromPoint.startPoint.space
+
+        directionDifference =
+            Angle.inRadians <|
+                Direction2d.angleFrom
+                    baselineLeafFromPoint.directionAtStart
+                    currentLeafFromPoint.directionAtStart
+
+        gradientDifference =
+            baselineLeafFromPoint.gradientAtStart - currentLeafFromPoint.gradientAtStart
+
+        gradientExceedsThreshold =
+            abs baselineLeafFromPoint.gradientAtStart - options.maxGradient
+
+        gradientChangeAtPointAboveThreshold =
+            (abs <| currentLeafFromPoint.gradientAtStart - currentPriorLeaf.gradientAtStart)
+                - options.maxDeltaGradient
+
+        effectiveDistance =
+            Quantity.plus currentPriorLeaf.trueLength currentLeafFromPoint.trueLength
+                |> Quantity.half
+                |> Length.inMeters
+
+        curvatureAtPoint =
+            Direction2d.angleFrom currentPriorLeaf.directionAtStart currentLeafFromPoint.directionAtStart
+                |> Angle.inRadians
+                |> abs
+
+        curvatureExceedingThreshold =
+            curvatureAtPoint - (Length.inMeters options.minRadius * effectiveDistance)
+    in
+    scalarShift
+        + directionDifference
+        + gradientDifference
+        + gradientExceedsThreshold
+        + gradientChangeAtPointAboveThreshold
+        + curvatureExceedingThreshold
