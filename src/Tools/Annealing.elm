@@ -51,7 +51,7 @@ defaultOptions =
     , minRadius = Length.meters 5
     , maxGradient = 15
     , maxDeltaGradient = 1
-    , saTrack = Nothing
+    , currentTrack = Nothing
     , iterationsToRun = 1000
     , maxIterations = 10000
     , scoreHistory = []
@@ -122,7 +122,7 @@ apply options track =
             , Maybe.map pointerReposition track.markerPosition
             )
     in
-    case options.saTrack of
+    case options.currentTrack of
         Just saTrack ->
             { track
                 | trackTree = saTrack.tree
@@ -179,7 +179,7 @@ update msg options previewColour track wrapper =
             let
                 newOptions =
                     { options
-                        | saTrack = Just { tree = track.trackTree, reference = track.referenceLonLat }
+                        | currentTrack = Just { tree = track.trackTree, reference = track.referenceLonLat }
                         , searching = True
                         , iterationsToRun = options.maxIterations
                     }
@@ -199,13 +199,16 @@ update msg options previewColour track wrapper =
                     { options
                         | currentIndex = perturbation.pointIndex
                         , lastPerturbation = Just perturbation
-                        , saTrack = Maybe.map (applyPerturbationRegardless options perturbation) options.saTrack
+                        , currentTrack =
+                            Maybe.map
+                                (applyPerturbationRegardless options track.trackTree perturbation)
+                                options.currentTrack
                         , iterationsToRun = options.iterationsToRun - 1
                         , searching = options.iterationsToRun > 1
                     }
             in
             ( newOptions
-            , [ preview newOptions.saTrack
+            , [ preview newOptions.currentTrack
               , DelayMessage 1 (wrapper Tick)
               ]
             )
@@ -287,7 +290,8 @@ view settings wrapper options track =
     case track of
         Just _ ->
             column (CommonToolStyles.toolContentBoxStyle settings)
-                [ el [ centerX ] <|
+                [ el [ centerX ] <| text <| String.fromInt options.iterationsToRun
+                , el [ centerX ] <|
                     if options.searching then
                         stopButton
 
@@ -301,15 +305,15 @@ view settings wrapper options track =
             noTrackMessage settings
 
 
-applyPerturbationRegardless : Options -> Perturbation -> MinimalTrack -> MinimalTrack
-applyPerturbationRegardless options perturbation baseTrack =
+applyPerturbationRegardless : Options -> PeteTree -> Perturbation -> MinimalTrack -> MinimalTrack
+applyPerturbationRegardless options baselineTree perturbation currentTrack =
     {-
        SA requires that we assess the impact of each perturbation.
        There are variations; no easy way to know which is best for any situation.
        This is my plan.
        Find current score for target point and any immediate neighbours.
        Find new score for these points.
-       If new score is lower, accept the perturbation.
+       If new score is lower than the current track, accept the perturbation.
        When new score is higher, accept if the `p` value is less than `temperature`,
        where temperature is `iterationsToRun / maxIterations'.
        ** Should we be more likely to accept smaller changes??
@@ -322,23 +326,42 @@ applyPerturbationRegardless options perturbation baseTrack =
                     (Vector3d.withLength (Length.meters perturbation.altitude) Direction3d.z)
 
         basePoint =
-            DomainModel.earthPointFromIndex perturbation.pointIndex baseTrack.tree
+            DomainModel.earthPointFromIndex perturbation.pointIndex currentTrack.tree
 
         newPoint =
             { basePoint | space = basePoint.space |> Point3d.translateBy vector }
 
-        newTree =
+        proposedNewTree =
             DomainModel.updateEarthPointByIndexInSitu
                 perturbation.pointIndex
                 newPoint
-                baseTrack.reference
-                baseTrack.tree
+                currentTrack.reference
+                currentTrack.tree
+
+        pointScoreInCurrentTree =
+            scorePoint perturbation.pointIndex options baselineTree currentTrack.tree
+
+        pointScoreInProposedTree =
+            scorePoint perturbation.pointIndex options baselineTree proposedNewTree
+
+        lowerScore =
+            pointScoreInProposedTree < pointScoreInCurrentTree
+
+        allowHigherScore =
+            toFloat options.iterationsToRun / toFloat options.maxIterations
+
+        acceptProposal =
+            lowerScore || perturbation.p < allowHigherScore
     in
-    { baseTrack | tree = newTree }
+    if acceptProposal then
+        { currentTrack | tree = proposedNewTree }
+
+    else
+        currentTrack
 
 
 scorePoint : Int -> Options -> PeteTree -> PeteTree -> Float
-scorePoint index options currentTree baselineTree =
+scorePoint index options baselineTree currentTree =
     {-
        Can delay this no longer. Score for track is sum of all point scores.
        High scores are worse in this game.
@@ -351,6 +374,7 @@ scorePoint index options currentTree baselineTree =
        * Extent to which curvature at point exceeds threshold;
        There is no more we can do at one point.
        Note that a perturbation affects three points (except at boundary).
+       To be clear, `baseline` is the original, not the latest, track.
     -}
     let
         ( baselineLeafFromPoint, currentLeafFromPoint ) =

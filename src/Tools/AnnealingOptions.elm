@@ -27,7 +27,7 @@ type alias Options =
     , minRadius : Quantity Float Meters
     , maxGradient : Float
     , maxDeltaGradient : Float
-    , saTrack : Maybe MinimalTrack
+    , currentTrack : Maybe MinimalTrack
     , iterationsToRun : Int
     , maxIterations : Int
     , scoreHistory : List Float
