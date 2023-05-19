@@ -21,6 +21,7 @@ import SystemSettings exposing (SystemSettings)
 import Tools.AnnealingOptions exposing (..)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (..)
 import Vector3d exposing (..)
 import ViewPureStyles exposing (..)
 
@@ -47,15 +48,7 @@ defaultOptions =
     , scoreHistory = []
     , currentIndex = 0
     , searching = False
-    }
-
-
-type alias Perturbation =
-    { pointIndex : Int -- proportion of track distance
-    , direction : Direction2d LocalCoords
-    , distance : Float -- meters horizontal displacement
-    , altitude : Float
-    , p : Float -- Chance of accepting a "worse" option
+    , lastPerturbation = Nothing
     }
 
 
@@ -158,7 +151,10 @@ update msg options previewColour track wrapper =
             )
 
         Perturb perturbation ->
-            ( { options | currentIndex = perturbation.pointIndex }
+            ( { options
+                | currentIndex = perturbation.pointIndex
+                , lastPerturbation = Just perturbation
+              }
             , [ DelayMessage 10 (wrapper Tick) ]
             )
 
@@ -196,6 +192,38 @@ view settings wrapper options track =
                 { onPress = Just <| wrapper StopSearching
                 , label = i18n "stop"
                 }
+
+        labels =
+            [ "pointIndex"
+            , "direction"
+            , "distance"
+            , "altitude"
+            , "p"
+            ]
+
+        accessors : List (Perturbation -> String)
+        accessors =
+            [ .pointIndex >> String.fromInt
+            , .direction >> Direction2d.toAngle >> UtilsForViews.showAngle
+            , .distance >> UtilsForViews.showDecimal2
+            , .altitude >> UtilsForViews.showDecimal2
+            , .p >> UtilsForViews.showDecimal2
+            ]
+
+        accessing : Perturbation -> (Perturbation -> String) -> String
+        accessing thing with =
+            with thing
+
+        showLastPerturbation =
+            case options.lastPerturbation of
+                Just perturb ->
+                    row [ spacing 5, padding 5 ]
+                        [ column [ spacing 5 ] <| List.map text labels
+                        , column [ spacing 5 ] <| List.map (text << accessing perturb) accessors
+                        ]
+
+                Nothing ->
+                    none
     in
     case track of
         Just _ ->
@@ -206,6 +234,7 @@ view settings wrapper options track =
 
                     else
                         searchButton
+                , showLastPerturbation
                 ]
 
         Nothing ->
