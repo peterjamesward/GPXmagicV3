@@ -70,6 +70,7 @@ type
     | RenderProfile ViewProfileChartContext.ProfileContext -- rebuild the altitude and gradient charts
     | BezierApplyWithOptions Tools.BezierOptions.Options
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
+    | AnnealingApply
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
     | SmartSmootherApplyWithOptions Tools.SmartSmootherOptions.Options
@@ -238,6 +239,9 @@ actionTextForUndo location action =
 
             UsePhysicsModel ->
                 "physics"
+
+            AnnealingApply ->
+                "annealing"
 
             _ ->
                 "unknown"

@@ -195,7 +195,7 @@ type alias Options msg =
     , timestampOptions : Tools.TimestampOptions.Options
     , routingOptions : Tools.MapMatchingRouterOptions.Options
     , tracksOptions : Tracks.Options msg
-    , annealingOptions : Tools.AnnealingOptions.Options msg
+    , annealingOptions : Tools.AnnealingOptions.Options
     }
 
 

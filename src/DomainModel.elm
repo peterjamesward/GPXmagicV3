@@ -44,7 +44,8 @@ module DomainModel exposing
     , treeFromSourcePoints
     , treeFromSourcesWithExistingReference
     , trueLength
-    , updatePointByIndexInSitu
+    , updateEarthPointByIndexInSitu
+    , updateGpxPointByIndexInSitu
     , withTime
     , withoutTime
     )
@@ -1132,10 +1133,19 @@ queryRoadsUsingFilter filterFn treeNode foldFn accum =
     helper 0 (skipCount treeNode) treeNode accum
 
 
-updatePointByIndexInSitu : Int -> GPXSource -> GPXSource -> PeteTree -> PeteTree
-updatePointByIndexInSitu index newGPX referencePoint tree =
+updateEarthPointByIndexInSitu : Int -> EarthPoint -> GPXSource -> PeteTree -> PeteTree
+updateEarthPointByIndexInSitu index newPoint referencePoint tree =
+    let
+        newGPX =
+            gpxFromPointWithReference referencePoint newPoint
+    in
+    updateGpxPointByIndexInSitu index newGPX referencePoint tree
+
+
+updateGpxPointByIndexInSitu : Int -> GPXSource -> GPXSource -> PeteTree -> PeteTree
+updateGpxPointByIndexInSitu index newGPX referencePoint tree =
     -- Note that all points except end points appear in two places, and they can be distant in the tree.
-    -- Still, idea is to change only ancestor nodes, obviously including the topmost.
+    -- Here, we change only ancestor nodes, obviously including the topmost.
     if index < 0 || index > skipCount tree then
         tree
 
@@ -1151,5 +1161,5 @@ updatePointByIndexInSitu index newGPX referencePoint tree =
 
             Node node ->
                 joiningNode
-                    (updatePointByIndexInSitu index newGPX referencePoint node.left)
-                    (updatePointByIndexInSitu (index - skipCount node.left) newGPX referencePoint node.right)
+                    (updateGpxPointByIndexInSitu index newGPX referencePoint node.left)
+                    (updateGpxPointByIndexInSitu (index - skipCount node.left) newGPX referencePoint node.right)

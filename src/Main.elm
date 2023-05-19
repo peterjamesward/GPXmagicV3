@@ -60,6 +60,7 @@ import SystemSettings exposing (SystemSettings)
 import Task
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
+import Tools.Annealing
 import Tools.BendSmoother
 import Tools.BezierSplines
 import Tools.CentroidAverage
@@ -1792,6 +1793,11 @@ performActionsOnModel actions model =
                         (Tools.CentroidAverage.applyUsingOptions options track)
                         foldedModel
 
+                ( AnnealingApply, Just track ) ->
+                    updateActiveTrack
+                        (Tools.Annealing.apply foldedModel.toolOptions.annealingOptions track)
+                        foldedModel
+
                 ( SmartSmootherApplyWithOptions options, Just track ) ->
                     updateActiveTrack
                         (Tools.SmartSmoother.applyUsingOptions options track)
@@ -2003,7 +2009,7 @@ performActionsOnModel actions model =
                             }
 
                         newTree =
-                            DomainModel.updatePointByIndexInSitu
+                            DomainModel.updateGpxPointByIndexInSitu
                                 index
                                 endGpx
                                 track.referenceLonLat

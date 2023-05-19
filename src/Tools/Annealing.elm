@@ -11,17 +11,21 @@ module Tools.Annealing exposing
 import Actions exposing (ToolAction(..))
 import CommonToolStyles exposing (noTrackMessage)
 import Direction2d exposing (Direction2d, random)
+import Direction3d exposing (..)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
 import Element exposing (..)
 import Element.Input as Input exposing (button)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import Point3d exposing (translateBy)
 import Random
+import SketchPlane3d exposing (..)
 import SystemSettings exposing (SystemSettings)
 import Tools.AnnealingOptions exposing (..)
 import Tools.I18N as I18N
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (..)
+import Vector2d exposing (..)
 import Vector3d exposing (..)
 import ViewPureStyles exposing (..)
 
@@ -30,7 +34,7 @@ toolId =
     "annealing"
 
 
-defaultOptions : Options msg
+defaultOptions : Options
 defaultOptions =
     { weightSamePosition = 1.0
     , weightSameAltitude = 1.0
@@ -71,7 +75,7 @@ type Msg
     | Tick
 
 
-apply : Options msg -> TrackLoaded msg -> TrackLoaded msg
+apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
         newTree =
@@ -102,9 +106,9 @@ apply options track =
 toolStateChange :
     Bool
     -> Element.Color
-    -> Options msg
+    -> Options
     -> Maybe (TrackLoaded msg)
-    -> ( Options msg, List (ToolAction msg) )
+    -> ( Options, List (ToolAction msg) )
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
@@ -118,13 +122,48 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
+applyUsingOptions :
+    Options
+    -> TrackLoaded msg
+    -> TrackLoaded msg
+applyUsingOptions options track =
+    let
+        ( fromStart, fromEnd ) =
+            if track.markerPosition /= Nothing then
+                TrackLoaded.getRangeFromMarkers track
+
+            else
+                ( 0, 0 )
+    in
+    let
+        pointerReposition =
+            identity
+
+        ( newOrange, newPurple ) =
+            ( pointerReposition track.currentPosition
+            , Maybe.map pointerReposition track.markerPosition
+            )
+    in
+    case options.saTrack of
+        Just saTrack ->
+            { track
+                | trackTree = saTrack.tree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+                , leafIndex = TrackLoaded.indexLeaves saTrack.tree
+            }
+
+        Nothing ->
+            track
+
+
 update :
     Msg
-    -> Options msg
+    -> Options
     -> Element.Color
     -> TrackLoaded msg
     -> (Msg -> msg)
-    -> ( Options msg, List (ToolAction msg) )
+    -> ( Options, List (ToolAction msg) )
 update msg options previewColour track wrapper =
     let
         requestPerturbation =
@@ -135,11 +174,16 @@ update msg options previewColour track wrapper =
     in
     case msg of
         Apply ->
-            ( options, [] )
+            ( { options | searching = False, saTrack = Nothing }
+            , [ WithUndo Actions.AnnealingApply
+              , Actions.AnnealingApply
+              , TrackHasChanged
+              ]
+            )
 
         Search ->
             ( { options
-                | saTrack = Just track
+                | saTrack = Just { tree = track.trackTree, reference = track.referenceLonLat }
                 , searching = True
               }
             , [ requestPerturbation ]
@@ -154,6 +198,7 @@ update msg options previewColour track wrapper =
             ( { options
                 | currentIndex = perturbation.pointIndex
                 , lastPerturbation = Just perturbation
+                , saTrack = Maybe.map (applyPerturbationRegardless options perturbation) options.saTrack
               }
             , [ DelayMessage 1 (wrapper Tick) ]
             )
@@ -171,7 +216,7 @@ update msg options previewColour track wrapper =
 view :
     SystemSettings
     -> (Msg -> msg)
-    -> Options msg
+    -> Options
     -> Maybe (TrackLoaded msg)
     -> Element msg
 view settings wrapper options track =
@@ -191,6 +236,13 @@ view settings wrapper options track =
                 neatToolsBorder
                 { onPress = Just <| wrapper StopSearching
                 , label = i18n "stop"
+                }
+
+        applyButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper Apply
+                , label = i18n "adopt"
                 }
 
         labels =
@@ -235,17 +287,33 @@ view settings wrapper options track =
                     else
                         searchButton
                 , showLastPerturbation
+                , applyButton
                 ]
 
         Nothing ->
             noTrackMessage settings
 
 
-saOneMove : Options msg -> Int -> Vector3d Meters LocalCoords -> TrackLoaded msg -> TrackLoaded msg
-saOneMove options pointIndex displacement baseTrack =
-    {-
-       We have a clone of the track (tree) that we update piecemeal in our Options to endure over several cycles & updates.
-       Will use in-situ tree updates and should be easy enough to derive scores based on metrics from baseline.
-       Locally assess impact of each perturbation (at worst extends two points each side).
-    -}
-    baseTrack
+applyPerturbationRegardless : Options -> Perturbation -> MinimalTrack -> MinimalTrack
+applyPerturbationRegardless options perturbation baseTrack =
+    let
+        vector =
+            Vector2d.withLength (Length.meters perturbation.distance) perturbation.direction
+                |> Vector3d.on SketchPlane3d.xy
+                |> Vector3d.plus
+                    (Vector3d.withLength (Length.meters perturbation.altitude) Direction3d.z)
+
+        basePoint =
+            DomainModel.earthPointFromIndex perturbation.pointIndex baseTrack.tree
+
+        newPoint =
+            { basePoint | space = basePoint.space |> Point3d.translateBy vector }
+
+        newTree =
+            DomainModel.updateEarthPointByIndexInSitu
+                perturbation.pointIndex
+                newPoint
+                baseTrack.reference
+                baseTrack.tree
+    in
+    { baseTrack | tree = newTree }

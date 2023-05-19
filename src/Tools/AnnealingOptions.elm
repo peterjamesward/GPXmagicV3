@@ -1,13 +1,20 @@
-module Tools.AnnealingOptions exposing (Options, Perturbation)
+module Tools.AnnealingOptions exposing (MinimalTrack, Options, Perturbation)
 
 import Direction2d exposing (Direction2d)
+import DomainModel exposing (GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Quantity exposing (Quantity)
-import TrackLoaded exposing (TrackLoaded)
 
 
-type alias Options msg =
+type alias MinimalTrack =
+    -- Import loops making copy of TrackLoaded a pain.
+    { tree : PeteTree
+    , reference : GPXSource
+    }
+
+
+type alias Options =
     -- Some combination of these will determine score for SA.
     { weightSamePosition : Float
     , weightSameAltitude : Float
@@ -20,7 +27,7 @@ type alias Options msg =
     , minRadius : Quantity Float Meters
     , maxGradient : Float
     , maxDeltaGradient : Float
-    , saTrack : Maybe (TrackLoaded msg)
+    , saTrack : Maybe MinimalTrack
     , iterationsToRun : Int
     , scoreHistory : List Float
     , currentIndex : Int

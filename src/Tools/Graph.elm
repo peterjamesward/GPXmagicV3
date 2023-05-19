@@ -790,7 +790,7 @@ snapTrackToClusters clusters updatingTrack =
                         --    Debug.log "MOVING" pointsInThisTrack
                         movePoint : Int -> PeteTree -> PeteTree
                         movePoint pointNumber treeFoldedOverPointsInCluster =
-                            DomainModel.updatePointByIndexInSitu
+                            DomainModel.updateGpxPointByIndexInSitu
                                 pointNumber
                                 centroidGPX
                                 updatingTrack.referenceLonLat
