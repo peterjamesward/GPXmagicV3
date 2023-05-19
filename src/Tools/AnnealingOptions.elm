@@ -22,4 +22,5 @@ type alias Options msg =
     , iterationsToRun : Int
     , scoreHistory : List Float
     , currentIndex : Int
+    , searching : Bool
     }

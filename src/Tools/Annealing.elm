@@ -46,6 +46,7 @@ defaultOptions =
     , iterationsToRun = 1000
     , scoreHistory = []
     , currentIndex = 0
+    , searching = False
     }
 
 
@@ -74,6 +75,7 @@ type Msg
     | Apply
     | StopSearching
     | Perturb Perturbation
+    | Tick
 
 
 apply : Options msg -> TrackLoaded msg -> TrackLoaded msg
@@ -131,24 +133,43 @@ update :
     -> (Msg -> msg)
     -> ( Options msg, List (ToolAction msg) )
 update msg options previewColour track wrapper =
+    let
+        requestPerturbation =
+            ExternalCommand <|
+                Random.generate
+                    (wrapper << Perturb)
+                    (randomMove (DomainModel.skipCount track.trackTree))
+    in
     case msg of
         Apply ->
             ( options, [] )
 
         Search ->
-            ( { options | saTrack = Just track }
-            , [ ExternalCommand <|
-                    Random.generate
-                        (wrapper << Perturb)
-                        (randomMove (DomainModel.skipCount track.trackTree))
-              ]
+            ( { options
+                | saTrack = Just track
+                , searching = True
+              }
+            , [ requestPerturbation ]
             )
 
         StopSearching ->
-            ( options, [] )
+            ( { options | searching = False }
+            , []
+            )
 
         Perturb perturbation ->
-            ( { options | currentIndex = perturbation.pointIndex }, [] )
+            ( { options | currentIndex = perturbation.pointIndex }
+            , [ DelayMessage 10 (wrapper Tick) ]
+            )
+
+        Tick ->
+            ( options
+            , if options.searching then
+                [ requestPerturbation ]
+
+              else
+                []
+            )
 
 
 view :
@@ -168,11 +189,23 @@ view settings wrapper options track =
                 { onPress = Just <| wrapper Search
                 , label = i18n "search"
                 }
+
+        stopButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper StopSearching
+                , label = i18n "stop"
+                }
     in
     case track of
         Just _ ->
             column (CommonToolStyles.toolContentBoxStyle settings)
-                [ el [ centerX ] <| searchButton
+                [ el [ centerX ] <|
+                    if options.searching then
+                        stopButton
+
+                    else
+                        searchButton
                 ]
 
         Nothing ->

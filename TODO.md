@@ -53,6 +53,8 @@ May be able to use a local calculation, as changes should be limited to within t
 Plan:
 1Provide a random perturbation generator.
 > Switch to vector direction & length, altitude delta.
+> Seems to be looping tightly.
+> 
 2. Figure out incremental score/cost change calculations if possible for point updates.
    > Might do this first ("is this move an improvement"?)
 3. Show the perturbed track (as preview line?)
@@ -65,6 +67,10 @@ Plan:
 ---
 
 # BACKLOG
+
+## Strava &c
+
+Use `ExternalCommand` action to remove specific actions from Main.
 
 ## Land Use
 
