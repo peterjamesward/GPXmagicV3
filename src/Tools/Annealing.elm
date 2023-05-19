@@ -20,6 +20,7 @@ import LocalCoords exposing (LocalCoords)
 import Point3d exposing (translateBy)
 import PreviewData exposing (..)
 import Random
+import Random.Float
 import SketchPlane3d exposing (..)
 import SystemSettings exposing (SystemSettings)
 import Tools.AnnealingOptions exposing (..)
@@ -64,8 +65,8 @@ randomMove maxPoint =
         Perturbation
         (Random.int 0 maxPoint)
         Direction2d.random
-        (Random.float 0 1)
-        (Random.float -1 1)
+        Random.Float.standardNormal
+        Random.Float.standardNormal
         (Random.float 0 1)
 
 
