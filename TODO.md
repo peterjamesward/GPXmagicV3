@@ -17,47 +17,14 @@ BUG: Fix **radiused bends**. It maybe works better in one direction.
 
 # WIP
 
-## Bends
-
-I still think there is a **search** approach worth trying. 
-Perhaps simulated annealing which seems to be the go-to.
-There would be a cost associated with input fundamentals:
-* Point: Deviation from physical place (xyz);
-* Line: Deviation from direction;
-* Line: Deviation from gradient
-
-Also, costs associated with limits set by user:
-* Maximum gradient (ascent, descent);
-* Minimum radius (a la Direction Change tool code);
-* (Maybe) Non-constant rate of change of curvature (favours clothoids) for direction;
-* Maximum rate of change of gradient.
-
-Should also consider Orange and Purple to be fixed but perhaps optionally allow:
-* Position change
-* Altitude change
-* Gradient change
-* Direction change
-
-Each of these having some extra loading (e.g. square of distance) and a user weighting.
-
-Search attenpts to minimise cost, across designated range of track.
-Assumes that the route is seeded with extra points, perhaps more dense near areas of change, perhaps every meter.
-> Perhaps spacing square root of edge length.
-> These could be areas identified by Bend and Gradient problems tools.
-> Added points are "special" in that there should be no cost to moving them during SA!
-
-Simulated Annealing (SA) algorithm seems very simple. 
-Just jiggle points around in XYZ and assess the cost impact. 
-May be able to use a local calculation, as changes should be limited to within two points on each side.
+## Simulated annealing
 
 Plan:
-> Gosh, this looks like it could even work, based on quick preview alone.
-2. Figure out incremental score/cost change calculations if possible for point updates.
-5. Implement the basic SA with default score/cost function and weight.
 4. If it doesn't work, stop.
 5. Add UI for weights etc.
+6. Make preview optional or less frequent, for speed.
 6. Start/stop search and apply new track.
-7. Consider how to visualise the activity (depends how many we can do per second/frame).
+7. Make it work for range.
 
 ---
 
