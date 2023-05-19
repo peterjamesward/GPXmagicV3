@@ -51,12 +51,7 @@ Just jiggle points around in XYZ and assess the cost impact.
 May be able to use a local calculation, as changes should be limited to within two points on each side.
 
 Plan:
-1Provide a random perturbation generator.
-> Switch to vector direction & length, altitude delta.
-> Seems to be looping tightly.
-> 
 2. Figure out incremental score/cost change calculations if possible for point updates.
-   > Might do this first ("is this move an improvement"?)
 3. Show the perturbed track (as preview line?)
 4. Implement the basic SA with default score/cost function and weight.
 4. If it doesn't work, stop.

@@ -8,7 +8,7 @@ import Quantity exposing (Quantity)
 
 
 type alias MinimalTrack =
-    -- Import loops making copy of TrackLoaded a pain.
+    -- Don't keep whole track as likely get into a tizz with undo, and may prevent GC.
     { tree : PeteTree
     , reference : GPXSource
     }
@@ -29,6 +29,7 @@ type alias Options =
     , maxDeltaGradient : Float
     , saTrack : Maybe MinimalTrack
     , iterationsToRun : Int
+    , maxIterations : Int
     , scoreHistory : List Float
     , currentIndex : Int
     , searching : Bool

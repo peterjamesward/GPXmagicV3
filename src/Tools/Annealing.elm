@@ -18,6 +18,7 @@ import Element.Input as Input exposing (button)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (translateBy)
+import PreviewData exposing (..)
 import Random
 import SketchPlane3d exposing (..)
 import SystemSettings exposing (SystemSettings)
@@ -49,6 +50,7 @@ defaultOptions =
     , maxDeltaGradient = 1
     , saTrack = Nothing
     , iterationsToRun = 1000
+    , maxIterations = 10000
     , scoreHistory = []
     , currentIndex = 0
     , searching = False
@@ -144,6 +146,22 @@ update msg options previewColour track wrapper =
                 Random.generate
                     (wrapper << Perturb)
                     (randomMove (DomainModel.skipCount track.trackTree))
+
+        previewFromDual ( earth, gpx ) =
+            PreviewPoint earth gpx
+
+        preview latest =
+            case latest of
+                Just something ->
+                    ShowPreview
+                        { tag = toolId
+                        , shape = PreviewCircle
+                        , colour = previewColour
+                        , points = List.map previewFromDual <| DomainModel.extractPointsInRange 0 0 something.tree
+                        }
+
+                Nothing ->
+                    Actions.NoAction
     in
     case msg of
         Apply ->
@@ -155,10 +173,15 @@ update msg options previewColour track wrapper =
             )
 
         Search ->
-            ( { options
-                | saTrack = Just { tree = track.trackTree, reference = track.referenceLonLat }
-                , searching = True
-              }
+            let
+                newOptions =
+                    { options
+                        | saTrack = Just { tree = track.trackTree, reference = track.referenceLonLat }
+                        , searching = True
+                        , iterationsToRun = options.maxIterations
+                    }
+            in
+            ( newOptions
             , [ requestPerturbation ]
             )
 
@@ -168,12 +191,20 @@ update msg options previewColour track wrapper =
             )
 
         Perturb perturbation ->
-            ( { options
-                | currentIndex = perturbation.pointIndex
-                , lastPerturbation = Just perturbation
-                , saTrack = Maybe.map (applyPerturbationRegardless options perturbation) options.saTrack
-              }
-            , [ DelayMessage 1 (wrapper Tick) ]
+            let
+                newOptions =
+                    { options
+                        | currentIndex = perturbation.pointIndex
+                        , lastPerturbation = Just perturbation
+                        , saTrack = Maybe.map (applyPerturbationRegardless options perturbation) options.saTrack
+                        , iterationsToRun = options.iterationsToRun - 1
+                        , searching = options.iterationsToRun > 1
+                    }
+            in
+            ( newOptions
+            , [ preview newOptions.saTrack
+              , DelayMessage 1 (wrapper Tick)
+              ]
             )
 
         Tick ->
