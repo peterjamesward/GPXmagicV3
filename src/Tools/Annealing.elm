@@ -68,7 +68,7 @@ randomMove maxPoint =
         (Random.int 0 maxPoint)
         Direction2d.random
         (Random.float 0 1)
-        (Random.float -1 1)
+        (Random.float -0.5 0.5)
         (Random.float 0 1)
 
 
@@ -351,7 +351,7 @@ applyPerturbationRegardless options baselineTree perturbation currentTrack =
             toFloat options.iterationsToRun / toFloat options.maxIterations
 
         acceptProposal =
-            lowerScore || perturbation.p < allowHigherScore
+            lowerScore || perturbation.p < (allowHigherScore ^ 2)
     in
     if acceptProposal then
         { currentTrack | tree = proposedNewTree }
@@ -388,26 +388,29 @@ scorePoint index options baselineTree currentTree =
             )
 
         scalarShift =
+            --(\x -> x ^ 2) <|
             Length.inMeters <|
                 Point3d.distanceFrom
                     baselineLeafFromPoint.startPoint.space
                     currentLeafFromPoint.startPoint.space
 
         directionDifference =
-            Angle.inRadians <|
-                Direction2d.angleFrom
-                    baselineLeafFromPoint.directionAtStart
-                    currentLeafFromPoint.directionAtStart
+            abs <|
+                Angle.inRadians <|
+                    Direction2d.angleFrom
+                        baselineLeafFromPoint.directionAtStart
+                        currentLeafFromPoint.directionAtStart
 
-        gradientDifference =
+        gradientDifferenceFromBaseline =
             abs <| baselineLeafFromPoint.gradientAtStart - currentLeafFromPoint.gradientAtStart
 
         gradientExceedsThreshold =
-            baselineLeafFromPoint.gradientAtStart - options.maxGradient
+            max 0 <| abs currentLeafFromPoint.gradientAtStart - options.maxGradient
 
         gradientChangeAtPointAboveThreshold =
-            (abs <| currentLeafFromPoint.gradientAtStart - currentPriorLeaf.gradientAtStart)
-                - options.maxDeltaGradient
+            max 0 <|
+                (abs <| currentLeafFromPoint.gradientAtStart - currentPriorLeaf.gradientAtStart)
+                    - options.maxDeltaGradient
 
         effectiveDistance =
             Quantity.plus currentPriorLeaf.trueLength currentLeafFromPoint.trueLength
@@ -420,11 +423,13 @@ scorePoint index options baselineTree currentTree =
                 |> abs
 
         curvatureExceedingThreshold =
-            curvatureAtPoint - (Length.inMeters options.minRadius * effectiveDistance)
+            max 0 <|
+                curvatureAtPoint
+                    - (Length.inMeters options.minRadius * effectiveDistance)
     in
     scalarShift
         + directionDifference
-        + gradientDifference
+        + gradientDifferenceFromBaseline
         + gradientExceedsThreshold
         + gradientChangeAtPointAboveThreshold
         + curvatureExceedingThreshold

@@ -20,7 +20,7 @@ BUG: Fix **radiused bends**. It maybe works better in one direction.
 ## Simulated annealing
 
 Plan:
-4. If it doesn't work, stop.
+4. Check scores are right, and all the SA logic, before we give up!
 5. Try with inserted points.
 5. Hide preview.
 6. Show score history (useful diagnostic).
