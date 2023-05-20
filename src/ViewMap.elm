@@ -18,6 +18,7 @@ import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import Html.Attributes exposing (id, style)
+import MapPortController
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
 import SystemSettings exposing (SystemSettings)
@@ -114,7 +115,7 @@ update msg msgWrapper track area context =
                     { context | draggable = not context.draggable }
             in
             ( newOptions
-            , [ MakeMapPointsDraggable newOptions.draggable
+            , [ ExternalCommand <| MapPortController.toggleDragging newOptions.draggable track
               , TrackHasChanged
               ]
             )

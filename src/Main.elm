@@ -1718,9 +1718,6 @@ performActionsOnModel actions model =
                     in
                     updateActiveTrack newTrack foldedModel
 
-                ( MakeMapPointsDraggable flag, _ ) ->
-                    { foldedModel | mapPointsDraggable = flag }
-
                 ( ReRender, Just _ ) ->
                     { foldedModel | needsRendering = True }
 
@@ -2394,9 +2391,6 @@ performActionCommands actions model =
                 ( MapRefresh, Nothing ) ->
                     -- Lazy, use this to refresh profile as well.
                     MapPortController.refreshMap
-
-                ( MakeMapPointsDraggable flag, Just track ) ->
-                    MapPortController.toggleDragging flag track
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.
