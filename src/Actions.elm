@@ -109,7 +109,6 @@ type
     | DisplayInfo String String
     | Autofix (List Int)
     | MakeRouteFromGraph
-    | WidenBend (List Int) (Quantity Float Meters)
     | AdjustTimes Tools.TimestampOptions.Options
     | SetTimeTicks Int
     | TimeDoubling
