@@ -70,6 +70,7 @@ type
     | RenderProfile ViewProfileChartContext.ProfileContext -- rebuild the altitude and gradient charts
     | BezierApplyWithOptions Tools.BezierOptions.Options
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
+    | AnnealingApply
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
     | SmartSmootherApplyWithOptions Tools.SmartSmootherOptions.Options
@@ -135,6 +136,7 @@ type
     | SetMapAllowTilt Bool
     | SetMapAllowRotate Bool
     | SetMapProjection String
+    | ExternalCommand (Cmd msg)
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String
@@ -237,6 +239,9 @@ actionTextForUndo location action =
 
             UsePhysicsModel ->
                 "physics"
+
+            AnnealingApply ->
+                "annealing"
 
             _ ->
                 "unknown"
