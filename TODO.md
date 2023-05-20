@@ -15,14 +15,6 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 # WIP
 
-## Remove Actions
-
-One at a time. I think the way into this is to reduce action codes to:
-- UpdatedTrack (Trackloaded msg)
-- UpdatedGraph (Graph msg)
-- MovedPointers (?)
-- etc
-
 ---
 
 # BACKLOG
@@ -98,6 +90,11 @@ Provide info text capability on top bar and on view panes.
 ---
 
 # The cellar
+
+## Remove Actions
+
+It's a challenge to avoid import loops, the interaction between tools and track (and graph) is hairy.
+Whilst something of a burden, the Actions approach provides flexibility (yes, maybe too much).
 
 ## Snap to Roads with TomTom
 
