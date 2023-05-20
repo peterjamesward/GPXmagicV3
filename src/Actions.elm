@@ -71,7 +71,6 @@ type
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
     | SmartSmootherApplyWithOptions Tools.SmartSmootherOptions.Options
-    | MakeMapPointsDraggable Bool
     | SetMapStyle String
     | PointMovedOnMap Float Float Float Float
     | NudgeApplyWithOptions Tools.NudgeOptions.Options
@@ -212,9 +211,6 @@ actionTextForUndo location action =
 
             MakeRouteFromGraph ->
                 "route"
-
-            WidenBend _ _ ->
-                "widen"
 
             SmartSmootherApplyWithOptions _ ->
                 "smart"

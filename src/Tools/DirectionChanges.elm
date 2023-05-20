@@ -1,4 +1,14 @@
-module Tools.DirectionChanges exposing (DirectionChangeMode(..), Msg(..), Options, ResultMode(..), defaultOptions, toolId, toolStateChange, update, view, widenBend)
+module Tools.DirectionChanges exposing
+    ( DirectionChangeMode(..)
+    , Msg(..)
+    , Options
+    , ResultMode(..)
+    , defaultOptions
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
@@ -637,20 +647,3 @@ view settings msgWrapper options isTrack =
 
         Nothing ->
             noTrackMessage settings
-
-
-widenBend :
-    List Int
-    -> Quantity Float Meters
-    -> TrackLoaded msg
-    -> TrackLoaded msg
-widenBend points adjustment track =
-    case Tools.Nudge.widenBendHelper points adjustment track of
-        Just isTree ->
-            { track
-                | trackTree = isTree
-                , leafIndex = TrackLoaded.indexLeaves isTree
-            }
-
-        Nothing ->
-            track

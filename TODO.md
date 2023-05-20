@@ -15,18 +15,6 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 # WIP
 
-## Strava
-
-Use the new Action from annealing branch to tidy up some of the flow.
-
----
-
-# BACKLOG
-
-## Land Use
-
-Refetch data when more tracks loaded. Or provide button in the eponymous tool.
-
 ## Remove Actions
 
 One at a time. I think the way into this is to reduce action codes to:
@@ -35,11 +23,16 @@ One at a time. I think the way into this is to reduce action codes to:
 - MovedPointers (?)
 - etc
 
-## Merge terrain and land use painting
+---
 
-+ Fetch Land Use for subsequent track loads.
+# BACKLOG
 
+## Land Use
+
+Refetch data when more tracks loaded. Or provide button in the eponymous tool.
 + Make the Land Use tool actually do something.
+
+## Merge terrain and land use painting
 
 Using similar but less regular recursion scheme, use Land Use to colour terrain.
 Maybe put some buildings, trees, water in for suitable land types, provided not on road.

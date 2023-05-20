@@ -2063,12 +2063,6 @@ performActionsOnModel actions model =
                         Nothing ->
                             { foldedModel | modalMessage = Just "nosvg" }
 
-                ( Actions.WidenBend points adjustment, Just track ) ->
-                    -- This for one contiguous set of points, i.e. one bend.
-                    updateActiveTrack
-                        (Tools.DirectionChanges.widenBend points adjustment track)
-                        foldedModel
-
                 ( TrackHasChanged, Just _ ) ->
                     -- Must be wary of looping here.
                     -- Purpose is to refresh all tools' options and all presentations.
@@ -2515,9 +2509,6 @@ performActionCommands actions model =
 
                 ( GetPointsFromMap, _ ) ->
                     MapPortController.getPoints
-
-                ( FetchMatchingRoute coordinates, _ ) ->
-                    Tools.MapMatchingRouter.mapMatchingApi MatchingRoute coordinates
 
                 ( ExternalCommand command, _ ) ->
                     command
