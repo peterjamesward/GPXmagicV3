@@ -135,7 +135,7 @@ update msg options =
                     { options | mapAllowTilt = allowed }
             in
             ( newOptions
-            , Actions.SetMapAllowTilt allowed
+            , (Actions.ExternalCommand <| MapPortController.setAllowTilt allowed)
                 :: actions newOptions
             )
 
@@ -145,7 +145,7 @@ update msg options =
                     { options | mapAllowRotate = allowed }
             in
             ( newOptions
-            , Actions.SetMapAllowRotate allowed
+            , (ExternalCommand <| MapPortController.setAllowRotate allowed)
                 :: actions newOptions
             )
 
@@ -163,7 +163,7 @@ update msg options =
                     }
             in
             ( newOptions
-            , Actions.SetMapProjection newOptions.mapProjection
+            , (ExternalCommand <| MapPortController.setProjection newOptions.mapProjection)
                 :: actions newOptions
             )
 

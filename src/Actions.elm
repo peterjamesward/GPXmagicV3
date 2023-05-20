@@ -121,9 +121,6 @@ type
     | UpdateNamedSegments (List NamedSegment)
     | UnloadActiveTrack String
     | RemoveAllFromMap (List String)
-    | SetMapAllowTilt Bool
-    | SetMapAllowRotate Bool
-    | SetMapProjection String
     | ExternalCommand (Cmd msg)
 
 
