@@ -114,7 +114,6 @@ type
     | SetTimeTicks Int
     | TimeDoubling
     | UsePhysicsModel
-    | TryRemoteLoadIfGiven
     | ProfileClick String Float --- CAUTION, check units.
     | EnablePlanningOnMap
     | GetPointsFromMap

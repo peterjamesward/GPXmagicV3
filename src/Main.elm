@@ -2341,17 +2341,6 @@ performActionCommands actions model =
                         , performAction TrackHasChanged
                         ]
 
-                ( TryRemoteLoadIfGiven, _ ) ->
-                    case model.loadFromUrl of
-                        Nothing ->
-                            Cmd.none
-
-                        Just url ->
-                            Http.get
-                                { url = Url.toString url
-                                , expect = Http.expectString GpxFromUrl
-                                }
-
                 ( SetCurrent _, Just track ) ->
                     MapPortController.addMarkersToMap track
 
