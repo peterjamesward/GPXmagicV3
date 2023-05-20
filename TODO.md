@@ -15,38 +15,9 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 # WIP
 
-## Bends
+## Strava
 
-BUG: Fix **radiused bends**. It maybe works better in one direction.
-
-I still think there is a **search** approach worth trying. 
-Perhaps simulated annealing which seems to be the go-to.
-There would be a cost associated with input fundamentals:
-* Deviation from physical place (xyz);
-* Deviation from direction;
-* Deviation from gradient
-
-Also, costs associated with limits set by user:
-* Maximum gradient (ascent, descent);
-* Minimum radius;
-* Non-constant rate of change of curvature (favours clothoids) for directiom;
-* Maximum rate of change of gradient.
-
-Should also consider Orange and Purple to be fixed but perhaps optionally allow:
-* Position change
-* Altitude change
-* Gradient change
-* Direction change
-
-Each of these having some extra loading (e.g. square of distance) and a user weighting.
-
-Search attenpts to minimise cost, across designated range of track.
-Assumes that the route is seeded with extra points, perhaps more dense near areas of change, perhaps every meter.
-> These will be areas identified by Bend and Gradient problems tools.
-
-Simulated Annealing (SA) algorithm seems very simple. 
-Just jiggle points around in XYZ and assess the cost impact. 
-May be able to use a local calculation, as changes should be limited to within two points on each side.
+Use the new Action from annealing branch to tidy up some of the flow.
 
 ---
 
