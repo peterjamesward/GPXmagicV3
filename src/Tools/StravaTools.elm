@@ -161,18 +161,17 @@ update msg settings wrap track =
                     ( { settings | adjustSegmentAltitude = match }, [] )
 
         LoadExternalRoute ->
-            -- It's a bit convoluted because a tool cannot issue commands, but
-            -- must send instruction by way of Action back to Main.
             case settings.stravaStatus of
                 StravaConnected token ->
                     ( { settings
                         | stravaRoute = StravaRouteRequested
                         , lastHttpError = Nothing
                       }
-                    , [ Actions.RequestStravaRouteHeader
-                            (wrap << HandleRouteData)
-                            settings.externalRouteId
-                            token
+                    , [ Actions.ExternalCommand <|
+                            Tools.StravaDataLoad.requestStravaRouteHeader
+                                (wrap << HandleRouteData)
+                                settings.externalRouteId
+                                token
                       ]
                     )
 
@@ -185,10 +184,11 @@ update msg settings wrap track =
             case settings.stravaStatus of
                 StravaConnected token ->
                     ( { settings | lastHttpError = Nothing }
-                    , [ Actions.RequestStravaActivity
-                            (wrap << ActivityDownloaded)
-                            settings.externalRouteId
-                            token
+                    , [ Actions.ExternalCommand <|
+                            Tools.StravaDataLoad.requestStravaActivity
+                                (wrap << ActivityDownloaded)
+                                settings.externalRouteId
+                                token
                       ]
                     )
 
@@ -205,10 +205,11 @@ update msg settings wrap track =
                     ( { settings | stravaRoute = result, lastHttpError = Nothing }
                     , case result of
                         StravaRouteOk _ ->
-                            [ Actions.RequestStravaRoute
-                                (wrap << GpxDownloaded)
-                                settings.externalRouteId
-                                token
+                            [ Actions.ExternalCommand <|
+                                Tools.StravaDataLoad.requestStravaRoute
+                                    (wrap << GpxDownloaded)
+                                    settings.externalRouteId
+                                    token
                             ]
 
                         _ ->
@@ -232,10 +233,11 @@ update msg settings wrap track =
             case settings.stravaStatus of
                 StravaConnected token ->
                     ( { settings | externalSegment = SegmentRequested, lastHttpError = Nothing }
-                    , [ Actions.RequestStravaSegment
-                            (wrap << HandleSegmentData)
-                            settings.externalSegmentId
-                            token
+                    , [ Actions.ExternalCommand <|
+                            Tools.StravaDataLoad.requestStravaSegment
+                                (wrap << HandleSegmentData)
+                                settings.externalSegmentId
+                                token
                       ]
                     )
 
@@ -262,10 +264,11 @@ update msg settings wrap track =
             case settings.stravaStatus of
                 StravaConnected token ->
                     ( { settings | lastHttpError = Nothing }
-                    , [ Actions.RequestStravaSegmentStreams
-                            (wrap << HandleSegmentStreams)
-                            settings.externalSegmentId
-                            token
+                    , [ Actions.ExternalCommand <|
+                            Tools.StravaDataLoad.requestStravaSegmentStreams
+                                (wrap << HandleSegmentStreams)
+                                settings.externalSegmentId
+                                token
                       ]
                     )
 
@@ -308,10 +311,11 @@ update msg settings wrap track =
                             }
                     in
                     ( newSettings
-                    , [ Actions.RequestStravaActivityStreams
-                            (wrap << ActivityStreamsDownloaded)
-                            settings.externalRouteId
-                            token
+                    , [ Actions.ExternalCommand <|
+                            Tools.StravaDataLoad.requestStravaActivityStreams
+                                (wrap << ActivityStreamsDownloaded)
+                                settings.externalRouteId
+                                token
                       ]
                     )
 

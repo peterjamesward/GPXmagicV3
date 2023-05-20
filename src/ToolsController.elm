@@ -53,8 +53,6 @@ import List.Extra
 import SystemSettings exposing (SystemSettings)
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
-import Tools.Annealing
-import Tools.AnnealingOptions
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -148,7 +146,6 @@ type ToolType
     | ToolTimestamps
     | ToolRouting
     | ToolTracks
-    | ToolAnnealing
 
 
 type ToolCategory
@@ -195,7 +192,6 @@ type alias Options msg =
     , timestampOptions : Tools.TimestampOptions.Options
     , routingOptions : Tools.MapMatchingRouterOptions.Options
     , tracksOptions : Tracks.Options msg
-    , annealingOptions : Tools.AnnealingOptions.Options
     }
 
 
@@ -234,7 +230,6 @@ defaultOptions =
     , timestampOptions = Tools.Timestamp.defaultOptions
     , routingOptions = Tools.MapMatchingRouter.defaultOptions
     , tracksOptions = Tools.Tracks.defaultOptions
-    , annealingOptions = Tools.Annealing.defaultOptions
     }
 
 
@@ -278,7 +273,6 @@ type ToolMsg
     | ToolTimestampMsg Tools.Timestamp.Msg
     | ToolRoutingMsg Tools.MapMatchingRouter.Msg
     | ToolTracksMsg Tools.Tracks.Msg
-    | ToolAnnealingMsg Tools.Annealing.Msg
 
 
 type alias ToolEntry =
@@ -332,7 +326,6 @@ orderedTools =
     , ( timestampTool.toolId, timestampTool )
     , ( routingTool.toolId, routingTool )
     , ( tracksTool.toolId, tracksTool )
-    , ( annealingTool.toolId, annealingTool )
     ]
 
 
@@ -364,20 +357,6 @@ trackInfoBox =
     , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
-    , isPopupOpen = False
-    }
-
-
-annealingTool : ToolEntry
-annealingTool =
-    { toolType = ToolAnnealing
-    , toolId = Tools.Annealing.toolId
-    , video = Nothing
-    , state = Contracted
-    , isVisible = True
-    , dock = DockRight
-    , tabColour = FlatColors.AussiePalette.beekeeper
-    , textColour = contrastingColour FlatColors.AussiePalette.beekeeper
     , isPopupOpen = False
     }
 
@@ -1417,25 +1396,6 @@ update toolMsg isTrack msgWrapper options =
                 isTrack
                 newOptions
 
-        ToolAnnealingMsg msg ->
-            case isTrack of
-                Just track ->
-                    let
-                        ( newOptions, actions ) =
-                            Tools.Annealing.update
-                                msg
-                                options.annealingOptions
-                                (getColour namedSegmentTool.toolId options.tools)
-                                track
-                                (msgWrapper << ToolAnnealingMsg)
-                    in
-                    ( { options | annealingOptions = newOptions }
-                    , actions
-                    )
-
-                Nothing ->
-                    ( options, [] )
-
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1811,20 +1771,6 @@ toolStateHasChanged toolId showPreviews isTrack options =
 
                 newOptions =
                     { options | tracksOptions = newToolOptions }
-            in
-            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
-
-        ToolAnnealing ->
-            let
-                ( newToolOptions, actions ) =
-                    Tools.Annealing.toolStateChange
-                        showPreviews
-                        (getColour toolId options.tools)
-                        options.annealingOptions
-                        isTrack
-
-                newOptions =
-                    { options | annealingOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -2530,13 +2476,6 @@ viewToolByType settings msgWrapper entry isTrack options =
                     (msgWrapper << ToolTracksMsg)
                     options.tracksOptions
 
-            ToolAnnealing ->
-                Tools.Annealing.view
-                    settings
-                    (msgWrapper << ToolAnnealingMsg)
-                    options.annealingOptions
-                    isTrack
-
 
 
 -- Local storage management
@@ -2651,9 +2590,6 @@ encodeType toolType =
 
         ToolTracks ->
             "ToolTracks"
-
-        ToolAnnealing ->
-            "ToolAnnealing"
 
 
 encodeColour : Element.Color -> E.Value

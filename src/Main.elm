@@ -60,7 +60,6 @@ import SystemSettings exposing (SystemSettings)
 import Task
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
-import Tools.Annealing
 import Tools.BendSmoother
 import Tools.BezierSplines
 import Tools.CentroidAverage
@@ -1793,11 +1792,6 @@ performActionsOnModel actions model =
                         (Tools.CentroidAverage.applyUsingOptions options track)
                         foldedModel
 
-                ( AnnealingApply, Just track ) ->
-                    updateActiveTrack
-                        (Tools.Annealing.apply foldedModel.toolOptions.annealingOptions track)
-                        foldedModel
-
                 ( SmartSmootherApplyWithOptions options, Just track ) ->
                     updateActiveTrack
                         (Tools.SmartSmoother.applyUsingOptions options track)
@@ -2501,42 +2495,6 @@ performActionCommands actions model =
 
                 ( LoadGpxFromStrava _, Just track ) ->
                     showTrackOnMapCentered model.toolOptions.tracksOptions
-
-                ( RequestStravaRouteHeader msg routeId token, _ ) ->
-                    Tools.StravaDataLoad.requestStravaRouteHeader
-                        msg
-                        routeId
-                        token
-
-                ( RequestStravaRoute msg routeId token, _ ) ->
-                    Tools.StravaDataLoad.requestStravaRoute
-                        msg
-                        routeId
-                        token
-
-                ( RequestStravaActivity msg activityId token, _ ) ->
-                    Tools.StravaDataLoad.requestStravaActivity
-                        msg
-                        activityId
-                        token
-
-                ( RequestStravaActivityStreams msg activityId token, _ ) ->
-                    Tools.StravaDataLoad.requestStravaActivityStreams
-                        msg
-                        activityId
-                        token
-
-                ( RequestStravaSegment msg segmentId token, _ ) ->
-                    Tools.StravaDataLoad.requestStravaSegment
-                        msg
-                        segmentId
-                        token
-
-                ( RequestStravaSegmentStreams msg segmentId token, _ ) ->
-                    Tools.StravaDataLoad.requestStravaSegmentStreams
-                        msg
-                        segmentId
-                        token
 
                 ( WriteTrackSections sections, Just track ) ->
                     Tools.SplitAndJoin.writeOneSection

@@ -1,4 +1,14 @@
-module Tools.StravaDataLoad exposing (requestStravaActivity, requestStravaActivityStreams, requestStravaRoute, requestStravaRouteHeader, requestStravaSegment, requestStravaSegmentStreams, stravaApiRoot, stravaProcessRoute, stravaProcessSegment)
+module Tools.StravaDataLoad exposing
+    ( requestStravaActivity
+    , requestStravaActivityStreams
+    , requestStravaRoute
+    , requestStravaRouteHeader
+    , requestStravaSegment
+    , requestStravaSegmentStreams
+    , stravaApiRoot
+    , stravaProcessRoute
+    , stravaProcessSegment
+    )
 
 import Angle
 import Direction2d
