@@ -15,9 +15,37 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 # WIP
 
+## MapBox without JS
+
+https://github.com/MartinSStewart/elm-map
+
+Oh. This is interesting. It fetches Mapbox tiles and does WebGL rendering.
+
+> Author will remove Codec and Effect dependencies; should then work as plain Elm app.
+
+Hence:
+1. Could use this and add SVG overlay for route.
+2. Use this and render the route in WebGL.
+3. Change the rendering here so that it uses Scene3d.
+
+> 3 may be possible as the tiles are ? decoded into triangular meshes;
+> 2 is a starting point as 3d-scene offers transparent background!
+> 1 is thus probably unnecessary.
+> Draggable points SVG overlay, only above a certain zoom, clipped to view so superfast.
+
+In each case, to some extent, the Map view could be merged into Plan or even 3D views.
+That's exciting.
+Also, no worry about the DIV structure changing so any pane(s) could have a map view.
+
+Also, though way more work, we would know, in principle, where the roads are...!
+
 ---
 
 # BACKLOG
+
+## Actions
+
+In several cases, only reason to use Actions is for Undo stack. That don't seem right.
 
 ## Land Use
 
