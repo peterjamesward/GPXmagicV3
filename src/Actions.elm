@@ -114,8 +114,6 @@ type
     | TimeDoubling
     | UsePhysicsModel
     | ProfileClick String Float --- CAUTION, check units.
-    | EnablePlanningOnMap
-    | GetPointsFromMap
     | FetchMatchingRoute (List (List Float))
     | SetActiveTrack String
     | UpdateNamedSegments (List NamedSegment)

@@ -22,6 +22,7 @@ https://github.com/MartinSStewart/elm-map
 Oh. This is interesting. It fetches Mapbox tiles and does WebGL rendering.
 
 > Author will remove Codec and Effect dependencies; should then work as plain Elm app.
+> When I get round to it, `checkCollisions` should use a quadtree. Suspect it's called a lot.
 
 Hence:
 1. Could use this and add SVG overlay for route.

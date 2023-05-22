@@ -25,6 +25,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.FlatUIPalette
 import Http
+import MapPortController
 import MapboxKey exposing (mapboxKey)
 import Maybe.Extra
 import Quantity
@@ -276,7 +277,7 @@ update msg options wrapper =
                 | routeState = RouteDrawing
                 , numPoints = 0
               }
-            , [ Actions.EnablePlanningOnMap ]
+            , [ Actions.ExternalCommand <| MapPortController.enablePlanning ]
             )
 
         GetDrawnPoints ->
@@ -284,7 +285,7 @@ update msg options wrapper =
                 | routeState = RouteComputing
                 , numPoints = 0
               }
-            , [ Actions.GetPointsFromMap ]
+            , [ Actions.ExternalCommand <| MapPortController.getPoints ]
             )
 
         UseMapElevations ->

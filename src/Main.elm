@@ -2484,12 +2484,6 @@ performActionCommands actions model =
                             track
                         ]
 
-                ( EnablePlanningOnMap, _ ) ->
-                    MapPortController.enablePlanning
-
-                ( GetPointsFromMap, _ ) ->
-                    MapPortController.getPoints
-
                 ( ExternalCommand command, _ ) ->
                     command
 
