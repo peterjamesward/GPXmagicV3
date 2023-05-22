@@ -29,6 +29,7 @@ import Point3d exposing (Point3d)
 import Polyline3d
 import Quantity exposing (Quantity(..))
 import Regex
+import Task
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import XmlParser exposing (Node(..))
@@ -68,14 +69,14 @@ update msg options wrap =
 
         FileSelected file ->
             ( options
-            , [ LoadSvgFile (wrap << FileLoaded) file ]
-              --, Task.perform (wrap << FileLoaded) (File.toString file)
+            , [ ExternalCommand <|
+                    Task.perform (wrap << FileLoaded) (File.toString file)
+              ]
             )
 
         FileLoaded content ->
             ( options
             , [ TrackFromSvg content, TrackHasChanged ]
-              --, Task.perform (wrap << FileLoaded) (File.toString file)
             )
 
 

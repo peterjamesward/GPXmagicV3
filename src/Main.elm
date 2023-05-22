@@ -2446,9 +2446,6 @@ performActionCommands actions model =
                 ( SelectSvgFile message, _ ) ->
                     Select.file [ "text/svg" ] message
 
-                ( LoadSvgFile message file, _ ) ->
-                    Task.perform message (File.toString file)
-
                 ( TrackFromSvg _, Just track ) ->
                     showTrackOnMapCentered model.toolOptions.tracksOptions
 
