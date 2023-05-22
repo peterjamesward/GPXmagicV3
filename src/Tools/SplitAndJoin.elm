@@ -8,12 +8,14 @@ import Element.Background as Background
 import Element.Input as Input exposing (button)
 import File exposing (File)
 import File.Download as Download
+import File.Select
 import FlatColors.ChinesePalette
 import GpxParser
 import Length
 import Quantity
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
+import Task
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.OneClickQuickFix as OneClickQuickFix
@@ -67,10 +69,14 @@ update msg settings mTrack wrap =
             ( { settings | applyAutofix = not settings.applyAutofix }, [] )
 
         AppendFile ->
-            ( settings, [ Actions.SelectGpxFile (wrap << FileSelected) ] )
+            ( settings
+            , [ Actions.ExternalCommand <| File.Select.file [ "text/gpx" ] (wrap << FileSelected) ]
+            )
 
         FileSelected file ->
-            ( settings, [ Actions.LoadGpxFile (wrap << FileLoaded) file ] )
+            ( settings
+            , [ Actions.ExternalCommand <| Task.perform (wrap << FileLoaded) (File.toString file) ]
+            )
 
         --, ActionCommand <| Task.perform (msgWrapper << FileLoaded) (File.toString file)
         FileLoaded content ->

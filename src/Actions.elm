@@ -100,8 +100,6 @@ type
     | ReverseTrack
     | MoveStartPoint Int
     | AddRiderPens
-    | SelectGpxFile (File -> msg)
-    | LoadGpxFile (String -> msg) File
     | TrackFromGpx String
     | ParseAndAppend String
     | WriteTrackSections (List ( Int, Float, Float ))

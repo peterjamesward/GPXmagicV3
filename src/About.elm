@@ -6,6 +6,10 @@ aboutText =
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
 
+## 3.12.4 (UNRELEASED)
+
+Internal tidy up to make code cleaner and more maintainable.
+
 ## 3.12.3
 
 Compromising on gradient colour palette by using the v3 basis but slightly improving saturation for clarity.

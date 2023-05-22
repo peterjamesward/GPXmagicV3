@@ -2452,12 +2452,6 @@ performActionCommands actions model =
                 ( TrackFromSvg _, Just track ) ->
                     showTrackOnMapCentered model.toolOptions.tracksOptions
 
-                ( SelectGpxFile message, _ ) ->
-                    Select.file [ "text/gpx" ] message
-
-                ( LoadGpxFile message file, _ ) ->
-                    Task.perform message (File.toString file)
-
                 ( TrackFromGpx _, Just track ) ->
                     showTrackOnMapCentered model.toolOptions.tracksOptions
 
