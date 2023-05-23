@@ -32,7 +32,6 @@ import Html.Events.Extra.Mouse as Mouse
 import Http
 import Json.Decode as D
 import Json.Encode as E
-import JwtStuff exposing (signedToken)
 import LandUseDataOSM
 import LandUseDataTypes
 import Length
@@ -127,7 +126,6 @@ type Msg
     | SetColourTheme SystemSettings.ColourTheme
     | Language I18NOptions.Location
     | ToggleLanguageEditor
-    | UserLocationsVisible Bool
     | RestoreDefaultToolLayout
     | WriteGpxFile
     | FilenameChange String
@@ -457,23 +455,6 @@ update msg model =
             , LocalStorage.storageSetItem "singleDock" <| E.bool newSettings.singleDock
             )
 
-        UserLocationsVisible visible ->
-            ( { model | userLocationsVisible = visible }
-            , Cmd.batch
-                [ if visible then
-                    MapPortController.showLocations model.userLocations
-
-                  else
-                    MapPortController.showLocations []
-                , if visible && model.userLocations == [] then
-                    PageLoadLog.getRecentLocations
-                        |> P.toCmd (jwt signedToken) RecentLocations
-
-                  else
-                    Cmd.none
-                ]
-            )
-
         DisplayAboutMessage ->
             ( { model | modalMessage = Just "aboutText" }, Cmd.none )
 
@@ -619,15 +600,6 @@ update msg model =
                             , centreLon = 0.0
                             , centreLat = 0.0
                             }
-
-                databasePost =
-                    case ipInfo of
-                        Just ip ->
-                            PageLoadLog.post ip
-                                |> P.toCmd (jwt signedToken) PageLoadRecorded
-
-                        Nothing ->
-                            Cmd.none
             in
             ( { model | ipInfo = ipInfo }
             , Cmd.batch
@@ -635,8 +607,6 @@ update msg model =
                     ViewMap.defaultStyleUrl
                     mapInfoWithLocation
                     model.contentArea
-
-                --, databasePost
                 ]
             )
 
@@ -1587,15 +1557,6 @@ showOptionsMenu model =
                 subtleToolStyles
                 { label = text "Show/Hide language file editor"
                 , onPress = Just ToggleLanguageEditor
-                }
-
-        showUserLocations =
-            Input.checkbox
-                subtleToolStyles
-                { label = Input.labelRight [] <| text "Show user locations"
-                , onChange = UserLocationsVisible
-                , icon = Input.defaultCheckbox
-                , checked = model.userLocationsVisible
                 }
     in
     if model.isPopupOpen then
