@@ -19,7 +19,7 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 https://github.com/MartinSStewart/elm-map
 
-Oh. This is interesting. It fetches Mapbox tiles and does WebGL rendering.
+Oh. This is interesting. It fetches Mapbox tiles and renders with WebGL in Elm.
 
 > Author will remove Codec and Effect dependencies; should then work as plain Elm app.
 > When I get round to it, `checkCollisions` should use a quadtree. Suspect it's called a lot.
@@ -39,6 +39,8 @@ That's exciting.
 Also, no worry about the DIV structure changing so any pane(s) could have a map view.
 
 Also, though way more work, we would know, in principle, where the roads are...!
+
+Losing JS map means losing elevation fetch and draw on map, though could recreate the latter.
 
 ---
 
