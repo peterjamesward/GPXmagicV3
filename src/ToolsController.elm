@@ -71,7 +71,6 @@ import Tools.I18N as I18N
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
-import Tools.LandUse
 import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
@@ -137,7 +136,6 @@ type ToolType
     | ToolIntersections
     | ToolStraighten
     | ToolSettings
-    | ToolLandUse
     | ToolSmartSmoother
     | ToolNamedSegments
     | ToolTimestamps
@@ -182,7 +180,6 @@ type alias Options msg =
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
     , straightenOptions : Tools.Straightener.Options
-    , landUseOptions : Tools.LandUse.Options
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
     , timestampOptions : Tools.TimestampOptions.Options
@@ -219,7 +216,6 @@ defaultOptions =
     , splitAndJoinOptions = Tools.SplitAndJoin.defaultOptions
     , intersectionOptions = Tools.Intersections.defaultOptions
     , straightenOptions = Tools.Straightener.defaultOptions
-    , landUseOptions = Tools.LandUse.defaultOptions
     , smartSmootherOptions = Tools.SmartSmoother.defaultOptions
     , namedSegmentOptions = Tools.NamedSegment.defaultOptions
     , timestampOptions = Tools.Timestamp.defaultOptions
@@ -261,7 +257,6 @@ type ToolMsg
     | ToolSplitJoinMsg Tools.SplitAndJoin.Msg
     | ToolIntersectionMsg Tools.Intersections.Msg
     | ToolStraightenMsg Tools.Straightener.Msg
-    | ToolLandUseMsg Tools.LandUse.Msg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
     | ToolNamedSegmentMsg Tools.NamedSegment.Msg
     | ToolTimestampMsg Tools.Timestamp.Msg
@@ -315,7 +310,6 @@ orderedTools =
     , ( splitAndJoinTool.toolId, splitAndJoinTool )
     , ( intersectionsTool.toolId, intersectionsTool )
     , ( straightenTool.toolId, straightenTool )
-    , ( landUseTool.toolId, landUseTool )
     , ( timestampTool.toolId, timestampTool )
     , ( tracksTool.toolId, tracksTool )
     ]
@@ -685,20 +679,6 @@ straightenTool =
     , dock = DockRight
     , tabColour = FlatColors.AussiePalette.spicedNectarine
     , textColour = contrastingColour FlatColors.AussiePalette.spicedNectarine
-    , isPopupOpen = False
-    }
-
-
-landUseTool : ToolEntry
-landUseTool =
-    { toolType = ToolLandUse
-    , toolId = Tools.LandUse.toolId
-    , video = Just "https://youtu.be/SgiVpQYxG8I"
-    , state = Contracted
-    , isVisible = True
-    , dock = DockRight
-    , tabColour = defaultToolColour
-    , textColour = contrastingColour defaultToolColour
     , isPopupOpen = False
     }
 
@@ -1272,18 +1252,6 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
-        ToolLandUseMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.LandUse.update
-                        msg
-                        (msgWrapper << ToolLandUseMsg)
-                        options.landUseOptions
-            in
-            ( { options | landUseOptions = newOptions }
-            , actions
-            )
-
         ToolSmartSmootherMsg msg ->
             case isTrack of
                 Just track ->
@@ -1692,9 +1660,6 @@ toolStateHasChanged toolId showPreviews isTrack options =
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolSettings ->
-            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
-
-        ToolLandUse ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolSmartSmoother ->
@@ -2395,13 +2360,6 @@ viewToolByType settings msgWrapper entry isTrack options =
             ToolSettings ->
                 viewToolSettings settings options msgWrapper
 
-            ToolLandUse ->
-                Tools.LandUse.view
-                    settings
-                    (msgWrapper << ToolLandUseMsg)
-                    options.landUseOptions
-                    isTrack
-
             ToolSmartSmoother ->
                 case isTrack of
                     Just track ->
@@ -2531,9 +2489,6 @@ encodeType toolType =
 
         ToolSettings ->
             "ToolSettings"
-
-        ToolLandUse ->
-            "ToolLandUse"
 
         ToolSmartSmoother ->
             "ToolTreeSmoother"

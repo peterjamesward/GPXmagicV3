@@ -1,4 +1,10 @@
-module View3dCommonElements exposing (Context, DragAction(..), Msg(..), common3dSceneAttributes, placesOverlay, zoomButtons)
+module View3dCommonElements exposing
+    ( Context
+    , DragAction(..)
+    , Msg(..)
+    , common3dSceneAttributes
+    , zoomButtons
+    )
 
 import Angle exposing (Angle)
 import Axis2d
@@ -152,95 +158,3 @@ zoomButtons settings msgWrapper context =
                     useIcon FeatherIcons.unlock
             }
         ]
-
-
-placesOverlay :
-    Tools.DisplaySettingsOptions.Options
-    -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> TrackLoaded msg
-    -> Camera3d Meters LocalCoords
-    -> Element msg
-placesOverlay display ( givenWidth, givenHeight ) track camera =
-    let
-        ( svgWidth, svgHeight ) =
-            ( String.fromInt <| Pixels.inPixels givenWidth
-            , String.fromInt <| Pixels.inPixels givenHeight
-            )
-
-        screenRectangle =
-            Rectangle2d.from
-                Point2d.origin
-                (Point2d.xy
-                    (Quantity.toFloatQuantity givenWidth)
-                    (Quantity.toFloatQuantity givenHeight)
-                )
-
-        nodes2d =
-            track.landUseData.places
-                |> Dict.filter
-                    (\_ place ->
-                        place.space
-                            |> Point3d.depth camera
-                            |> Quantity.greaterThanZero
-                    )
-                |> Dict.map
-                    (\_ place ->
-                        place.space |> Point3d.toScreenSpace camera screenRectangle
-                    )
-                |> Dict.filter
-                    (\_ screenPoint ->
-                        Rectangle2d.contains screenPoint screenRectangle
-                    )
-
-        textAttributes atPoint =
-            [ Svg.Attributes.fill "white"
-            , Svg.Attributes.fontFamily "sans-serif"
-            , Svg.Attributes.fontSize "12px"
-            , Svg.Attributes.stroke "none"
-            , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate atPoint) + 10))
-            , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint)))
-            ]
-
-        -- Create an SVG label at each place
-        placeNames =
-            nodes2d
-                |> Dict.map
-                    (\name place ->
-                        Svg.g []
-                            [ Svg.circle2d
-                                [ Svg.Attributes.stroke "white"
-                                , Svg.Attributes.strokeWidth "1"
-                                , Svg.Attributes.fill "none"
-                                ]
-                                (Circle2d.withRadius (Pixels.float 3) place)
-                            , Svg.text_
-                                (textAttributes place)
-                                [ Svg.text name ]
-                                -- Hack: flip the text upside down since our later
-                                -- 'Svg.relativeTo topLeftFrame' call will flip it
-                                -- back right side up
-                                |> Svg.mirrorAcross (Axis2d.through place Direction2d.x)
-                            ]
-                    )
-                |> Dict.values
-                |> Svg.g []
-    in
-    if
-        Dict.isEmpty track.landUseData.places
-            || not display.placeNames
-    then
-        none
-
-    else
-        let
-            topLeftFrame =
-                Frame2d.atPoint
-                    (Point2d.xy Quantity.zero (Quantity.toFloatQuantity givenHeight))
-                    |> Frame2d.reverseY
-        in
-        html <|
-            Svg.svg
-                [ Svg.Attributes.width svgWidth
-                , Svg.Attributes.height svgHeight
-                ]
-                [ Svg.relativeTo topLeftFrame placeNames ]

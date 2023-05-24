@@ -3,17 +3,12 @@ module Tools.DisplaySettings exposing (Msg(..), defaultOptions, restoreSettings,
 import Actions exposing (ToolAction(..))
 import CommonToolStyles
 import Element exposing (..)
-import Element.Background as Background
 import Element.Border as Border
 import Element.Input as Input
-import FlatColors.ChinesePalette
 import Json.Decode as D
-import LandUseDataTypes
-import ProfilePort
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions exposing (..)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton)
 
 

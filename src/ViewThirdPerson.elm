@@ -44,9 +44,6 @@ view settings context display contentArea track scene msgWrapper =
 
         camera =
             deriveCamera track.trackTree context track.currentPosition
-
-        overlay =
-            placesOverlay display contentArea track camera
     in
     el
         ((if dragging /= DragNone then
@@ -55,7 +52,6 @@ view settings context display contentArea track scene msgWrapper =
           else
             pointer
          )
-            :: (inFront <| overlay)
             :: (inFront <| zoomButtons settings msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
@@ -64,7 +60,7 @@ view settings context display contentArea track scene msgWrapper =
             Scene3d.sunny
                 { camera = deriveCamera track.trackTree context track.currentPosition
                 , dimensions = contentArea
-                , background = backgroundColor Color.lightBlue
+                , background = Scene3d.transparentBackground
                 , clipDepth = Length.meters 1
                 , entities = scene
                 , upDirection = positiveZ

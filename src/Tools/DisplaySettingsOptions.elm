@@ -4,7 +4,6 @@ module Tools.DisplaySettingsOptions exposing (CurtainStyle(..), Options, decode,
 
 import Json.Decode as D
 import Json.Encode as E
-import LandUseDataTypes
 
 
 type alias Options =

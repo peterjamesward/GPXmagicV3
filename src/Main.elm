@@ -32,8 +32,6 @@ import Html.Events.Extra.Mouse as Mouse
 import Http
 import Json.Decode as D
 import Json.Encode as E
-import LandUseDataOSM
-import LandUseDataTypes
 import Length
 import List.Extra
 import LocalStorage
@@ -1781,63 +1779,6 @@ performActionsOnModel actions model =
                 ( ApplyRecentre coords, Just track ) ->
                     updateActiveTrack
                         (adjustReference <| Tools.MoveScaleRotate.applyRecentre coords track)
-                        foldedModel
-
-                ( ApplyMapElevations elevations, Just track ) ->
-                    updateActiveTrack
-                        (Tools.MoveScaleRotate.applyMapElevations elevations track)
-                        foldedModel
-
-                ( ApplyLandUseAltitudes altitudes, Just track ) ->
-                    -- Using mapbox elevations to set altitude of OSM places.
-                    updateActiveTrack
-                        (LandUseDataOSM.applyAltitudes altitudes track)
-                        foldedModel
-
-                ( PointMovedOnMap startLon startLat endLon endLat, Just track ) ->
-                    let
-                        startGpx =
-                            { longitude = Direction2d.fromAngle <| Angle.degrees startLon
-                            , latitude = Angle.degrees startLat
-                            , altitude = Quantity.zero
-                            , timestamp = Nothing
-                            }
-
-                        index =
-                            DomainModel.nearestToLonLat
-                                startGpx
-                                track.currentPosition
-                                track.trackTree
-                                track.referenceLonLat
-                                track.leafIndex
-
-                        positionBeforeDrag =
-                            gpxPointFromIndex index track.trackTree
-
-                        endGpx =
-                            { longitude = Direction2d.fromAngle <| Angle.degrees endLon
-                            , latitude = Angle.degrees endLat
-                            , altitude = positionBeforeDrag.altitude
-                            , timestamp = Nothing
-                            }
-
-                        newTree =
-                            DomainModel.updateGpxPointByIndexInSitu
-                                index
-                                endGpx
-                                track.referenceLonLat
-                                track.trackTree
-
-                        withUndo =
-                            TrackLoaded.addToUndoStack action track
-                    in
-                    updateActiveTrack
-                        { withUndo | trackTree = newTree }
-                        foldedModel
-
-                ( SaveLastMapClick lon lat, Just track ) ->
-                    updateActiveTrack
-                        { track | lastMapClick = ( lon, lat ) }
                         foldedModel
 
                 ( TrackFromSvg svgContent, _ ) ->
