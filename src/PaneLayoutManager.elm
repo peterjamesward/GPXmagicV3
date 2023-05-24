@@ -6,7 +6,6 @@ module PaneLayoutManager exposing
     , defaultOptions
     , forceRouteView
     , initialise
-    , paintProfileCharts
     , profileViewHandlesClick
     , render
     , restoreStoredValues
@@ -27,7 +26,6 @@ import List.Extra
 import PaneContext exposing (PaneContext, PaneId(..), PaneLayout(..), PaneLayoutOptions, SliderState(..), paneIdToString)
 import Pixels exposing (Pixels)
 import PreviewData exposing (PreviewData)
-import ProfilePort
 import Quantity exposing (Quantity)
 import SceneBuilder3D
 import SystemSettings exposing (SystemSettings)
@@ -94,7 +92,6 @@ type Msg
     | ProfileViewMessage PaneId ViewProfileChartContext.Msg
     | PlanViewMessage PaneId ViewPlan.Msg
     | GraphViewMessage PaneId ViewGraph.Msg
-    | ProfilePortMessage ProfilePort.ProfileMsg
     | PaneNoOp
 
 
@@ -221,9 +218,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
             in
             ( newOptions
             , tracks
-            , [ MapRefresh
-              , StoreLocally "panes" <| encodePaneState newOptions
-              ]
+            , [ StoreLocally "panes" <| encodePaneState newOptions ]
             )
 
         TogglePopup ->
@@ -244,9 +239,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
             in
             ( newOptions
             , tracks
-            , [ MapRefresh
-              , StoreLocally "panes" <| encodePaneState newOptions
-              ]
+            , [ StoreLocally "panes" <| encodePaneState newOptions ]
             )
 
         ThirdPersonViewMessage paneId imageMsg ->
@@ -418,12 +411,6 @@ update paneMsg msgWrapper tracks contentArea options previews =
               ]
             )
 
-        ProfilePortMessage portMsg ->
-            ( options
-            , tracks
-            , ProfilePort.processPortMessage mTrack portMsg
-            )
-
 
 isViewVisible : ViewMode -> PaneLayoutOptions -> Bool
 isViewVisible mode options =
@@ -534,56 +521,6 @@ dimensionsWithLayout layout ( w, h ) =
 
         PanesGrid ->
             ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
-
-
-paintProfileCharts :
-    PaneLayoutOptions
-    -> SystemSettings
-    -> TrackLoaded msg
-    -> Dict String PreviewData
-    -> Cmd msg
-paintProfileCharts panes settings track previews =
-    let
-        segments =
-            track.namedSegments
-
-        paintIfProfileVisible pane =
-            if pane.activeView == ViewProfileCanvas then
-                case pane.profileContext of
-                    Just context ->
-                        Cmd.batch
-                            [ ProfilePort.paintCanvasProfileChart
-                                context
-                                settings
-                                track
-                                previews
-                            , ProfilePort.paintCanvasGradientChart
-                                context
-                                settings
-                                track
-                            ]
-
-                    Nothing ->
-                        Cmd.none
-
-            else
-                Cmd.none
-
-        visiblePanes =
-            case panes.paneLayout of
-                PanesOne ->
-                    [ panes.pane1 ]
-
-                PanesLeftRight ->
-                    [ panes.pane1, panes.pane2 ]
-
-                PanesUpperLower ->
-                    [ panes.pane1, panes.pane2 ]
-
-                PanesGrid ->
-                    [ panes.pane1, panes.pane2, panes.pane3, panes.pane4 ]
-    in
-    Cmd.batch <| List.map paintIfProfileVisible visiblePanes
 
 
 profileViewHandlesClick : String -> Length.Length -> PaneLayoutOptions -> TrackLoaded msg -> Maybe Int

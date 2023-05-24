@@ -293,9 +293,7 @@ update msg options =
 
         ConvertFromGraph ->
             ( makeNewRoute options.userRoute options
-            , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
-              , Actions.TrackHasChanged
-              ]
+            , [ Actions.TrackHasChanged ]
             )
 
         DisplayInfo tool tag ->
@@ -316,9 +314,7 @@ update msg options =
                         , userRoute = []
                         , clustersForPreview = []
                       }
-                    , [ Actions.RemoveAllFromMap <| Dict.keys options.graph.edges
-                      , Actions.TrackHasChanged
-                      ]
+                    , [ Actions.TrackHasChanged ]
                     )
 
                 _ ->

@@ -46,7 +46,6 @@ import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
 import Postgrest.Client as P exposing (jwt)
 import PreviewData exposing (PreviewData, PreviewShape(..))
-import ProfilePort
 import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
@@ -130,7 +129,6 @@ type Msg
     | BackgroundClick Mouse.Event
     | DisplayWelcome
     | RGTOptions Tools.RGTOptions.Msg
-    | ProfilePaint
     | ToggleImperial
     | ToggleSingleDock
     | NoOp
@@ -369,15 +367,8 @@ update msg model =
             in
             case TrackLoaded.trackFromSegments trackName gpxSegments of
                 Just track ->
-                    let
-                        modelWithTrack =
-                            adoptTrackInModel track model
-                    in
-                    ( modelWithTrack
-                    , Cmd.batch
-                        [ LocalStorage.sessionClear
-                        , Delay.after 1000 ProfilePaint -- wait for container to paint.
-                        ]
+                    ( adoptTrackInModel track model
+                    , Cmd.none
                     )
 
                 Nothing ->
@@ -428,22 +419,6 @@ update msg model =
             ( { model | rgtOptions = Tools.RGTOptions.update options model.rgtOptions }
             , Cmd.none
             )
-
-        ProfilePaint ->
-            -- This does a deferred paint of profiles after a track is loaded
-            -- as the needed DIVs are not reliably there on loading the app.
-            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
-                Just track ->
-                    ( model
-                    , PaneLayoutManager.paintProfileCharts
-                        model.paneLayoutOptions
-                        model.systemSettings
-                        track
-                        model.previews
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
 
         BackgroundClick _ ->
             let
@@ -629,9 +604,7 @@ update msg model =
             in
             ( newModel
             , performActionCommands
-                [ MapRefresh
-                , StoreLocally "splits" (encodeSplitValues model)
-                ]
+                [ StoreLocally "splits" (encodeSplitValues model) ]
                 newModel
             )
 
@@ -643,9 +616,7 @@ update msg model =
             in
             ( newModel
             , performActionCommands
-                [ MapRefresh
-                , StoreLocally "splits" (encodeSplitValues model)
-                ]
+                [ StoreLocally "splits" (encodeSplitValues model) ]
                 newModel
             )
 
@@ -656,9 +627,7 @@ update msg model =
             in
             ( newModel
             , performActionCommands
-                [ MapRefresh
-                , StoreLocally "splits" (encodeSplitValues model)
-                ]
+                [ StoreLocally "splits" (encodeSplitValues model) ]
                 newModel
             )
 
@@ -673,7 +642,7 @@ update msg model =
                                     (truncate info.viewport.height)
                     in
                     ( newModel
-                    , performActionCommands [ MapRefresh ] newModel
+                    , Cmd.none
                     )
 
                 Err _ ->
@@ -890,9 +859,7 @@ adoptTrackInModel track model =
             Tracks.addTrack track tracksOptions
 
         newToolOptions =
-            { toolOptions
-                | tracksOptions = newTracksOptions
-            }
+            { toolOptions | tracksOptions = newTracksOptions }
 
         modelWithTrack =
             { model
@@ -906,9 +873,7 @@ adoptTrackInModel track model =
             }
 
         actions =
-            [ TrackHasChanged
-            , MapRefresh
-            ]
+            [ TrackHasChanged ]
     in
     performActionsOnModel actions modelWithTrack
 
@@ -1446,7 +1411,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
-        , ProfilePort.profileMessages (PaneMsg << ProfilePortMessage << ProfilePort.ProfileMessage)
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
@@ -1510,34 +1474,6 @@ performActionsOnModel actions model =
                         , toolOptions = newToolOptions
                     }
 
-                ( ProfileClick container x, Just track ) ->
-                    -- This must be handled with the right context, to prevent
-                    -- sideways scroll being interpreted as a click.
-                    let
-                        newOrangeIndex =
-                            PaneLayoutManager.profileViewHandlesClick
-                                container
-                                trackDistance
-                                model.paneLayoutOptions
-                                track
-
-                        trackDistance =
-                            if model.systemSettings.imperial then
-                                Length.miles x
-
-                            else
-                                Length.kilometers x
-
-                        newTrack =
-                            case newOrangeIndex of
-                                Just newOrange ->
-                                    { track | currentPosition = newOrange }
-
-                                Nothing ->
-                                    track
-                    in
-                    updateActiveTrack newTrack foldedModel
-
                 ( ReRender, Just _ ) ->
                     { foldedModel | needsRendering = True }
 
@@ -1559,24 +1495,19 @@ performActionsOnModel actions model =
                 ( SetCurrent position, Just track ) ->
                     updateActiveTrack { track | currentPosition = position } foldedModel
 
-                ( SetCurrentFromMapClick position, Just track ) ->
-                    updateActiveTrack { track | currentPosition = position } foldedModel
-
                 ( ShowPreview previewData, Just _ ) ->
                     -- Put preview into the scene.
                     -- After some thought, it is sensible to collect the preview data
                     -- since it's handy, as the alternative is another complex case
                     -- statement in ToolController.
                     { foldedModel
-                        | previews =
-                            Dict.insert previewData.tag previewData foldedModel.previews
+                        | previews = Dict.insert previewData.tag previewData foldedModel.previews
                         , needsRendering = True
                     }
 
                 ( HidePreview tag, Just _ ) ->
                     { foldedModel
-                        | previews =
-                            Dict.remove tag foldedModel.previews
+                        | previews = Dict.remove tag foldedModel.previews
                         , needsRendering = True
                     }
 
@@ -1803,9 +1734,7 @@ performActionsOnModel actions model =
                         newTrack =
                             track |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    updateActiveTrack
-                        newTrack
-                        foldedModel
+                    updateActiveTrack newTrack foldedModel
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
@@ -1843,9 +1772,7 @@ performActionsOnModel actions model =
                             innerModelWithNewToolSettings |> performActionsOnModel secondaryActions
                     in
                     -- This model should contain all updated previews from open tools.
-                    { modelAfterSecondaryActions
-                        | needsRendering = True
-                    }
+                    { modelAfterSecondaryActions | needsRendering = True }
 
                 ( PointerChange, Just _ ) ->
                     -- Unlike above, do not repaint map.
@@ -1863,9 +1790,7 @@ performActionsOnModel actions model =
                             innerModelWithNewToolSettings |> performActionsOnModel secondaryActions
                     in
                     -- This model should contain all updated previews from open tools.
-                    { modelAfterSecondaryActions
-                        | needsRendering = True
-                    }
+                    { modelAfterSecondaryActions | needsRendering = True }
 
                 ( SetMarker maybeMarker, Just track ) ->
                     updateActiveTrack { track | markerPosition = maybeMarker } foldedModel
@@ -2071,46 +1996,9 @@ performActionCommands actions model =
                 ( SetActiveTrack _, _ ) ->
                     performAction TrackHasChanged
 
-                ( ShowPreview previewData, Just track ) ->
-                    -- Add source and layer to map, via Port commands.
-                    -- Use preview data from model dictionary, as that could be
-                    -- more up to date than this version.
-                    Cmd.batch
-                        [ PaneLayoutManager.paintProfileCharts
-                            model.paneLayoutOptions
-                            model.systemSettings
-                            track
-                            model.previews
-                        ]
-
-                ( HidePreview tag, Just track ) ->
-                    Cmd.batch
-                        [ PaneLayoutManager.paintProfileCharts
-                            model.paneLayoutOptions
-                            model.systemSettings
-                            track
-                            model.previews
-                        ]
-
                 ( DelayMessage int msg, Just _ ) ->
                     -- This used to "debounce" some clicks.
                     Delay.after int msg
-
-                ( TrackHasChanged, Just track ) ->
-                    Cmd.batch <|
-                        [ PaneLayoutManager.paintProfileCharts
-                            model.paneLayoutOptions
-                            model.systemSettings
-                            track
-                            model.previews
-                        ]
-
-                ( PointerChange, Just track ) ->
-                    PaneLayoutManager.paintProfileCharts
-                        model.paneLayoutOptions
-                        model.systemSettings
-                        track
-                        model.previews
 
                 ( StoreLocally key value, _ ) ->
                     LocalStorage.storageSetItem key value
@@ -2127,19 +2015,6 @@ performActionCommands actions model =
                         model.toolOptions.splitAndJoinOptions
                         track
                         model.rgtOptions
-
-                ( RenderProfile context, Just track ) ->
-                    Cmd.batch
-                        [ ProfilePort.paintCanvasProfileChart
-                            context
-                            model.systemSettings
-                            track
-                            model.previews
-                        , ProfilePort.paintCanvasGradientChart
-                            context
-                            model.systemSettings
-                            track
-                        ]
 
                 ( ExternalCommand command, _ ) ->
                     command

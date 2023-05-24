@@ -40,9 +40,12 @@ Test app works. Moving code into v3 branch.
 4. Align zooming.
 5. Use Map as optional ground plane for 3D views.
 6. Make a nicer typeface (TTF -> SVG -> Glyphs)
+7. Stop road labels from following the path, just rotate.
 7. Make sure nothing broke (check profile click).
+8. Put Land Use back, maybe, but not great with no elevation!
+9. May be able to put map on top of terrain - just a thought.
 
-BTW, if we revert to the SVG profile charts, we can lose that pair of ports as well.
+BTW: revert to the SVG profile charts, we lose that pair of ports as well.
 
 ---
 

@@ -335,11 +335,10 @@ update msg options previewColour hasTrack =
                     [ SetCurrent orange
                     , SetMarker <| Just purple
                     , PointerChange
-                    , MapCenterOnCurrent
                     ]
 
                 _ ->
-                    [ SetCurrent orange, MapCenterOnCurrent ]
+                    [ SetCurrent orange ]
     in
     case msg of
         ViewNext ->
@@ -376,7 +375,7 @@ update msg options previewColour hasTrack =
                     )
 
                 _ ->
-                    ( newOptions, [ SetCurrent orange, MapCenterOnCurrent ] )
+                    ( newOptions, [ SetCurrent orange ] )
 
         PositionMarkerAtBreach orange purple ->
             ( options, moveMarkers orange purple )
