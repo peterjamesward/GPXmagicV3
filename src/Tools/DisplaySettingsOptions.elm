@@ -13,12 +13,8 @@ type alias Options =
     , groundPlane : Bool
     , curtainStyle : CurtainStyle
     , terrainFineness : Float -- 0.0 => OFF
-    , landUse : LandUseDataTypes.LandUseDisplay
     , placeNames : Bool
     , showConstraintsAtLevel : Maybe Int
-    , mapProjection : String
-    , mapAllowTilt : Bool
-    , mapAllowRotate : Bool
     , previewSize : Int
     }
 
@@ -28,9 +24,6 @@ type alias StoredOptions =
     , groundPlane : Bool
     , centreLine : Bool
     , curtainStyle : String
-    , mapProjection : Maybe String
-    , mapAllowTilt : Maybe Bool
-    , mapAllowRotate : Maybe Bool
     , previewSize : Maybe Int
     }
 
@@ -48,22 +41,16 @@ encode options =
         , ( "ground", E.bool options.groundPlane )
         , ( "centre", E.bool options.centreLine )
         , ( "curtain", encodeCurtain options.curtainStyle )
-        , ( "tilt", E.bool options.mapAllowTilt )
-        , ( "projection", E.string options.mapProjection )
-        , ( "rotate", E.bool options.mapAllowRotate )
         , ( "preview", E.int options.previewSize )
         ]
 
 
 decoder =
-    D.map8 StoredOptions
+    D.map5 StoredOptions
         (D.field "surface" D.bool)
         (D.field "ground" D.bool)
         (D.field "centre" D.bool)
         (D.field "curtain" D.string)
-        (D.maybe (D.field "projection" D.string))
-        (D.maybe (D.field "tilt" D.bool))
-        (D.maybe (D.field "rotate" D.bool))
         (D.maybe (D.field "preview" D.int))
 
 
@@ -76,12 +63,8 @@ decode json current =
             , groundPlane = decoded.groundPlane
             , curtainStyle = decodeCurtain decoded.curtainStyle
             , terrainFineness = 0.0
-            , landUse = LandUseDataTypes.LandUseHidden
             , placeNames = False
             , showConstraintsAtLevel = Nothing
-            , mapAllowTilt = decoded.mapAllowTilt |> Maybe.withDefault True
-            , mapProjection = decoded.mapProjection |> Maybe.withDefault "globe"
-            , mapAllowRotate = decoded.mapAllowRotate |> Maybe.withDefault True
             , previewSize = decoded.previewSize |> Maybe.withDefault 4
             }
 

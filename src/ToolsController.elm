@@ -1,9 +1,8 @@
 module ToolsController exposing
     ( ColourTriplet
     , DockSettings
-    ,  Options
-       --, ToolType(..)
-
+    , Options
+      --, ToolType(..)
     , ToolCategory(..)
     , ToolDock(..)
     , ToolEntry
@@ -73,8 +72,6 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
 import Tools.LandUse
-import Tools.MapMatchingRouter
-import Tools.MapMatchingRouterOptions
 import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
@@ -144,7 +141,6 @@ type ToolType
     | ToolSmartSmoother
     | ToolNamedSegments
     | ToolTimestamps
-    | ToolRouting
     | ToolTracks
 
 
@@ -190,7 +186,6 @@ type alias Options msg =
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
     , timestampOptions : Tools.TimestampOptions.Options
-    , routingOptions : Tools.MapMatchingRouterOptions.Options
     , tracksOptions : Tracks.Options msg
     }
 
@@ -228,7 +223,6 @@ defaultOptions =
     , smartSmootherOptions = Tools.SmartSmoother.defaultOptions
     , namedSegmentOptions = Tools.NamedSegment.defaultOptions
     , timestampOptions = Tools.Timestamp.defaultOptions
-    , routingOptions = Tools.MapMatchingRouter.defaultOptions
     , tracksOptions = Tools.Tracks.defaultOptions
     }
 
@@ -271,7 +265,6 @@ type ToolMsg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
     | ToolNamedSegmentMsg Tools.NamedSegment.Msg
     | ToolTimestampMsg Tools.Timestamp.Msg
-    | ToolRoutingMsg Tools.MapMatchingRouter.Msg
     | ToolTracksMsg Tools.Tracks.Msg
 
 
@@ -324,7 +317,6 @@ orderedTools =
     , ( straightenTool.toolId, straightenTool )
     , ( landUseTool.toolId, landUseTool )
     , ( timestampTool.toolId, timestampTool )
-    , ( routingTool.toolId, routingTool )
     , ( tracksTool.toolId, tracksTool )
     ]
 
@@ -721,20 +713,6 @@ timestampTool =
     , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
-    , isPopupOpen = False
-    }
-
-
-routingTool : ToolEntry
-routingTool =
-    { toolType = ToolRouting
-    , toolId = Tools.MapMatchingRouter.toolId
-    , video = Just "https://youtu.be/MYBTArdb_X0"
-    , state = Contracted
-    , isVisible = True
-    , dock = DockRight
-    , tabColour = FlatColors.TurkishPalette.neonBlue
-    , textColour = contrastingColour FlatColors.TurkishPalette.neonBlue
     , isPopupOpen = False
     }
 
@@ -1343,18 +1321,6 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
-        ToolRoutingMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.MapMatchingRouter.update
-                        msg
-                        options.routingOptions
-                        (msgWrapper << ToolRoutingMsg)
-            in
-            ( { options | routingOptions = newOptions }
-            , actions
-            )
-
         ToolTracksMsg msg ->
             let
                 ( newOptions, actions ) =
@@ -1758,9 +1724,6 @@ toolStateHasChanged toolId showPreviews isTrack options =
                     { options | namedSegmentOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
-
-        ToolRouting ->
-            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolTracks ->
             let
@@ -2463,13 +2426,6 @@ viewToolByType settings msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage settings
 
-            ToolRouting ->
-                Tools.MapMatchingRouter.view
-                    settings
-                    isTrack
-                    (msgWrapper << ToolRoutingMsg)
-                    options.routingOptions
-
             ToolTracks ->
                 Tools.Tracks.view
                     settings
@@ -2584,9 +2540,6 @@ encodeType toolType =
 
         ToolNamedSegments ->
             "ToolNamedSegments"
-
-        ToolRouting ->
-            "ToolRouting"
 
         ToolTracks ->
             "ToolTracks"

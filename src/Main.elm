@@ -37,8 +37,6 @@ import LandUseDataTypes
 import Length
 import List.Extra
 import LocalStorage
-import MapPortController
-import MapTypes exposing (MapState(..))
 import Markdown
 import Maybe.Extra
 import MyIP
@@ -50,6 +48,7 @@ import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
 import Postgrest.Client as P exposing (jwt)
 import PreviewData exposing (PreviewData, PreviewShape(..))
+import ProfilePort
 import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
@@ -69,8 +68,6 @@ import Tools.DisplaySettings
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
-import Tools.MapMatchingRouter
-import Tools.MapMatchingRouterOptions
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.NamedSegment
@@ -95,7 +92,6 @@ import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Url)
 import UtilsForViews exposing (uiColourHexString)
-import ViewMap
 import ViewPureStyles exposing (..)
 import WriteGPX
 
@@ -112,8 +108,6 @@ type Msg
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | ReceivedIpDetails (Result Http.Error IpInfoReceived)
-    | PageLoadRecorded (Result P.Error IpInfoReceived)
-    | RecentLocations (Result P.Error (List PageLoadLog.Location))
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitRightDockLeftEdge SplitPane.Msg
@@ -131,12 +125,9 @@ type Msg
     | FilenameChange String
     | TimeToUpdateMemory
     | OneClickMsg Tools.OneClickQuickFix.Msg
-    | FetchElevationsFromMap String
-    | ReplaceTrackOnMapAfterStyleChange
     | SvgMsg SvgPathExtractor.Msg
     | FlythroughTick Time.Posix
     | HideInfoPopup
-    | ReceivedLandUseData (Result Http.Error LandUseDataTypes.OSMLandUseData)
     | I18NMsg I18N.Msg
     | BackgroundClick Mouse.Event
     | DisplayWelcome
@@ -144,7 +135,6 @@ type Msg
     | ProfilePaint
     | ToggleImperial
     | ToggleSingleDock
-    | MatchingRoute (Result Http.Error Tools.MapMatchingRouterOptions.Matchings)
     | NoOp
 
 
@@ -156,14 +146,6 @@ type alias Model =
     , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
     , rgtOptionsVisible : Bool
-    , loadFromUrl : Maybe Url
-
-    -- State machine for map synchronisation
-    , mapState : MapState
-
-    -- User locations, to be visible on map.
-    , userLocations : List PageLoadLog.Location
-    , userLocationsVisible : Bool
 
     -- Track stuff now all in Tools.Tracks.
     --, activeTrack : Maybe String
@@ -171,7 +153,6 @@ type alias Model =
     , previews : Dict String PreviewData
     , flythroughRunning : Bool
     , needsRendering : Bool
-    , mapPointsDraggable : Bool
 
     -- Layout stuff
     , windowSize : ( Float, Float )
@@ -274,11 +255,6 @@ init mflags origin navigationKey =
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , rgtOptionsVisible = False
-      , loadFromUrl = remoteUrl
-      , mapState = MapDivNeeded
-      , mapPointsDraggable = False
-      , userLocations = []
-      , userLocationsVisible = False
       , previews = Dict.empty
       , needsRendering = False
       , flythroughRunning = False
@@ -377,23 +353,6 @@ updateActiveTrack newTrack model =
     }
 
 
-removeNamedTrackFromMap model trackName =
-    let
-        hidePreviews =
-            model.previews
-                |> Dict.keys
-                |> List.map MapPortController.hidePreview
-    in
-    Cmd.batch <|
-        (MapPortController.removeTrackFromMapByName trackName :: hidePreviews)
-
-
-removeAllTracksFromMap model =
-    Cmd.batch <|
-        List.map MapPortController.removeTrackFromMapByName <|
-            Dict.keys model.toolOptions.tracksOptions.graph.edges
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -418,9 +377,7 @@ update msg model =
                     in
                     ( modelWithTrack
                     , Cmd.batch
-                        [ showTrackOnMapCentered modelWithTrack.toolOptions.tracksOptions
-                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
-                        , LocalStorage.sessionClear
+                        [ LocalStorage.sessionClear
                         , Delay.after 1000 ProfilePaint -- wait for container to paint.
                         ]
                     )
@@ -565,23 +522,6 @@ update msg model =
             , Cmd.none
             )
 
-        PageLoadRecorded _ ->
-            ( model, Cmd.none )
-
-        RecentLocations response ->
-            case response of
-                Err _ ->
-                    ( model, Cmd.none )
-
-                Ok locations ->
-                    ( { model | userLocations = locations }
-                    , if model.userLocationsVisible then
-                        MapPortController.showLocations locations
-
-                      else
-                        MapPortController.showLocations []
-                    )
-
         ReceivedIpDetails response ->
             let
                 ipInfo =
@@ -602,12 +542,7 @@ update msg model =
                             }
             in
             ( { model | ipInfo = ipInfo }
-            , Cmd.batch
-                [ MapPortController.createMap
-                    ViewMap.defaultStyleUrl
-                    mapInfoWithLocation
-                    model.contentArea
-                ]
+            , Cmd.none
             )
 
         GpxFromUrl result ->
@@ -616,11 +551,8 @@ update msg model =
                     let
                         ( newModel, cmds ) =
                             processGpxContent content
-
-                        newPaneLayout =
-                            PaneLayoutManager.forceMapView newModel.paneLayoutOptions
                     in
-                    ( { newModel | paneLayoutOptions = newPaneLayout }
+                    ( newModel
                     , cmds
                     )
 
@@ -651,9 +583,7 @@ update msg model =
                 newToolOptions =
                     { toolOptions | tracksOptions = Tracks.defaultOptions }
             in
-            ( { model | toolOptions = newToolOptions }
-            , removeAllTracksFromMap model
-            )
+            ( { model | toolOptions = newToolOptions }, Cmd.none )
 
         --Delegate wrapped OAuthmessages.
         --For v3, we're copying the state into the Tool, which is not ideal
@@ -904,23 +834,6 @@ update msg model =
             , performActionCommands actions modelAfterActions
             )
 
-        FetchElevationsFromMap trackName ->
-            -- We have added the full track so that we can then ask
-            -- the map for elevation data. Let's do that.
-            ( model, MapPortController.requestElevations trackName )
-
-        ReplaceTrackOnMapAfterStyleChange ->
-            -- We have added the full track so that we can then ask
-            -- the map for elevation data. Let's do that.
-            let
-                actions =
-                    [ TrackHasChanged ]
-
-                newModel =
-                    performActionsOnModel actions model
-            in
-            ( newModel, performActionCommands actions newModel )
-
         ToggleLoadOptionMenu ->
             ( { model | loadOptionsMenuOpen = not model.loadOptionsMenuOpen }
             , Cmd.none
@@ -961,58 +874,6 @@ update msg model =
 
         HideInfoPopup ->
             ( { model | infoText = Nothing }, Cmd.none )
-
-        ReceivedLandUseData results ->
-            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
-                Just track ->
-                    let
-                        ( landUse, cmds ) =
-                            LandUseDataOSM.processLandUseData results track
-
-                        newTrack =
-                            { track
-                                | landUseData = landUse
-                            }
-                    in
-                    ( updateActiveTrack newTrack model, cmds )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
-        MatchingRoute result ->
-            let
-                toolOptions =
-                    model.toolOptions
-
-                options =
-                    toolOptions.routingOptions
-
-                ( newOptions, newTrack ) =
-                    Tools.MapMatchingRouter.trackFromDrawnRoute result options
-
-                newToolOptions =
-                    { toolOptions | routingOptions = newOptions }
-            in
-            case newTrack of
-                Just track ->
-                    let
-                        newModel =
-                            adoptTrackInModel track { model | toolOptions = newToolOptions }
-                    in
-                    ( newModel
-                    , Cmd.batch
-                        [ MapPortController.resetMapAfterDrawing
-                        , MapPortController.addAllTracksToMap newModel.toolOptions.tracksOptions
-                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
-                        , Delay.after 1000 <| FetchElevationsFromMap track.trackName -- async to allow map to quiesce.
-                        , Delay.after 1000 ProfilePaint -- async, seems to help
-                        ]
-                    )
-
-                Nothing ->
-                    ( { model | toolOptions = newToolOptions }
-                    , Cmd.none
-                    )
 
 
 adoptTrackInModel : TrackLoaded Msg -> Model -> Model
@@ -1587,7 +1448,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
-        , MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
+        , ProfilePort.profileMessages (PaneMsg << ProfilePortMessage << ProfilePort.ProfileMessage)
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
@@ -2263,77 +2124,18 @@ performActionsOnModel actions model =
 performActionCommands : List (ToolAction Msg) -> Model -> Cmd Msg
 performActionCommands actions model =
     let
-        showPreviewOnMap tag =
-            case Dict.get tag model.previews of
-                Just useThisData ->
-                    case useThisData.shape of
-                        PreviewCircle ->
-                            MapPortController.showPreview
-                                model.toolOptions.displaySettings.previewSize
-                                useThisData.tag
-                                "circle"
-                                (uiColourHexString useThisData.colour)
-                                (SceneBuilderMap.renderPreview useThisData)
-
-                        PreviewLine ->
-                            MapPortController.showPreview
-                                model.toolOptions.displaySettings.previewSize
-                                useThisData.tag
-                                "line"
-                                (uiColourHexString useThisData.colour)
-                                (SceneBuilderMap.renderPreview useThisData)
-
-                        _ ->
-                            -- No other shapes go to map.
-                            Cmd.none
-
-                Nothing ->
-                    Cmd.none
-
         performAction : ToolAction Msg -> Cmd Msg
         performAction action =
             case ( action, Tracks.getActiveTrack model.toolOptions.tracksOptions ) of
                 ( SetActiveTrack _, _ ) ->
                     performAction TrackHasChanged
 
-                ( UnloadActiveTrack oldTrackName, _ ) ->
-                    Cmd.batch
-                        [ removeNamedTrackFromMap model oldTrackName
-                        , performAction TrackHasChanged
-                        ]
-
-                ( SetCurrent _, Just track ) ->
-                    MapPortController.addMarkersToMap track
-
-                ( SetCurrentFromMapClick _, Just _ ) ->
-                    --MapPortController.addMarkersToMap track
-                    Cmd.none
-
-                ( MapCenterOnCurrent, Just track ) ->
-                    MapPortController.centreMapOnCurrent track
-
-                ( MapRefresh, Just track ) ->
-                    -- Lazy, use this to refresh profile as well.
-                    Cmd.batch
-                        [ MapPortController.refreshMap
-                        , PaneLayoutManager.paintProfileCharts
-                            model.paneLayoutOptions
-                            model.systemSettings
-                            track
-                            model.previews
-                        ]
-
-                ( MapRefresh, Nothing ) ->
-                    -- Lazy, use this to refresh profile as well.
-                    MapPortController.refreshMap
-
                 ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.
                     -- Use preview data from model dictionary, as that could be
                     -- more up to date than this version.
                     Cmd.batch
-                        [ showPreviewOnMap previewData.tag
-                        , PaneLayoutManager.paintProfileCharts
+                        [ PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
                             model.systemSettings
                             track
@@ -2342,8 +2144,7 @@ performActionCommands actions model =
 
                 ( HidePreview tag, Just track ) ->
                     Cmd.batch
-                        [ MapPortController.hidePreview tag
-                        , PaneLayoutManager.paintProfileCharts
+                        [ PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
                             model.systemSettings
                             track
@@ -2356,27 +2157,19 @@ performActionCommands actions model =
 
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch <|
-                        [ MapPortController.addAllTracksToMap model.toolOptions.tracksOptions
-                        , PaneLayoutManager.paintProfileCharts
+                        [ PaneLayoutManager.paintProfileCharts
                             model.paneLayoutOptions
                             model.systemSettings
                             track
                             model.previews
                         ]
-                            ++ List.map showPreviewOnMap (Dict.keys model.previews)
 
                 ( PointerChange, Just track ) ->
-                    Cmd.batch <|
-                        PaneLayoutManager.paintProfileCharts
-                            model.paneLayoutOptions
-                            model.systemSettings
-                            track
-                            model.previews
-                            :: MapPortController.addMarkersToMap track
-                            :: List.map showPreviewOnMap (Dict.keys model.previews)
-
-                ( SetMarker _, Just track ) ->
-                    MapPortController.addMarkersToMap track
+                    PaneLayoutManager.paintProfileCharts
+                        model.paneLayoutOptions
+                        model.systemSettings
+                        track
+                        model.previews
 
                 ( StoreLocally key value, _ ) ->
                     LocalStorage.storageSetItem key value
@@ -2384,37 +2177,8 @@ performActionCommands actions model =
                 ( HeapStatusUpdate _, _ ) ->
                     Delay.after 5000 TimeToUpdateMemory
 
-                ( AddFullTrackToMapForElevations, Just track ) ->
-                    -- Deliberate pause here seems to allow map to quiesce.
-                    Cmd.batch
-                        [ MapPortController.addFullTrackToMap track
-                        , Delay.after 100 <| FetchElevationsFromMap track.trackName
-                        ]
-
-                ( FetchMapElevations, Just track ) ->
-                    MapPortController.requestElevations track.trackName
-
-                ( RemoveAllFromMap names, _ ) ->
-                    Cmd.batch <| List.map (removeNamedTrackFromMap model) names
-
-                ( SetMapStyle url, _ ) ->
-                    -- Deliberate pause here seems to allow map to quiesce.
-                    Cmd.batch
-                        [ MapPortController.setMapStyle url
-                        , Delay.after 1000 ReplaceTrackOnMapAfterStyleChange
-                        ]
-
                 ( SelectSvgFile message, _ ) ->
                     Select.file [ "text/svg" ] message
-
-                ( TrackFromSvg _, Just track ) ->
-                    showTrackOnMapCentered model.toolOptions.tracksOptions
-
-                ( TrackFromGpx _, Just track ) ->
-                    showTrackOnMapCentered model.toolOptions.tracksOptions
-
-                ( LoadGpxFromStrava _, Just track ) ->
-                    showTrackOnMapCentered model.toolOptions.tracksOptions
 
                 ( WriteTrackSections sections, Just track ) ->
                     Tools.SplitAndJoin.writeOneSection
@@ -2425,12 +2189,12 @@ performActionCommands actions model =
 
                 ( RenderProfile context, Just track ) ->
                     Cmd.batch
-                        [ MapPortController.paintCanvasProfileChart
+                        [ ProfilePort.paintCanvasProfileChart
                             context
                             model.systemSettings
                             track
                             model.previews
-                        , MapPortController.paintCanvasGradientChart
+                        , ProfilePort.paintCanvasGradientChart
                             context
                             model.systemSettings
                             track
@@ -2443,17 +2207,3 @@ performActionCommands actions model =
                     Cmd.none
     in
     Cmd.batch <| List.map performAction actions
-
-
-showTrackOnMapCentered : Tracks.Options msg -> Cmd msg
-showTrackOnMapCentered tracks =
-    case Tracks.getActiveTrack tracks of
-        Just activeTrack ->
-            Cmd.batch
-                [ MapPortController.addAllTracksToMap tracks
-                , MapPortController.zoomMapToFitTrack activeTrack
-                , MapPortController.addMarkersToMap activeTrack
-                ]
-
-        Nothing ->
-            MapPortController.addAllTracksToMap tracks

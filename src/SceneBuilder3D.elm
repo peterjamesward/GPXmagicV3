@@ -206,21 +206,10 @@ render3dView settings track =
         spatialIndex =
             indexTerrain nearbySpace track.trackTree
 
-        ( landUseElements, indexWithLandUse ) =
-            case settings.landUse of
-                LandUseDataTypes.LandUseHidden ->
-                    ( [], spatialIndex )
-
-                LandUseDataTypes.LandUseSloped ->
-                    makeLandUseSloped track.landUseData spatialIndex track.trackTree floorPlane
-
-                LandUseDataTypes.LandUsePlanar ->
-                    makeLandUsePlanar track.landUseData spatialIndex track floorPlane
-
         terrain =
             -- Using the updated spatial index should make sure terrain does not obscure land use.
             if settings.terrainFineness > 0.0 then
-                indexWithLandUse
+                spatialIndex
                     |> terrainFromIndex
                         (flatBox nearbySpace)
                         (flatBox nearbySpace)
@@ -233,7 +222,6 @@ render3dView settings track =
     in
     renderPointZero
         :: terrain
-        ++ landUseElements
         ++ DomainModel.traverseTreeBetweenLimitsToDepth
             0
             (skipCount track.trackTree)
