@@ -19,11 +19,6 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 https://github.com/MartinSStewart/elm-map
 
-Oh. This is interesting. It fetches Mapbox tiles and renders with WebGL in Elm.
-
-> Author will remove Codec and Effect dependencies; should then work as plain Elm app.
-> When I get round to it, `checkCollisions` should use a quadtree. Suspect it's called a lot.
-
 Hence:
 1. Could use this and add SVG overlay for route.
 2. Use this and render the route in WebGL.
@@ -33,14 +28,24 @@ Hence:
 > 2 is a starting point as 3d-scene offers transparent background!
 > 1 is thus probably unnecessary.
 > Draggable points SVG overlay, only above a certain zoom, clipped to view so superfast.
+> Losing JS map means losing elevation fetch and draw on map, though could recreate the latter.
 
-In each case, to some extent, the Map view could be merged into Plan or even 3D views.
-That's exciting.
-Also, no worry about the DIV structure changing so any pane(s) could have a map view.
+**State of play**
 
-Also, though way more work, we would know, in principle, where the roads are...!
+Test app works. Moving code into v3 branch.
 
-Losing JS map means losing elevation fetch and draw on map, though could recreate the latter.
+~~1. Take this opportunity to clean up PaneManager. No need for the "fixed" DOM structure.~~
+1. Use Map as optional background for Plan view.
+2. Align projections (globe, mercator?)
+4. Align zooming.
+5. Use Map as optional ground plane for 3D views.
+6. Make a nicer typeface (TTF -> SVG -> Glyphs)
+7. Stop road labels from following the path, just rotate.
+7. Make sure nothing broke (check profile click).
+8. Put Land Use back, maybe, but not great with no elevation!
+9. May be able to put map on top of terrain - just a thought.
+
+BTW: revert to the SVG profile charts, we lose that pair of ports as well.
 
 ---
 

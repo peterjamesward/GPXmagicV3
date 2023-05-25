@@ -52,9 +52,6 @@ type Msg
     | ChangeName Int String
     | DeleteSegment
     | CreateSegment
-    | EnableAutoSuggest Bool
-    | TogglePreferCloser Bool
-    | LandUseProximity Length.Length
     | DisplayInfo String String
 
 
@@ -337,65 +334,6 @@ view settings wrapper options track =
                     , label = i18n "create"
                     }
 
-        autoSuggestButton =
-            -- If we have named places from Land Use, they may provide segment names.
-            el [ centerX ] <|
-                if Dict.isEmpty track.landUseData.places then
-                    i18n "nolanduse"
-
-                else
-                    column []
-                        [ row []
-                            [ Input.checkbox
-                                [ padding 5
-                                , spacing 5
-                                ]
-                                { onChange = wrapper << EnableAutoSuggest
-                                , checked = options.landUseProximity /= Nothing
-                                , label = Input.labelRight [] <| i18n "landuse"
-                                , icon = Input.defaultCheckbox
-                                }
-                            , infoButton (wrapper <| DisplayInfo toolId "landusetip")
-                            ]
-                        , if options.landUseProximity == Nothing then
-                            none
-
-                          else
-                            Input.slider
-                                ViewPureStyles.shortSliderStyles
-                                { onChange = Length.meters >> LandUseProximity >> wrapper
-                                , value =
-                                    Maybe.map Length.inMeters options.landUseProximity
-                                        |> Maybe.withDefault 0
-                                , label =
-                                    Input.labelBelow [] <|
-                                        text <|
-                                            String.Interpolate.interpolate
-                                                (I18N.localisedString settings.location toolId "proximity")
-                                                [ showDecimal0 <|
-                                                    Maybe.withDefault 0 <|
-                                                        Maybe.map Length.inMeters options.landUseProximity
-                                                ]
-                                , min = 50
-                                , max = 5000
-                                , step = Just 50
-                                , thumb = sliderThumb
-                                }
-                        , if options.landUseProximity == Nothing then
-                            none
-
-                          else
-                            Input.checkbox
-                                [ padding 5
-                                , spacing 5
-                                ]
-                                { onChange = wrapper << TogglePreferCloser
-                                , checked = options.landUsePreferCloser
-                                , label = Input.labelRight [] <| i18n "closer"
-                                , icon = Input.defaultCheckbox
-                                }
-                        ]
-
         goodSeparation segments =
             segments
                 |> List.all
@@ -435,7 +373,6 @@ view settings wrapper options track =
         [ segmentsTable
         , selectedSegmentDetail
         , newSegmentButton
-        , autoSuggestButton
         , overlapWarning
         , duplicateWarning
         ]
@@ -636,62 +573,6 @@ update msg options track previewColour wrapper =
               ]
             )
 
-        LandUseProximity distance ->
-            let
-                newOptions =
-                    { options | landUseProximity = Just distance }
-            in
-            ( newOptions
-            , [ exclusionZones track
-              , makePreview previewColour track
-              , Actions.UpdateNamedSegments <| segmentsFromPlaces track options
-              ]
-            )
-
-        EnableAutoSuggest enabled ->
-            -- Add segments based on nearby Land Use names.
-            if enabled then
-                let
-                    newOptions =
-                        { options | landUseProximity = Just <| Length.meters 50 }
-                in
-                ( newOptions
-                , [ exclusionZones track
-                  , makePreview previewColour track
-                  , Actions.UpdateNamedSegments <| segmentsFromPlaces track options
-                  ]
-                )
-
-            else
-                -- when disabling, do npt clear the iist
-                let
-                    newOptions =
-                        { options | landUseProximity = Nothing }
-
-                    newSegments =
-                        track.namedSegments
-                            |> List.filter
-                                (\seg -> seg.createMode == ManualSegment)
-                in
-                ( newOptions
-                , [ exclusionZones track
-                  , makePreview previewColour track
-                  , Actions.UpdateNamedSegments newSegments
-                  ]
-                )
-
-        TogglePreferCloser bool ->
-            let
-                newOptions =
-                    { options | landUsePreferCloser = bool }
-            in
-            ( newOptions
-            , [ exclusionZones track
-              , makePreview previewColour track
-              , Actions.UpdateNamedSegments <| segmentsFromPlaces track options
-              ]
-            )
-
 
 type alias SegmentCandidate =
     { name : String
@@ -699,134 +580,6 @@ type alias SegmentCandidate =
     , nearestTrackPointIndex : Int
     , distanceAway : Length.Length
     }
-
-
-segmentsFromPlaces : TrackLoaded msg -> Options -> List NamedSegment
-segmentsFromPlaces track options =
-    {-
-       1. Filter names places within threshold.
-       2. Sort by increasing or decreasing distance.
-       3. Folding the segment list across the sorted places:
-           3.1 Find nearest track point
-           3.2 Derive segment start and end (formula TBD)
-           3.3 If not overlapping existing segment, make new segment (also RGT rule check)
-       4. Return track with new segment list.
-    -}
-    let
-        retainedSegments =
-            -- Always scrap previously auto-found segments.
-            track.namedSegments
-                |> List.filter (\seg -> seg.createMode == ManualSegment)
-
-        withinThreshold : Length.Length -> SegmentCandidate -> Bool
-        withinThreshold threshold candidate =
-            candidate.distanceAway |> Quantity.lessThanOrEqualTo threshold
-
-        makeCandidate ( name, place ) =
-            let
-                nearestTrackPointIndex =
-                    DomainModel.nearestToEarthPoint place track.currentPosition track.trackTree track.leafIndex
-
-                nearestTrackPoint =
-                    DomainModel.earthPointFromIndex nearestTrackPointIndex track.trackTree
-            in
-            { name = name
-            , place = place
-            , nearestTrackPointIndex = nearestTrackPointIndex
-            , distanceAway = Point3d.distanceFrom place.space nearestTrackPoint.space
-            }
-
-        orderedCandidates =
-            case options.landUseProximity of
-                Just threshold ->
-                    let
-                        sortMethod =
-                            if options.landUsePreferCloser then
-                                .distanceAway >> Length.inMeters
-
-                            else
-                                .distanceAway >> Quantity.negate >> Length.inMeters
-                    in
-                    track.landUseData.places
-                        |> Dict.toList
-                        |> List.map makeCandidate
-                        |> List.filter (withinThreshold threshold)
-                        |> List.sortBy sortMethod
-
-                Nothing ->
-                    []
-
-        padInterval padding interval =
-            Interval.from
-                (Interval.minValue interval |> Quantity.minus padding)
-                (Interval.maxValue interval |> Quantity.plus padding)
-
-        addSegmentIfNoConflict : SegmentCandidate -> List NamedSegment -> List NamedSegment
-        addSegmentIfNoConflict candidate outputs =
-            let
-                newSegmentCentre =
-                    DomainModel.distanceFromIndex candidate.nearestTrackPointIndex track.trackTree
-
-                newSegmentHalfLength =
-                    Quantity.half candidate.distanceAway
-                        |> Quantity.max (Length.meters 50)
-
-                startBuffer =
-                    Interval.fromEndpoints ( Length.meters 0, Length.meters 120 )
-
-                endBuffer =
-                    Interval.from
-                        (DomainModel.trueLength track.trackTree |> Quantity.minus (Length.meters 200))
-                        (DomainModel.trueLength track.trackTree)
-
-                ( idealStart, idealEnd ) =
-                    ( newSegmentCentre |> Quantity.minus newSegmentHalfLength
-                    , newSegmentCentre |> Quantity.plus newSegmentHalfLength
-                    )
-
-                actualStart =
-                    DomainModel.distanceFromIndex
-                        (DomainModel.indexFromDistanceRoundedDown idealStart track.trackTree)
-                        track.trackTree
-
-                actualEnd =
-                    DomainModel.distanceFromIndex
-                        (DomainModel.indexFromDistanceRoundedUp idealEnd track.trackTree)
-                        track.trackTree
-
-                newSegmentInterval =
-                    Interval.fromEndpoints ( actualStart, actualEnd )
-
-                intervalFrom segment =
-                    -- Include RGT separation requirement here.
-                    Interval.from segment.startDistance segment.endDistance
-                        |> padInterval (Length.meters 50)
-
-                hasIntersectionWith existing =
-                    Interval.intersects
-                        (intervalFrom existing)
-                        newSegmentInterval
-            in
-            if
-                List.any hasIntersectionWith outputs
-                    || Interval.intersects newSegmentInterval startBuffer
-                    || Interval.intersects newSegmentInterval endBuffer
-            then
-                outputs
-
-            else
-                { name = candidate.name
-                , startDistance = actualStart
-                , endDistance = actualEnd
-                , createMode = AutoSegment
-                , startOk = True
-                , endOk = True
-                }
-                    :: outputs
-    in
-    orderedCandidates
-        |> List.foldl addSegmentIfNoConflict retainedSegments
-        |> List.sortBy (.startDistance >> Length.inMeters)
 
 
 

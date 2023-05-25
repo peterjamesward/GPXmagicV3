@@ -21,7 +21,6 @@ module TrackLoaded exposing
 
 import Actions exposing (ToolAction, UndoEntry)
 import DomainModel exposing (..)
-import LandUseDataTypes
 import LeafIndex exposing (LeafIndex)
 import Length
 import Point3d
@@ -43,7 +42,6 @@ type alias TrackLoaded msg =
     , undos : List (UndoEntry msg)
     , redos : List (UndoEntry msg)
     , lastMapClick : ( Float, Float )
-    , landUseData : LandUseDataTypes.LandUseData
     , leafIndex : LeafIndex
     , visible : Bool
     , namedSegments : List NamedSegment
@@ -61,7 +59,6 @@ newTrackFromTree refLonLat newTree =
     , undos = []
     , redos = []
     , lastMapClick = ( 0, 0 )
-    , landUseData = LandUseDataTypes.emptyLandUse
     , leafIndex = indexLeaves newTree
     , visible = True
     , namedSegments = []
@@ -208,10 +205,6 @@ trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)
 trackFromPoints trackName gpxTrack =
     case treeFromSourcePoints gpxTrack of
         Just aTree ->
-            let
-                landuse =
-                    LandUseDataTypes.emptyLandUse
-            in
             Just
                 { trackTree = aTree
                 , currentPosition = 0
@@ -220,9 +213,8 @@ trackFromPoints trackName gpxTrack =
                 , referenceLonLat = DomainModel.gpxPointFromIndex 0 aTree
                 , undos = []
                 , redos = []
-                , trackName = trackName
                 , lastMapClick = ( 0, 0 )
-                , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
+                , trackName = trackName
                 , leafIndex = indexLeaves aTree
                 , visible = True
                 , namedSegments = []

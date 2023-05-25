@@ -314,7 +314,7 @@ update msg options previewColour track =
                             Maybe.withDefault ( 0, Angle.degrees 0 ) <|
                                 List.Extra.getAt breachIndex newOptions.singlePointBreaches
                     in
-                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+                    ( newOptions, [ SetCurrent position ] )
 
                 DirectionChangeWithRadius ->
                     let
@@ -328,7 +328,7 @@ update msg options previewColour track =
                         Just group ->
                             case List.head <| Set.toList group of
                                 Just position ->
-                                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+                                    ( newOptions, [ SetCurrent position ] )
 
                                 Nothing ->
                                     ( newOptions, [] )
@@ -350,7 +350,7 @@ update msg options previewColour track =
                             Maybe.withDefault ( 0, Angle.degrees 0 ) <|
                                 List.Extra.getAt breachIndex newOptions.singlePointBreaches
                     in
-                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+                    ( newOptions, [ SetCurrent position ] )
 
                 DirectionChangeWithRadius ->
                     let
@@ -364,7 +364,7 @@ update msg options previewColour track =
                         Just group ->
                             case List.head <| Set.toList group of
                                 Just position ->
-                                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
+                                    ( newOptions, [ SetCurrent position ] )
 
                                 Nothing ->
                                     ( newOptions, [] )
@@ -375,10 +375,10 @@ update msg options previewColour track =
         SetCurrentPosition position ->
             case options.mode of
                 DirectionChangeAbrupt ->
-                    ( options, [ SetCurrent position, MapCenterOnCurrent ] )
+                    ( options, [ SetCurrent position ] )
 
                 DirectionChangeWithRadius ->
-                    ( options, [ SetCurrent position, MapCenterOnCurrent ] )
+                    ( options, [ SetCurrent position ] )
 
         SetThreshold angle ->
             let

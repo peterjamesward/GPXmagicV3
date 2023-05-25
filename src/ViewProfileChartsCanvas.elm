@@ -152,7 +152,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
             in
             ( newContext
-            , [ Actions.RenderProfile newContext ]
+            , []
             )
 
         ImageZoomOut ->
@@ -161,7 +161,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
             in
             ( newContext
-            , [ Actions.RenderProfile newContext ]
+            , []
             )
 
         ImageReset ->
@@ -170,7 +170,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     { context | zoomLevel = 0 }
             in
             ( newContext
-            , [ Actions.RenderProfile newContext ]
+            , []
             )
 
         ImageNoOp ->
@@ -178,7 +178,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
         ImageClick event ->
             -- For profile charts, this comes through as an event from the Chart.
-            -- See the MapPortController and 'handleClick' above.
+            -- See the ProfilePort and 'handleClick' above.
             ( context, [] )
 
         ClickDelayExpired ->
@@ -192,7 +192,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     }
             in
             ( newContext
-            , [ Actions.RenderProfile newContext ]
+            , []
             )
 
         ImageGrab event ->
@@ -233,7 +233,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                             }
                     in
                     ( newContext
-                    , [ Actions.RenderProfile newContext ]
+                    , []
                     )
 
                 DragNone ->
@@ -277,7 +277,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                 newContext =
                     { context | colouredChart = not context.colouredChart }
             in
-            ( newContext, [ Actions.RenderProfile newContext ] )
+            ( newContext, [] )
 
         SetEmphasis _ ->
             ( context, [] )

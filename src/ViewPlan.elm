@@ -36,7 +36,6 @@ import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import View3dCommonElements exposing (placesOverlay)
 import ViewPlanContext exposing (DragAction(..), PlanContext)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d
@@ -162,9 +161,6 @@ view context settings display contentArea track scene msgWrapper =
 
         camera =
             deriveCamera track.trackTree context track.currentPosition
-
-        overlay =
-            placesOverlay display contentArea track camera
     in
     el
         [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
@@ -183,7 +179,6 @@ view context settings display contentArea track scene msgWrapper =
         , pointer
         , Border.width 0
         , Border.color FlatColors.ChinesePalette.peace
-        , inFront <| overlay
         , inFront <| zoomButtons settings msgWrapper context
         ]
     <|

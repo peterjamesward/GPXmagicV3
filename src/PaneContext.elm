@@ -1,11 +1,9 @@
 module PaneContext exposing (..)
 
 import LocalCoords exposing (LocalCoords)
-import MapTypes
 import Scene3d exposing (Entity)
 import View3dCommonElements
 import ViewGraphContext
-import ViewMapContext
 import ViewMode exposing (ViewMode)
 import ViewPlanContext
 import ViewProfileChartContext
@@ -15,7 +13,6 @@ type PaneLayout
     = PanesOne
     | PanesLeftRight
     | PanesUpperLower
-    | PanesOnePlusTwo
     | PanesGrid
 
 
@@ -33,7 +30,6 @@ type alias PaneLayoutOptions =
     , pane4 : PaneContext
     , sliderState : SliderState
     , scene3d : List (Entity LocalCoords)
-    , mapState : MapTypes.MapClickLocation
     , viewBeforeRouteViewForced : Maybe ViewMode
     }
 
@@ -50,7 +46,6 @@ type alias PaneContext =
     , activeView : ViewMode
     , thirdPersonContext : Maybe View3dCommonElements.Context
     , firstPersonContext : Maybe View3dCommonElements.Context
-    , mapContext : Maybe ViewMapContext.MapContext
     , profileContext : Maybe ViewProfileChartContext.ProfileContext
     , planContext : Maybe ViewPlanContext.PlanContext
     , graphContext : Maybe ViewGraphContext.GraphContext

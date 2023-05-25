@@ -3,17 +3,12 @@ module Tools.DisplaySettings exposing (Msg(..), defaultOptions, restoreSettings,
 import Actions exposing (ToolAction(..))
 import CommonToolStyles
 import Element exposing (..)
-import Element.Background as Background
 import Element.Border as Border
 import Element.Input as Input
-import FlatColors.ChinesePalette
 import Json.Decode as D
-import LandUseDataTypes
-import MapPortController
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions exposing (..)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton)
 
 
@@ -28,12 +23,8 @@ defaultOptions =
     , centreLine = False
     , groundPlane = True
     , terrainFineness = 0.0
-    , landUse = LandUseDataTypes.LandUseHidden
     , placeNames = False
     , showConstraintsAtLevel = Nothing
-    , mapProjection = "globe"
-    , mapAllowTilt = True
-    , mapAllowRotate = True
     , previewSize = 4
     }
 
@@ -43,13 +34,8 @@ type Msg
     | SetCurtainStyle CurtainStyle
     | SetCentreLine Bool
     | SetGroundPlane Bool
-    | SetLandUse LandUseDataTypes.LandUseDisplay
     | SetTerrainFineness Float
     | DisplayInfo String String
-    | SetPlaceNames Bool
-    | AllowMapTilt Bool
-    | UseGlobeProjection Bool
-    | AllowMapRotate Bool
     | SetPreviewSize Int
 
 
@@ -74,20 +60,6 @@ update msg options =
             let
                 newOptions =
                     { options | centreLine = state }
-            in
-            ( newOptions, actions newOptions )
-
-        SetPlaceNames state ->
-            let
-                newOptions =
-                    { options | placeNames = state }
-            in
-            ( newOptions, actions newOptions )
-
-        SetLandUse state ->
-            let
-                newOptions =
-                    { options | landUse = state }
             in
             ( newOptions, actions newOptions )
 
@@ -129,44 +101,6 @@ update msg options =
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
 
-        AllowMapTilt allowed ->
-            let
-                newOptions =
-                    { options | mapAllowTilt = allowed }
-            in
-            ( newOptions
-            , (Actions.ExternalCommand <| MapPortController.setAllowTilt allowed)
-                :: actions newOptions
-            )
-
-        AllowMapRotate allowed ->
-            let
-                newOptions =
-                    { options | mapAllowRotate = allowed }
-            in
-            ( newOptions
-            , (ExternalCommand <| MapPortController.setAllowRotate allowed)
-                :: actions newOptions
-            )
-
-        UseGlobeProjection useGlobe ->
-            let
-                newOptions =
-                    { options
-                        | mapProjection =
-                            case useGlobe of
-                                False ->
-                                    "mercator"
-
-                                True ->
-                                    "globe"
-                    }
-            in
-            ( newOptions
-            , (ExternalCommand <| MapPortController.setProjection newOptions.mapProjection)
-                :: actions newOptions
-            )
-
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Element msg
 view settings wrap options =
@@ -192,28 +126,10 @@ view settings wrap options =
                     , Input.option PastelCurtain (i18n "Coloured")
                     ]
                 }
-
-        landUseChoice =
-            Input.radio groupStyle
-                { onChange = wrap << SetLandUse
-                , selected = Just options.landUse
-                , label =
-                    Input.labelBelow [] <|
-                        row [ spacing 4 ]
-                            [ i18n "Land Use"
-                            , infoButton (wrap <| DisplayInfo "display" "landuse")
-                            ]
-                , options =
-                    [ Input.option LandUseDataTypes.LandUseHidden (i18n "None")
-                    , Input.option LandUseDataTypes.LandUsePlanar (i18n "Flat")
-                    , Input.option LandUseDataTypes.LandUseSloped (i18n "3D")
-                    ]
-                }
     in
     wrappedRow
         (CommonToolStyles.toolContentBoxStyle settings)
         [ curtainChoice
-        , landUseChoice
         , column groupStyle
             [ Input.checkbox
                 []
@@ -234,36 +150,6 @@ view settings wrap options =
                 { onChange = wrap << SetCentreLine
                 , checked = options.centreLine
                 , label = Input.labelRight [] <| text "Centre line"
-                , icon = Input.defaultCheckbox
-                }
-            , Input.checkbox
-                []
-                { onChange = wrap << SetPlaceNames
-                , checked = options.placeNames
-                , label = Input.labelRight [] <| text "Place names"
-                , icon = Input.defaultCheckbox
-                }
-            ]
-        , column groupStyle
-            [ Input.checkbox
-                []
-                { onChange = wrap << UseGlobeProjection
-                , checked = options.mapProjection == "globe"
-                , label = Input.labelRight [] <| text "Use Globe map"
-                , icon = Input.defaultCheckbox
-                }
-            , Input.checkbox
-                []
-                { onChange = wrap << AllowMapTilt
-                , checked = options.mapAllowTilt
-                , label = Input.labelRight [] <| text "Map can tilt"
-                , icon = Input.defaultCheckbox
-                }
-            , Input.checkbox
-                []
-                { onChange = wrap << AllowMapRotate
-                , checked = options.mapAllowRotate
-                , label = Input.labelRight [] <| text "Map can rotate"
                 , icon = Input.defaultCheckbox
                 }
             ]

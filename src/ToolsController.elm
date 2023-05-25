@@ -1,9 +1,8 @@
 module ToolsController exposing
     ( ColourTriplet
     , DockSettings
-    ,  Options
-       --, ToolType(..)
-
+    , Options
+      --, ToolType(..)
     , ToolCategory(..)
     , ToolDock(..)
     , ToolEntry
@@ -72,9 +71,6 @@ import Tools.I18N as I18N
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
-import Tools.LandUse
-import Tools.MapMatchingRouter
-import Tools.MapMatchingRouterOptions
 import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
@@ -140,11 +136,9 @@ type ToolType
     | ToolIntersections
     | ToolStraighten
     | ToolSettings
-    | ToolLandUse
     | ToolSmartSmoother
     | ToolNamedSegments
     | ToolTimestamps
-    | ToolRouting
     | ToolTracks
 
 
@@ -186,11 +180,9 @@ type alias Options msg =
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
     , straightenOptions : Tools.Straightener.Options
-    , landUseOptions : Tools.LandUse.Options
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
     , timestampOptions : Tools.TimestampOptions.Options
-    , routingOptions : Tools.MapMatchingRouterOptions.Options
     , tracksOptions : Tracks.Options msg
     }
 
@@ -224,11 +216,9 @@ defaultOptions =
     , splitAndJoinOptions = Tools.SplitAndJoin.defaultOptions
     , intersectionOptions = Tools.Intersections.defaultOptions
     , straightenOptions = Tools.Straightener.defaultOptions
-    , landUseOptions = Tools.LandUse.defaultOptions
     , smartSmootherOptions = Tools.SmartSmoother.defaultOptions
     , namedSegmentOptions = Tools.NamedSegment.defaultOptions
     , timestampOptions = Tools.Timestamp.defaultOptions
-    , routingOptions = Tools.MapMatchingRouter.defaultOptions
     , tracksOptions = Tools.Tracks.defaultOptions
     }
 
@@ -267,11 +257,9 @@ type ToolMsg
     | ToolSplitJoinMsg Tools.SplitAndJoin.Msg
     | ToolIntersectionMsg Tools.Intersections.Msg
     | ToolStraightenMsg Tools.Straightener.Msg
-    | ToolLandUseMsg Tools.LandUse.Msg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
     | ToolNamedSegmentMsg Tools.NamedSegment.Msg
     | ToolTimestampMsg Tools.Timestamp.Msg
-    | ToolRoutingMsg Tools.MapMatchingRouter.Msg
     | ToolTracksMsg Tools.Tracks.Msg
 
 
@@ -322,9 +310,7 @@ orderedTools =
     , ( splitAndJoinTool.toolId, splitAndJoinTool )
     , ( intersectionsTool.toolId, intersectionsTool )
     , ( straightenTool.toolId, straightenTool )
-    , ( landUseTool.toolId, landUseTool )
     , ( timestampTool.toolId, timestampTool )
-    , ( routingTool.toolId, routingTool )
     , ( tracksTool.toolId, tracksTool )
     ]
 
@@ -697,20 +683,6 @@ straightenTool =
     }
 
 
-landUseTool : ToolEntry
-landUseTool =
-    { toolType = ToolLandUse
-    , toolId = Tools.LandUse.toolId
-    , video = Just "https://youtu.be/SgiVpQYxG8I"
-    , state = Contracted
-    , isVisible = True
-    , dock = DockRight
-    , tabColour = defaultToolColour
-    , textColour = contrastingColour defaultToolColour
-    , isPopupOpen = False
-    }
-
-
 timestampTool : ToolEntry
 timestampTool =
     { toolType = ToolTimestamps
@@ -721,20 +693,6 @@ timestampTool =
     , dock = DockRight
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
-    , isPopupOpen = False
-    }
-
-
-routingTool : ToolEntry
-routingTool =
-    { toolType = ToolRouting
-    , toolId = Tools.MapMatchingRouter.toolId
-    , video = Just "https://youtu.be/MYBTArdb_X0"
-    , state = Contracted
-    , isVisible = True
-    , dock = DockRight
-    , tabColour = FlatColors.TurkishPalette.neonBlue
-    , textColour = contrastingColour FlatColors.TurkishPalette.neonBlue
     , isPopupOpen = False
     }
 
@@ -1294,18 +1252,6 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
-        ToolLandUseMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.LandUse.update
-                        msg
-                        (msgWrapper << ToolLandUseMsg)
-                        options.landUseOptions
-            in
-            ( { options | landUseOptions = newOptions }
-            , actions
-            )
-
         ToolSmartSmootherMsg msg ->
             case isTrack of
                 Just track ->
@@ -1342,18 +1288,6 @@ update toolMsg isTrack msgWrapper options =
 
                 Nothing ->
                     ( options, [] )
-
-        ToolRoutingMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.MapMatchingRouter.update
-                        msg
-                        options.routingOptions
-                        (msgWrapper << ToolRoutingMsg)
-            in
-            ( { options | routingOptions = newOptions }
-            , actions
-            )
 
         ToolTracksMsg msg ->
             let
@@ -1728,9 +1662,6 @@ toolStateHasChanged toolId showPreviews isTrack options =
         ToolSettings ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
-        ToolLandUse ->
-            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
-
         ToolSmartSmoother ->
             let
                 ( newToolOptions, actions ) =
@@ -1758,9 +1689,6 @@ toolStateHasChanged toolId showPreviews isTrack options =
                     { options | namedSegmentOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
-
-        ToolRouting ->
-            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolTracks ->
             let
@@ -2432,13 +2360,6 @@ viewToolByType settings msgWrapper entry isTrack options =
             ToolSettings ->
                 viewToolSettings settings options msgWrapper
 
-            ToolLandUse ->
-                Tools.LandUse.view
-                    settings
-                    (msgWrapper << ToolLandUseMsg)
-                    options.landUseOptions
-                    isTrack
-
             ToolSmartSmoother ->
                 case isTrack of
                     Just track ->
@@ -2462,13 +2383,6 @@ viewToolByType settings msgWrapper entry isTrack options =
 
                     Nothing ->
                         noTrackMessage settings
-
-            ToolRouting ->
-                Tools.MapMatchingRouter.view
-                    settings
-                    isTrack
-                    (msgWrapper << ToolRoutingMsg)
-                    options.routingOptions
 
             ToolTracks ->
                 Tools.Tracks.view
@@ -2576,17 +2490,11 @@ encodeType toolType =
         ToolSettings ->
             "ToolSettings"
 
-        ToolLandUse ->
-            "ToolLandUse"
-
         ToolSmartSmoother ->
             "ToolTreeSmoother"
 
         ToolNamedSegments ->
             "ToolNamedSegments"
-
-        ToolRouting ->
-            "ToolRouting"
 
         ToolTracks ->
             "ToolTracks"

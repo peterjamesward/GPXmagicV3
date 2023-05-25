@@ -7,6 +7,4 @@ type ViewMode
     | ViewPlan
     | ViewProfileCanvas
     | ViewProfileWebGL
-    | ViewMap
     | ViewGraph
-    | ViewDerivatives

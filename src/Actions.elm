@@ -49,13 +49,9 @@ type
     | ReRender
     | WithUndo (ToolAction msg)
     | SetCurrent Int -- move the orange pointer
-    | SetCurrentFromMapClick Int -- to avoid re-centering the map!
-    | SaveLastMapClick Float Float
     | ShowPreview PreviewData -- add a tool's preview to the collection
     | HidePreview String -- remove a tools' preview
     | DelayMessage Int msg -- set a timer, useful for debouncing
-    | MapCenterOnCurrent -- as it says
-    | MapRefresh -- generally because layout has changed.
     | StoreLocally String E.Value -- save something in local storage
     | StoredValueRetrieved String E.Value -- retrieve from local storage
     | DeletePointOrPoints Int Int -- fromStart, fromEnd
@@ -65,14 +61,11 @@ type
     | UndoLastAction
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
-    | RenderProfile ViewProfileChartContext.ProfileContext -- rebuild the altitude and gradient charts
     | BezierApplyWithOptions Tools.BezierOptions.Options
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
     | SmartSmootherApplyWithOptions Tools.SmartSmootherOptions.Options
-    | SetMapStyle String
-    | PointMovedOnMap Float Float Float Float
     | NudgeApplyWithOptions Tools.NudgeOptions.Options
     | OutAndBackApplyWithOptions Tools.OutAndBackOptions.Options
     | ApplySimplify
@@ -82,10 +75,6 @@ type
     | ApplySmoothProfile Tools.ProfileSmoothOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
     | ApplyRecentre ( Float, Float )
-    | AddFullTrackToMapForElevations
-    | FetchMapElevations
-    | ApplyMapElevations (List (Maybe Float))
-    | ApplyLandUseAltitudes (List (Maybe Float))
     | SelectSvgFile (File -> msg)
     | TrackFromSvg String
     | StartFlythoughTicks
@@ -99,7 +88,6 @@ type
     | ReverseTrack
     | MoveStartPoint Int
     | AddRiderPens
-    | TrackFromGpx String
     | ParseAndAppend String
     | WriteTrackSections (List ( Int, Float, Float ))
     | Straighten
@@ -110,12 +98,9 @@ type
     | SetTimeTicks Int
     | TimeDoubling
     | UsePhysicsModel
-    | ProfileClick String Float --- CAUTION, check units.
-    | FetchMatchingRoute (List (List Float))
     | SetActiveTrack String
     | UpdateNamedSegments (List NamedSegment)
     | UnloadActiveTrack String
-    | RemoveAllFromMap (List String)
     | ExternalCommand (Cmd msg)
 
 
@@ -138,9 +123,6 @@ actionTextForUndo location action =
 
             BendSmootherApplyWithOptions _ ->
                 "arc"
-
-            PointMovedOnMap _ _ _ _ ->
-                "map"
 
             NudgeApplyWithOptions _ ->
                 "nudge"
@@ -165,12 +147,6 @@ actionTextForUndo location action =
 
             ApplyRecentre _ ->
                 "move"
-
-            ApplyMapElevations _ ->
-                "elevations"
-
-            AddFullTrackToMapForElevations ->
-                "elevations"
 
             PasteStravaSegment _ ->
                 "segment"

@@ -4,11 +4,8 @@ module PaneLayoutManager exposing
     , StoredPane
     , ViewContext(..)
     , defaultOptions
-    , exitRouteView
-    , forceMapView
     , forceRouteView
     , initialise
-    , paintProfileCharts
     , profileViewHandlesClick
     , render
     , restoreStoredValues
@@ -20,20 +17,12 @@ import Actions exposing (..)
 import Dict exposing (Dict)
 import DomainModel exposing (skipCount)
 import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
-import FlatColors.ChinesePalette
-import FlatColors.FlatUIPalette
-import Html.Attributes exposing (style)
-import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
 import Json.Encode as E
 import Length
 import List.Extra
-import MapPortController
 import PaneContext exposing (PaneContext, PaneId(..), PaneLayout(..), PaneLayoutOptions, SliderState(..), paneIdToString)
 import Pixels exposing (Pixels)
 import PreviewData exposing (PreviewData)
@@ -42,10 +31,8 @@ import SceneBuilder3D
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import Tools.Flythrough
-import Tools.GraphOptions exposing (Graph)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
-import Tools.NamedSegmentOptions exposing (NamedSegment)
 import Tools.Tracks as Tracks
 import Tools.TracksOptions as Tracks
 import ToolsController
@@ -53,8 +40,6 @@ import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements
 import ViewFirstPerson
 import ViewGraph
-import ViewMap
-import ViewMapContext
 import ViewMode exposing (ViewMode(..))
 import ViewPlan
 import ViewProfileChartContext
@@ -78,17 +63,9 @@ defaultPaneContext =
     , activeView = ViewThird
     , thirdPersonContext = Nothing
     , firstPersonContext = Nothing
-    , mapContext = Nothing
     , profileContext = Nothing
     , planContext = Nothing
     , graphContext = Nothing
-    }
-
-
-alwaysShowsMapContext : PaneContext
-alwaysShowsMapContext =
-    { defaultPaneContext
-        | mapContext = Just ViewMapContext.default
     }
 
 
@@ -96,13 +73,12 @@ defaultOptions : PaneLayoutOptions
 defaultOptions =
     { paneLayout = PanesOne
     , popupVisible = False
-    , pane1 = alwaysShowsMapContext
+    , pane1 = { defaultPaneContext | paneId = Pane1 }
     , pane2 = { defaultPaneContext | paneId = Pane2 }
     , pane3 = { defaultPaneContext | paneId = Pane3 }
     , pane4 = { defaultPaneContext | paneId = Pane4 }
     , sliderState = SliderIdle
     , scene3d = []
-    , mapState = MapPortController.defaultMapState
     , viewBeforeRouteViewForced = Nothing
     }
 
@@ -116,8 +92,6 @@ type Msg
     | ProfileViewMessage PaneId ViewProfileChartContext.Msg
     | PlanViewMessage PaneId ViewPlan.Msg
     | GraphViewMessage PaneId ViewGraph.Msg
-    | MapPortsMessage MapPortController.MapMsg
-    | MapViewMessage ViewMap.Msg
     | PaneNoOp
 
 
@@ -147,8 +121,6 @@ optionList location =
                 [ rotate (pi / 2) ]
                 (useIconWithSize 12 FeatherIcons.columns)
             )
-
-    -- TODO: Rotate!
     , Input.optionWith PanesGrid <| layoutModeTab Last (useIconWithSize 12 FeatherIcons.grid)
     ]
 
@@ -246,9 +218,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
             in
             ( newOptions
             , tracks
-            , [ MapRefresh
-              , StoreLocally "panes" <| encodePaneState newOptions
-              ]
+            , [ StoreLocally "panes" <| encodePaneState newOptions ]
             )
 
         TogglePopup ->
@@ -269,9 +239,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
             in
             ( newOptions
             , tracks
-            , [ MapRefresh
-              , StoreLocally "panes" <| encodePaneState newOptions
-              ]
+            , [ StoreLocally "panes" <| encodePaneState newOptions ]
             )
 
         ThirdPersonViewMessage paneId imageMsg ->
@@ -433,68 +401,13 @@ update paneMsg msgWrapper tracks contentArea options previews =
             in
             updatePaneWith paneId paneUpdateFunction
 
-        MapViewMessage mapViewMsg ->
-            -- Can only be pane 1!
-            let
-                paneInfo =
-                    options.pane1
-
-                ( newContext, actions ) =
-                    case ( mTrack, paneInfo.mapContext ) of
-                        ( Just track, Just mapContext ) ->
-                            let
-                                ( new, act ) =
-                                    ViewMap.update
-                                        mapViewMsg
-                                        (msgWrapper << MapViewMessage)
-                                        track
-                                        (dimensionsWithLayout options.paneLayout contentArea)
-                                        mapContext
-                            in
-                            ( Just new, act )
-
-                        _ ->
-                            ( Nothing, [] )
-
-                newPane =
-                    { paneInfo | mapContext = newContext }
-            in
-            ( { options | pane1 = newPane }, tracks, actions )
-
-        MapPortsMessage mapMsg ->
-            let
-                ( newState, actions ) =
-                    MapPortController.update mapMsg mTrack options.mapState
-            in
-            ( { options | mapState = newState }
-            , tracks
-            , actions
-            )
-
         SetCurrentPosition pos ->
             -- Slider moves pointer and re-centres view.
             -- The actions will re-render and repaint the map.
-            let
-                mapFollowsOrange =
-                    case options.pane1.mapContext of
-                        Just mapContext ->
-                            mapContext.followOrange
-
-                        Nothing ->
-                            False
-
-                newOptions =
-                    { options | sliderState = SliderMoved }
-            in
-            ( newOptions
+            ( { options | sliderState = SliderMoved }
             , tracks
             , [ SetCurrent pos
               , PointerChange
-              , if mapFollowsOrange then
-                    MapCenterOnCurrent
-
-                else
-                    Actions.NoAction
               ]
             )
 
@@ -511,9 +424,6 @@ isViewVisible mode options =
 
             PanesUpperLower ->
                 [ options.pane1, options.pane2 ]
-
-            PanesOnePlusTwo ->
-                [ options.pane1, options.pane2, options.pane3 ]
 
             PanesGrid ->
                 [ options.pane1, options.pane2, options.pane3, options.pane4 ]
@@ -533,38 +443,6 @@ forceRouteView options =
             | pane1 = { pane1 | activeView = ViewGraph }
             , viewBeforeRouteViewForced = Just options.pane1.activeView
         }
-
-
-forceMapView : PaneLayoutOptions -> PaneLayoutOptions
-forceMapView options =
-    if isViewVisible ViewMap options then
-        options
-
-    else
-        let
-            pane1 =
-                options.pane1
-        in
-        { options
-            | pane1 = { pane1 | activeView = ViewMap }
-        }
-
-
-exitRouteView : PaneLayoutOptions -> PaneLayoutOptions
-exitRouteView options =
-    let
-        pane1 =
-            options.pane1
-    in
-    case ( options.viewBeforeRouteViewForced, pane1.activeView ) of
-        ( Just savedView, ViewGraph ) ->
-            { options
-                | pane1 = { pane1 | activeView = savedView }
-                , viewBeforeRouteViewForced = Nothing
-            }
-
-        _ ->
-            options
 
 
 initialise : TrackLoaded msg -> PaneLayoutOptions -> PaneLayoutOptions
@@ -591,7 +469,6 @@ initialisePane track options pane =
                     pane.profileContext
         , planContext = Just <| ViewPlan.initialiseView 0 track.trackTree pane.planContext
         , graphContext = Just <| ViewGraph.initialiseView 0 track.trackTree pane.graphContext
-        , mapContext = Just <| ViewMap.initialiseContext pane.mapContext
     }
 
 
@@ -607,8 +484,7 @@ viewModeChoices settings msgWrapper context options =
             I18N.localisedString settings.location "panes"
 
         fullOptionList =
-            [ Input.optionWith ViewMap <| viewModeTab First <| localise "Map"
-            , Input.optionWith ViewThird <| viewModeTab Mid <| localise "Perspective"
+            [ Input.optionWith ViewThird <| viewModeTab Mid <| localise "Perspective"
             , Input.optionWith ViewFirst <| viewModeTab Mid <| localise "Rider"
             , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
             , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
@@ -628,32 +504,6 @@ viewModeChoices settings msgWrapper context options =
         }
 
 
-viewModeChoicesNoMap : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> Element msg
-viewModeChoicesNoMap location msgWrapper pane =
-    let
-        localise =
-            I18N.localisedString location "panes"
-
-        reducedOptionList =
-            [ Input.optionWith ViewThird <| viewModeTab First <| localise "Perspective"
-            , Input.optionWith ViewFirst <| viewModeTab Mid <| localise "Rider"
-            , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
-            , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
-            , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
-
-            --, Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
-            ]
-    in
-    Input.radioRow
-        []
-        { onChange = msgWrapper << SetViewMode pane.paneId
-        , selected = Just pane.activeView
-        , label = Input.labelHidden "Choose view"
-        , options = reducedOptionList
-        }
-
-
 takeHalf qty =
     qty |> Quantity.toFloatQuantity |> Quantity.half |> Quantity.truncate
 
@@ -669,65 +519,8 @@ dimensionsWithLayout layout ( w, h ) =
         PanesUpperLower ->
             ( w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
 
-        PanesOnePlusTwo ->
-            -- Later, not that simple
-            ( w, h )
-
         PanesGrid ->
             ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
-
-
-paintProfileCharts :
-    PaneLayoutOptions
-    -> SystemSettings
-    -> TrackLoaded msg
-    -> Dict String PreviewData
-    -> Cmd msg
-paintProfileCharts panes settings track previews =
-    let
-        segments =
-            track.namedSegments
-
-        paintIfProfileVisible pane =
-            if pane.activeView == ViewProfileCanvas then
-                case pane.profileContext of
-                    Just context ->
-                        Cmd.batch
-                            [ MapPortController.paintCanvasProfileChart
-                                context
-                                settings
-                                track
-                                previews
-                            , MapPortController.paintCanvasGradientChart
-                                context
-                                settings
-                                track
-                            ]
-
-                    Nothing ->
-                        Cmd.none
-
-            else
-                Cmd.none
-
-        visiblePanes =
-            case panes.paneLayout of
-                PanesOne ->
-                    [ panes.pane1 ]
-
-                PanesLeftRight ->
-                    [ panes.pane1, panes.pane2 ]
-
-                PanesUpperLower ->
-                    [ panes.pane1, panes.pane2 ]
-
-                PanesOnePlusTwo ->
-                    [ panes.pane1, panes.pane2, panes.pane3 ]
-
-                PanesGrid ->
-                    [ panes.pane1, panes.pane2, panes.pane3, panes.pane4 ]
-    in
-    Cmd.batch <| List.map paintIfProfileVisible visiblePanes
 
 
 profileViewHandlesClick : String -> Length.Length -> PaneLayoutOptions -> TrackLoaded msg -> Maybe Int
@@ -769,10 +562,9 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
         showNonMapViews : PaneContext -> Element msg
         showNonMapViews pane =
-            -- Try having all the DIVs there but hidden.
-            --TODO: This code could be tidied quite a bit.
-            column []
-                [ conditionallyVisible (pane.activeView == ViewThird) <|
+            --TODO: elm-map means we can be much simpler.
+            case pane.activeView of
+                ViewThird ->
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewThirdPerson.view
@@ -786,7 +578,8 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewFirst) <|
+
+                ViewFirst ->
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewFirstPerson.view
@@ -799,7 +592,8 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewPlan) <|
+
+                ViewPlan ->
                     case ( pane.planContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewPlan.view
@@ -813,7 +607,8 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewGraph) <|
+
+                ViewGraph ->
                     case ( pane.graphContext, mTrack ) of
                         ( Just context, Just _ ) ->
                             ViewGraph.view
@@ -825,7 +620,8 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewProfileCanvas) <|
+
+                ViewProfileCanvas ->
                     case pane.profileContext of
                         Just context ->
                             ViewProfileChartsCanvas.view
@@ -837,7 +633,8 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewProfileWebGL) <|
+
+                ViewProfileWebGL ->
                     case ( pane.profileContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewProfileChartsWebGL.view
@@ -850,29 +647,12 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                         _ ->
                             none
-                ]
-
-        viewPaneZeroWithMap : PaneContext -> Element msg
-        viewPaneZeroWithMap pane =
-            -- The Map DIV must be constructed once only, even before we have a Track,
-            -- or the map gets upset. So we use CSS to show and hide these elements.
-            column [ width fill, centerX ]
-                [ viewModeChoices settings msgWrapper pane options
-                , showNonMapViews pane
-                , conditionallyVisible (pane.activeView == ViewMap) <|
-                    ViewMap.view
-                        settings
-                        mTrack
-                        ( paneWidth, paneHeight )
-                        pane.mapContext
-                        (msgWrapper << MapViewMessage)
-                ]
 
         viewPaneNoMap : PaneContext -> Element msg
-        viewPaneNoMap pane =
+        viewPaneNoMap context =
             column [ width fill, centerX ]
-                [ viewModeChoicesNoMap settings.location msgWrapper pane
-                , showNonMapViews pane
+                [ viewModeChoices settings msgWrapper context options
+                , showNonMapViews context
                 ]
 
         slider =
@@ -892,6 +672,20 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
 
                 Nothing ->
                     none
+
+        numberOfPanes =
+            case options.paneLayout of
+                PanesOne ->
+                    1
+
+                PanesLeftRight ->
+                    2
+
+                PanesUpperLower ->
+                    2
+
+                PanesGrid ->
+                    4
     in
     column
         [ centerX
@@ -903,30 +697,12 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
         [ wrappedRow
             [ centerX, width fill, spacing 5 ]
           <|
-            case options.paneLayout of
-                PanesOne ->
-                    [ viewPaneZeroWithMap options.pane1 ]
-
-                PanesLeftRight ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    ]
-
-                PanesUpperLower ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    ]
-
-                PanesGrid ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    , viewPaneNoMap options.pane3
-                    , viewPaneNoMap options.pane4
-                    ]
-
-                PanesOnePlusTwo ->
-                    -- Later.
-                    [ viewPaneZeroWithMap options.pane1 ]
+            List.take numberOfPanes
+                [ viewPaneNoMap options.pane1
+                , viewPaneNoMap options.pane2
+                , viewPaneNoMap options.pane3
+                , viewPaneNoMap options.pane4
+                ]
         , slider
         ]
 
@@ -947,7 +723,6 @@ paneLayoutHelper =
     [ ( PanesOne, "One" )
     , ( PanesLeftRight, "LR" )
     , ( PanesUpperLower, "UL" )
-    , ( PanesOnePlusTwo, "OneUpTwoDown" )
     , ( PanesGrid, "Grid" )
     ]
 
@@ -1008,7 +783,6 @@ viewHelper =
     , ( ViewPlan, "plan" )
     , ( ViewProfileCanvas, "profile" )
     , ( ViewProfileWebGL, "profNew" )
-    , ( ViewMap, "map" )
     , ( ViewGraph, "route" )
     ]
 

@@ -1,4 +1,13 @@
-module Tools.MoveScaleRotate exposing (Msg(..), applyMapElevations, applyRecentre, applyRotateAndScale, defaultOptions, toolId, toolStateChange, update, view)
+module Tools.MoveScaleRotate exposing
+    ( Msg(..)
+    , applyRecentre
+    , applyRotateAndScale
+    , defaultOptions
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
@@ -133,47 +142,8 @@ update msg settings previewColour hasTrack =
             , actions newSettings previewColour track
             )
 
-        ( UseMapElevations, Just track ) ->
-            -- This is problematic if the map points are elided due to quantity.
-            -- "Best" option is here to force a new set of points, then
-            -- do the fetch.
-            ( settings
-            , makeActions AddFullTrackToMapForElevations track
-            )
-
         _ ->
             ( settings, [] )
-
-
-applyMapElevations : List (Maybe Float) -> TrackLoaded msg -> TrackLoaded msg
-applyMapElevations elevations track =
-    -- We have previously forced a full load into the map (caveat user).
-    -- So these should be in order to match up with the domain model.
-    let
-        useNewElevation gpx newAltitude =
-            case newAltitude of
-                Just altitude ->
-                    { gpx | altitude = Length.meters altitude }
-
-                Nothing ->
-                    gpx
-
-        currentPoints =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-
-        adjustedPoints =
-            List.map2 useNewElevation currentPoints elevations
-    in
-    case
-        DomainModel.treeFromSourcesWithExistingReference
-            track.referenceLonLat
-            adjustedPoints
-    of
-        Just isTree ->
-            { track | trackTree = isTree }
-
-        Nothing ->
-            track
 
 
 computeRecentredPoints : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
