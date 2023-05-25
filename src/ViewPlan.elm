@@ -19,6 +19,7 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
+import Html
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
@@ -185,39 +186,47 @@ view context settings display contentArea track scene msgWrapper =
 
         overlay =
             placesOverlay display contentArea track camera
-    in
-    el
-        [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-        , if dragging /= DragNone then
-            htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
 
-          else
-            pointer
-        , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
-        , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
-        , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
-        , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-        , onContextMenu (msgWrapper ImageNoOp)
-        , width fill
-        , height fill
-        , pointer
-        , Border.width 0
-        , Border.color FlatColors.ChinesePalette.peace
-        , inFront <| overlay
-        , inFront <| zoomButtons settings msgWrapper context
-        ]
-    <|
-        html <|
-            Scene3d.sunny
-                { camera = camera
-                , dimensions = contentArea
-                , background = Scene3d.transparentBackground
-                , clipDepth = Length.meters 1
-                , entities = scene
-                , upDirection = positiveZ
-                , sunlightDirection = negativeZ
-                , shadows = False
-                }
+        plan3dView =
+            el
+                [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
+                , if dragging /= DragNone then
+                    htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+
+                  else
+                    pointer
+                , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
+                , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
+                , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
+                , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+                , onContextMenu (msgWrapper ImageNoOp)
+                , width fill
+                , height fill
+                , pointer
+                , Border.width 0
+                , Border.color FlatColors.ChinesePalette.peace
+                , inFront <| overlay
+                , inFront <| zoomButtons settings msgWrapper context
+                ]
+            <|
+                html <|
+                    Scene3d.sunny
+                        { camera = camera
+                        , dimensions = contentArea
+                        , background = Scene3d.transparentBackground
+                        , clipDepth = Length.meters 1
+                        , entities = scene
+                        , upDirection = positiveZ
+                        , sunlightDirection = negativeZ
+                        , shadows = False
+                        }
+
+        mapUnderlay =
+            html <|
+                Html.map (msgWrapper << MapMsg) <|
+                    MapViewer.view [] context.mapData context.map
+    in
+    el [ inFront plan3dView ] mapUnderlay
 
 
 deriveCamera : PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
