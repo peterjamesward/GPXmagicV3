@@ -191,7 +191,7 @@ view context settings display contentArea track scene msgWrapper =
             Scene3d.sunny
                 { camera = camera
                 , dimensions = contentArea
-                , background = backgroundColor Color.lightBlue
+                , background = Scene3d.transparentBackground
                 , clipDepth = Length.meters 1
                 , entities = scene
                 , upDirection = positiveZ
