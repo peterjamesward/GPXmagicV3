@@ -40,6 +40,7 @@ import List.Extra
 import LocalStorage
 import MapPortController
 import MapTypes exposing (MapState(..))
+import MapViewer
 import Markdown
 import Maybe.Extra
 import MyIP
@@ -97,6 +98,7 @@ import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Url)
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
+import ViewPlan
 import ViewPureStyles exposing (..)
 import WriteGPX
 
@@ -1636,6 +1638,7 @@ subscriptions model =
 
           else
             Sub.none
+        , PaneLayoutManager.subscriptions model.paneLayoutOptions |> Sub.map PaneMsg
         ]
 
 

@@ -1,6 +1,7 @@
 module ViewPlan exposing
     ( Msg(..)
     , initialiseView
+    , subscriptions
     , update
     , view
     )
@@ -8,7 +9,6 @@ module ViewPlan exposing
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Camera3d exposing (Camera3d)
-import Color
 import CommonToolStyles
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
@@ -25,6 +25,9 @@ import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import MapStyles
+import MapViewer
+import MapboxKey
 import Pixels exposing (Pixels)
 import Point2d
 import Point3d
@@ -40,6 +43,7 @@ import View3dCommonElements exposing (placesOverlay)
 import ViewPlanContext exposing (DragAction(..), PlanContext)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d
+import ZoomLevel
 
 
 type Msg
@@ -55,6 +59,12 @@ type Msg
     | ImageReset
     | ClickDelayExpired
     | ToggleFollowOrange
+    | MapMsg MapViewer.Msg
+
+
+subscriptions : PlanContext -> Sub Msg
+subscriptions context =
+    MapViewer.subscriptions context.mapData context.map |> Sub.map MapMsg
 
 
 initialiseView :
@@ -86,6 +96,16 @@ initialiseView current treeNode currentContext =
                 treeNode |> leafFromIndex current |> startPoint
             , waitingForClickDelay = False
             , followSelectedPoint = True
+            , map =
+                MapViewer.init
+                    { lng = 0, lat = 52 }
+                    (ZoomLevel.fromLogZoom 16)
+                    1
+                    ( Pixels.pixels 800, Pixels.pixels 600 )
+            , mapData =
+                MapViewer.initMapData
+                    "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
+                    MapStyles.mapStyle
             }
 
 
@@ -242,6 +262,19 @@ update :
 update msg msgWrapper track area context =
     -- Second return value indicates whether selection needs to change.
     case msg of
+        MapMsg mapMsg ->
+            let
+                { newModel, newMapData, outMsg, cmd } =
+                    MapViewer.update
+                        (MapViewer.mapboxAccessToken MapboxKey.mapboxKey)
+                        context.mapData
+                        mapMsg
+                        context.map
+            in
+            ( { context | map = newModel, mapData = newMapData }
+            , [ ExternalCommand <| Cmd.map (msgWrapper << MapMsg) cmd ]
+            )
+
         ImageGrab event ->
             -- Mouse behaviour depends which view is in use...
             -- Right-click or ctrl-click to mean rotate; otherwise pan.

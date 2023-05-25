@@ -12,6 +12,7 @@ module PaneLayoutManager exposing
     , profileViewHandlesClick
     , render
     , restoreStoredValues
+    , subscriptions
     , update
     , viewPanes
     )
@@ -34,6 +35,7 @@ import Json.Encode as E
 import Length
 import List.Extra
 import MapPortController
+import MapViewer
 import PaneContext exposing (PaneContext, PaneId(..), PaneLayout(..), PaneLayoutOptions, SliderState(..), paneIdToString)
 import Pixels exposing (Pixels)
 import PreviewData exposing (PreviewData)
@@ -119,6 +121,25 @@ type Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
     | PaneNoOp
+
+
+subscriptions : PaneLayoutOptions -> Sub Msg
+subscriptions options =
+    [ ( options.pane1.planContext, Pane1 )
+    , ( options.pane2.planContext, Pane2 )
+    , ( options.pane3.planContext, Pane3 )
+    , ( options.pane4.planContext, Pane4 )
+    ]
+        |> List.filterMap
+            (\( planContext, paneId ) ->
+                case planContext of
+                    Just context ->
+                        Just (ViewPlan.subscriptions context |> Sub.map (PlanViewMessage paneId))
+
+                    Nothing ->
+                        Nothing
+            )
+        |> Sub.batch
 
 
 paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg

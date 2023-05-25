@@ -466,7 +466,7 @@ identifyPointsToBeMerged tolerance graph =
                 -}
                 perpendicularFeetGroupedByLeaf : List ProjectedPointOnLeaf -> Dict Int (List ProjectedPointOnLeaf)
                 perpendicularFeetGroupedByLeaf projections =
-                    -- Can't see a suitable function in List.Extra, so do it by hand.
+                    -- Can't see a suitable function in List.Extras, so do it by hand.
                     let
                         addToLeafDict newEntry dict =
                             case Dict.get newEntry.toLeaf dict of
