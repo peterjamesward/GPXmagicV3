@@ -10,6 +10,7 @@ import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Camera3d exposing (Camera3d)
 import CommonToolStyles
+import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -74,39 +75,59 @@ initialiseView :
     -> Maybe PlanContext
     -> PlanContext
 initialiseView current treeNode currentContext =
+    let
+        map =
+            MapViewer.init
+                { lng =
+                    DomainModel.getFirstLeaf treeNode
+                        |> .sourceData
+                        |> Tuple.first
+                        |> .longitude
+                        |> Direction2d.toAngle
+                        |> Angle.inDegrees
+                , lat =
+                    DomainModel.getFirstLeaf treeNode
+                        |> .sourceData
+                        |> Tuple.first
+                        |> .latitude
+                        |> Angle.inDegrees
+                }
+                (ZoomLevel.fromLogZoom 12)
+                1
+                ( Pixels.pixels 800, Pixels.pixels 600 )
+
+        mapData =
+            MapViewer.initMapData
+                "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
+                MapStyles.mapStyle
+    in
     case currentContext of
         Just context ->
             { context
                 | fieldOfView = Angle.degrees 45
                 , orbiting = Nothing
                 , dragAction = DragNone
-                , zoomLevel = 16.0
-                , defaultZoomLevel = 16.0
+                , zoomLevel = 12.0
+                , defaultZoomLevel = 12.0
                 , focalPoint =
                     treeNode |> leafFromIndex current |> startPoint
                 , waitingForClickDelay = False
+                , map = map
+                , mapData = mapData
             }
 
         Nothing ->
             { fieldOfView = Angle.degrees 45
             , orbiting = Nothing
             , dragAction = DragNone
-            , zoomLevel = 16.0
-            , defaultZoomLevel = 16.0
+            , zoomLevel = 12.0
+            , defaultZoomLevel = 12.0
             , focalPoint =
                 treeNode |> leafFromIndex current |> startPoint
             , waitingForClickDelay = False
             , followSelectedPoint = True
-            , map =
-                MapViewer.init
-                    { lng = 0, lat = 52 }
-                    (ZoomLevel.fromLogZoom 16)
-                    1
-                    ( Pixels.pixels 800, Pixels.pixels 600 )
-            , mapData =
-                MapViewer.initMapData
-                    "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
-                    MapStyles.mapStyle
+            , map = map
+            , mapData = mapData
             }
 
 
@@ -226,7 +247,7 @@ view context settings display contentArea track scene msgWrapper =
                 Html.map (msgWrapper << MapMsg) <|
                     MapViewer.view [] context.mapData context.map
     in
-    el [ inFront plan3dView ] mapUnderlay
+    mapUnderlay
 
 
 deriveCamera : PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
