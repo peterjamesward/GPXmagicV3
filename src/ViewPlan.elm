@@ -245,7 +245,7 @@ view context settings display contentArea track scene msgWrapper =
                 Html.map (msgWrapper << MapMsg) <|
                     MapViewer.view [] context.mapData context.map
     in
-    mapUnderlay
+    el [ behindContent mapUnderlay ] plan3dView
 
 
 deriveCamera : PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
