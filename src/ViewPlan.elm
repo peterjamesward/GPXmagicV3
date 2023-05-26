@@ -101,34 +101,32 @@ initialiseView current treeNode currentContext =
                 "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
                 MapStyles.mapStyle
     in
-    case currentContext of
-        Just context ->
-            { context
-                | fieldOfView = Angle.degrees 45
-                , orbiting = Nothing
-                , dragAction = DragNone
-                , zoomLevel = 12.0
-                , defaultZoomLevel = 12.0
-                , focalPoint =
-                    treeNode |> leafFromIndex current |> startPoint
-                , waitingForClickDelay = False
-                , map = map
-                , mapData = mapData
-            }
-
-        Nothing ->
-            { fieldOfView = Angle.degrees 45
-            , orbiting = Nothing
-            , dragAction = DragNone
-            , zoomLevel = 12.0
-            , defaultZoomLevel = 12.0
-            , focalPoint =
-                treeNode |> leafFromIndex current |> startPoint
-            , waitingForClickDelay = False
-            , followSelectedPoint = True
-            , map = map
-            , mapData = mapData
-            }
+    --case currentContext of
+    --    Just context ->
+    --        { context
+    --            | fieldOfView = Angle.degrees 45
+    --            , orbiting = Nothing
+    --            , dragAction = DragNone
+    --            , zoomLevel = 12.0
+    --            , defaultZoomLevel = 12.0
+    --            , focalPoint = treeNode |> leafFromIndex current |> startPoint
+    --            , waitingForClickDelay = False
+    --            , map = map
+    --            , mapData = mapData
+    --        }
+    --
+    --    Nothing ->
+    { fieldOfView = Angle.degrees 45
+    , orbiting = Nothing
+    , dragAction = DragNone
+    , zoomLevel = 12.0
+    , defaultZoomLevel = 12.0
+    , focalPoint = treeNode |> leafFromIndex current |> startPoint
+    , waitingForClickDelay = False
+    , followSelectedPoint = True
+    , map = map
+    , mapData = mapData
+    }
 
 
 stopProp =

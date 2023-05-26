@@ -361,7 +361,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                         ( new, act ) =
                                             ViewPlan.update
                                                 imageMsg
-                                                (msgWrapper << PlanViewMessage Pane1)
+                                                (msgWrapper << PlanViewMessage paneId)
                                                 track
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 planContext
