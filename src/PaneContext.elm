@@ -2,6 +2,7 @@ module PaneContext exposing (..)
 
 import LocalCoords exposing (LocalCoords)
 import MapTypes
+import MapViewer
 import Scene3d exposing (Entity)
 import View3dCommonElements
 import ViewGraphContext
@@ -35,6 +36,7 @@ type alias PaneLayoutOptions =
     , scene3d : List (Entity LocalCoords)
     , mapState : MapTypes.MapClickLocation
     , viewBeforeRouteViewForced : Maybe ViewMode
+    , mapData : MapViewer.MapData
     }
 
 

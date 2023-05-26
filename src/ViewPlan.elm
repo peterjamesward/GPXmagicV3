@@ -64,9 +64,9 @@ type Msg
     | MapMsg MapViewer.Msg
 
 
-subscriptions : PlanContext -> Sub Msg
-subscriptions context =
-    MapViewer.subscriptions context.mapData context.map |> Sub.map MapMsg
+subscriptions : MapViewer.MapData -> PlanContext -> Sub Msg
+subscriptions mapData context =
+    MapViewer.subscriptions mapData context.map |> Sub.map MapMsg
 
 
 initialiseView :
@@ -95,11 +95,6 @@ initialiseView current treeNode currentContext =
                 (ZoomLevel.fromLogZoom 12)
                 1
                 ( Pixels.pixels 800, Pixels.pixels 600 )
-
-        mapData =
-            MapViewer.initMapData
-                "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
-                MapStyles.mapStyle
     in
     --case currentContext of
     --    Just context ->
@@ -125,7 +120,6 @@ initialiseView current treeNode currentContext =
     , waitingForClickDelay = False
     , followSelectedPoint = True
     , map = map
-    , mapData = mapData
     }
 
 
@@ -188,6 +182,7 @@ onContextMenu msg =
 
 view :
     PlanContext
+    -> MapViewer.MapData
     -> SystemSettings
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -195,7 +190,7 @@ view :
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context settings display contentArea track scene msgWrapper =
+view context mapData settings display contentArea track scene msgWrapper =
     let
         dragging =
             context.dragAction
@@ -243,9 +238,10 @@ view context settings display contentArea track scene msgWrapper =
         mapUnderlay =
             html <|
                 Html.map (msgWrapper << MapMsg) <|
-                    MapViewer.view [] context.mapData context.map
+                    MapViewer.view [] mapData context.map
     in
-    el [ behindContent mapUnderlay ] plan3dView
+    --el [ behindContent mapUnderlay ] plan3dView
+    el [ inFront plan3dView ] mapUnderlay
 
 
 deriveCamera : PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
@@ -286,8 +282,9 @@ update :
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> PlanContext
-    -> ( PlanContext, List (ToolAction msg) )
-update msg msgWrapper track area context =
+    -> MapViewer.MapData
+    -> ( PlanContext, List (ToolAction msg), MapViewer.MapData )
+update msg msgWrapper track area context mapData =
     -- Second return value indicates whether selection needs to change.
     case msg of
         MapMsg mapMsg ->
@@ -295,12 +292,13 @@ update msg msgWrapper track area context =
                 { newModel, newMapData, outMsg, cmd } =
                     MapViewer.update
                         (MapViewer.mapboxAccessToken MapboxKey.mapboxKey)
-                        context.mapData
+                        mapData
                         mapMsg
                         context.map
             in
-            ( { context | map = newModel, mapData = newMapData }
+            ( { context | map = newModel }
             , [ ExternalCommand <| Cmd.map (msgWrapper << MapMsg) cmd ]
+            , newMapData
             )
 
         ImageGrab event ->
@@ -312,11 +310,13 @@ update msg msgWrapper track area context =
                 , waitingForClickDelay = True
               }
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
+            , mapData
             )
 
         ClickDelayExpired ->
             ( { context | waitingForClickDelay = False }
             , []
+            , mapData
             )
 
         ImageDrag event ->
@@ -347,10 +347,14 @@ update msg msgWrapper track area context =
                         , orbiting = Just ( dx, dy )
                       }
                     , []
+                    , mapData
                     )
 
                 _ ->
-                    ( context, [] )
+                    ( context
+                    , []
+                    , mapData
+                    )
 
         ImageRelease _ ->
             ( { context
@@ -358,6 +362,7 @@ update msg msgWrapper track area context =
                 , dragAction = DragNone
               }
             , []
+            , mapData
             )
 
         ImageMouseWheel deltaY ->
@@ -367,6 +372,7 @@ update msg msgWrapper track area context =
             in
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
             , []
+            , mapData
             )
 
         ImageClick event ->
@@ -376,10 +382,14 @@ update msg msgWrapper track area context =
                 , [ SetCurrent <| detectHit event track area context
                   , TrackHasChanged
                   ]
+                , mapData
                 )
 
             else
-                ( context, [] )
+                ( context
+                , []
+                , mapData
+                )
 
         ImageDoubleClick event ->
             let
@@ -390,20 +400,26 @@ update msg msgWrapper track area context =
             , [ SetCurrent nearestPoint
               , TrackHasChanged
               ]
+            , mapData
             )
 
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
             , []
+            , mapData
             )
 
         ImageZoomOut ->
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
             , []
+            , mapData
             )
 
         ImageReset ->
-            ( { context | zoomLevel = context.defaultZoomLevel }, [] )
+            ( { context | zoomLevel = context.defaultZoomLevel }
+            , []
+            , mapData
+            )
 
         ToggleFollowOrange ->
             ( { context
@@ -411,10 +427,14 @@ update msg msgWrapper track area context =
                 , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
               }
             , []
+            , mapData
             )
 
         _ ->
-            ( context, [] )
+            ( context
+            , []
+            , mapData
+            )
 
 
 detectHit :

@@ -21,5 +21,4 @@ type alias PlanContext =
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
     , map : MapViewer.Model
-    , mapData : MapViewer.MapData
     }

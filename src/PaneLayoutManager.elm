@@ -35,6 +35,7 @@ import Json.Encode as E
 import Length
 import List.Extra
 import MapPortController
+import MapStyles
 import MapViewer
 import PaneContext exposing (PaneContext, PaneId(..), PaneLayout(..), PaneLayoutOptions, SliderState(..), paneIdToString)
 import Pixels exposing (Pixels)
@@ -106,6 +107,10 @@ defaultOptions =
     , scene3d = []
     , mapState = MapPortController.defaultMapState
     , viewBeforeRouteViewForced = Nothing
+    , mapData =
+        MapViewer.initMapData
+            "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
+            MapStyles.mapStyle
     }
 
 
@@ -134,7 +139,9 @@ subscriptions options =
             (\( planContext, paneId ) ->
                 case planContext of
                     Just context ->
-                        Just (ViewPlan.subscriptions context |> Sub.map (PlanViewMessage paneId))
+                        ViewPlan.subscriptions options.mapData context
+                            |> Sub.map (PlanViewMessage paneId)
+                            |> Just
 
                     Nothing ->
                         Nothing
@@ -232,12 +239,16 @@ update paneMsg msgWrapper tracks contentArea options previews =
 
         updatePaneWith :
             PaneId
-            -> (PaneContext -> Tracks.Options msg -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) ))
+            ->
+                (PaneContext
+                 -> Tracks.Options msg
+                 -> ( ( PaneContext, MapViewer.MapData ), Tracks.Options msg, List (ToolAction msg) )
+                )
             -> ( PaneLayoutOptions, Tracks.Options msg, List (ToolAction msg) )
         updatePaneWith id updateFn =
             -- Helper avoids tedious repetition of these case statements.
             let
-                ( updatedPane, tracksOut, actions ) =
+                ( ( updatedPane, newMapData ), tracksOut, actions ) =
                     updateFn (currentPane id) tracks
 
                 updatedOptions =
@@ -254,7 +265,10 @@ update paneMsg msgWrapper tracks contentArea options previews =
                         Pane4 ->
                             { options | pane4 = updatedPane }
             in
-            ( updatedOptions, tracksOut, actions )
+            ( { updatedOptions | mapData = newMapData }
+            , tracksOut
+            , actions
+            )
     in
     case paneMsg of
         PaneNoOp ->
@@ -280,9 +294,11 @@ update paneMsg msgWrapper tracks contentArea options previews =
                 ( newOptions, _, _ ) =
                     updatePaneWith paneId
                         (\pane _ ->
-                            ( { pane
-                                | activeView = viewMode
-                              }
+                            ( ( { pane
+                                    | activeView = viewMode
+                                }
+                              , options.mapData
+                              )
                             , tracks
                             , []
                             )
@@ -300,7 +316,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                 paneUpdateFunction :
                     PaneContext
                     -> Tracks.Options msg
-                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                    -> ( ( PaneContext, MapViewer.MapData ), Tracks.Options msg, List (ToolAction msg) )
                 paneUpdateFunction paneInfo _ =
                     let
                         effectiveContext =
@@ -342,7 +358,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                 _ ->
                                     paneInfo
                     in
-                    ( newPane, tracks, actions )
+                    ( ( newPane, options.mapData ), tracks, actions )
             in
             updatePaneWith paneId paneUpdateFunction
 
@@ -351,39 +367,46 @@ update paneMsg msgWrapper tracks contentArea options previews =
                 paneUpdateFunction :
                     PaneContext
                     -> Tracks.Options msg
-                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                    -> ( ( PaneContext, MapViewer.MapData ), Tracks.Options msg, List (ToolAction msg) )
                 paneUpdateFunction paneInfo _ =
                     let
-                        ( newContext, actions ) =
+                        ( newContext, actions, newMapDataFromPane ) =
                             case ( mTrack, paneInfo.planContext ) of
                                 ( Just track, Just planContext ) ->
                                     let
-                                        ( new, act ) =
+                                        ( new, act, newMapData ) =
                                             ViewPlan.update
                                                 imageMsg
                                                 (msgWrapper << PlanViewMessage paneId)
                                                 track
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 planContext
+                                                options.mapData
                                     in
-                                    ( Just new, act )
+                                    ( Just new, act, newMapData )
 
                                 _ ->
-                                    ( Nothing, [] )
+                                    ( Nothing, [], options.mapData )
 
                         newPane =
                             { paneInfo | planContext = newContext }
                     in
-                    ( newPane, tracks, actions )
+                    ( ( newPane, newMapDataFromPane ), tracks, actions )
+
+                ( newPaneOptions, newOptions, newActions ) =
+                    updatePaneWith paneId paneUpdateFunction
             in
-            updatePaneWith paneId paneUpdateFunction
+            ( newPaneOptions
+            , newOptions
+            , newActions
+            )
 
         GraphViewMessage paneId imageMsg ->
             let
                 paneUpdateFunction :
                     PaneContext
                     -> Tracks.Options msg
-                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                    -> ( ( PaneContext, MapViewer.MapData ), Tracks.Options msg, List (ToolAction msg) )
                 paneUpdateFunction paneInfo _ =
                     let
                         ( newContext, newTracks, actions ) =
@@ -406,7 +429,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                         newPane =
                             { paneInfo | graphContext = newContext }
                     in
-                    ( newPane, newTracks, actions )
+                    ( ( newPane, options.mapData ), newTracks, actions )
             in
             updatePaneWith paneId paneUpdateFunction
 
@@ -416,7 +439,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                 paneUpdateFunction :
                     PaneContext
                     -> Tracks.Options msg
-                    -> ( PaneContext, Tracks.Options msg, List (ToolAction msg) )
+                    -> ( ( PaneContext, MapViewer.MapData ), Tracks.Options msg, List (ToolAction msg) )
                 paneUpdateFunction paneInfo _ =
                     let
                         ( newContext, actions ) =
@@ -450,7 +473,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                         newPane =
                             { paneInfo | profileContext = newContext }
                     in
-                    ( newPane, tracks, actions )
+                    ( ( newPane, options.mapData ), tracks, actions )
             in
             updatePaneWith paneId paneUpdateFunction
 
@@ -595,6 +618,10 @@ initialise track options =
         , pane2 = initialisePane track options options.pane2
         , pane3 = initialisePane track options options.pane3
         , pane4 = initialisePane track options options.pane4
+        , mapData =
+            MapViewer.initMapData
+                "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
+                MapStyles.mapStyle
     }
 
 
@@ -825,6 +852,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                         ( Just context, Just track ) ->
                             ViewPlan.view
                                 context
+                                options.mapData
                                 settings
                                 displayOptions
                                 ( paneWidth, paneHeight )
