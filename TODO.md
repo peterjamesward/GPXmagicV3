@@ -25,7 +25,7 @@ State of play:
 
 2. Need to wire up init map on track load, updates, views.
 > Can show map, or route, not quite both, close.
-> Need to share mapData (move to PaneLayoutManager level).
+> ~~Need to share mapData (move to PaneLayoutManager level).~~
 3. Need to synchronise pan, zoom, etc.
 4. Need to adjust projection (map is mercator, we are helicopter).
 

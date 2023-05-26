@@ -24,6 +24,7 @@ import Html
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
+import Illuminance
 import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
@@ -36,6 +37,7 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
+import Scene3d.Light as Light
 import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
@@ -235,13 +237,53 @@ view context mapData settings display contentArea track scene msgWrapper =
                         , shadows = False
                         }
 
+        sun =
+            Light.directional (Light.castsShadows False)
+                { direction = Direction3d.negativeZ
+                , intensity = Illuminance.lux 80000
+                , chromaticity = Light.sunlight
+                }
+
+        sky =
+            Light.overhead
+                { upDirection = Direction3d.positiveZ
+                , chromaticity = Light.skylight
+                , intensity = Illuminance.lux 20000
+                }
+
+        environment =
+            Light.overhead
+                { upDirection = Direction3d.positiveZ
+                , chromaticity = Light.daylight
+                , intensity = Illuminance.lux 15000
+                }
+
+        lights =
+            Scene3d.threeLights sun sky environment
+
+        plan3dScene =
+            Scene3d.toWebGLEntities
+                { lights = lights
+                , camera = camera
+                , clipDepth = Length.meters 1
+                , exposure = Scene3d.exposureValue 15
+                , toneMapping = Scene3d.noToneMapping
+                , whiteBalance = Light.daylight
+                , aspectRatio = 1.0
+                , supersampling = 1.0
+                , entities = scene
+                }
+
         mapUnderlay =
-            html <|
-                Html.map (msgWrapper << MapMsg) <|
-                    MapViewer.view [] mapData context.map
+            Html.map (msgWrapper << MapMsg) <|
+                MapViewer.view
+                    plan3dScene
+                    mapData
+                    context.map
     in
     --el [ behindContent mapUnderlay ] plan3dView
-    el [ inFront plan3dView ] mapUnderlay
+    --el [ inFront plan3dView ] mapUnderlay
+    html mapUnderlay
 
 
 deriveCamera : PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
