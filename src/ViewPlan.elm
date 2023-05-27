@@ -198,7 +198,7 @@ view context mapData settings display contentArea track scene msgWrapper =
             context.dragAction
 
         camera =
-            deriveCamera track.trackTree context track.currentPosition
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
         overlay =
             placesOverlay display contentArea track camera
@@ -269,7 +269,7 @@ view context mapData settings display contentArea track scene msgWrapper =
                 , exposure = Scene3d.exposureValue 15
                 , toneMapping = Scene3d.noToneMapping
                 , whiteBalance = Light.daylight
-                , aspectRatio = 1.0
+                , aspectRatio = 8 / 6
                 , supersampling = 1.0
                 , entities = scene
                 }
@@ -286,18 +286,52 @@ view context mapData settings display contentArea track scene msgWrapper =
     html mapUnderlay
 
 
-deriveCamera : PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
-deriveCamera treeNode context currentPosition =
+deriveCamera : GPXSource -> PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
+deriveCamera refPoint treeNode context currentPosition =
     let
+        { x, y } =
+            -- Center of map view in fractional "Mercator" units.
+            MapViewer.viewPosition context.map
+                |> Point2d.toUnitless
+
+        longitude =
+            (x - 0.5) |> Angle.turns |> Direction2d.fromAngle
+
         latitude =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
 
+        newLatitude =
+            -- Reverse Mercator gives latitude in radians, we hope.
+            Angle.radians <| 2 * (atan <| e ^ (1 - (y / 2)) - pi / 4)
+
+        {- Mercator encodiing of latitude in MapView is ...
+           y =
+               0.5 * (1 - (logBase e (tan (lngLat.lat * pi / 180) + 1 / cos (lngLat.lat * pi / 180)) / pi))
+
+           - that's not an obvious inverse, and may be wrong.
+
+           My version is ((1 - (logBase e (tan (halfLat + piBy4)) / pi)) / 2)
+
+           Which inverts easily
+
+           2 * (atan <| e ^ ( 1 - (y/2) ) - pi / 4)
+        -}
         lookingAt =
             if context.followSelectedPoint then
                 startPoint <| leafFromIndex currentPosition treeNode
 
             else
                 context.focalPoint
+
+        focalPoint =
+            DomainModel.pointFromGpxWithReference
+                refPoint
+                { longitude = longitude
+                , latitude = latitude
+                , altitude = Quantity.zero
+                , timestamp = Nothing
+                }
+                |> .space
 
         eyePoint =
             Point3d.translateBy
@@ -307,7 +341,7 @@ deriveCamera treeNode context currentPosition =
         viewpoint =
             -- Fixing "up is North" so that 2-way drag works well.
             Viewpoint3d.lookAt
-                { focalPoint = lookingAt.space
+                { focalPoint = focalPoint --lookingAt.space
                 , eyePoint = eyePoint
                 , upDirection = Direction3d.positiveY
                 }
@@ -503,7 +537,7 @@ detectHit event track ( w, h ) context =
 
         camera =
             -- Must use same camera derivation as for the 3D model, else pointless!
-            deriveCamera track.trackTree context track.currentPosition
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
         ray =
             Camera3d.ray camera screenRectangle screenPoint

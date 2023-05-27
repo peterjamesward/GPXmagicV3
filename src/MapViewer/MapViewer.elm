@@ -729,9 +729,19 @@ pointToGridMinCorner zoom point =
 -}
 lngLatToWorld : LngLat -> Point2d Unitless WorldCoordinates
 lngLatToWorld lngLat =
+    let
+        halfLat =
+            Angle.inRadians <|
+                Angle.degrees <|
+                    lngLat.lat
+                        / 2
+
+        piBy4 =
+            pi / 4
+    in
     Point2d.unitless
         ((lngLat.lng + 180) / 360)
-        (0.5 * (1 - (logBase e (tan (lngLat.lat * pi / 180) + 1 / cos (lngLat.lat * pi / 180)) / pi)))
+        ((1 - (logBase e (tan (halfLat + piBy4)) / pi)) / 2)
 
 
 tileCount : Int -> Int

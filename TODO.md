@@ -19,15 +19,15 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 https://github.com/MartinSStewart/elm-map
 
-Oh. This is interesting. It fetches Mapbox tiles and renders with WebGL in Elm.
-
 State of play:
 
-2. Need to wire up init map on track load, updates, views.
-> Can show map, or route, not quite both, close.
+~~2. Need to wire up init map on track load, updates, views.~~
+~~> Can show map, or route, not quite both, close.~~
 > ~~Need to share mapData (move to PaneLayoutManager level).~~
 3. Need to synchronise pan, zoom, etc.
-4. Need to adjust projection (map is mercator, we are helicopter).
+> May be as easy as using the OutMsg from MapView and deriving a transform for our Scene.
+> No it isn't.
+4. Need to adjust projection (map is mercator, we are helicopter)?
 
 ---
 
@@ -47,6 +47,10 @@ Refetch data when more tracks loaded. Or provide button in the eponymous tool.
 + Make the Land Use tool actually do something.
 
 ## Merge terrain and land use painting
+
+(Experiment proved the idea (of roads partitioning polygons) but implementation was weak.
+Roads should divide polygons, but care needed over directionality and crossing points.
+It needs doing properly, including the start and finish cases.)
 
 Using similar but less regular recursion scheme, use Land Use to colour terrain.
 Maybe put some buildings, trees, water in for suitable land types, provided not on road.
@@ -86,12 +90,6 @@ You could do this you know, just not for the visuals.
 Awaiting French support.
 Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
-
-## Land use 3D rendering
-
-Experiment proved the idea (of roads partitioning polygons) but implementation was weak.
-Roads should divide polygons, but care needed over directionality and crossing points.
-It needs doing properly, including the start and finish cases.
 
 ## Usability
 
