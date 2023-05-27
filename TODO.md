@@ -25,8 +25,7 @@ State of play:
 ~~> Can show map, or route, not quite both, close.~~
 > ~~Need to share mapData (move to PaneLayoutManager level).~~
 3. Need to synchronise pan, zoom, etc.
-> May be as easy as using the OutMsg from MapView and deriving a transform for our Scene.
-> No it isn't.
+> Need to align the zoom levels with MapView.
 4. Need to adjust projection (map is mercator, we are helicopter)?
 
 ---

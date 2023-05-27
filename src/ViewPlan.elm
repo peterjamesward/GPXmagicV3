@@ -297,6 +297,15 @@ deriveCamera refPoint treeNode context currentPosition =
         longitude =
             (x - 0.5) |> Angle.turns |> Direction2d.fromAngle
 
+        _ =
+            Debug.log "longitude" <|
+                Angle.inDegrees <|
+                    Direction2d.toAngle longitude
+
+        _ =
+            Debug.log "latitude" <|
+                Angle.inDegrees latitude
+
         latitude =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
 
@@ -324,19 +333,13 @@ deriveCamera refPoint treeNode context currentPosition =
                 context.focalPoint
 
         focalPoint =
-            DomainModel.pointFromGpxWithReference
-                refPoint
-                { longitude = longitude
-                , latitude = latitude
-                , altitude = Quantity.zero
-                , timestamp = Nothing
-                }
-                |> .space
+            Point3d.origin
 
         eyePoint =
+            --TODO: Perhaps tilting by 'latitude' will compensate for Mercator distortion.
             Point3d.translateBy
                 (Vector3d.meters 0.0 0.0 5000.0)
-                lookingAt.space
+                focalPoint
 
         viewpoint =
             -- Fixing "up is North" so that 2-way drag works well.
@@ -348,7 +351,12 @@ deriveCamera refPoint treeNode context currentPosition =
     in
     Camera3d.orthographic
         { viewpoint = viewpoint
-        , viewportHeight = Length.meters <| 1200.0 * metresPerPixel context.zoomLevel latitude
+        , viewportHeight =
+            Length.meters <|
+                1200.0
+                    * metresPerPixel
+                        (ZoomLevel.toLogZoom <| MapViewer.viewZoom context.map)
+                        newLatitude
         }
 
 
