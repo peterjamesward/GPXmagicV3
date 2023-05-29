@@ -20,8 +20,8 @@ type alias Color =
 mapStyle : MapViewer.Style
 mapStyle =
     { water = rgb255 136 186 231
-    , ground = rgb 0.87 0.85 0.83
-    , buildings = rgb255 200 198 184
+    , ground = rgb255 235 225 205
+    , buildings = rgb255 210 212 223
     , nature = rgb255 160 200 130
     , background = rgb 0.87 0.85 0.83
     , primaryRoad = rgb 0.9 0.9 0.9
