@@ -517,10 +517,13 @@ update msg msgWrapper track ( width, height ) context mapData =
             ( { context
                 | zoomLevel = newZoom
                 , map =
-                    MapViewer.withPositionAndZoom
-                        (MapViewer.viewPosition context.map)
-                        (ZoomLevel.fromLogZoom newZoom)
+                    MapViewer.animateZoom
+                        (newZoom - (ZoomLevel.toLogZoom <| MapViewer.viewZoom context.map))
                         context.map
+
+                --(MapViewer.viewPosition context.map)
+                --(ZoomLevel.fromLogZoom newZoom)
+                --context.map
               }
             , []
             , mapData
