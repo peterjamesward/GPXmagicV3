@@ -1072,6 +1072,7 @@ adoptTrackInModel track model =
                 | paneLayoutOptions =
                     PaneLayoutManager.initialise
                         track
+                        model.contentArea
                         model.paneLayoutOptions
                 , modalMessage = Nothing
                 , previews = Dict.empty

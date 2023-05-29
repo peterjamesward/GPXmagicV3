@@ -611,13 +611,21 @@ exitRouteView options =
             options
 
 
-initialise : TrackLoaded msg -> PaneLayoutOptions -> PaneLayoutOptions
-initialise track options =
+initialise :
+    TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> PaneLayoutOptions
+    -> PaneLayoutOptions
+initialise track contentArea options =
+    let
+        ( paneWidth, paneHeight ) =
+            dimensionsWithLayout options.paneLayout contentArea
+    in
     { options
-        | pane1 = initialisePane track options options.pane1
-        , pane2 = initialisePane track options options.pane2
-        , pane3 = initialisePane track options options.pane3
-        , pane4 = initialisePane track options options.pane4
+        | pane1 = initialisePane track options ( paneWidth, paneHeight ) options.pane1
+        , pane2 = initialisePane track options ( paneWidth, paneHeight ) options.pane2
+        , pane3 = initialisePane track options ( paneWidth, paneHeight ) options.pane3
+        , pane4 = initialisePane track options ( paneWidth, paneHeight ) options.pane4
         , mapData =
             MapViewer.initMapData
                 "https://raw.githubusercontent.com/MartinSStewart/elm-map/master/public/dinProMediumEncoded.json"
@@ -625,8 +633,13 @@ initialise track options =
     }
 
 
-initialisePane : TrackLoaded msg -> PaneLayoutOptions -> PaneContext -> PaneContext
-initialisePane track options pane =
+initialisePane :
+    TrackLoaded msg
+    -> PaneLayoutOptions
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> PaneContext
+    -> PaneContext
+initialisePane track options contentArea pane =
     { pane
         | activeView = pane.activeView
         , thirdPersonContext = Just <| ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
@@ -637,7 +650,7 @@ initialisePane track options pane =
                     (paneIdToString pane.paneId)
                     track.trackTree
                     pane.profileContext
-        , planContext = Just <| ViewPlan.initialiseView 0 track.trackTree pane.planContext
+        , planContext = Just <| ViewPlan.initialiseView 0 track contentArea pane.planContext
         , graphContext = Just <| ViewGraph.initialiseView 0 track.trackTree pane.graphContext
         , mapContext = Just <| ViewMap.initialiseContext pane.mapContext
     }
@@ -662,9 +675,6 @@ viewModeChoices settings msgWrapper context options =
             , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
             , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
             , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
-
-            --, Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
-            --, Input.optionWith ViewInfo <| viewModeTab Last <| localise "About"
             ]
     in
     Input.radioRow

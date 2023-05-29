@@ -2015,12 +2015,13 @@ view extraLayers (MapData mapData) (Model model) =
          , Html.Attributes.height (Quantity.unwrap (Tuple.second perfectSize.devicePixelCanvasSize))
          , Html.Attributes.style "width" (String.fromInt (Pixels.inPixels cssWindowWidth) ++ "px")
          , Html.Attributes.style "height" (String.fromInt (Pixels.inPixels cssWindowHeight) ++ "px")
-         , Html.Events.Extra.Wheel.onWheel MouseWheelMoved
-         , Html.Events.Extra.Touch.onStart (\_ -> TouchStart)
-         , Html.Events.Extra.Touch.onMove (\_ -> TouchMoved)
-         , Html.Events.Extra.Pointer.onDown (eventToPointerEvent PointerDown)
-         , Html.Events.Extra.Pointer.onUp (eventToPointerEvent PointerUp)
-         , Html.Events.Extra.Pointer.onLeave (eventToPointerEvent PointerLeave)
+
+         --, Html.Events.Extra.Wheel.onWheel MouseWheelMoved
+         --, Html.Events.Extra.Touch.onStart (\_ -> TouchStart)
+         --, Html.Events.Extra.Touch.onMove (\_ -> TouchMoved)
+         --, Html.Events.Extra.Pointer.onDown (eventToPointerEvent PointerDown)
+         --, Html.Events.Extra.Pointer.onUp (eventToPointerEvent PointerUp)
+         --, Html.Events.Extra.Pointer.onLeave (eventToPointerEvent PointerLeave)
          ]
             ++ (case model.pointerIsDown of
                     Just _ ->

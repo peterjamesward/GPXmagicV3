@@ -21,12 +21,16 @@ https://github.com/MartinSStewart/elm-map
 
 State of play:
 
-~~2. Need to wire up init map on track load, updates, views.~~
-~~> Can show map, or route, not quite both, close.~~
-> ~~Need to share mapData (move to PaneLayoutManager level).~~
 3. Need to synchronise pan, zoom, etc.
-> Need to align the zoom levels with MapView.
+
+> Try slaving the map to the route. I.e. just set map bounds.
+> !!! Fix my dragging so that the nearest point tracks the mouse pointer.
+> Or slave to the map (but what if the map is not there?).
+
 4. Need to adjust projection (map is mercator, we are helicopter)?
+> Possible camera tilt.
+5. Need to sort out vertical relationship.
+6. Think about 3D
 
 ---
 

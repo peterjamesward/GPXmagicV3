@@ -8,6 +8,8 @@ module ViewPlan exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import BoundingBox2d
+import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import CommonToolStyles
 import Direction2d
@@ -27,6 +29,7 @@ import Html.Events.Extra.Wheel as Wheel
 import Illuminance
 import Json.Decode as D
 import Length exposing (Meters)
+import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapStyles
 import MapViewer
@@ -42,6 +45,7 @@ import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (flatBox)
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
 import ViewPlanContext exposing (DragAction(..), PlanContext)
@@ -71,13 +75,43 @@ subscriptions mapData context =
     MapViewer.subscriptions mapData context.map |> Sub.map MapMsg
 
 
+lngLatFromXYZ : TrackLoaded msg -> EarthPoint -> LngLat.LngLat
+lngLatFromXYZ track point =
+    let
+        gps =
+            DomainModel.gpxFromPointWithReference track.referenceLonLat point
+    in
+    { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+    , lat = gps.latitude |> Angle.inDegrees
+    }
+
+
 initialiseView :
     Int
-    -> PeteTree
+    -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Maybe PlanContext
     -> PlanContext
-initialiseView current treeNode currentContext =
+initialiseView current track contentArea currentContext =
     let
+        treeNode =
+            track.trackTree
+
+        box =
+            DomainModel.boundingBox treeNode
+
+        { minX, maxX, minY, maxY, minZ, maxZ } =
+            BoundingBox3d.extrema box
+
+        ( ne, sw ) =
+            ( Point3d.xyz maxX maxY minZ
+                |> DomainModel.withoutTime
+                |> DomainModel.gpxFromPointWithReference track.referenceLonLat
+            , Point3d.xyz minX minY minZ
+                |> DomainModel.withoutTime
+                |> DomainModel.gpxFromPointWithReference track.referenceLonLat
+            )
+
         map =
             MapViewer.init
                 { lng =
@@ -96,28 +130,13 @@ initialiseView current treeNode currentContext =
                 }
                 (ZoomLevel.fromLogZoom 12)
                 1
-                ( Pixels.pixels 800, Pixels.pixels 600 )
+                contentArea
     in
-    --case currentContext of
-    --    Just context ->
-    --        { context
-    --            | fieldOfView = Angle.degrees 45
-    --            , orbiting = Nothing
-    --            , dragAction = DragNone
-    --            , zoomLevel = 12.0
-    --            , defaultZoomLevel = 12.0
-    --            , focalPoint = treeNode |> leafFromIndex current |> startPoint
-    --            , waitingForClickDelay = False
-    --            , map = map
-    --            , mapData = mapData
-    --        }
-    --
-    --    Nothing ->
     { fieldOfView = Angle.degrees 45
     , orbiting = Nothing
     , dragAction = DragNone
-    , zoomLevel = 12.0
-    , defaultZoomLevel = 12.0
+    , zoomLevel = MapViewer.viewZoom map |> ZoomLevel.toLogZoom
+    , defaultZoomLevel = MapViewer.viewZoom map |> ZoomLevel.toLogZoom
     , focalPoint = treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
     , followSelectedPoint = True
@@ -277,13 +296,17 @@ view context mapData settings display contentArea track scene msgWrapper =
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
-                    plan3dScene
+                    []
+                    --plan3dScene
                     mapData
                     context.map
     in
-    --el [ behindContent mapUnderlay ] plan3dView
-    --el [ inFront plan3dView ] mapUnderlay
-    html mapUnderlay
+    el [ behindContent <| html mapUnderlay ] plan3dView
+
+
+
+--el [ inFront plan3dView ] mapUnderlay
+--html mapUnderlay
 
 
 deriveCamera : GPXSource -> PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
@@ -332,31 +355,23 @@ deriveCamera refPoint treeNode context currentPosition =
             else
                 context.focalPoint
 
-        focalPoint =
-            Point3d.origin
-
         eyePoint =
             --TODO: Perhaps tilting by 'latitude' will compensate for Mercator distortion.
             Point3d.translateBy
                 (Vector3d.meters 0.0 0.0 5000.0)
-                focalPoint
+                lookingAt.space
 
         viewpoint =
             -- Fixing "up is North" so that 2-way drag works well.
             Viewpoint3d.lookAt
-                { focalPoint = focalPoint --lookingAt.space
+                { focalPoint = lookingAt.space
                 , eyePoint = eyePoint
                 , upDirection = Direction3d.positiveY
                 }
     in
     Camera3d.orthographic
         { viewpoint = viewpoint
-        , viewportHeight =
-            Length.meters <|
-                1200.0
-                    * metresPerPixel
-                        (ZoomLevel.toLogZoom <| MapViewer.viewZoom context.map)
-                        newLatitude
+        , viewportHeight = Length.meters <| 1200.0 * metresPerPixel context.zoomLevel latitude
         }
 
 
@@ -421,14 +436,21 @@ update msg msgWrapper track area context mapData =
                                         context.zoomLevel
                                         (Angle.degrees 30)
                                     )
-                    in
-                    ( { context
-                        | focalPoint =
+
+                        newFocus =
                             context.focalPoint
                                 |> .space
                                 |> Point3d.translateBy shiftVector
                                 |> DomainModel.withoutTime
+                    in
+                    ( { context
+                        | focalPoint = newFocus
                         , orbiting = Just ( dx, dy )
+                        , map =
+                            MapViewer.withPositionAndZoom
+                                (MapViewer.lngLatToWorld <| lngLatFromXYZ track newFocus)
+                                (MapViewer.viewZoom context.map)
+                                context.map
                       }
                     , []
                     , mapData
@@ -453,8 +475,18 @@ update msg msgWrapper track area context mapData =
             let
                 increment =
                     -0.001 * deltaY
+
+                newZoom =
+                    clamp 0.0 22.0 <| context.zoomLevel + increment
             in
-            ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+            ( { context
+                | zoomLevel = newZoom
+                , map =
+                    MapViewer.withPositionAndZoom
+                        (MapViewer.viewPosition context.map)
+                        (ZoomLevel.fromLogZoom newZoom)
+                        context.map
+              }
             , []
             , mapData
             )
@@ -480,7 +512,9 @@ update msg msgWrapper track area context mapData =
                 nearestPoint =
                     detectHit event track area context
             in
-            ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
+            ( { context
+                | focalPoint = earthPointFromIndex nearestPoint track.trackTree
+              }
             , [ SetCurrent nearestPoint
               , TrackHasChanged
               ]
@@ -488,19 +522,43 @@ update msg msgWrapper track area context mapData =
             )
 
         ImageZoomIn ->
-            ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
+            let
+                newZoom =
+                    clamp 0.0 22.0 <| context.zoomLevel + 0.5
+            in
+            ( { context
+                | zoomLevel = newZoom
+                , map =
+                    MapViewer.withPositionAndZoom
+                        (MapViewer.viewPosition context.map)
+                        (ZoomLevel.fromLogZoom newZoom)
+                        context.map
+              }
             , []
             , mapData
             )
 
         ImageZoomOut ->
-            ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
+            let
+                newZoom =
+                    clamp 0.0 22.0 <| context.zoomLevel - 0.5
+            in
+            ( { context
+                | zoomLevel = newZoom
+                , map =
+                    MapViewer.withPositionAndZoom
+                        (MapViewer.viewPosition context.map)
+                        (ZoomLevel.fromLogZoom newZoom)
+                        context.map
+              }
             , []
             , mapData
             )
 
         ImageReset ->
-            ( { context | zoomLevel = context.defaultZoomLevel }
+            ( { context
+                | zoomLevel = context.defaultZoomLevel
+              }
             , []
             , mapData
             )
