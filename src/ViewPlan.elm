@@ -8,6 +8,7 @@ module ViewPlan exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import Axis3d
 import BoundingBox2d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
@@ -35,6 +36,7 @@ import MapStyles
 import MapViewer
 import MapboxKey
 import Pixels exposing (Pixels)
+import Plane3d
 import Point2d
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
@@ -46,6 +48,7 @@ import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (flatBox)
+import Vector2d
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
 import ViewPlanContext exposing (DragAction(..), PlanContext)
@@ -320,15 +323,14 @@ deriveCamera refPoint treeNode context currentPosition =
         longitude =
             (x - 0.5) |> Angle.turns |> Direction2d.fromAngle
 
-        _ =
-            Debug.log "longitude" <|
-                Angle.inDegrees <|
-                    Direction2d.toAngle longitude
-
-        _ =
-            Debug.log "latitude" <|
-                Angle.inDegrees latitude
-
+        --_ =
+        --    Debug.log "longitude" <|
+        --        Angle.inDegrees <|
+        --            Direction2d.toAngle longitude
+        --
+        --_ =
+        --    Debug.log "latitude" <|
+        --        Angle.inDegrees latitude
         latitude =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
 
@@ -383,7 +385,45 @@ update :
     -> PlanContext
     -> MapViewer.MapData
     -> ( PlanContext, List (ToolAction msg), MapViewer.MapData )
-update msg msgWrapper track area context mapData =
+update msg msgWrapper track ( width, height ) context mapData =
+    let
+        -- Let us have some information about the view, making dragging more sensible.
+        screenPoint x y =
+            Point2d.pixels x y
+
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity width, toFloatQuantity height )
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        camera =
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+
+        rayOrigin =
+            Camera3d.ray camera screenRectangle Point2d.origin
+
+        rayMax =
+            Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
+
+        topLeftModel =
+            rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
+
+        bottomRightModel =
+            rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+
+        metersPerPixel =
+            case ( topLeftModel, bottomRightModel ) of
+                ( Just topLeft, Just bottomRight ) ->
+                    (Length.inMeters <| Vector3d.xComponent <| Vector3d.from topLeft bottomRight)
+                        / Pixels.toFloat wFloat
+
+                _ ->
+                    -- We hope never to see this.
+                    1
+    in
     -- Second return value indicates whether selection needs to change.
     case msg of
         MapMsg mapMsg ->
@@ -428,14 +468,9 @@ update msg msgWrapper track area context mapData =
                     let
                         shiftVector =
                             Vector3d.meters
-                                (startX - dx)
-                                (dy - startY)
+                                ((startX - dx) * metersPerPixel)
+                                ((dy - startY) * metersPerPixel)
                                 0.0
-                                |> Vector3d.scaleBy
-                                    (Spherical.metresPerPixel
-                                        context.zoomLevel
-                                        (Angle.degrees 30)
-                                    )
 
                         newFocus =
                             context.focalPoint
@@ -495,7 +530,7 @@ update msg msgWrapper track area context mapData =
             -- Click moves pointer but does not re-centre view. (Double click will.)
             if context.waitingForClickDelay then
                 ( context
-                , [ SetCurrent <| detectHit event track area context
+                , [ SetCurrent <| detectHit event track ( width, height ) context
                   , TrackHasChanged
                   ]
                 , mapData
@@ -510,7 +545,7 @@ update msg msgWrapper track area context mapData =
         ImageDoubleClick event ->
             let
                 nearestPoint =
-                    detectHit event track area context
+                    detectHit event track ( width, height ) context
             in
             ( { context
                 | focalPoint = earthPointFromIndex nearestPoint track.trackTree
