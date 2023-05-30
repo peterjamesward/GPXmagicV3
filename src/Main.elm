@@ -374,10 +374,18 @@ updateActiveTrack newTrack model =
 
         newToolsOptions =
             { toolsOptions | tracksOptions = newTracks }
+
+        newPaneLayoutOptions =
+            --FYI, in case we need to recenter or something (mostly the new map).
+            PaneLayoutManager.trackChanged
+                newTrack
+                model.contentArea
+                model.paneLayoutOptions
     in
     { model
         | toolOptions = newToolsOptions
         , needsRendering = True
+        , paneLayoutOptions = newPaneLayoutOptions
     }
 
 

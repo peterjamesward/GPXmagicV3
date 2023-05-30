@@ -3,6 +3,7 @@ module ViewPlan exposing
     , initialiseView
     , resizeOccured
     , subscriptions
+    , trackChanged
     , update
     , view
     )
@@ -546,10 +547,14 @@ update msg msgWrapper track ( width, height ) context mapData =
             )
 
         ToggleFollowOrange ->
-            ( { context
-                | followSelectedPoint = not context.followSelectedPoint
-                , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
-              }
+            let
+                newContext =
+                    { context
+                        | followSelectedPoint = not context.followSelectedPoint
+                        , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
+                    }
+            in
+            ( { newContext | map = updatedMap newContext }
             , []
             , mapData
             )
@@ -559,6 +564,25 @@ update msg msgWrapper track ( width, height ) context mapData =
             , []
             , mapData
             )
+
+
+trackChanged :
+    TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> PlanContext
+    -> PlanContext
+trackChanged newTrack ( width, height ) context =
+    -- Only interest is Orange pointer move.
+    let
+        ( lngLat1, lngLat2 ) =
+            mapBoundsFromScene context ( width, height ) newTrack
+
+        noPadding =
+            { left = 0, right = 0, top = 0, bottom = 0 }
+    in
+    { context
+        | map = MapViewer.withViewBounds noPadding lngLat1 lngLat2 context.map
+    }
 
 
 detectHit :

@@ -14,6 +14,7 @@ module PaneLayoutManager exposing
     , resizeOccured
     , restoreStoredValues
     , subscriptions
+    , trackChanged
     , update
     , viewPanes
     )
@@ -764,6 +765,38 @@ dimensionsWithLayout layout ( w, h ) =
 
         PanesGrid ->
             ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels paneModeHeight) )
+
+
+trackChanged :
+    TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> PaneLayoutOptions
+    -> PaneLayoutOptions
+trackChanged newTrack contentArea options =
+    let
+        tellPane : PaneContext -> PaneContext
+        tellPane pane =
+            case pane.activeView of
+                ViewPlan ->
+                    { pane
+                        | planContext =
+                            Maybe.map
+                                (ViewPlan.trackChanged
+                                    newTrack
+                                    (dimensionsWithLayout options.paneLayout contentArea)
+                                )
+                                pane.planContext
+                    }
+
+                _ ->
+                    pane
+    in
+    { options
+        | pane1 = tellPane options.pane1
+        , pane2 = tellPane options.pane2
+        , pane3 = tellPane options.pane3
+        , pane4 = tellPane options.pane4
+    }
 
 
 paintProfileCharts :
