@@ -23,7 +23,9 @@ State of play:
 
 3. Need to synchronise pan, zoom, etc.
 
-> Maybe just my initial zoom is wrong, or the camera derivation.
+> Now working with fit to bounds. 
+> Need to stop animation. 
+> Need to fix initial case.
 
 4. Need to adjust projection (map is mercator, we are helicopter)?
 > Possible camera tilt. How does Mapbox JS do globe?
