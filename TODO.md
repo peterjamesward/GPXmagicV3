@@ -23,9 +23,7 @@ State of play:
 
 3. Need to synchronise pan, zoom, etc.
 
-> Try slaving the map to the route. I.e. just set map bounds.
-> !!! Fix my dragging so that the nearest point tracks the mouse pointer.
-> Or slave to the map (but what if the map is not there?).
+> Maybe just my initial zoom is wrong, or the camera derivation.
 
 4. Need to adjust projection (map is mercator, we are helicopter)?
 > Possible camera tilt.
