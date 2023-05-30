@@ -25,6 +25,7 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
+import FlatColors.IndianPalette
 import Html
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
@@ -46,6 +47,7 @@ import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
 import ViewPlanContext exposing (DragAction(..), PlanContext)
@@ -240,7 +242,7 @@ view context mapData settings display contentArea track scene msgWrapper =
                                 Scene3d.transparentBackground
 
                             else
-                                Scene3d.backgroundColor Color.darkGreen
+                                Scene3d.backgroundColor <| colorFromElmUiColour FlatColors.IndianPalette.keppel
                         , clipDepth = Length.meters 1
                         , entities = scene
                         , upDirection = positiveZ

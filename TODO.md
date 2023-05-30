@@ -24,6 +24,8 @@ State of play:
 > There are errors in grid layout switching in and out of plan view.
 
 5. Think about 3D (Third, Rider views).
+> See if we can translate our camera position into the map's webgl context.
+
 6. Does Profile1 need some help to paint?
 
 ---
