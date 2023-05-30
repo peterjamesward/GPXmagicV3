@@ -9,4 +9,3 @@ type ViewMode
     | ViewProfileWebGL
     | ViewMap
     | ViewGraph
-    | ViewDerivatives

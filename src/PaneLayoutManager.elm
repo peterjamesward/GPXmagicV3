@@ -859,88 +859,95 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
         showNonMapViews : PaneContext -> Element msg
         showNonMapViews pane =
             -- Try having all the DIVs there but hidden.
-            --TODO: This code could be tidied quite a bit.
-            column []
-                [ conditionallyVisible (pane.activeView == ViewThird) <|
-                    case ( pane.thirdPersonContext, mTrack ) of
-                        ( Just context, Just track ) ->
-                            ViewThirdPerson.view
-                                settings
-                                context
-                                displayOptions
-                                ( paneWidth, paneHeight )
-                                track
-                                options.scene3d
-                                (msgWrapper << ThirdPersonViewMessage pane.paneId)
+            conditionallyVisible (pane.activeView /= ViewMap) <|
+                case pane.activeView of
+                    ViewThird ->
+                        case ( pane.thirdPersonContext, mTrack ) of
+                            ( Just context, Just track ) ->
+                                ViewThirdPerson.view
+                                    settings
+                                    context
+                                    displayOptions
+                                    ( paneWidth, paneHeight )
+                                    track
+                                    options.scene3d
+                                    (msgWrapper << ThirdPersonViewMessage pane.paneId)
 
-                        _ ->
-                            none
-                , conditionallyVisible (pane.activeView == ViewFirst) <|
-                    case ( pane.thirdPersonContext, mTrack ) of
-                        ( Just context, Just track ) ->
-                            ViewFirstPerson.view
-                                context
-                                ( paneWidth, paneHeight )
-                                track
-                                options.scene3d
-                                (msgWrapper << ThirdPersonViewMessage pane.paneId)
-                                mFlythrough
+                            _ ->
+                                none
 
-                        _ ->
-                            none
-                , conditionallyVisible (pane.activeView == ViewPlan) <|
-                    case ( pane.planContext, mTrack ) of
-                        ( Just context, Just track ) ->
-                            ViewPlan.view
-                                context
-                                options.mapData
-                                settings
-                                displayOptions
-                                ( paneWidth, paneHeight )
-                                track
-                                options.scene3d
-                                (msgWrapper << PlanViewMessage pane.paneId)
+                    ViewFirst ->
+                        case ( pane.thirdPersonContext, mTrack ) of
+                            ( Just context, Just track ) ->
+                                ViewFirstPerson.view
+                                    context
+                                    ( paneWidth, paneHeight )
+                                    track
+                                    options.scene3d
+                                    (msgWrapper << ThirdPersonViewMessage pane.paneId)
+                                    mFlythrough
 
-                        _ ->
-                            none
-                , conditionallyVisible (pane.activeView == ViewGraph) <|
-                    case ( pane.graphContext, mTrack ) of
-                        ( Just context, Just _ ) ->
-                            ViewGraph.view
-                                settings
-                                context
-                                ( paneWidth, paneHeight )
-                                tracksOptions
-                                (msgWrapper << GraphViewMessage pane.paneId)
+                            _ ->
+                                none
 
-                        _ ->
-                            none
-                , conditionallyVisible (pane.activeView == ViewProfileCanvas) <|
-                    case pane.profileContext of
-                        Just context ->
-                            ViewProfileChartsCanvas.view
-                                context
-                                settings
-                                pane.paneId
-                                ( paneWidth, paneHeight )
-                                (msgWrapper << ProfileViewMessage pane.paneId)
+                    ViewPlan ->
+                        case ( pane.planContext, mTrack ) of
+                            ( Just context, Just track ) ->
+                                ViewPlan.view
+                                    context
+                                    options.mapData
+                                    settings
+                                    displayOptions
+                                    ( paneWidth, paneHeight )
+                                    track
+                                    options.scene3d
+                                    (msgWrapper << PlanViewMessage pane.paneId)
 
-                        _ ->
-                            none
-                , conditionallyVisible (pane.activeView == ViewProfileWebGL) <|
-                    case ( pane.profileContext, mTrack ) of
-                        ( Just context, Just track ) ->
-                            ViewProfileChartsWebGL.view
-                                context
-                                settings
-                                ( paneWidth, paneHeight )
-                                track
-                                (msgWrapper << ProfileViewMessage pane.paneId)
-                                previews
+                            _ ->
+                                none
 
-                        _ ->
-                            none
-                ]
+                    ViewGraph ->
+                        case ( pane.graphContext, mTrack ) of
+                            ( Just context, Just _ ) ->
+                                ViewGraph.view
+                                    settings
+                                    context
+                                    ( paneWidth, paneHeight )
+                                    tracksOptions
+                                    (msgWrapper << GraphViewMessage pane.paneId)
+
+                            _ ->
+                                none
+
+                    ViewProfileCanvas ->
+                        case pane.profileContext of
+                            Just context ->
+                                ViewProfileChartsCanvas.view
+                                    context
+                                    settings
+                                    pane.paneId
+                                    ( paneWidth, paneHeight )
+                                    (msgWrapper << ProfileViewMessage pane.paneId)
+
+                            _ ->
+                                none
+
+                    ViewProfileWebGL ->
+                        case ( pane.profileContext, mTrack ) of
+                            ( Just context, Just track ) ->
+                                ViewProfileChartsWebGL.view
+                                    context
+                                    settings
+                                    ( paneWidth, paneHeight )
+                                    track
+                                    (msgWrapper << ProfileViewMessage pane.paneId)
+                                    previews
+
+                            _ ->
+                                none
+
+                    ViewMap ->
+                        none
 
         viewPaneZeroWithMap : PaneContext -> Element msg
         viewPaneZeroWithMap pane =

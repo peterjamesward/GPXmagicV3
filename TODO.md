@@ -25,7 +25,7 @@ State of play:
     -- Must come through from Main, PaneLayoutManager (cannot update map in view).
     -- Could this be made into an `update` ?
 3. Option to show map on the view's menu button.
-5. Think about 3D.
+5. Think about 3D (Third, Rider views).
 
 ---
 
