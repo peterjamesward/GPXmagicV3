@@ -26,8 +26,10 @@ State of play:
 > Maybe just my initial zoom is wrong, or the camera derivation.
 
 4. Need to adjust projection (map is mercator, we are helicopter)?
-> Possible camera tilt.
+> Possible camera tilt. How does Mapbox JS do globe?
 5. Need to sort out vertical relationship.
+6. Display Settings option to show map.
+7. Respond to resize.
 6. Think about 3D
 
 ---

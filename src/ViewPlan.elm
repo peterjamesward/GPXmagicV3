@@ -283,33 +283,14 @@ view context mapData settings display contentArea track scene msgWrapper =
         lights =
             Scene3d.threeLights sun sky environment
 
-        plan3dScene =
-            Scene3d.toWebGLEntities
-                { lights = lights
-                , camera = camera
-                , clipDepth = Length.meters 1
-                , exposure = Scene3d.exposureValue 15
-                , toneMapping = Scene3d.noToneMapping
-                , whiteBalance = Light.daylight
-                , aspectRatio = 8 / 6
-                , supersampling = 1.0
-                , entities = scene
-                }
-
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
                     []
-                    --plan3dScene
                     mapData
                     context.map
     in
     el [ behindContent <| html mapUnderlay ] plan3dView
-
-
-
---el [ inFront plan3dView ] mapUnderlay
---html mapUnderlay
 
 
 deriveCamera : GPXSource -> PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
@@ -320,36 +301,9 @@ deriveCamera refPoint treeNode context currentPosition =
             MapViewer.viewPosition context.map
                 |> Point2d.toUnitless
 
-        longitude =
-            (x - 0.5) |> Angle.turns |> Direction2d.fromAngle
-
-        --_ =
-        --    Debug.log "longitude" <|
-        --        Angle.inDegrees <|
-        --            Direction2d.toAngle longitude
-        --
-        --_ =
-        --    Debug.log "latitude" <|
-        --        Angle.inDegrees latitude
         latitude =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
 
-        newLatitude =
-            -- Reverse Mercator gives latitude in radians, we hope.
-            Angle.radians <| 2 * (atan <| e ^ (1 - (y / 2)) - pi / 4)
-
-        {- Mercator encodiing of latitude in MapView is ...
-           y =
-               0.5 * (1 - (logBase e (tan (lngLat.lat * pi / 180) + 1 / cos (lngLat.lat * pi / 180)) / pi))
-
-           - that's not an obvious inverse, and may be wrong.
-
-           My version is ((1 - (logBase e (tan (halfLat + piBy4)) / pi)) / 2)
-
-           Which inverts easily
-
-           2 * (atan <| e ^ ( 1 - (y/2) ) - pi / 4)
-        -}
         lookingAt =
             if context.followSelectedPoint then
                 startPoint <| leafFromIndex currentPosition treeNode
@@ -377,6 +331,60 @@ deriveCamera refPoint treeNode context currentPosition =
         }
 
 
+mapBoundsFromScene :
+    PlanContext
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
+    -> ( LngLat.LngLat, LngLat.LngLat )
+mapBoundsFromScene updatedContext ( width, height ) track =
+    -- Call this after updating context after any update changing the view/
+    let
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity width, toFloatQuantity height )
+
+        oopsLngLat =
+            { lng = 0, lat = 0 }
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        camera =
+            deriveCamera track.referenceLonLat track.trackTree updatedContext track.currentPosition
+
+        ( rayOrigin, rayMax ) =
+            ( Camera3d.ray camera screenRectangle Point2d.origin
+            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
+            )
+
+        ( topLeftModel, bottomRightModel ) =
+            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
+            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+            )
+
+        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
+        lngLatFromXY point =
+            let
+                gps : GPXSource
+                gps =
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
+            in
+            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+            , lat = gps.latitude |> Angle.inDegrees
+            }
+    in
+    case ( topLeftModel, bottomRightModel ) of
+        ( Just topLeft, Just bottomRight ) ->
+            ( lngLatFromXY topLeft
+            , lngLatFromXY bottomRight
+            )
+
+        _ ->
+            -- We hope never to see this.
+            ( oopsLngLat, oopsLngLat )
+
+
 update :
     Msg
     -> (Msg -> msg)
@@ -387,12 +395,12 @@ update :
     -> ( PlanContext, List (ToolAction msg), MapViewer.MapData )
 update msg msgWrapper track ( width, height ) context mapData =
     let
-        -- Let us have some information about the view, making dragging more sensible.
-        screenPoint x y =
-            Point2d.pixels x y
-
+        -- Let us have some information about the view, making dragging more precise.
         ( wFloat, hFloat ) =
             ( toFloatQuantity width, toFloatQuantity height )
+
+        oopsLngLat =
+            { lng = 0, lat = 0 }
 
         screenRectangle =
             Rectangle2d.from
@@ -402,17 +410,15 @@ update msg msgWrapper track ( width, height ) context mapData =
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
-        rayOrigin =
-            Camera3d.ray camera screenRectangle Point2d.origin
+        ( rayOrigin, rayMax ) =
+            ( Camera3d.ray camera screenRectangle Point2d.origin
+            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
+            )
 
-        rayMax =
-            Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
-
-        topLeftModel =
-            rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
-
-        bottomRightModel =
-            rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+        ( topLeftModel, bottomRightModel ) =
+            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
+            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+            )
 
         metersPerPixel =
             case ( topLeftModel, bottomRightModel ) of
@@ -423,6 +429,16 @@ update msg msgWrapper track ( width, height ) context mapData =
                 _ ->
                     -- We hope never to see this.
                     1
+
+        updatedMap ctxt =
+            let
+                ( lngLat1, lngLat2 ) =
+                    mapBoundsFromScene ctxt ( width, height ) track
+
+                noPadding =
+                    { left = 0, right = 0, top = 0, bottom = 0 }
+            in
+            MapViewer.animateViewBounds noPadding lngLat1 lngLat2 ctxt.map
     in
     -- Second return value indicates whether selection needs to change.
     case msg of
@@ -477,16 +493,14 @@ update msg msgWrapper track ( width, height ) context mapData =
                                 |> .space
                                 |> Point3d.translateBy shiftVector
                                 |> DomainModel.withoutTime
+
+                        newContext =
+                            { context
+                                | focalPoint = newFocus
+                                , orbiting = Just ( dx, dy )
+                            }
                     in
-                    ( { context
-                        | focalPoint = newFocus
-                        , orbiting = Just ( dx, dy )
-                        , map =
-                            MapViewer.withPositionAndZoom
-                                (MapViewer.lngLatToWorld <| lngLatFromXYZ track newFocus)
-                                (MapViewer.viewZoom context.map)
-                                context.map
-                      }
+                    ( { newContext | map = updatedMap newContext }
                     , []
                     , mapData
                     )
@@ -513,15 +527,13 @@ update msg msgWrapper track ( width, height ) context mapData =
 
                 newZoom =
                     clamp 0.0 22.0 <| context.zoomLevel + increment
+
+                newContext =
+                    { context
+                        | zoomLevel = newZoom
+                    }
             in
-            ( { context
-                | zoomLevel = newZoom
-                , map =
-                    MapViewer.withPositionAndZoom
-                        (MapViewer.viewPosition context.map)
-                        (ZoomLevel.fromLogZoom newZoom)
-                        context.map
-              }
+            ( { newContext | map = updatedMap newContext }
             , []
             , mapData
             )
@@ -558,34 +570,20 @@ update msg msgWrapper track ( width, height ) context mapData =
 
         ImageZoomIn ->
             let
-                newZoom =
-                    clamp 0.0 22.0 <| context.zoomLevel + 0.5
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
             in
-            ( { context
-                | zoomLevel = newZoom
-                , map =
-                    MapViewer.withPositionAndZoom
-                        (MapViewer.viewPosition context.map)
-                        (ZoomLevel.fromLogZoom newZoom)
-                        context.map
-              }
+            ( { newContext | map = updatedMap newContext }
             , []
             , mapData
             )
 
         ImageZoomOut ->
             let
-                newZoom =
-                    clamp 0.0 22.0 <| context.zoomLevel - 0.5
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
             in
-            ( { context
-                | zoomLevel = newZoom
-                , map =
-                    MapViewer.withPositionAndZoom
-                        (MapViewer.viewPosition context.map)
-                        (ZoomLevel.fromLogZoom newZoom)
-                        context.map
-              }
+            ( { newContext | map = updatedMap newContext }
             , []
             , mapData
             )
