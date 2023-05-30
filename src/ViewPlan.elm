@@ -78,17 +78,6 @@ subscriptions mapData context =
     MapViewer.subscriptions mapData context.map |> Sub.map MapMsg
 
 
-lngLatFromXYZ : TrackLoaded msg -> EarthPoint -> LngLat.LngLat
-lngLatFromXYZ track point =
-    let
-        gps =
-            DomainModel.gpxFromPointWithReference track.referenceLonLat point
-    in
-    { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
-    , lat = gps.latitude |> Angle.inDegrees
-    }
-
-
 initialiseView :
     Int
     -> TrackLoaded msg
@@ -106,45 +95,32 @@ initialiseView current track contentArea currentContext =
         { minX, maxX, minY, maxY, minZ, maxZ } =
             BoundingBox3d.extrema box
 
-        ( ne, sw ) =
-            ( Point3d.xyz maxX maxY minZ
-                |> DomainModel.withoutTime
-                |> DomainModel.gpxFromPointWithReference track.referenceLonLat
-            , Point3d.xyz minX minY minZ
-                |> DomainModel.withoutTime
-                |> DomainModel.gpxFromPointWithReference track.referenceLonLat
-            )
+        noPadding =
+            { left = 0, right = 0, top = 0, bottom = 0 }
 
-        map =
+        initialMap =
             MapViewer.init
-                { lng =
-                    DomainModel.getFirstLeaf treeNode
-                        |> .sourceData
-                        |> Tuple.first
-                        |> .longitude
-                        |> Direction2d.toAngle
-                        |> Angle.inDegrees
-                , lat =
-                    DomainModel.getFirstLeaf treeNode
-                        |> .sourceData
-                        |> Tuple.first
-                        |> .latitude
-                        |> Angle.inDegrees
-                }
+                { lng = 0, lat = 0 }
                 (ZoomLevel.fromLogZoom 12)
                 1
                 contentArea
+
+        newContext =
+            { fieldOfView = Angle.degrees 45
+            , orbiting = Nothing
+            , dragAction = DragNone
+            , zoomLevel = 12
+            , defaultZoomLevel = 12
+            , focalPoint = treeNode |> leafFromIndex current |> startPoint
+            , waitingForClickDelay = False
+            , followSelectedPoint = True
+            , map = initialMap
+            }
+
+        ( lngLat1, lngLat2 ) =
+            mapBoundsFromScene newContext contentArea track
     in
-    { fieldOfView = Angle.degrees 45
-    , orbiting = Nothing
-    , dragAction = DragNone
-    , zoomLevel = MapViewer.viewZoom map |> ZoomLevel.toLogZoom
-    , defaultZoomLevel = MapViewer.viewZoom map |> ZoomLevel.toLogZoom
-    , focalPoint = treeNode |> leafFromIndex current |> startPoint
-    , waitingForClickDelay = False
-    , followSelectedPoint = True
-    , map = map
-    }
+    { newContext | map = MapViewer.withViewBounds noPadding lngLat1 lngLat2 newContext.map }
 
 
 stopProp =

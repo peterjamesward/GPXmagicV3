@@ -21,7 +21,7 @@ https://github.com/MartinSStewart/elm-map
 
 State of play:
 
-1. Fix initial case. 
+1. ~~Fix initial case.~~ 
 2. Handle Orange move. 
 3. Display Settings option to show map. 
 4. Respond to resize. 
@@ -41,8 +41,8 @@ In several cases, only reason to use Actions is for Undo stack. That don't seem 
 
 ## Land Use
 
-Refetch data when more tracks loaded. Or provide button in the eponymous tool.
-+ Make the Land Use tool actually do something.
+Refetch data when more tracks loaded. Or provide button in the tool.
+= Make the Land Use tool actually do something.
 
 ## Merge terrain and land use painting
 
