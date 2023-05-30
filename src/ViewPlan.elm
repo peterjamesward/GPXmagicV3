@@ -1,6 +1,7 @@
 module ViewPlan exposing
     ( Msg(..)
     , initialiseView
+    , resizeOccured
     , subscriptions
     , update
     , view
@@ -9,7 +10,6 @@ module ViewPlan exposing
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
-import BoundingBox2d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import CommonToolStyles
@@ -27,12 +27,10 @@ import Html
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
-import Illuminance
 import Json.Decode as D
 import Length exposing (Meters)
 import LngLat
 import LocalCoords exposing (LocalCoords)
-import MapStyles
 import MapViewer
 import MapboxKey
 import Pixels exposing (Pixels)
@@ -42,13 +40,10 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
-import Scene3d.Light as Light
 import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (flatBox)
-import Vector2d
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
 import ViewPlanContext exposing (DragAction(..), PlanContext)
@@ -235,30 +230,6 @@ view context mapData settings display contentArea track scene msgWrapper =
                         , shadows = False
                         }
 
-        sun =
-            Light.directional (Light.castsShadows False)
-                { direction = Direction3d.negativeZ
-                , intensity = Illuminance.lux 80000
-                , chromaticity = Light.sunlight
-                }
-
-        sky =
-            Light.overhead
-                { upDirection = Direction3d.positiveZ
-                , chromaticity = Light.skylight
-                , intensity = Illuminance.lux 20000
-                }
-
-        environment =
-            Light.overhead
-                { upDirection = Direction3d.positiveZ
-                , chromaticity = Light.daylight
-                , intensity = Illuminance.lux 15000
-                }
-
-        lights =
-            Scene3d.threeLights sun sky environment
-
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
@@ -269,14 +240,14 @@ view context mapData settings display contentArea track scene msgWrapper =
     el [ behindContent <| html mapUnderlay ] plan3dView
 
 
+resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> PlanContext -> PlanContext
+resizeOccured paneArea context =
+    { context | map = MapViewer.resizeCanvas 1.0 paneArea context.map }
+
+
 deriveCamera : GPXSource -> PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
 deriveCamera refPoint treeNode context currentPosition =
     let
-        { x, y } =
-            -- Center of map view in fractional "Mercator" units.
-            MapViewer.viewPosition context.map
-                |> Point2d.toUnitless
-
         latitude =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
 

@@ -92,7 +92,7 @@ deriveCamera treeNode context currentPosition =
                 , azimuth = Direction2d.toAngle context.cameraAzimuth
                 , elevation = context.cameraElevation
                 , distance =
-                    --TODO: Some fudging going on here that should not be needed.
+                    --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
                     Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
                 }
     in

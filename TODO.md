@@ -21,11 +21,11 @@ https://github.com/MartinSStewart/elm-map
 
 State of play:
 
-1. ~~Fix initial case.~~ 
-2. Handle Orange move. 
+> Resize breaks zoom.
+
+1. Handle Orange move. -- Must come through from Main, PaneLayoutManager (cannot update map in view).
 3. Display Settings option to show map. 
-4. Respond to resize. 
-5. Think about 3D
+5. Think about 3D.
 
 ---
 

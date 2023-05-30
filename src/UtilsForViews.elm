@@ -210,7 +210,6 @@ colourHexString colour =
 
 
 fullDepthRenderingBoxSize =
-    --TODO: put box size in model
     Length.kilometers 4
 
 

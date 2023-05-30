@@ -1140,12 +1140,15 @@ adjustSpaceForContent model =
         ( reservedWidth, reservedHeight ) =
             -- This by experiment, not ideal.
             ( 30, 160 )
-    in
-    { model
-        | contentArea =
+
+        contentArea =
             ( Pixels.pixels <| round availableWidthPixels
             , Pixels.pixels <| round (height - reservedHeight)
             )
+    in
+    { model
+        | contentArea = contentArea
+        , paneLayoutOptions = PaneLayoutManager.resizeOccured contentArea model.paneLayoutOptions
     }
 
 

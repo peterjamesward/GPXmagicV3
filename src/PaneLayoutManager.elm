@@ -11,6 +11,7 @@ module PaneLayoutManager exposing
     , paintProfileCharts
     , profileViewHandlesClick
     , render
+    , resizeOccured
     , restoreStoredValues
     , subscriptions
     , update
@@ -294,9 +295,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                 ( newOptions, _, _ ) =
                     updatePaneWith paneId
                         (\pane _ ->
-                            ( ( { pane
-                                    | activeView = viewMode
-                                }
+                            ( ( { pane | activeView = viewMode }
                               , options.mapData
                               )
                             , tracks
@@ -541,6 +540,29 @@ update paneMsg msgWrapper tracks contentArea options previews =
                     Actions.NoAction
               ]
             )
+
+
+resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> PaneLayoutOptions -> PaneLayoutOptions
+resizeOccured ( w, h ) options =
+    let
+        paneArea =
+            dimensionsWithLayout options.paneLayout ( w, h )
+
+        resizePane : PaneContext -> PaneContext
+        resizePane pane =
+            case pane.activeView of
+                ViewPlan ->
+                    { pane | planContext = Maybe.map (ViewPlan.resizeOccured paneArea) pane.planContext }
+
+                _ ->
+                    pane
+    in
+    { options
+        | pane1 = resizePane options.pane1
+        , pane2 = resizePane options.pane2
+        , pane3 = resizePane options.pane3
+        , pane4 = resizePane options.pane4
+    }
 
 
 isViewVisible : ViewMode -> PaneLayoutOptions -> Bool
