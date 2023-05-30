@@ -21,10 +21,10 @@ https://github.com/MartinSStewart/elm-map
 
 State of play:
 
-> Resize breaks zoom.
-
-1. Handle Orange move. -- Must come through from Main, PaneLayoutManager (cannot update map in view).
-3. Display Settings option to show map. 
+1. Handle Orange move. 
+    -- Must come through from Main, PaneLayoutManager (cannot update map in view).
+    -- Could this be made into an `update` ?
+3. Option to show map on the view's menu button.
 5. Think about 3D.
 
 ---

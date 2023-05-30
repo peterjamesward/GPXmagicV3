@@ -20,7 +20,7 @@ module PaneLayoutManager exposing
 
 import Actions exposing (..)
 import Dict exposing (Dict)
-import DomainModel exposing (skipCount)
+import DomainModel exposing (EarthPoint, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -279,6 +279,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
             let
                 newOptions =
                     { options | paneLayout = paneLayout }
+                        |> resizeOccured contentArea
             in
             ( newOptions
             , tracks
@@ -542,6 +543,14 @@ update paneMsg msgWrapper tracks contentArea options previews =
             )
 
 
+paneSpacing =
+    5
+
+
+paneModeHeight =
+    20
+
+
 resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> PaneLayoutOptions -> PaneLayoutOptions
 resizeOccured ( w, h ) options =
     let
@@ -747,14 +756,14 @@ dimensionsWithLayout layout ( w, h ) =
             ( takeHalf w, h )
 
         PanesUpperLower ->
-            ( w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
+            ( w, takeHalf h |> Quantity.minus (Pixels.pixels paneModeHeight) )
 
         PanesOnePlusTwo ->
             -- Later, not that simple
             ( w, h )
 
         PanesGrid ->
-            ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
+            ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels paneModeHeight) )
 
 
 paintProfileCharts :
@@ -982,7 +991,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
         , inFront <| paneLayoutMenu settings.location msgWrapper options
         ]
         [ wrappedRow
-            [ centerX, width fill, spacing 5 ]
+            [ centerX, width fill, spacing paneSpacing ]
           <|
             case options.paneLayout of
                 PanesOne ->

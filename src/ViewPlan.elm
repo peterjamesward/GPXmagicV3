@@ -536,9 +536,11 @@ update msg msgWrapper track ( width, height ) context mapData =
             )
 
         ImageReset ->
-            ( { context
-                | zoomLevel = context.defaultZoomLevel
-              }
+            let
+                newContext =
+                    { context | zoomLevel = context.defaultZoomLevel }
+            in
+            ( { newContext | map = updatedMap newContext }
             , []
             , mapData
             )
