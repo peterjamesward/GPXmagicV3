@@ -21,8 +21,8 @@ https://github.com/MartinSStewart/elm-map
 
 State of play:
 
-3. Option to show map on the view's menu button. (What about the ground?)
-4. Pane layout change maybe not always resizing.
+> There are errors in grid layout switching in and out of plan view.
+
 5. Think about 3D (Third, Rider views).
 6. Does Profile1 need some help to paint?
 

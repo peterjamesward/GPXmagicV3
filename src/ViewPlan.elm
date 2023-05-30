@@ -13,6 +13,7 @@ import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
+import Color
 import CommonToolStyles
 import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
@@ -67,6 +68,7 @@ type Msg
     | ClickDelayExpired
     | ToggleFollowOrange
     | MapMsg MapViewer.Msg
+    | ToggleShowMap
 
 
 subscriptions : MapViewer.MapData -> PlanContext -> Sub Msg
@@ -111,6 +113,7 @@ initialiseView current track contentArea currentContext =
             , waitingForClickDelay = False
             , followSelectedPoint = True
             , map = initialMap
+            , showMap = False
             }
 
         ( lngLat1, lngLat2 ) =
@@ -160,6 +163,15 @@ zoomButtons settings msgWrapper context =
 
                 else
                     useIcon FeatherIcons.unlock
+            }
+        , Input.button []
+            { onPress = Just <| msgWrapper ToggleShowMap
+            , label =
+                if context.showMap then
+                    useIcon FeatherIcons.square
+
+                else
+                    useIcon FeatherIcons.map
             }
         ]
 
@@ -223,7 +235,12 @@ view context mapData settings display contentArea track scene msgWrapper =
                     Scene3d.sunny
                         { camera = camera
                         , dimensions = contentArea
-                        , background = Scene3d.transparentBackground
+                        , background =
+                            if context.showMap then
+                                Scene3d.transparentBackground
+
+                            else
+                                Scene3d.backgroundColor Color.darkGreen
                         , clipDepth = Length.meters 1
                         , entities = scene
                         , upDirection = positiveZ
@@ -238,7 +255,15 @@ view context mapData settings display contentArea track scene msgWrapper =
                     mapData
                     context.map
     in
-    el [ behindContent <| html mapUnderlay ] plan3dView
+    el
+        [ behindContent <|
+            if context.showMap then
+                html mapUnderlay
+
+            else
+                none
+        ]
+        plan3dView
 
 
 resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> PlanContext -> PlanContext
@@ -555,6 +580,12 @@ update msg msgWrapper track ( width, height ) context mapData =
                     }
             in
             ( { newContext | map = updatedMap newContext }
+            , []
+            , mapData
+            )
+
+        ToggleShowMap ->
+            ( { context | showMap = not context.showMap }
             , []
             , mapData
             )
