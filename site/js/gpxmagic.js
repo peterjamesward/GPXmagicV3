@@ -233,6 +233,15 @@ function mapMessageHandler(msg) {
             gradientChart(msg.container, msg.chart);
             break;
 
+        case 'DestroyCharts':
+            try {
+                destroyProfileCharts(msg.container1);
+            } catch (e) {};
+            try {
+                destroyProfileCharts(msg.container2);
+            } catch (e) {};
+            break;
+
         case 'Style':
             if (isMapCreated) {
                 map.setStyle(msg.style);
@@ -886,9 +895,20 @@ const eventPlugin = {
 
 Chart.register(eventPlugin);
 
+// Try to keep track of charts for reliable destruction.
+let charts = {};
+
+function destroyProfileCharts(canvasContainerDiv) {
+
+//    console.log("DESTROY", canvasContainerDiv);
+
+    charts[canvasContainerDiv].destroy();
+    delete charts[canvasContainerDiv];
+}
+
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
-    //console.log(chartInfo);
+//    console.log("CREATE", canvasContainerDiv);
 
     var profileDiv = document.getElementById(canvasContainerDiv);
     var canvasId = canvasContainerDiv + '.profile.';
@@ -924,9 +944,13 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
             chartInfo
         );
     };
+
+    charts[ canvasContainerDiv ] = chart;
 }
 
 function gradientChart(canvasContainerDiv, chartInfo) {
+
+//    console.log("CREATE", canvasContainerDiv);
 
     var profileDiv = document.getElementById(canvasContainerDiv);
     var canvasId = canvasContainerDiv + '.gradient.';
@@ -966,7 +990,7 @@ function gradientChart(canvasContainerDiv, chartInfo) {
     };
 
     chart.update('none'); //update the chart
-
+    charts[ canvasContainerDiv ] = chart;
 }
 
 

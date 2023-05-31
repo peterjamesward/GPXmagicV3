@@ -304,7 +304,18 @@ update paneMsg msgWrapper tracks contentArea options previews =
                             , tracks
                             , case ( viewMode, pane.profileContext ) of
                                 ( ViewProfileCanvas, Just profile ) ->
+                                    -- Wait until DIV is created before loading chart data.
                                     [ DelayMessage 500 (msgWrapper <| DeferredProfile paneId profile) ]
+
+                                ( _, Just profile ) ->
+                                    -- If old mode was profile, destroy the charts.
+                                    if pane.activeView == ViewProfileCanvas then
+                                        [ ExternalCommand <|
+                                            MapPortController.destroyCharts profile
+                                        ]
+
+                                    else
+                                        []
 
                                 _ ->
                                     []

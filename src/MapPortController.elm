@@ -343,6 +343,16 @@ paintCanvasGradientChart profileContext settings track =
             ]
 
 
+destroyCharts : ViewProfileChartContext.ProfileContext -> Cmd msg
+destroyCharts profileContext =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "DestroyCharts" )
+            , ( "container1", E.string <| "altitude." ++ profileContext.contextSuffix )
+            , ( "container2", E.string <| "gradient." ++ profileContext.contextSuffix )
+            ]
+
+
 showPreview : Int -> String -> String -> String -> E.Value -> Cmd msg
 showPreview size tag shape colour geoJson =
     mapCommands <|
