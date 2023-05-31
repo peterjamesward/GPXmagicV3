@@ -45,6 +45,7 @@ import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
+import ToolTip
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colorFromElmUiColour)
@@ -166,7 +167,17 @@ zoomButtons settings msgWrapper context =
                 else
                     useIcon FeatherIcons.unlock
             }
-        , Input.button []
+        , Input.button
+            [ ToolTip.tooltip
+                onLeft
+                (ToolTip.myTooltip <|
+                    if context.showMap then
+                        "Hide map"
+
+                    else
+                        "Show map"
+                )
+            ]
             { onPress = Just <| msgWrapper ToggleShowMap
             , label =
                 if context.showMap then

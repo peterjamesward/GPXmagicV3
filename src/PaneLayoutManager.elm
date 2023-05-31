@@ -671,7 +671,7 @@ initialisePane :
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> PaneContext
     -> PaneContext
-initialisePane track options contentArea pane =
+initialisePane track options paneArea pane =
     { pane
         | activeView = pane.activeView
         , thirdPersonContext = Just <| ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
@@ -682,7 +682,7 @@ initialisePane track options contentArea pane =
                     (paneIdToString pane.paneId)
                     track.trackTree
                     pane.profileContext
-        , planContext = Just <| ViewPlan.initialiseView 0 track contentArea pane.planContext
+        , planContext = Just <| ViewPlan.initialiseView 0 track paneArea pane.planContext
         , graphContext = Just <| ViewGraph.initialiseView 0 track.trackTree pane.graphContext
         , mapContext = Just <| ViewMap.initialiseContext pane.mapContext
     }
