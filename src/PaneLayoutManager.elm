@@ -128,6 +128,7 @@ type Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
     | PaneNoOp
+    | DeferredProfile PaneId ViewProfileChartContext.ProfileContext
 
 
 subscriptions : PaneLayoutOptions -> Sub Msg
@@ -294,14 +295,19 @@ update paneMsg msgWrapper tracks contentArea options previews =
 
         SetViewMode paneId viewMode ->
             let
-                ( newOptions, _, _ ) =
+                ( newOptions, _, paneActions ) =
                     updatePaneWith paneId
                         (\pane _ ->
                             ( ( { pane | activeView = viewMode }
                               , options.mapData
                               )
                             , tracks
-                            , []
+                            , case ( viewMode, pane.profileContext ) of
+                                ( ViewProfileCanvas, Just profile ) ->
+                                    [ DelayMessage 500 (msgWrapper <| DeferredProfile paneId profile) ]
+
+                                _ ->
+                                    []
                             )
                         )
             in
@@ -310,6 +316,14 @@ update paneMsg msgWrapper tracks contentArea options previews =
             , [ MapRefresh
               , StoreLocally "panes" <| encodePaneState newOptions
               ]
+                ++ paneActions
+            )
+
+        DeferredProfile paneId profileContext ->
+            -- We let the `view` complete so that the canvas DIV is present, then render the data,
+            ( options
+            , tracks
+            , [ RenderProfile profileContext ]
             )
 
         ThirdPersonViewMessage paneId imageMsg ->

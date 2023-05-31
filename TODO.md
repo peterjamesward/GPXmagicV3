@@ -21,10 +21,6 @@ https://github.com/MartinSStewart/elm-map
 
 ### State of play
 
-* Does Profile1 need some help to paint?
-> Yes, now it's not there until needed.
-> Ideally get JS to send a Msg straight back to the View when the canvas is ready.
-
 * Think about 3D (Third, Rider views).
 > See if we can translate our camera position into the map's webgl context.
 
