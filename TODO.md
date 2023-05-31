@@ -21,7 +21,6 @@ https://github.com/MartinSStewart/elm-map
 
 ### State of play
 
-
 5. Think about 3D (Third, Rider views).
 > See if we can translate our camera position into the map's webgl context.
 

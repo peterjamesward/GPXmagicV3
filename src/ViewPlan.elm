@@ -271,7 +271,13 @@ view context mapData settings display contentArea track scene msgWrapper =
     el
         [ behindContent <|
             if context.showMap then
-                html mapUnderlay
+                el
+                    [ inFront <|
+                        el [ alignLeft, alignBottom ] <|
+                            html MapViewer.attribution
+                    ]
+                <|
+                    html mapUnderlay
 
             else
                 none
