@@ -360,12 +360,13 @@ update paneMsg msgWrapper tracks contentArea options previews =
                             case ( mTrack, effectiveContext ) of
                                 ( Just track, Just context ) ->
                                     let
-                                        ( newThirdContext, act ) =
+                                        ( newThirdContext, act, newMapData ) =
                                             ViewThirdPerson.update
                                                 imageMsg
                                                 (msgWrapper << ThirdPersonViewMessage Pane1)
                                                 track
                                                 (dimensionsWithLayout options.paneLayout contentArea)
+                                                options.mapData
                                                 context
                                     in
                                     ( Just newThirdContext, act )
@@ -699,8 +700,20 @@ initialisePane :
 initialisePane track options paneArea pane =
     { pane
         | activeView = pane.activeView
-        , thirdPersonContext = Just <| ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
-        , firstPersonContext = Just <| ViewThirdPerson.initialiseView 0 track.trackTree pane.firstPersonContext
+        , thirdPersonContext =
+            Just <|
+                ViewThirdPerson.initialiseView
+                    0
+                    paneArea
+                    track
+                    pane.thirdPersonContext
+        , firstPersonContext =
+            Just <|
+                ViewThirdPerson.initialiseView
+                    0
+                    paneArea
+                    track
+                    pane.firstPersonContext
         , profileContext =
             Just <|
                 ViewProfileChartsCanvas.initialiseView
@@ -924,6 +937,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                             ( Just context, Just track ) ->
                                 ViewThirdPerson.view
                                     settings
+                                    options.mapData
                                     context
                                     displayOptions
                                     ( paneWidth, paneHeight )

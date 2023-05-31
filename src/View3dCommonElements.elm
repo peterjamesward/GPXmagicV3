@@ -24,6 +24,7 @@ import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import MapViewer
 import Pixels exposing (Pixels)
 import Point2d
 import Point3d.Projection as Point3d
@@ -54,6 +55,8 @@ type Msg
     | ToggleFollowOrange
     | SetEmphasis Int
     | MouseMove Mouse.Event
+    | MapMsg MapViewer.Msg
+    | ToggleShowMap
 
 
 type DragAction
@@ -74,6 +77,8 @@ type alias Context =
     , focalPoint : EarthPoint
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
+    , map : MapViewer.Model
+    , showMap : Bool
     }
 
 
@@ -150,6 +155,25 @@ zoomButtons settings msgWrapper context =
 
                 else
                     useIcon FeatherIcons.unlock
+            }
+        , Input.button
+            [ ToolTip.tooltip
+                onLeft
+                (ToolTip.myTooltip <|
+                    if context.showMap then
+                        "Hide map"
+
+                    else
+                        "Show map"
+                )
+            ]
+            { onPress = Just <| msgWrapper ToggleShowMap
+            , label =
+                if context.showMap then
+                    useIcon FeatherIcons.square
+
+                else
+                    useIcon FeatherIcons.map
             }
         ]
 

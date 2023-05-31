@@ -9,10 +9,15 @@ import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
+import Html
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Length exposing (Meters)
+import LngLat
 import LocalCoords exposing (LocalCoords)
+import MapViewer
+import MapboxKey
 import Pixels exposing (Pixels)
+import Plane3d
 import Point2d
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
@@ -23,13 +28,16 @@ import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews
 import Vector3d
 import View3dCommonElements exposing (..)
 import Viewpoint3d
+import ZoomLevel
 
 
 view :
     SystemSettings
+    -> MapViewer.MapData
     -> Context
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -37,16 +45,23 @@ view :
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view settings context display contentArea track scene msgWrapper =
+view settings mapData context display contentArea track scene msgWrapper =
     let
         dragging =
             context.dragAction
 
         camera =
-            deriveCamera track.trackTree context track.currentPosition
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
         overlay =
             placesOverlay display contentArea track camera
+
+        mapUnderlay =
+            Html.map (msgWrapper << MapMsg) <|
+                MapViewer.view
+                    []
+                    mapData
+                    context.map
     in
     el
         ((if dragging /= DragNone then
@@ -62,7 +77,7 @@ view settings context display contentArea track scene msgWrapper =
     <|
         html <|
             Scene3d.sunny
-                { camera = deriveCamera track.trackTree context track.currentPosition
+                { camera = deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
                 , dimensions = contentArea
                 , background = backgroundColor Color.lightBlue
                 , clipDepth = Length.meters 1
@@ -73,8 +88,8 @@ view settings context display contentArea track scene msgWrapper =
                 }
 
 
-deriveCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
-deriveCamera treeNode context currentPosition =
+deriveCamera : GPXSource -> PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
+deriveCamera refPoint treeNode context currentPosition =
     let
         latitude =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
@@ -85,6 +100,20 @@ deriveCamera treeNode context currentPosition =
 
             else
                 context.focalPoint
+
+        eyePoint =
+            --TODO: Perhaps tilting by 'latitude' will compensate for Mercator distortion.
+            Point3d.translateBy
+                (Vector3d.meters 0.0 0.0 5000.0)
+                lookingAt.space
+
+        viewpoint =
+            -- Fixing "up is North" so that 2-way drag works well.
+            Viewpoint3d.lookAt
+                { focalPoint = lookingAt.space
+                , eyePoint = eyePoint
+                , upDirection = Direction3d.positiveY
+                }
 
         cameraViewpoint =
             Viewpoint3d.orbitZ
@@ -126,7 +155,7 @@ detectHit event track ( w, h ) context =
 
         camera =
             -- Must use same camera derivation as for the 3D model, else pointless!
-            deriveCamera track.trackTree context track.currentPosition
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
         ray =
             Camera3d.ray camera screenRectangle screenPoint
@@ -138,62 +167,180 @@ detectHit event track ( w, h ) context =
         track.currentPosition
 
 
+mapBoundsFromScene :
+    Context
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
+    -> ( LngLat.LngLat, LngLat.LngLat )
+mapBoundsFromScene updatedContext ( width, height ) track =
+    -- Call this after updating context after any update changing the view/
+    let
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity width, toFloatQuantity height )
+
+        oopsLngLat =
+            { lng = 0, lat = 0 }
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        camera =
+            deriveCamera track.referenceLonLat track.trackTree updatedContext track.currentPosition
+
+        ( rayOrigin, rayMax ) =
+            ( Camera3d.ray camera screenRectangle Point2d.origin
+            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
+            )
+
+        ( topLeftModel, bottomRightModel ) =
+            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
+            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+            )
+
+        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
+        lngLatFromXY point =
+            let
+                gps : GPXSource
+                gps =
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
+            in
+            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+            , lat = gps.latitude |> Angle.inDegrees
+            }
+    in
+    case ( topLeftModel, bottomRightModel ) of
+        ( Just topLeft, Just bottomRight ) ->
+            ( lngLatFromXY topLeft
+            , lngLatFromXY bottomRight
+            )
+
+        _ ->
+            -- We hope never to see this.
+            ( oopsLngLat, oopsLngLat )
+
+
 update :
     Msg
     -> (Msg -> msg)
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> MapViewer.MapData
     -> Context
-    -> ( Context, List (ToolAction msg) )
-update msg msgWrapper track area context =
+    -> ( Context, List (ToolAction msg), MapViewer.MapData )
+update msg msgWrapper track ( width, height ) mapData context =
+    let
+        -- Let us have some information about the view, making dragging more precise.
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity width, toFloatQuantity height )
+
+        oopsLngLat =
+            { lng = 0, lat = 0 }
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        camera =
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+
+        ( rayOrigin, rayMax ) =
+            ( Camera3d.ray camera screenRectangle Point2d.origin
+            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
+            )
+
+        ( topLeftModel, bottomRightModel ) =
+            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
+            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+            )
+
+        metersPerPixel =
+            case ( topLeftModel, bottomRightModel ) of
+                ( Just topLeft, Just bottomRight ) ->
+                    (Length.inMeters <| Vector3d.xComponent <| Vector3d.from topLeft bottomRight)
+                        / Pixels.toFloat wFloat
+
+                _ ->
+                    -- We hope never to see this.
+                    1
+
+        updatedMap ctxt =
+            let
+                ( lngLat1, lngLat2 ) =
+                    mapBoundsFromScene ctxt ( width, height ) track
+
+                noPadding =
+                    { left = 0, right = 0, top = 0, bottom = 0 }
+            in
+            MapViewer.withViewBounds noPadding lngLat1 lngLat2 ctxt.map
+    in
     case msg of
+        MapMsg mapMsg ->
+            let
+                { newModel, newMapData, outMsg, cmd } =
+                    MapViewer.update
+                        (MapViewer.mapboxAccessToken MapboxKey.mapboxKey)
+                        mapData
+                        mapMsg
+                        context.map
+            in
+            ( { context | map = newModel }
+            , [ ExternalCommand <| Cmd.map (msgWrapper << MapMsg) cmd ]
+            , newMapData
+            )
+
         ImageZoomIn ->
             let
                 newContext =
                     { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
             in
-            ( newContext, [] )
+            ( newContext, [], mapData )
 
         ImageZoomOut ->
             let
                 newContext =
                     { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
             in
-            ( newContext, [] )
+            ( newContext, [], mapData )
 
         ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree (Just context)
+            ( initialiseView track.currentPosition ( width, height ) track (Just context)
             , []
+            , mapData
             )
 
         ImageNoOp ->
-            ( context, [] )
+            ( context, [], mapData )
 
         ImageClick event ->
             -- Click moves pointer but does not re-centre view. (Double click will.)
             if context.waitingForClickDelay then
                 ( context
-                , [ SetCurrent <| detectHit event track area context
+                , [ SetCurrent <| detectHit event track ( width, height ) context
                   , TrackHasChanged
                   ]
+                , mapData
                 )
 
             else
-                ( context, [] )
+                ( context, [], mapData )
 
         ImageDoubleClick event ->
             let
                 nearestPoint =
-                    detectHit event track area context
+                    detectHit event track ( width, height ) context
             in
             ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
             , [ SetCurrent nearestPoint
               , TrackHasChanged
               ]
+            , mapData
             )
 
         ClickDelayExpired ->
-            ( { context | waitingForClickDelay = False }, [] )
+            ( { context | waitingForClickDelay = False }, [], mapData )
 
         ImageMouseWheel deltaY ->
             let
@@ -203,7 +350,7 @@ update msg msgWrapper track area context =
                 newContext =
                     { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
             in
-            ( newContext, [] )
+            ( newContext, [], mapData )
 
         ImageGrab event ->
             -- Mouse behaviour depends which view is in use...
@@ -226,6 +373,7 @@ update msg msgWrapper track area context =
             in
             ( newContext
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
+            , mapData
             )
 
         ImageDrag event ->
@@ -256,6 +404,7 @@ update msg msgWrapper track area context =
                     in
                     ( newContext
                     , []
+                    , mapData
                     )
 
                 ( DragPan, Just ( startX, startY ) ) ->
@@ -285,10 +434,10 @@ update msg msgWrapper track area context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext, [] )
+                    ( newContext, [], mapData )
 
                 _ ->
-                    ( context, [] )
+                    ( context, [], mapData )
 
         ImageRelease _ ->
             let
@@ -298,7 +447,7 @@ update msg msgWrapper track area context =
                         , dragAction = DragNone
                     }
             in
-            ( newContext, [] )
+            ( newContext, [], mapData )
 
         ToggleFollowOrange ->
             ( { context
@@ -306,49 +455,83 @@ update msg msgWrapper track area context =
                 , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
               }
             , []
+            , mapData
+            )
+
+        ToggleShowMap ->
+            ( { context | showMap = not context.showMap }
+            , []
+            , mapData
             )
 
         SetEmphasis _ ->
-            ( context, [] )
+            ( context, [], mapData )
 
         MouseMove _ ->
             -- Only interested if dragging.
-            ( context, [] )
+            ( context, [], mapData )
 
 
 initialiseView :
     Int
-    -> PeteTree
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
     -> Maybe Context
     -> Context
-initialiseView current treeNode currentContext =
-    case currentContext of
-        Just context ->
-            { context
-                | cameraAzimuth = Direction2d.negativeY
-                , cameraElevation = Angle.degrees 30
-                , cameraDistance = Length.kilometers 10
-                , fieldOfView = Angle.degrees 45
-                , orbiting = Nothing
-                , dragAction = DragNone
-                , zoomLevel = 14.0
-                , defaultZoomLevel = 14.0
-                , focalPoint =
-                    treeNode |> leafFromIndex current |> startPoint
-                , waitingForClickDelay = False
-            }
+initialiseView current contentArea track currentContext =
+    let
+        treeNode =
+            track.trackTree
 
-        Nothing ->
-            { cameraAzimuth = Direction2d.negativeY
-            , cameraElevation = Angle.degrees 30
-            , cameraDistance = Length.kilometers 10
-            , fieldOfView = Angle.degrees 45
-            , orbiting = Nothing
-            , dragAction = DragNone
-            , zoomLevel = 14.0
-            , defaultZoomLevel = 14.0
-            , focalPoint =
-                treeNode |> leafFromIndex current |> startPoint
-            , waitingForClickDelay = False
-            , followSelectedPoint = True
-            }
+        initialMap =
+            MapViewer.init
+                { lng = 0, lat = 0 }
+                (ZoomLevel.fromLogZoom 12)
+                1
+                contentArea
+
+        newContext =
+            case currentContext of
+                Just context ->
+                    { context
+                        | cameraAzimuth = Direction2d.negativeY
+                        , cameraElevation = Angle.degrees 30
+                        , cameraDistance = Length.kilometers 10
+                        , fieldOfView = Angle.degrees 45
+                        , orbiting = Nothing
+                        , dragAction = DragNone
+                        , zoomLevel = 14.0
+                        , defaultZoomLevel = 14.0
+                        , focalPoint =
+                            treeNode |> leafFromIndex current |> startPoint
+                        , waitingForClickDelay = False
+                    }
+
+                Nothing ->
+                    { cameraAzimuth = Direction2d.negativeY
+                    , cameraElevation = Angle.degrees 30
+                    , cameraDistance = Length.kilometers 10
+                    , fieldOfView = Angle.degrees 45
+                    , orbiting = Nothing
+                    , dragAction = DragNone
+                    , zoomLevel = 14.0
+                    , defaultZoomLevel = 14.0
+                    , focalPoint =
+                        treeNode |> leafFromIndex current |> startPoint
+                    , waitingForClickDelay = False
+                    , followSelectedPoint = True
+                    , map = initialMap
+                    , showMap = False
+                    }
+
+        ( lngLat1, lngLat2 ) =
+            mapBoundsFromScene newContext contentArea track
+    in
+    { newContext
+        | map =
+            MapViewer.withViewBounds
+                UtilsForViews.noPadding
+                lngLat1
+                lngLat2
+                newContext.map
+    }

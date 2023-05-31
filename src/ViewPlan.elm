@@ -426,11 +426,8 @@ update msg msgWrapper track ( width, height ) context mapData =
             let
                 ( lngLat1, lngLat2 ) =
                     mapBoundsFromScene ctxt ( width, height ) track
-
-                noPadding =
-                    { left = 0, right = 0, top = 0, bottom = 0 }
             in
-            MapViewer.withViewBounds noPadding lngLat1 lngLat2 ctxt.map
+            MapViewer.withViewBounds UtilsForViews.noPadding lngLat1 lngLat2 ctxt.map
     in
     -- Second return value indicates whether selection needs to change.
     case msg of

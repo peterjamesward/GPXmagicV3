@@ -1,4 +1,24 @@
-module UtilsForViews exposing (colorFromElmUiColour, colourHexString, elmuiColour, flatBox, formattedTime, fullDepthRenderingBoxSize, httpErrorString, latitudeString, longitudeString, showAngle, showDecimal0, showDecimal1, showDecimal2, showLongMeasure, showShortMeasure, showSpeed, uiColourHexString, withLeadingZeros)
+module UtilsForViews exposing
+    ( colorFromElmUiColour
+    , colourHexString
+    , elmuiColour
+    , flatBox
+    , formattedTime
+    , fullDepthRenderingBoxSize
+    , httpErrorString
+    , latitudeString
+    , longitudeString
+    , noPadding
+    , showAngle
+    , showDecimal0
+    , showDecimal1
+    , showDecimal2
+    , showLongMeasure
+    , showShortMeasure
+    , showSpeed
+    , uiColourHexString
+    , withLeadingZeros
+    )
 
 import Angle
 import BoundingBox2d exposing (BoundingBox2d)
@@ -220,6 +240,10 @@ flatBox box =
             BoundingBox3d.extrema box
     in
     BoundingBox2d.fromExtrema { minX = minX, maxX = maxX, minY = minY, maxY = maxY }
+
+
+noPadding =
+    { left = 0, right = 0, top = 0, bottom = 0 }
 
 
 longitudeString angle =
