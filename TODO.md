@@ -22,7 +22,11 @@ https://github.com/MartinSStewart/elm-map
 ### State of play
 
 * Think about 3D (Third, Rider views).
-> See if we can translate our camera position into the map's webgl context.
+
+> 3D compiles. Map shows.
+> Not zooming or panning, or resizing.
+> Need to get to point where it looks the same as Plan when we're looking down on it.
+> Then, it's "onlt" camera placement.
 
 ---
 

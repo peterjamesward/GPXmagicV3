@@ -62,30 +62,52 @@ view settings mapData context display contentArea track scene msgWrapper =
                     []
                     mapData
                     context.map
+
+        view3d =
+            el
+                ((if dragging /= DragNone then
+                    htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+
+                  else
+                    pointer
+                 )
+                    :: (inFront <| overlay)
+                    :: (inFront <| zoomButtons settings msgWrapper context)
+                    :: common3dSceneAttributes msgWrapper context
+                )
+            <|
+                html <|
+                    Scene3d.sunny
+                        { camera = deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+                        , dimensions = contentArea
+                        , background =
+                            if context.showMap then
+                                Scene3d.transparentBackground
+
+                            else
+                                backgroundColor Color.lightBlue
+                        , clipDepth = Length.meters 1
+                        , entities = scene
+                        , upDirection = positiveZ
+                        , sunlightDirection = negativeZ
+                        , shadows = False
+                        }
     in
     el
-        ((if dragging /= DragNone then
-            htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+        [ behindContent <|
+            if context.showMap then
+                el
+                    [ inFront <|
+                        el [ alignLeft, alignBottom ] <|
+                            html MapViewer.attribution
+                    ]
+                <|
+                    html mapUnderlay
 
-          else
-            pointer
-         )
-            :: (inFront <| overlay)
-            :: (inFront <| zoomButtons settings msgWrapper context)
-            :: common3dSceneAttributes msgWrapper context
-        )
-    <|
-        html <|
-            Scene3d.sunny
-                { camera = deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
-                , dimensions = contentArea
-                , background = backgroundColor Color.lightBlue
-                , clipDepth = Length.meters 1
-                , entities = scene
-                , upDirection = positiveZ
-                , sunlightDirection = negativeZ
-                , shadows = False
-                }
+            else
+                none
+        ]
+        view3d
 
 
 deriveCamera : GPXSource -> PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
