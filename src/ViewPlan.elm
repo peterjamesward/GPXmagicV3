@@ -266,6 +266,7 @@ view context mapData settings display contentArea track scene msgWrapper =
                 MapViewer.view
                     []
                     mapData
+                    Nothing
                     context.map
     in
     el

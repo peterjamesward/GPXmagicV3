@@ -1697,8 +1697,8 @@ canvasSize (Model model) =
 
 {-| Draw the map! You can add additional layers on top of the map as well though for now this isn't easy to do unless you are well versed in how to use `elm-explorations/webgl`. The plan is to add helper functions in a future version of this package that make it easier.
 -}
-view : List WebGL.Entity -> MapData -> Model -> Html Msg
-view extraLayers (MapData mapData) (Model model) =
+view : List WebGL.Entity -> MapData -> Maybe Mat4 -> Model -> Html Msg
+view extraLayers (MapData mapData) externalMatrix (Model model) =
     let
         ( cssWindowWidth, cssWindowHeight ) =
             perfectSize.canvasSize
@@ -1714,14 +1714,17 @@ view extraLayers (MapData mapData) (Model model) =
                 (Quantity.toFloatQuantity canvasWidth)
                 (Quantity.toFloatQuantity canvasHeight)
 
-        viewMatrix : Mat4
-        viewMatrix =
+        internalViewMatrix : Mat4
+        internalViewMatrix =
             WebGL.Matrices.viewProjectionMatrix
                 (camera (Model model))
                 { nearClipDepth = Quantity.float 0.1
                 , farClipDepth = Quantity.float 10
                 , aspectRatio = aspectRatio
                 }
+
+        viewMatrix =
+            externalMatrix |> Maybe.withDefault internalViewMatrix
 
         zoom : Int
         zoom =

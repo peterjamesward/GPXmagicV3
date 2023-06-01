@@ -16,6 +16,7 @@ import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import MapboxKey
+import Math.Matrix4 exposing (Mat4)
 import Pixels exposing (Pixels)
 import Plane3d
 import Point2d
@@ -31,6 +32,7 @@ import UtilsForViews
 import Vector3d
 import View3dCommonElements exposing (..)
 import Viewpoint3d
+import WebGL.Matrices
 import ZoomLevel
 
 
@@ -60,11 +62,29 @@ view settings mapData context display contentArea track scene msgWrapper =
         overlay =
             placesOverlay display contentArea track camera
 
+        ( canvasWidth, canvasHeight ) =
+            contentArea
+
+        aspectRatio =
+            Quantity.ratio
+                (Quantity.toFloatQuantity canvasWidth)
+                (Quantity.toFloatQuantity canvasHeight)
+
+        viewMatrix : Mat4
+        viewMatrix =
+            WebGL.Matrices.viewProjectionMatrix
+                camera
+                { nearClipDepth = Length.meters 0.1
+                , farClipDepth = Length.meters 1000
+                , aspectRatio = aspectRatio
+                }
+
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
                     []
                     mapData
+                    (Just viewMatrix)
                     context.map
 
         view3d =
