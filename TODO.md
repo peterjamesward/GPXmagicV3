@@ -23,9 +23,13 @@ https://github.com/MartinSStewart/elm-map
 
 * Think about 3D (Third, Rider views).
 
-> Resize support for third.
-> Need to get to point where it looks the same as Plan when we're looking down on it.
+> Restrict bounds to track bounding box (plus some).
+> Need to get to point where it looks the same as Plan when we're looking down on it (sort of there now).
 > Then, it's "only" camera placement.
+> Meaning, suppose we pass our camera azimuth, elevation and distance to MapViewer.view'
+> (having made sure the default remains if this is not present).
+> Then, we work out how to position the MapViewer camera relatively aligned.
+> 
 > Same for Rider view.
 
 ---

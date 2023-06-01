@@ -1,4 +1,4 @@
-module ViewFirstPerson exposing (subscriptions, view)
+module ViewFirstPerson exposing (resizeOccured, subscriptions, view)
 
 import Angle
 import Camera3d exposing (Camera3d)
@@ -28,6 +28,11 @@ import Viewpoint3d
 subscriptions : MapViewer.MapData -> Context -> Sub Msg
 subscriptions mapData context =
     MapViewer.subscriptions mapData context.map |> Sub.map MapMsg
+
+
+resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> Context -> Context
+resizeOccured paneArea context =
+    { context | map = MapViewer.resizeCanvas 1.0 paneArea context.map }
 
 
 view :

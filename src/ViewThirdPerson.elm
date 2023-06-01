@@ -1,4 +1,4 @@
-module ViewThirdPerson exposing (initialiseView, subscriptions, update, view)
+module ViewThirdPerson exposing (initialiseView, resizeOccured, subscriptions, update, view)
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -112,6 +112,11 @@ view settings mapData context display contentArea track scene msgWrapper =
                 none
         ]
         view3d
+
+
+resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> Context -> Context
+resizeOccured paneArea context =
+    { context | map = MapViewer.resizeCanvas 1.0 paneArea context.map }
 
 
 deriveCamera : GPXSource -> PeteTree -> Context -> Int -> Camera3d Meters LocalCoords

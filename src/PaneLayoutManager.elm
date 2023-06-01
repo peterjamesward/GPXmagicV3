@@ -618,6 +618,12 @@ resizeOccured ( w, h ) options =
                 ViewPlan ->
                     { pane | planContext = Maybe.map (ViewPlan.resizeOccured paneArea) pane.planContext }
 
+                ViewThird ->
+                    { pane | thirdPersonContext = Maybe.map (ViewThirdPerson.resizeOccured paneArea) pane.thirdPersonContext }
+
+                ViewFirst ->
+                    { pane | firstPersonContext = Maybe.map (ViewFirstPerson.resizeOccured paneArea) pane.firstPersonContext }
+
                 _ ->
                     pane
     in
