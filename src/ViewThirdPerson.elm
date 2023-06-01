@@ -1,4 +1,4 @@
-module ViewThirdPerson exposing (initialiseView, update, view)
+module ViewThirdPerson exposing (initialiseView, subscriptions, update, view)
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -26,13 +26,17 @@ import Scene3d exposing (Entity, backgroundColor)
 import Spherical
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews
 import Vector3d
 import View3dCommonElements exposing (..)
 import Viewpoint3d
 import ZoomLevel
+
+
+subscriptions : MapViewer.MapData -> Context -> Sub Msg
+subscriptions mapData context =
+    MapViewer.subscriptions mapData context.map |> Sub.map MapMsg
 
 
 view :
@@ -122,20 +126,6 @@ deriveCamera refPoint treeNode context currentPosition =
 
             else
                 context.focalPoint
-
-        eyePoint =
-            --TODO: Perhaps tilting by 'latitude' will compensate for Mercator distortion.
-            Point3d.translateBy
-                (Vector3d.meters 0.0 0.0 5000.0)
-                lookingAt.space
-
-        viewpoint =
-            -- Fixing "up is North" so that 2-way drag works well.
-            Viewpoint3d.lookAt
-                { focalPoint = lookingAt.space
-                , eyePoint = eyePoint
-                , upDirection = Direction3d.positiveY
-                }
 
         cameraViewpoint =
             Viewpoint3d.orbitZ
@@ -318,20 +308,21 @@ update msg msgWrapper track ( width, height ) mapData context =
                 newContext =
                     { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
             in
-            ( newContext, [], mapData )
+            ( { newContext | map = updatedMap newContext }, [], mapData )
 
         ImageZoomOut ->
             let
                 newContext =
                     { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
             in
-            ( newContext, [], mapData )
+            ( { newContext | map = updatedMap newContext }, [], mapData )
 
         ImageReset ->
-            ( initialiseView track.currentPosition ( width, height ) track (Just context)
-            , []
-            , mapData
-            )
+            let
+                newContext =
+                    initialiseView track.currentPosition ( width, height ) track (Just context)
+            in
+            ( { newContext | map = updatedMap newContext }, [], mapData )
 
         ImageNoOp ->
             ( context, [], mapData )

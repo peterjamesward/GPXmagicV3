@@ -1,4 +1,4 @@
-module ViewFirstPerson exposing (view)
+module ViewFirstPerson exposing (subscriptions, view)
 
 import Angle
 import Camera3d exposing (Camera3d)
@@ -14,6 +14,7 @@ import Element.Font as Font
 import FlatColors.ChinesePalette exposing (white)
 import Length
 import LocalCoords exposing (LocalCoords)
+import MapViewer
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
@@ -22,6 +23,11 @@ import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour, showDecimal1)
 import View3dCommonElements exposing (..)
 import Viewpoint3d
+
+
+subscriptions : MapViewer.MapData -> Context -> Sub Msg
+subscriptions mapData context =
+    MapViewer.subscriptions mapData context.map |> Sub.map MapMsg
 
 
 view :

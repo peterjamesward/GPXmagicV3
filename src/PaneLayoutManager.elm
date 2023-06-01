@@ -133,23 +133,51 @@ type Msg
 
 subscriptions : PaneLayoutOptions -> Sub Msg
 subscriptions options =
-    [ ( options.pane1.planContext, Pane1 )
-    , ( options.pane2.planContext, Pane2 )
-    , ( options.pane3.planContext, Pane3 )
-    , ( options.pane4.planContext, Pane4 )
-    ]
-        |> List.filterMap
-            (\( planContext, paneId ) ->
-                case planContext of
-                    Just context ->
-                        ViewPlan.subscriptions options.mapData context
-                            |> Sub.map (PlanViewMessage paneId)
-                            |> Just
+    let
+        panes =
+            [ options.pane1
+            , options.pane2
+            , options.pane3
+            , options.pane4
+            ]
 
-                    Nothing ->
-                        Nothing
-            )
-        |> Sub.batch
+        subsForPane : PaneContext -> Maybe (Sub Msg)
+        subsForPane pane =
+            case pane.activeView of
+                ViewFirst ->
+                    case pane.firstPersonContext of
+                        Just context ->
+                            ViewFirstPerson.subscriptions options.mapData context
+                                |> Sub.map (ThirdPersonViewMessage pane.paneId)
+                                |> Just
+
+                        Nothing ->
+                            Nothing
+
+                ViewThird ->
+                    case pane.thirdPersonContext of
+                        Just context ->
+                            ViewThirdPerson.subscriptions options.mapData context
+                                |> Sub.map (ThirdPersonViewMessage pane.paneId)
+                                |> Just
+
+                        Nothing ->
+                            Nothing
+
+                ViewPlan ->
+                    case pane.planContext of
+                        Just context ->
+                            ViewPlan.subscriptions options.mapData context
+                                |> Sub.map (PlanViewMessage pane.paneId)
+                                |> Just
+
+                        Nothing ->
+                            Nothing
+
+                _ ->
+                    Nothing
+    in
+    Sub.batch <| List.filterMap subsForPane panes
 
 
 paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
@@ -356,23 +384,23 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                 _ ->
                                     Nothing
 
-                        ( newContext, actions ) =
+                        ( newContext, actions, newMapDataFromPane ) =
                             case ( mTrack, effectiveContext ) of
                                 ( Just track, Just context ) ->
                                     let
                                         ( newThirdContext, act, newMapData ) =
                                             ViewThirdPerson.update
                                                 imageMsg
-                                                (msgWrapper << ThirdPersonViewMessage Pane1)
+                                                (msgWrapper << ThirdPersonViewMessage paneId)
                                                 track
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 options.mapData
                                                 context
                                     in
-                                    ( Just newThirdContext, act )
+                                    ( Just newThirdContext, act, newMapData )
 
                                 _ ->
-                                    ( Nothing, [] )
+                                    ( Nothing, [], options.mapData )
 
                         newPane =
                             case paneInfo.activeView of
@@ -385,7 +413,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                 _ ->
                                     paneInfo
                     in
-                    ( ( newPane, options.mapData ), tracks, actions )
+                    ( ( newPane, newMapDataFromPane ), tracks, actions )
             in
             updatePaneWith paneId paneUpdateFunction
 
