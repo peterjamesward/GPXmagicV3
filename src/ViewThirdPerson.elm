@@ -222,6 +222,8 @@ mapBoundsFromScene updatedContext ( width, height ) track =
             , lat = gps.latitude |> Angle.inDegrees
             }
     in
+    --TODO: Intersect with track/graph bounds.
+    --Debug.log "bounds" <|
     case ( topLeftModel, bottomRightModel ) of
         ( Just topLeft, Just bottomRight ) ->
             ( lngLatFromXY topLeft
@@ -363,7 +365,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                 newContext =
                     { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
             in
-            ( newContext, [], mapData )
+            ( { newContext | map = updatedMap newContext }, [], mapData )
 
         ImageGrab event ->
             -- Mouse behaviour depends which view is in use...
