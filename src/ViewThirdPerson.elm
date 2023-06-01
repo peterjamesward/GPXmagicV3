@@ -346,8 +346,11 @@ update msg msgWrapper track ( width, height ) mapData context =
             let
                 nearestPoint =
                     detectHit event track ( width, height ) context
+
+                newContext =
+                    { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
             in
-            ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
+            ( { newContext | map = updatedMap newContext }
             , [ SetCurrent nearestPoint
               , TrackHasChanged
               ]
@@ -417,7 +420,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext
+                    ( { newContext | map = updatedMap newContext }
                     , []
                     , mapData
                     )
@@ -449,7 +452,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext, [], mapData )
+                    ( { newContext | map = updatedMap newContext }, [], mapData )
 
                 _ ->
                     ( context, [], mapData )

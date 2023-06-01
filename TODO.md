@@ -23,10 +23,10 @@ https://github.com/MartinSStewart/elm-map
 
 * Think about 3D (Third, Rider views).
 
-> 3D compiles. Map shows.
-> Not zooming or panning, or resizing.
+> Resize support for third.
 > Need to get to point where it looks the same as Plan when we're looking down on it.
-> Then, it's "onlt" camera placement.
+> Then, it's "only" camera placement.
+> Same for Rider view.
 
 ---
 
