@@ -962,8 +962,8 @@ camera3d_ point ( azimuth, elevation ) =
 
         eyepoint =
             normalEyepoint
-                |> Point3d.rotateAround Axis3d.y elevation
-                |> Point3d.rotateAround Axis3d.z (Direction2d.toAngle azimuth)
+                |> Point3d.rotateAround Axis3d.y (Quantity.negate elevation)
+                |> Point3d.rotateAround Axis3d.z (Direction2d.toAngle azimuth |> Quantity.negate)
 
         cameraViewpoint =
             Viewpoint3d.lookAt
@@ -974,7 +974,7 @@ camera3d_ point ( azimuth, elevation ) =
     in
     Camera3d.perspective
         { viewpoint = cameraViewpoint
-        , verticalFieldOfView = Angle.degrees 45
+        , verticalFieldOfView = Angle.degrees 4
         }
 
 
@@ -1756,12 +1756,12 @@ view extraLayers (MapData mapData) adjustments (Model model) =
                 (Quantity.toFloatQuantity canvasHeight)
 
         useCamera =
-            --case adjustments of
-            --    Just useThese ->
-            --        camera3d (Model model) useThese
-            --
-            --    Nothing ->
-            camera (Model model)
+            case adjustments of
+                Just useThese ->
+                    camera3d (Model model) useThese
+
+                Nothing ->
+                    camera (Model model)
 
         viewMatrix : Mat4
         viewMatrix =
