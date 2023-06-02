@@ -957,19 +957,20 @@ camera3d_ point ( azimuth, elevation ) =
         { x, y } =
             Point2d.toUnitless point
 
+        normalEyepoint =
+            Point3d.fromUnitless { x = x, y = y, z = -1 }
+
+        eyepoint =
+            normalEyepoint
+                |> Point3d.rotateAround Axis3d.y elevation
+                |> Point3d.rotateAround Axis3d.z (Direction2d.toAngle azimuth)
+
         cameraViewpoint =
             Viewpoint3d.lookAt
                 { focalPoint = Point3d.fromUnitless { x = x, y = y, z = 0 }
-                , eyePoint = Point3d.fromUnitless { x = x, y = y, z = -1 }
+                , eyePoint = eyepoint
                 , upDirection = Direction3d.negativeY
                 }
-
-        --Viewpoint3d.orbitZ
-        --    { focalPoint = Point3d.fromUnitless { x = x, y = y, z = 0 }
-        --    , azimuth = Quantity.negate <| Direction2d.toAngle azimuth
-        --    , elevation = Quantity.negate elevation
-        --    , distance = Quantity.float 1
-        --    }
     in
     Camera3d.perspective
         { viewpoint = cameraViewpoint

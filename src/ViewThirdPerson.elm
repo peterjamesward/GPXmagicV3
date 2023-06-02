@@ -65,14 +65,6 @@ view settings mapData context display contentArea track scene msgWrapper =
         overlay =
             placesOverlay display contentArea track camera
 
-        ( canvasWidth, canvasHeight ) =
-            contentArea
-
-        aspectRatio =
-            Quantity.ratio
-                (Quantity.toFloatQuantity canvasWidth)
-                (Quantity.toFloatQuantity canvasHeight)
-
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
@@ -286,50 +278,33 @@ update :
     -> ( Context, List (ToolAction msg), MapViewer.MapData )
 update msg msgWrapper track ( width, height ) mapData context =
     let
-        -- Let us have some information about the view, making dragging more precise.
-        ( wFloat, hFloat ) =
-            ( toFloatQuantity width, toFloatQuantity height )
-
-        oopsLngLat =
-            { lng = 0, lat = 0 }
-
-        screenRectangle =
-            Rectangle2d.from
-                (Point2d.xy Quantity.zero hFloat)
-                (Point2d.xy wFloat Quantity.zero)
-
-        camera =
-            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
-
-        ( rayOrigin, rayMax ) =
-            ( Camera3d.ray camera screenRectangle Point2d.origin
-            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
-            )
-
-        ( topLeftModel, bottomRightModel ) =
-            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
-            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
-            )
-
-        metersPerPixel =
-            case ( topLeftModel, bottomRightModel ) of
-                ( Just topLeft, Just bottomRight ) ->
-                    (Length.inMeters <| Vector3d.xComponent <| Vector3d.from topLeft bottomRight)
-                        / Pixels.toFloat wFloat
-
-                _ ->
-                    -- We hope never to see this.
-                    1
+        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
+        lngLatFromXY point =
+            let
+                gps : GPXSource
+                gps =
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
+            in
+            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+            , lat = gps.latitude |> Angle.inDegrees
+            }
 
         updatedMap ctxt =
             let
-                ( lngLat1, lngLat2 ) =
-                    mapBoundsFromScene ctxt ( width, height ) track
+                lookingAt =
+                    MapViewer.lngLatToWorld <|
+                        lngLatFromXY <|
+                            if context.followSelectedPoint then
+                                DomainModel.earthPointFromIndex track.currentPosition track.trackTree
+                                    |> .space
 
-                noPadding =
-                    { left = 0, right = 0, top = 0, bottom = 0 }
+                            else
+                                context.focalPoint.space
             in
-            MapViewer.withViewBounds noPadding lngLat1 lngLat2 ctxt.map
+            MapViewer.withPositionAndZoom
+                lookingAt
+                (ZoomLevel.fromLogZoom context.zoomLevel)
+                context.map
     in
     case msg of
         MapMsg mapMsg ->
