@@ -958,18 +958,18 @@ camera3d_ point ( azimuth, elevation ) =
             Point2d.toUnitless point
 
         normalEyepoint =
-            Point3d.fromUnitless { x = x, y = y, z = -1 }
+            Point3d.fromUnitless { x = x, y = y, z = 0.001 }
 
         eyepoint =
             normalEyepoint
-                |> Point3d.rotateAround Axis3d.y (Quantity.negate elevation)
-                |> Point3d.rotateAround Axis3d.z (Direction2d.toAngle azimuth |> Quantity.negate)
+                |> Point3d.rotateAround Axis3d.x (Angle.turns 0.25 |> Quantity.minus elevation)
 
+        --|> Point3d.rotateAround Axis3d.z (Direction2d.toAngle azimuth |> Quantity.plus (Angle.turns 0.25))
         cameraViewpoint =
             Viewpoint3d.lookAt
                 { focalPoint = Point3d.fromUnitless { x = x, y = y, z = 0 }
                 , eyePoint = eyepoint
-                , upDirection = Direction3d.negativeY
+                , upDirection = Direction3d.positiveZ
                 }
     in
     Camera3d.perspective
