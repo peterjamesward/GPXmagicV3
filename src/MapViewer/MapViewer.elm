@@ -736,13 +736,10 @@ lngLatToWorld lngLat =
                 Angle.degrees <|
                     lngLat.lat
                         / 2
-
-        piBy4 =
-            pi / 4
     in
     Point2d.unitless
         ((lngLat.lng + 180) / 360)
-        ((1 - (logBase e (tan (halfLat + piBy4)) / pi)) / 2)
+        ((1 - (logBase e (tan (halfLat + pi / 4)) / pi)) / 2)
 
 
 tileCount : Int -> Int
@@ -961,12 +958,18 @@ camera3d_ point ( azimuth, elevation ) =
             Point2d.toUnitless point
 
         cameraViewpoint =
-            Viewpoint3d.orbitZ
+            Viewpoint3d.lookAt
                 { focalPoint = Point3d.fromUnitless { x = x, y = y, z = 0 }
-                , azimuth = Quantity.negate <| Direction2d.toAngle azimuth
-                , elevation = Quantity.negate elevation
-                , distance = Quantity.float 1
+                , eyePoint = Point3d.fromUnitless { x = x, y = y, z = -1 }
+                , upDirection = Direction3d.negativeY
                 }
+
+        --Viewpoint3d.orbitZ
+        --    { focalPoint = Point3d.fromUnitless { x = x, y = y, z = 0 }
+        --    , azimuth = Quantity.negate <| Direction2d.toAngle azimuth
+        --    , elevation = Quantity.negate elevation
+        --    , distance = Quantity.float 1
+        --    }
     in
     Camera3d.perspective
         { viewpoint = cameraViewpoint
