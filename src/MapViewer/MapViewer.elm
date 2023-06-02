@@ -1752,16 +1752,15 @@ view extraLayers (MapData mapData) adjustments (Model model) =
                 (Quantity.toFloatQuantity canvasHeight)
 
         useCamera =
-            case adjustments of
-                Just useThese ->
-                    camera3d (Model model) useThese
-
-                Nothing ->
-                    camera (Model model)
+            --case adjustments of
+            --    Just useThese ->
+            --        camera3d (Model model) useThese
+            --
+            --    Nothing ->
+            camera (Model model)
 
         viewMatrix : Mat4
         viewMatrix =
-            --Debug.log "internalViewMatrix" <|
             WebGL.Matrices.viewProjectionMatrix
                 useCamera
                 { nearClipDepth = Quantity.float 0.1

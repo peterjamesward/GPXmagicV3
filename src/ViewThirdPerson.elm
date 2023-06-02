@@ -252,6 +252,7 @@ mapBoundsFromScene updatedContext ( width, height ) track =
             , lat = gps.latitude |> Angle.inDegrees
             }
     in
+    --Debug.log "BOUNDS" <|
     case ( topLeftModel, bottomRightModel ) of
         ( Just topLeft, Just bottomRight ) ->
             let
