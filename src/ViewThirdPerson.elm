@@ -3,6 +3,8 @@ module ViewThirdPerson exposing (initialiseView, resizeOccured, subscriptions, u
 import Actions exposing (ToolAction(..))
 import Angle
 import Axis3d
+import BoundingBox2d
+import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Color
 import Direction2d
@@ -24,6 +26,7 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
+import SketchPlane3d
 import Spherical
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
@@ -70,21 +73,16 @@ view settings mapData context display contentArea track scene msgWrapper =
                 (Quantity.toFloatQuantity canvasWidth)
                 (Quantity.toFloatQuantity canvasHeight)
 
-        viewMatrix : Mat4
-        viewMatrix =
-            WebGL.Matrices.viewProjectionMatrix
-                camera
-                { nearClipDepth = Length.meters 0.1
-                , farClipDepth = Length.meters 1000
-                , aspectRatio = aspectRatio
-                }
-
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
                     []
                     mapData
-                    (Just viewMatrix)
+                    (Just
+                        ( context.cameraAzimuth |> Direction2d.toAngle |> Direction2d.fromAngle
+                        , context.cameraElevation
+                        )
+                    )
                     context.map
 
         view3d =
@@ -211,6 +209,7 @@ mapBoundsFromScene :
     -> ( LngLat.LngLat, LngLat.LngLat )
 mapBoundsFromScene updatedContext ( width, height ) track =
     -- Call this after updating context after any update changing the view/
+    -- We restrict the bounds here to the track enclosing box.
     let
         ( wFloat, hFloat ) =
             ( toFloatQuantity width, toFloatQuantity height )
@@ -236,6 +235,12 @@ mapBoundsFromScene updatedContext ( width, height ) track =
             , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
             )
 
+        trackBox =
+            -- Restrict the bounds to the track enclosing box.
+            track.trackTree
+                |> DomainModel.boundingBox
+                |> BoundingBox3d.expandBy Length.kilometer
+
         lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
         lngLatFromXY point =
             let
@@ -247,12 +252,22 @@ mapBoundsFromScene updatedContext ( width, height ) track =
             , lat = gps.latitude |> Angle.inDegrees
             }
     in
-    --TODO: Intersect with track/graph bounds.
-    --Debug.log "bounds" <|
     case ( topLeftModel, bottomRightModel ) of
         ( Just topLeft, Just bottomRight ) ->
-            ( lngLatFromXY topLeft
-            , lngLatFromXY bottomRight
+            let
+                visibleBox =
+                    BoundingBox3d.from
+                        topLeft
+                        bottomRight
+
+                { minX, minY, maxX, maxY, minZ, maxZ } =
+                    visibleBox
+                        |> BoundingBox3d.intersection trackBox
+                        |> Maybe.withDefault trackBox
+                        |> BoundingBox3d.extrema
+            in
+            ( lngLatFromXY <| Point3d.xyz minX maxY Quantity.zero
+            , lngLatFromXY <| Point3d.xyz maxX minY Quantity.zero
             )
 
         _ ->

@@ -65,6 +65,7 @@ import Html.Events.Extra.Touch exposing (Touch)
 import Html.Events.Extra.Wheel
 import Http
 import Int64 exposing (Int64)
+import Length
 import List.Extra as List
 import List.Nonempty exposing (Nonempty(..))
 import LngLat exposing (LngLat)
@@ -950,11 +951,42 @@ camera_ point viewportHeight_ =
         }
 
 
+camera3d_ :
+    Point2d Unitless WorldCoordinates
+    -> ( Direction2d Unitless, Angle.Angle )
+    -> Camera3d Unitless WorldCoordinates
+camera3d_ point ( azimuth, elevation ) =
+    let
+        { x, y } =
+            Point2d.toUnitless point
+
+        cameraViewpoint =
+            Viewpoint3d.orbitZ
+                { focalPoint = Point3d.fromUnitless { x = x, y = y, z = 0 }
+                , azimuth = Quantity.negate <| Direction2d.toAngle azimuth
+                , elevation = Quantity.negate elevation
+                , distance = Quantity.float 1
+                }
+    in
+    Camera3d.perspective
+        { viewpoint = cameraViewpoint
+        , verticalFieldOfView = Angle.degrees 45
+        }
+
+
 {-| Get the camera that defines what part of the map is being viewed.
 -}
 camera : Model -> Camera3d Unitless WorldCoordinates
 camera (Model model) =
     camera_ model.viewPosition (viewportHeight model.devicePixelRatio model.canvasSize model.viewZoom)
+
+
+camera3d :
+    Model
+    -> ( Direction2d Unitless, Angle.Angle )
+    -> Camera3d Unitless WorldCoordinates
+camera3d (Model model) adjustments =
+    camera3d_ model.viewPosition adjustments
 
 
 {-| The height of the viewport in world units
@@ -1697,8 +1729,13 @@ canvasSize (Model model) =
 
 {-| Draw the map! You can add additional layers on top of the map as well though for now this isn't easy to do unless you are well versed in how to use `elm-explorations/webgl`. The plan is to add helper functions in a future version of this package that make it easier.
 -}
-view : List WebGL.Entity -> MapData -> Maybe Mat4 -> Model -> Html Msg
-view extraLayers (MapData mapData) externalMatrix (Model model) =
+view :
+    List WebGL.Entity
+    -> MapData
+    -> Maybe ( Direction2d Unitless, Angle.Angle )
+    -> Model
+    -> Html Msg
+view extraLayers (MapData mapData) adjustments (Model model) =
     let
         ( cssWindowWidth, cssWindowHeight ) =
             perfectSize.canvasSize
@@ -1714,17 +1751,23 @@ view extraLayers (MapData mapData) externalMatrix (Model model) =
                 (Quantity.toFloatQuantity canvasWidth)
                 (Quantity.toFloatQuantity canvasHeight)
 
-        internalViewMatrix : Mat4
-        internalViewMatrix =
+        useCamera =
+            case adjustments of
+                Just useThese ->
+                    camera3d (Model model) useThese
+
+                Nothing ->
+                    camera (Model model)
+
+        viewMatrix : Mat4
+        viewMatrix =
+            --Debug.log "internalViewMatrix" <|
             WebGL.Matrices.viewProjectionMatrix
-                (camera (Model model))
+                useCamera
                 { nearClipDepth = Quantity.float 0.1
                 , farClipDepth = Quantity.float 10
                 , aspectRatio = aspectRatio
                 }
-
-        viewMatrix =
-            externalMatrix |> Maybe.withDefault internalViewMatrix
 
         zoom : Int
         zoom =
@@ -1741,7 +1784,8 @@ view extraLayers (MapData mapData) externalMatrix (Model model) =
         drawRoad : Bool -> { a | roadLayer : WebGL.Mesh RoadVertex } -> Float -> Mat4 -> WebGL.Entity
         drawRoad isOutline tile relativeZoom matrix =
             WebGL.entityWith
-                [ WebGL.Settings.cullFace WebGL.Settings.back ]
+                []
+                --[ WebGL.Settings.cullFace WebGL.Settings.back ]
                 roadVertexShader
                 roadFragmentShader
                 tile.roadLayer
