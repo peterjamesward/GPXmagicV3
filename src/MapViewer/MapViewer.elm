@@ -958,7 +958,7 @@ camera3d_ point ( azimuth, elevation ) =
             Point2d.toUnitless point
 
         normalEyepoint =
-            Point3d.fromUnitless { x = x, y = y, z = 0.001 }
+            Point3d.fromUnitless { x = x, y = y, z = 1 }
 
         eyepoint =
             normalEyepoint

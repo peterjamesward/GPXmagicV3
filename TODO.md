@@ -23,7 +23,14 @@ https://github.com/MartinSStewart/elm-map
 
 * Think about 3D (Third, Rider views).
 
-> Restrict bounds to track bounding box (plus some).
+> Figure out the relationship between map's z value, angle of view.
+> Probably involves the zoom level and the window size.
+
+Yes. Should be able to derive the required "height" as we know the map centre and zoom (or bounds)
+in the Map Model.
+Note: rotation is not generally around x (or y) and z in the Map Model, we need to translate our 
+3d camera position into the map world (i.e. mercator values plus derived height). It is this derived
+(x,y,z) for camera that we pass in (perhaps with angle of view, for completeness).
 
 > Same for Rider view.
 
