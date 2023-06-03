@@ -4,7 +4,7 @@ module MapViewer exposing
     , defaultStyle, Style, Color
     , animateZoom, animateZoomAt, animateViewBounds, withPositionAndZoom, viewPosition, viewZoom, viewportHeight, camera, lngLatToWorld, canvasToWorld, canvasSize, DevicePixels, CanvasCoordinates, WorldCoordinates
     , attribution, loadTile
-    , GridPoint, PointerEvent, Value(..), getTags, withViewBounds
+    , ExternalView, GridPoint, PointerEvent, Value(..), getTags, withViewBounds
     )
 
 {-|
@@ -40,7 +40,7 @@ There is a limited amount of styling you can do to the map viewer. Likely you'll
 
 -}
 
-import Angle
+import Angle exposing (Angle)
 import Array exposing (Array)
 import AssocList as Dict exposing (Dict)
 import Axis2d
@@ -69,6 +69,7 @@ import Length exposing (Meters)
 import List.Extra as List
 import List.Nonempty exposing (Nonempty(..))
 import LngLat exposing (LngLat)
+import LocalCoords exposing (LocalCoords)
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3)
 import Math.Vector4 as Vec4 exposing (Vec4)
@@ -83,6 +84,7 @@ import Random
 import Random.List
 import Rectangle2d exposing (Rectangle2d)
 import Serialize
+import SketchPlane3d
 import Spherical
 import Task
 import Time
@@ -961,27 +963,23 @@ varies with zoom level. With that, we convert the given focus and view points to
 The idea is that this mirrors the camera used externally in GPXmagic.
 -}
 deriveCamera3d :
-    ( LngLat, Quantity Float Meters )
-    -> ( LngLat, Quantity Float Meters )
+    ExternalView
     -> Model
     -> Camera3d Unitless WorldCoordinates
-deriveCamera3d ( focalPointPosition, focalPointHeight ) ( viewPointPosition, viewPointHeight ) (Model model) =
+deriveCamera3d useView (Model model) =
     let
-        viewPositionWorld =
-            lngLatToWorld viewPointPosition
-
         focalPointPositionWorld =
-            lngLatToWorld focalPointPosition
+            lngLatToWorld useView.focusPosition
 
         mercatorVerticalExtent =
             -- becuase Mercator cuts off at 85.05 degrees. the world range [0,1] is in meters:
             Length.meters <| Spherical.metresPerDegree * 170
 
-        focusHeightWorld =
-            Quantity.ratio focalPointHeight mercatorVerticalExtent
+        cameraDistanceAsFraction =
+            Quantity.ratio useView.distance mercatorVerticalExtent
 
-        viewHeightWorld =
-            Quantity.ratio viewPointHeight mercatorVerticalExtent
+        focusHeightWorld =
+            Quantity.ratio useView.focusHeight mercatorVerticalExtent
 
         withHeight height point2d =
             let
@@ -991,10 +989,12 @@ deriveCamera3d ( focalPointPosition, focalPointHeight ) ( viewPointPosition, vie
             Point3d.fromUnitless { x = x, y = y, z = 0 - height }
 
         viewPoint =
-            Viewpoint3d.lookAt
+            Viewpoint3d.orbit
                 { focalPoint = withHeight focusHeightWorld focalPointPositionWorld
-                , eyePoint = withHeight viewHeightWorld viewPositionWorld
-                , upDirection = Direction3d.negativeZ
+                , groundPlane = SketchPlane3d.yx
+                , azimuth = useView.azimuth
+                , elevation = useView.elevation
+                , distance = Quantity.float cameraDistanceAsFraction
                 }
     in
     Camera3d.perspective
@@ -1741,10 +1741,19 @@ canvasSize (Model model) =
     }
 
 
+type alias ExternalView =
+    { focusPosition : LngLat
+    , focusHeight : Quantity Float Meters
+    , azimuth : Angle
+    , elevation : Angle
+    , distance : Quantity Float Meters
+    }
+
+
 {-| Draw the map! You can add additional layers on top of the map as well though for now this isn't easy to do unless you are well versed in how to use `elm-explorations/webgl`. The plan is to add helper functions in a future version of this package that make it easier.
 -}
 view :
-    Maybe ( ( LngLat, Quantity Float Meters ), ( LngLat, Quantity Float Meters ) )
+    Maybe ExternalView
     -> MapData
     -> Model
     -> Html Msg
@@ -1766,8 +1775,8 @@ view externalView (MapData mapData) (Model model) =
 
         useCamera =
             case externalView of
-                Just ( focus, viewpoint ) ->
-                    deriveCamera3d focus viewpoint (Model model)
+                Just hasView ->
+                    deriveCamera3d hasView (Model model)
 
                 _ ->
                     camera (Model model)

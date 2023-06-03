@@ -2,6 +2,7 @@ module ViewThirdPerson exposing (initialiseView, resizeOccured, subscriptions, u
 
 import Actions exposing (ToolAction(..))
 import Angle
+import Axis2d
 import Axis3d
 import BoundingBox2d
 import BoundingBox3d
@@ -59,6 +60,10 @@ view settings mapData context display contentArea track scene msgWrapper =
         dragging =
             context.dragAction
 
+        groundHeight =
+            DomainModel.boundingBox track.trackTree
+                |> BoundingBox3d.minZ
+
         lookingAt =
             --TODO: Remove repeated code here, quickly added to test 3d map stuff.
             if context.followSelectedPoint then
@@ -88,22 +93,31 @@ view settings mapData context display contentArea track scene msgWrapper =
         lookingfromPoint =
             lookingAt.space |> Point3d.translateBy lookingFromVector
 
-        lookingAtPair =
-            ( lngLatFromGps <|
+        lookingAtPosition =
+            lngLatFromGps <|
                 DomainModel.gpxFromPointWithReference track.referenceLonLat lookingAt
-            , Point3d.zCoordinate lookingAt.space
-            )
+
+        lookingAtHeight =
+            Point3d.zCoordinate lookingAt.space |> Quantity.minus groundHeight
 
         lookingfromPair =
             ( lngLatFromGps <|
                 DomainModel.gpxFromPointWithReference track.referenceLonLat <|
                     DomainModel.withoutTime lookingfromPoint
-            , Point3d.zCoordinate lookingfromPoint
+            , Point3d.zCoordinate lookingfromPoint |> Quantity.minus groundHeight
             )
 
         lngLatFromGps gps =
             { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
             , lat = gps.latitude |> Angle.inDegrees
+            }
+
+        mapViewInfo =
+            { focusPosition = lookingAtPosition
+            , focusHeight = lookingAtHeight
+            , azimuth = Direction2d.toAngle <| Direction2d.rotateCounterclockwise context.cameraAzimuth
+            , elevation = context.cameraElevation
+            , distance = viewDistance
             }
 
         camera =
@@ -115,7 +129,7 @@ view settings mapData context display contentArea track scene msgWrapper =
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
-                    (Just ( lookingAtPair, lookingfromPair ))
+                    (Just mapViewInfo)
                     mapData
                     context.map
 
