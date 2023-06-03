@@ -23,6 +23,8 @@ https://github.com/MartinSStewart/elm-map
 
 * Third person view.
 
+> Well done, you broke the Plan View.
+
 > Given that it works so well on Plan, I still think I can do better than this.
 
 * Repeat for Rider view.

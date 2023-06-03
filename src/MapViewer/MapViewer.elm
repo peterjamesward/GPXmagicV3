@@ -971,9 +971,17 @@ deriveCamera3d useView (Model model) =
         focalPointPositionWorld =
             lngLatToWorld useView.focusPosition
 
+        northernExtent =
+            lngLatToWorld { lng = 0, lat = 85 } |> Point2d.yCoordinate
+
+        southernExtent =
+            lngLatToWorld { lng = 0, lat = -85 } |> Point2d.yCoordinate
+
+        --_ =
+        --    Debug.log "(N,S)" ( northernExtent, southernExtent )
         mercatorVerticalExtent =
             -- becuase Mercator cuts off at 85.05 degrees. the world range [0,1] is in meters:
-            Length.meters <| Spherical.metresPerDegree * 170
+            Length.meters <| Spherical.metresPerDegree * 180
 
         cameraDistanceAsFraction =
             Quantity.ratio useView.distance mercatorVerticalExtent

@@ -77,21 +77,7 @@ view settings mapData context display contentArea track scene msgWrapper =
 
         viewDistance =
             --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
-            Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
-
-        lookingFromDirection =
-            Direction3d.fromAzimuthInAndElevationFrom
-                SketchPlane3d.xy
-                (Direction2d.toAngle context.cameraAzimuth)
-                context.cameraElevation
-
-        lookingFromVector =
-            Vector3d.withLength
-                viewDistance
-                lookingFromDirection
-
-        lookingfromPoint =
-            lookingAt.space |> Point3d.translateBy lookingFromVector
+            Length.meters <| 80.0 * Spherical.metresPerPixel context.zoomLevel latitude
 
         lookingAtPosition =
             lngLatFromGps <|
@@ -99,13 +85,6 @@ view settings mapData context display contentArea track scene msgWrapper =
 
         lookingAtHeight =
             Point3d.zCoordinate lookingAt.space |> Quantity.minus groundHeight
-
-        lookingfromPair =
-            ( lngLatFromGps <|
-                DomainModel.gpxFromPointWithReference track.referenceLonLat <|
-                    DomainModel.withoutTime lookingfromPoint
-            , Point3d.zCoordinate lookingfromPoint |> Quantity.minus groundHeight
-            )
 
         lngLatFromGps gps =
             { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
