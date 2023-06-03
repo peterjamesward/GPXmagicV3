@@ -59,6 +59,53 @@ view settings mapData context display contentArea track scene msgWrapper =
         dragging =
             context.dragAction
 
+        lookingAt =
+            --TODO: Remove repeated code here, quickly added to test 3d map stuff.
+            if context.followSelectedPoint then
+                startPoint <| leafFromIndex track.currentPosition track.trackTree
+
+            else
+                context.focalPoint
+
+        latitude =
+            effectiveLatitude <| leafFromIndex track.currentPosition track.trackTree
+
+        viewDistance =
+            --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
+            Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
+
+        lookingFromDirection =
+            Direction3d.fromAzimuthInAndElevationFrom
+                SketchPlane3d.xy
+                (Direction2d.toAngle context.cameraAzimuth)
+                context.cameraElevation
+
+        lookingFromVector =
+            Vector3d.withLength
+                viewDistance
+                lookingFromDirection
+
+        lookingfromPoint =
+            lookingAt.space |> Point3d.translateBy lookingFromVector
+
+        lookingAtPair =
+            ( lngLatFromGps <|
+                DomainModel.gpxFromPointWithReference track.referenceLonLat lookingAt
+            , Point3d.zCoordinate lookingAt.space
+            )
+
+        lookingfromPair =
+            ( lngLatFromGps <|
+                DomainModel.gpxFromPointWithReference track.referenceLonLat <|
+                    DomainModel.withoutTime lookingfromPoint
+            , Point3d.zCoordinate lookingfromPoint
+            )
+
+        lngLatFromGps gps =
+            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+            , lat = gps.latitude |> Angle.inDegrees
+            }
+
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
@@ -68,13 +115,8 @@ view settings mapData context display contentArea track scene msgWrapper =
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
-                    []
+                    (Just ( lookingAtPair, lookingfromPair ))
                     mapData
-                    (Just
-                        ( context.cameraAzimuth |> Direction2d.toAngle |> Direction2d.fromAngle
-                        , context.cameraElevation
-                        )
-                    )
                     context.map
 
         view3d =

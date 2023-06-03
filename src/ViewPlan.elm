@@ -264,9 +264,8 @@ view context mapData settings display contentArea track scene msgWrapper =
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
-                    []
-                    mapData
                     Nothing
+                    mapData
                     context.map
     in
     el

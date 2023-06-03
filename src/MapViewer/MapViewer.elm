@@ -65,7 +65,7 @@ import Html.Events.Extra.Touch exposing (Touch)
 import Html.Events.Extra.Wheel
 import Http
 import Int64 exposing (Int64)
-import Length
+import Length exposing (Meters)
 import List.Extra as List
 import List.Nonempty exposing (Nonempty(..))
 import LngLat exposing (LngLat)
@@ -74,7 +74,7 @@ import Math.Vector3 as Vec3 exposing (Vec3)
 import Math.Vector4 as Vec4 exposing (Vec4)
 import Pixels exposing (Pixels)
 import Point2d exposing (Point2d)
-import Point3d
+import Point3d exposing (Point3d)
 import Polyline2d
 import Process
 import ProtobufDecode exposing (Decoder)
@@ -83,6 +83,7 @@ import Random
 import Random.List
 import Rectangle2d exposing (Rectangle2d)
 import Serialize
+import Spherical
 import Task
 import Time
 import TriangularMesh exposing (TriangularMesh)
@@ -948,36 +949,6 @@ camera_ point viewportHeight_ =
         }
 
 
-camera3d_ :
-    Point2d Unitless WorldCoordinates
-    -> ( Direction2d Unitless, Angle.Angle )
-    -> Camera3d Unitless WorldCoordinates
-camera3d_ point ( azimuth, elevation ) =
-    let
-        { x, y } =
-            Point2d.toUnitless point
-
-        normalEyepoint =
-            Point3d.fromUnitless { x = x, y = y, z = 1 }
-
-        eyepoint =
-            normalEyepoint
-                |> Point3d.rotateAround Axis3d.x (Angle.turns 0.25 |> Quantity.minus elevation)
-
-        --|> Point3d.rotateAround Axis3d.z (Direction2d.toAngle azimuth |> Quantity.plus (Angle.turns 0.25))
-        cameraViewpoint =
-            Viewpoint3d.lookAt
-                { focalPoint = Point3d.fromUnitless { x = x, y = y, z = 0 }
-                , eyePoint = eyepoint
-                , upDirection = Direction3d.positiveZ
-                }
-    in
-    Camera3d.perspective
-        { viewpoint = cameraViewpoint
-        , verticalFieldOfView = Angle.degrees 4
-        }
-
-
 {-| Get the camera that defines what part of the map is being viewed.
 -}
 camera : Model -> Camera3d Unitless WorldCoordinates
@@ -985,12 +956,51 @@ camera (Model model) =
     camera_ model.viewPosition (viewportHeight model.devicePixelRatio model.canvasSize model.viewZoom)
 
 
-camera3d :
-    Model
-    -> ( Direction2d Unitless, Angle.Angle )
+{-| From the model we should be able to work out the conversion from positions to world, which
+varies with zoom level. With that, we convert the given focus and view points to world and make a camera.
+The idea is that this mirrors the camera used externally in GPXmagic.
+-}
+deriveCamera3d :
+    ( LngLat, Quantity Float Meters )
+    -> ( LngLat, Quantity Float Meters )
+    -> Model
     -> Camera3d Unitless WorldCoordinates
-camera3d (Model model) adjustments =
-    camera3d_ model.viewPosition adjustments
+deriveCamera3d ( focalPointPosition, focalPointHeight ) ( viewPointPosition, viewPointHeight ) (Model model) =
+    let
+        viewPositionWorld =
+            lngLatToWorld viewPointPosition
+
+        focalPointPositionWorld =
+            lngLatToWorld focalPointPosition
+
+        mercatorVerticalExtent =
+            -- becuase Mercator cuts off at 85.05 degrees. the world range [0,1] is in meters:
+            Length.meters <| Spherical.metresPerDegree * 170
+
+        focusHeightWorld =
+            Quantity.ratio focalPointHeight mercatorVerticalExtent
+
+        viewHeightWorld =
+            Quantity.ratio viewPointHeight mercatorVerticalExtent
+
+        withHeight height point2d =
+            let
+                { x, y } =
+                    Point2d.toUnitless point2d
+            in
+            Point3d.fromUnitless { x = x, y = y, z = height }
+
+        viewPoint =
+            Viewpoint3d.lookAt
+                { focalPoint = withHeight focusHeightWorld focalPointPositionWorld
+                , eyePoint = withHeight viewHeightWorld viewPositionWorld
+                , upDirection = Direction3d.negativeZ
+                }
+    in
+    Camera3d.perspective
+        { viewpoint = viewPoint
+        , verticalFieldOfView = Angle.degrees 45
+        }
 
 
 {-| The height of the viewport in world units
@@ -1734,12 +1744,11 @@ canvasSize (Model model) =
 {-| Draw the map! You can add additional layers on top of the map as well though for now this isn't easy to do unless you are well versed in how to use `elm-explorations/webgl`. The plan is to add helper functions in a future version of this package that make it easier.
 -}
 view :
-    List WebGL.Entity
+    Maybe ( ( LngLat, Quantity Float Meters ), ( LngLat, Quantity Float Meters ) )
     -> MapData
-    -> Maybe ( Direction2d Unitless, Angle.Angle )
     -> Model
     -> Html Msg
-view extraLayers (MapData mapData) adjustments (Model model) =
+view externalView (MapData mapData) (Model model) =
     let
         ( cssWindowWidth, cssWindowHeight ) =
             perfectSize.canvasSize
@@ -1756,11 +1765,11 @@ view extraLayers (MapData mapData) adjustments (Model model) =
                 (Quantity.toFloatQuantity canvasHeight)
 
         useCamera =
-            case adjustments of
-                Just useThese ->
-                    camera3d (Model model) useThese
+            case externalView of
+                Just ( focus, viewpoint ) ->
+                    deriveCamera3d focus viewpoint (Model model)
 
-                Nothing ->
+                _ ->
                     camera (Model model)
 
         viewMatrix : Mat4
@@ -2061,26 +2070,11 @@ view extraLayers (MapData mapData) adjustments (Model model) =
             (Vec4.getW mapData.style.background)
         , WebGL.antialias
         ]
-        ([ Html.Attributes.width (Quantity.unwrap (Tuple.first perfectSize.devicePixelCanvasSize))
-         , Html.Attributes.height (Quantity.unwrap (Tuple.second perfectSize.devicePixelCanvasSize))
-         , Html.Attributes.style "width" (String.fromInt (Pixels.inPixels cssWindowWidth) ++ "px")
-         , Html.Attributes.style "height" (String.fromInt (Pixels.inPixels cssWindowHeight) ++ "px")
-
-         --, Html.Events.Extra.Wheel.onWheel MouseWheelMoved
-         --, Html.Events.Extra.Touch.onStart (\_ -> TouchStart)
-         --, Html.Events.Extra.Touch.onMove (\_ -> TouchMoved)
-         --, Html.Events.Extra.Pointer.onDown (eventToPointerEvent PointerDown)
-         --, Html.Events.Extra.Pointer.onUp (eventToPointerEvent PointerUp)
-         --, Html.Events.Extra.Pointer.onLeave (eventToPointerEvent PointerLeave)
-         ]
-            ++ (case model.pointerIsDown of
-                    Just _ ->
-                        [ Html.Events.Extra.Pointer.onMove (eventToPointerEvent PointerMoved) ]
-
-                    Nothing ->
-                        []
-               )
-        )
+        [ Html.Attributes.width (Quantity.unwrap (Tuple.first perfectSize.devicePixelCanvasSize))
+        , Html.Attributes.height (Quantity.unwrap (Tuple.second perfectSize.devicePixelCanvasSize))
+        , Html.Attributes.style "width" (String.fromInt (Pixels.inPixels cssWindowWidth) ++ "px")
+        , Html.Attributes.style "height" (String.fromInt (Pixels.inPixels cssWindowHeight) ++ "px")
+        ]
         (List.concatMap
             (\tiles ->
                 background tiles
@@ -2093,7 +2087,6 @@ view extraLayers (MapData mapData) adjustments (Model model) =
                     ++ placeLabels tiles
             )
             visibleTiles
-            ++ extraLayers
         )
 
 

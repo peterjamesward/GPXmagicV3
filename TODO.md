@@ -21,18 +21,12 @@ https://github.com/MartinSStewart/elm-map
 
 ### State of play
 
-* Think about 3D (Third, Rider views).
+* Third person view.
 
-> Figure out the relationship between map's z value, angle of view.
-> Probably involves the zoom level and the window size.
+> I think better is to optionally pass to MapViewer.view the focal point and the eye point as (LngLat, Length).
+> Then it should be able to work out actually scale and convert these to local coordinates.
 
-Yes. Should be able to derive the required "height" as we know the map centre and zoom (or bounds)
-in the Map Model.
-Note: rotation is not generally around x (or y) and z in the Map Model, we need to translate our 
-3d camera position into the map world (i.e. mercator values plus derived height). It is this derived
-(x,y,z) for camera that we pass in (perhaps with angle of view, for completeness).
-
-> Same for Rider view.
+* Repeat for Rider view.
 
 ---
 
