@@ -23,8 +23,7 @@ https://github.com/MartinSStewart/elm-map
 
 * Third person view.
 
-> I think better is to optionally pass to MapViewer.view the focal point and the eye point as (LngLat, Length).
-> Then it should be able to work out actually scale and convert these to local coordinates.
+> Given that it works so well on Plan, I still think I can do better than this.
 
 * Repeat for Rider view.
 
