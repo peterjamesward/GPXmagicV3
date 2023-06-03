@@ -988,7 +988,7 @@ deriveCamera3d ( focalPointPosition, focalPointHeight ) ( viewPointPosition, vie
                 { x, y } =
                     Point2d.toUnitless point2d
             in
-            Point3d.fromUnitless { x = x, y = y, z = height }
+            Point3d.fromUnitless { x = x, y = y, z = 0 - height }
 
         viewPoint =
             Viewpoint3d.lookAt
@@ -1776,8 +1776,8 @@ view externalView (MapData mapData) (Model model) =
         viewMatrix =
             WebGL.Matrices.viewProjectionMatrix
                 useCamera
-                { nearClipDepth = Quantity.float 0.1
-                , farClipDepth = Quantity.float 10
+                { nearClipDepth = Quantity.float 0.0
+                , farClipDepth = Quantity.float 10000
                 , aspectRatio = aspectRatio
                 }
 
