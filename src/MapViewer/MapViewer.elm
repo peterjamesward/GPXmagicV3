@@ -981,7 +981,7 @@ deriveCamera3d useView (Model model) =
         --    Debug.log "(N,S)" ( northernExtent, southernExtent )
         mercatorVerticalExtent =
             -- becuase Mercator cuts off at 85.05 degrees. the world range [0,1] is in meters:
-            Length.meters <| Spherical.metresPerDegree * 180
+            Length.meters <| Spherical.metresPerDegree * 170
 
         cameraDistanceAsFraction =
             Quantity.ratio useView.distance mercatorVerticalExtent

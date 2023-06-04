@@ -19,15 +19,21 @@ TODO: Make size of preview dot user choice, 3D and Map views.
 
 https://github.com/MartinSStewart/elm-map
 
-### State of play
+### Third person view.
 
-* Third person view.
+Discrepancy between camera distances in my coords and mapview, worse as you travel south.
+Needs proper basis.
+Curtain should touch the map plane...
 
-> Well done, you broke the Plan View.
+Had idea that I can project a ray through the centre of the screen into the track and see where it intersects
+XY (if it does). That would become the "lookingAt" for the map view. May be some reference points that will allow
+something vaguely similar to work out exact camera distance.
+If I can solve that case, perhaps the height issue will be easier to solve as we will have a method for conversion.
+<shrugs>
 
-> Given that it works so well on Plan, I still think I can do better than this.
+Need to improve the zoom and the text size.
 
-* Repeat for Rider view.
+### Repeat for Rider view.
 
 ---
 
@@ -146,25 +152,6 @@ Nope, can't be done in an iFrame. Google stops it. Alternative APIs too costly.
 
 Direct reading of LIDAR data.
 -- Nope. Not enough data, tricky to access, mostly not free.
-
-## Replace MapBox?
-
-https://github.com/klaftertief/slippery-slope
-
-Motivation is to be free of some dodgy JavaScript.
-Free. Forever.
-Or Haskell, I suppose.
-Bloody good though, pure Elm.
-Not sure how to build it, but I cloned it anyway.
-
-https://github.com/lucamug/elm-map
-Might make more sense - more recently updated.
-
-## Route joining
-
-Open multiple GPX routes (file, Strava) and combine them in Route Maker.
-May not even be that hard, given Route Maker exists.
-But, routing tools exist.
 
 ## Video playback window
 
