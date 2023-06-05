@@ -954,32 +954,6 @@ camera (Model model) =
     camera_ model.viewPosition (viewportHeight model.devicePixelRatio model.canvasSize model.viewZoom)
 
 
-{-| From the model we should be able to work out the conversion from positions to world, which
-varies with zoom level. With that, we convert the given focus and view points to world and make a camera.
-The idea is that this mirrors the camera used externally in GPXmagic.
--}
-deriveCamera3d :
-    ExternalView
-    -> Model
-    -> Camera3d Unitless WorldCoordinates
-deriveCamera3d useView (Model model) =
-    let
-        viewPoint =
-            --Note how this frame is very different from GPXmagic.
-            Viewpoint3d.orbit
-                { focalPoint = useView.focusPosition
-                , groundPlane = SketchPlane3d.yx
-                , azimuth = useView.azimuth
-                , elevation = useView.elevation
-                , distance = useView.distance
-                }
-    in
-    Camera3d.perspective
-        { viewpoint = viewPoint
-        , verticalFieldOfView = Angle.degrees 45
-        }
-
-
 {-| The height of the viewport in world units
 -}
 viewportHeight : Float -> ( Quantity Int Pixels, Quantity Int Pixels ) -> ZoomLevel -> Quantity Float Unitless
@@ -1731,11 +1705,11 @@ type alias ExternalView =
 {-| Draw the map! You can add additional layers on top of the map as well though for now this isn't easy to do unless you are well versed in how to use `elm-explorations/webgl`. The plan is to add helper functions in a future version of this package that make it easier.
 -}
 view :
-    Maybe ExternalView
+    Maybe (Camera3d Unitless WorldCoordinates)
     -> MapData
     -> Model
     -> Html Msg
-view externalView (MapData mapData) (Model model) =
+view externalCamera (MapData mapData) (Model model) =
     let
         ( cssWindowWidth, cssWindowHeight ) =
             perfectSize.canvasSize
@@ -1752,12 +1726,7 @@ view externalView (MapData mapData) (Model model) =
                 (Quantity.toFloatQuantity canvasHeight)
 
         useCamera =
-            case externalView of
-                Just hasView ->
-                    deriveCamera3d hasView (Model model)
-
-                _ ->
-                    camera (Model model)
+            externalCamera |> Maybe.withDefault (camera (Model model))
 
         viewMatrix : Mat4
         viewMatrix =

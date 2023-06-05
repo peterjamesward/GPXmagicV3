@@ -19,23 +19,12 @@ https://github.com/MartinSStewart/elm-map
 
 ### Third person view.
 
-Discrepancy between camera distances in my coords and mapview, worse as you travel south.
-Needs proper basis.
-Curtain should touch the map plane...
+BROKEN Plan view (sometimes).
 
-Had idea that I can project a ray through the centre of the screen into the track and see where it intersects
-XY (if it does). That would become the "lookingAt" for the map view. May be some reference points that will allow
-something vaguely similar to work out exact camera distance.
-If I can solve that case, perhaps the height issue will be easier to solve as we will have a method for conversion.
-<shrugs>
-OK, yes. Take the case where the focal point is not in XY and the ray intersects XY. Suppose that in our model
-these are points P and P'. We know the projection of P onto XY locally, so we now have two related points in both
-spaces. This gives us accurate relationship between distances in the two worlds.
-But, wait, this is surely true for any two points. So we need only take any two distinct points ("at random") along the track
-and map them. Bish-bosh, we have our distance conversion. 
-Still need to see if the height issue resolves, or if we should be using P' as our "lookingAt", though would
-prefer not as the camera distance is then C-P' instead of C-P.
-
+Work on distance scale is improvement but I think raw altitude messes it up.
+(This because Switzerland definitely worse).
+Plus, dragging vertically separates the two layers.
+Nearly there despite this, I hope.
 
 Need to improve the zoom and the text size.
 

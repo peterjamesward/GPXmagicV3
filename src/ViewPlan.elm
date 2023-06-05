@@ -304,7 +304,6 @@ deriveCamera refPoint treeNode context currentPosition =
                 context.focalPoint
 
         eyePoint =
-            --TODO: Perhaps tilting by 'latitude' will compensate for Mercator distortion.
             Point3d.translateBy
                 (Vector3d.meters 0.0 0.0 5000.0)
                 lookingAt.space

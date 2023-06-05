@@ -102,7 +102,8 @@ view settings mapData context display contentArea track scene msgWrapper =
         viewDistance : Quantity Float Meters
         viewDistance =
             --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
-            Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
+            --Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
+            Length.meters <| 2 ^ (21 - context.zoomLevel)
 
         viewDistanceInWorld : Quantity Float Unitless
         viewDistanceInWorld =
@@ -126,14 +127,18 @@ view settings mapData context display contentArea track scene msgWrapper =
             in
             Point3d.fromUnitless { x = x, y = y, z = Quantity.toFloat h }
 
-        mapViewInfo : MapViewer.ExternalView
-        mapViewInfo =
-            { focusPosition = lookingAtPosition
-            , focusHeight = heightInWorld
-            , azimuth = Direction2d.toAngle <| Direction2d.rotateCounterclockwise context.cameraAzimuth
-            , elevation = context.cameraElevation
-            , distance = viewDistanceInWorld
-            }
+        mapCamera =
+            Camera3d.perspective
+                { viewpoint =
+                    Viewpoint3d.orbit
+                        { focalPoint = lookingAtPosition
+                        , groundPlane = SketchPlane3d.yx
+                        , azimuth = Direction2d.toAngle <| Direction2d.rotateCounterclockwise context.cameraAzimuth
+                        , elevation = context.cameraElevation
+                        , distance = viewDistanceInWorld
+                        }
+                , verticalFieldOfView = Angle.degrees 45
+                }
 
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
@@ -144,7 +149,7 @@ view settings mapData context display contentArea track scene msgWrapper =
         mapUnderlay =
             Html.map (msgWrapper << MapMsg) <|
                 MapViewer.view
-                    (Just mapViewInfo)
+                    (Just mapCamera)
                     mapData
                     context.map
 
@@ -220,7 +225,8 @@ deriveCamera refPoint treeNode context currentPosition =
                 , elevation = context.cameraElevation
                 , distance =
                     --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
-                    Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
+                    --Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
+                    Length.meters <| 2 ^ (21 - context.zoomLevel)
                 }
     in
     Camera3d.perspective
