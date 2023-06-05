@@ -2,13 +2,26 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.12.3 (cdc99d09, 2023-05-17 15:16)
+    """# GPXmagic v3.13.0 (cdc99d09, 2023-06-05 14:14)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
 
-## 3.12.4 (UNRELEASED)
+## 3.13.0
+
+A present from the code fairies. Thanks to some excellent unrelated work by Martin Stewart, we can
+now combined a (simplified) map with the Plan and 3-D views. There is a new toggle on the column of
+buttons that appears in the upper right of these views. You will need to turn off "Ground" in the
+_Display settings_ tool. It uses the exact same data from mapbox as the main map, but a drawing routine
+that integrates much better with GPXmagic. It's not as good as the main map, but it's better than none,
+and may get better.
 
 Internal tidy up to make code cleaner and more maintainable.
+
+Some visuals that were hidden but still updated have now been removed.
+This shouldn't make any difference but may result in a small performance gain.
+
+As never, there's a risk that new things break old things. If you encounter problems, please try to
+isolate them, make them repeatable, and let me know.
 
 ## 3.12.3
 
