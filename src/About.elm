@@ -2,7 +2,7 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.13.0 (cdc99d09, 2023-06-05 14:14)
+    """# GPXmagic v3.13.0 (281bd94f, 2023-06-05 14:14)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
 
@@ -15,12 +15,14 @@ _Display settings_ tool. It uses the exact same data from mapbox as the main map
 that integrates much better with GPXmagic. It's not as good as the main map, but it's better than none,
 and may get better.
 
+Main map updated to use mapbox GL JS 2.15.0.
+
 Internal tidy up to make code cleaner and more maintainable.
 
 Some visuals that were hidden but still updated have now been removed.
 This shouldn't make any difference but may result in a small performance gain.
 
-As never, there's a risk that new things break old things. If you encounter problems, please try to
+As ever, there's a risk that new things break old things. If you encounter problems, please try to
 isolate them, make them repeatable, and let me know.
 
 ## 3.12.3
