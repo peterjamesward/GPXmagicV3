@@ -24,7 +24,7 @@ import Pixels exposing (Pixels)
 import Plane3d
 import Point2d
 import Point3d
-import Quantity exposing (Quantity, toFloatQuantity)
+import Quantity exposing (Quantity, Unitless, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import SketchPlane3d
@@ -60,6 +60,14 @@ view settings mapData context display contentArea track scene msgWrapper =
         dragging =
             context.dragAction
 
+        lngLatFromGps gps =
+            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+            , lat = gps.latitude |> Angle.inDegrees
+            }
+
+        worldFromGps =
+            lngLatFromGps >> MapViewer.lngLatToWorld
+
         groundHeight =
             DomainModel.boundingBox track.trackTree
                 |> BoundingBox3d.minZ
@@ -75,28 +83,56 @@ view settings mapData context display contentArea track scene msgWrapper =
         latitude =
             effectiveLatitude <| leafFromIndex track.currentPosition track.trackTree
 
+        {-
+           I want a consistent conversion of meters to World Coordinates across the globe.
+           I'll do that by numerically differentiating the Web Mercator formula.
+           If it works, I'll do the proper maths.
+           For now, I'll just take the first leaf and use those two points.
+        -}
+        firstLeaf =
+            DomainModel.getFirstLeaf track.trackTree
+
+        ( worldStart, worldEnd ) =
+            Tuple.mapBoth worldFromGps worldFromGps firstLeaf.sourceData
+
+        leafLengthInWorld : Quantity Float Unitless
+        leafLengthInWorld =
+            Point2d.distanceFrom worldStart worldEnd
+
+        viewDistance : Quantity Float Meters
         viewDistance =
             --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
-            Length.meters <| 80.0 * Spherical.metresPerPixel context.zoomLevel latitude
+            Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
+
+        viewDistanceInWorld : Quantity Float Unitless
+        viewDistanceInWorld =
+            leafLengthInWorld |> Quantity.multiplyBy (Quantity.ratio viewDistance firstLeaf.trueLength)
 
         lookingAtPosition =
-            lngLatFromGps <|
-                DomainModel.gpxFromPointWithReference track.referenceLonLat lookingAt
+            withHeight heightInWorld <|
+                worldFromGps <|
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat lookingAt
 
         lookingAtHeight =
             Point3d.zCoordinate lookingAt.space |> Quantity.minus groundHeight
 
-        lngLatFromGps gps =
-            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
-            , lat = gps.latitude |> Angle.inDegrees
-            }
+        heightInWorld =
+            leafLengthInWorld |> Quantity.multiplyBy (Quantity.ratio lookingAtHeight firstLeaf.trueLength)
 
+        withHeight h pt =
+            let
+                { x, y } =
+                    Point2d.toUnitless pt
+            in
+            Point3d.fromUnitless { x = x, y = y, z = Quantity.toFloat h }
+
+        mapViewInfo : MapViewer.ExternalView
         mapViewInfo =
             { focusPosition = lookingAtPosition
-            , focusHeight = lookingAtHeight
+            , focusHeight = heightInWorld
             , azimuth = Direction2d.toAngle <| Direction2d.rotateCounterclockwise context.cameraAzimuth
             , elevation = context.cameraElevation
-            , distance = viewDistance
+            , distance = viewDistanceInWorld
             }
 
         camera =

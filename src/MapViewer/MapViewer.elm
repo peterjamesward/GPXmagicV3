@@ -61,15 +61,12 @@ import Font exposing (Font, Glyph)
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events.Extra.Pointer
-import Html.Events.Extra.Touch exposing (Touch)
 import Html.Events.Extra.Wheel
 import Http
 import Int64 exposing (Int64)
-import Length exposing (Meters)
 import List.Extra as List
 import List.Nonempty exposing (Nonempty(..))
 import LngLat exposing (LngLat)
-import LocalCoords exposing (LocalCoords)
 import Math.Matrix4 exposing (Mat4)
 import Math.Vector3 as Vec3 exposing (Vec3)
 import Math.Vector4 as Vec4 exposing (Vec4)
@@ -85,7 +82,6 @@ import Random.List
 import Rectangle2d exposing (Rectangle2d)
 import Serialize
 import SketchPlane3d
-import Spherical
 import Task
 import Time
 import TriangularMesh exposing (TriangularMesh)
@@ -968,41 +964,14 @@ deriveCamera3d :
     -> Camera3d Unitless WorldCoordinates
 deriveCamera3d useView (Model model) =
     let
-        focalPointPositionWorld =
-            lngLatToWorld useView.focusPosition
-
-        northernExtent =
-            lngLatToWorld { lng = 0, lat = 85 } |> Point2d.yCoordinate
-
-        southernExtent =
-            lngLatToWorld { lng = 0, lat = -85 } |> Point2d.yCoordinate
-
-        --_ =
-        --    Debug.log "(N,S)" ( northernExtent, southernExtent )
-        mercatorVerticalExtent =
-            -- becuase Mercator cuts off at 85.05 degrees. the world range [0,1] is in meters:
-            Length.meters <| Spherical.metresPerDegree * 170
-
-        cameraDistanceAsFraction =
-            Quantity.ratio useView.distance mercatorVerticalExtent
-
-        focusHeightWorld =
-            Quantity.ratio useView.focusHeight mercatorVerticalExtent
-
-        withHeight height point2d =
-            let
-                { x, y } =
-                    Point2d.toUnitless point2d
-            in
-            Point3d.fromUnitless { x = x, y = y, z = 0 - height }
-
         viewPoint =
+            --Note how this frame is very different from GPXmagic.
             Viewpoint3d.orbit
-                { focalPoint = withHeight focusHeightWorld focalPointPositionWorld
+                { focalPoint = useView.focusPosition
                 , groundPlane = SketchPlane3d.yx
                 , azimuth = useView.azimuth
                 , elevation = useView.elevation
-                , distance = Quantity.float cameraDistanceAsFraction
+                , distance = useView.distance
                 }
     in
     Camera3d.perspective
@@ -1750,11 +1719,12 @@ canvasSize (Model model) =
 
 
 type alias ExternalView =
-    { focusPosition : LngLat
-    , focusHeight : Quantity Float Meters
+    --TODO: Interface to provide matching cameras. Caller must do the coordinate conversion.
+    { focusPosition : Point3d Unitless WorldCoordinates
+    , focusHeight : Quantity Float Unitless
     , azimuth : Angle
     , elevation : Angle
-    , distance : Quantity Float Meters
+    , distance : Quantity Float Unitless
     }
 
 
