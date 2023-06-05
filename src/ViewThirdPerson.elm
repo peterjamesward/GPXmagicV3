@@ -75,25 +75,31 @@ view settings mapData context display contentArea track scene msgWrapper =
         lookingAt =
             --TODO: Remove repeated code here, quickly added to test 3d map stuff.
             if context.followSelectedPoint then
-                startPoint <| leafFromIndex track.currentPosition track.trackTree
+                DomainModel.earthPointFromIndex track.currentPosition track.trackTree
 
             else
                 context.focalPoint
 
-        latitude =
-            effectiveLatitude <| leafFromIndex track.currentPosition track.trackTree
+        lookingAtPosition =
+            withHeight (Quantity.negate heightInWorld) <|
+                worldFromGps <|
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat lookingAt
+
+        lookingAtHeight =
+            Point3d.zCoordinate lookingAt.space |> Quantity.minus groundHeight
 
         {-
            I want a consistent conversion of meters to World Coordinates across the globe.
            I'll do that by numerically differentiating the Web Mercator formula.
            If it works, I'll do the proper maths.
-           For now, I'll just take the first leaf and use those two points.
+           For now, I'll just take the nearby leaf and use those two points.
         -}
-        firstLeaf =
-            DomainModel.getFirstLeaf track.trackTree
+        aLeaf =
+            DomainModel.asRecord <|
+                DomainModel.leafFromIndex track.currentPosition track.trackTree
 
         ( worldStart, worldEnd ) =
-            Tuple.mapBoth worldFromGps worldFromGps firstLeaf.sourceData
+            Tuple.mapBoth worldFromGps worldFromGps aLeaf.sourceData
 
         leafLengthInWorld : Quantity Float Unitless
         leafLengthInWorld =
@@ -103,20 +109,15 @@ view settings mapData context display contentArea track scene msgWrapper =
         viewDistance =
             Length.meters <| 2 ^ (21 - context.zoomLevel)
 
+        worldScaling =
+            Quantity.per leafLengthInWorld aLeaf.trueLength
+
         viewDistanceInWorld : Quantity Float Unitless
         viewDistanceInWorld =
-            leafLengthInWorld |> Quantity.multiplyBy (Quantity.ratio viewDistance firstLeaf.trueLength)
-
-        lookingAtPosition =
-            withHeight heightInWorld <|
-                worldFromGps <|
-                    DomainModel.gpxFromPointWithReference track.referenceLonLat lookingAt
-
-        lookingAtHeight =
-            Point3d.zCoordinate lookingAt.space |> Quantity.minus groundHeight
+            viewDistance |> Quantity.at_ worldScaling
 
         heightInWorld =
-            leafLengthInWorld |> Quantity.multiplyBy (Quantity.ratio lookingAtHeight firstLeaf.trueLength)
+            lookingAtHeight |> Quantity.at_ worldScaling
 
         withHeight h pt =
             let
@@ -366,17 +367,17 @@ update msg msgWrapper track ( width, height ) mapData context =
                 lookingAt =
                     MapViewer.lngLatToWorld <|
                         lngLatFromXY <|
-                            if context.followSelectedPoint then
+                            if ctxt.followSelectedPoint then
                                 DomainModel.earthPointFromIndex track.currentPosition track.trackTree
                                     |> .space
 
                             else
-                                context.focalPoint.space
+                                ctxt.focalPoint.space
             in
             MapViewer.withPositionAndZoom
                 lookingAt
-                (ZoomLevel.fromLogZoom context.zoomLevel)
-                context.map
+                (ZoomLevel.fromLogZoom ctxt.zoomLevel)
+                ctxt.map
     in
     case msg of
         MapMsg mapMsg ->
