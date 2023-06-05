@@ -12,12 +12,15 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import FlatColors.ChinesePalette exposing (white)
+import Html
 import Length
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
+import SketchPlane3d
+import SystemSettings exposing (SystemSettings)
 import Tools.Flythrough
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour, showDecimal1)
@@ -36,14 +39,16 @@ resizeOccured paneArea context =
 
 
 view :
-    Context
+    SystemSettings
+    -> Context
+    -> MapViewer.MapData
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Maybe Tools.Flythrough.Flythrough
     -> Element msg
-view context contentArea track scene msgWrapper mFlythrough =
+view settings context mapData contentArea track scene msgWrapper mFlythrough =
     let
         flythroughHUD =
             case mFlythrough of
@@ -52,62 +57,119 @@ view context contentArea track scene msgWrapper mFlythrough =
 
                 Nothing ->
                     inFront none
+
+        ( camera3d, cameraMap ) =
+            deriveViewPointAndCamera context track mFlythrough
+
+        view3d =
+            el
+                (flythroughHUD :: common3dSceneAttributes msgWrapper context)
+            <|
+                html <|
+                    Scene3d.sunny
+                        { camera = camera3d
+                        , dimensions = contentArea
+                        , background = backgroundColor Color.lightBlue
+                        , clipDepth = Length.meters 1
+                        , entities = scene
+                        , upDirection = positiveZ
+                        , sunlightDirection = negativeZ
+                        , shadows = False
+                        }
+
+        mapUnderlay =
+            el
+                [ inFront <|
+                    el [ alignLeft, alignBottom ] <|
+                        html MapViewer.attribution
+                ]
+            <|
+                html <|
+                    Html.map (msgWrapper << MapMsg) <|
+                        MapViewer.view
+                            (Just cameraMap)
+                            mapData
+                            context.map
     in
     el
-        (flythroughHUD :: common3dSceneAttributes msgWrapper context)
-    <|
-        html <|
-            Scene3d.sunny
-                { camera = deriveViewPointAndCamera context track mFlythrough
-                , dimensions = contentArea
-                , background = backgroundColor Color.lightBlue
-                , clipDepth = Length.meters 1
-                , entities = scene
-                , upDirection = positiveZ
-                , sunlightDirection = negativeZ
-                , shadows = False
-                }
+        [ inFront <| View3dCommonElements.toggleMapButtonOnly settings msgWrapper context
+        , behindContent <|
+            if context.showMap then
+                mapUnderlay
+
+            else
+                none
+        ]
+        view3d
 
 
 deriveViewPointAndCamera :
     Context
     -> TrackLoaded msg
     -> Maybe Tools.Flythrough.Flythrough
-    -> Camera3d Length.Meters LocalCoords
+    -> ( Camera3d Length.Meters LocalCoords, Camera3d Quantity.Unitless MapViewer.WorldCoordinates )
 deriveViewPointAndCamera context track mFlythrough =
     let
+        localRoad =
+            DomainModel.leafFromIndex track.currentPosition track.trackTree
+                |> asRecord
+
+        gradientAsAngle =
+            Angle.atan <| localRoad.gradientAtStart / 100.0
+
+        azimuth =
+            localRoad.directionAtStart
+                |> Direction2d.reverse
+                |> Direction2d.toAngle
+
+        elevation =
+            Angle.degrees 20.0 |> Quantity.minus gradientAsAngle
+
+        lookingAt =
+            case mFlythrough of
+                Nothing ->
+                    localRoad.startPoint.space
+
+                Just flying ->
+                    flying.cameraPosition
+
         cameraViewpoint =
             case mFlythrough of
                 Nothing ->
-                    let
-                        localRoad =
-                            DomainModel.leafFromIndex track.currentPosition track.trackTree
-                                |> asRecord
-
-                        gradientAsAngle =
-                            Angle.atan <| localRoad.gradientAtStart / 100.0
-                    in
                     Viewpoint3d.orbitZ
-                        { focalPoint = localRoad.startPoint.space
-                        , azimuth =
-                            localRoad.directionAtStart
-                                |> Direction2d.reverse
-                                |> Direction2d.toAngle
-                        , elevation = Angle.degrees 20.0 |> Quantity.minus gradientAsAngle
+                        { focalPoint = lookingAt
+                        , azimuth = azimuth
+                        , elevation = elevation
                         , distance = Length.meters 10
                         }
 
                 Just flying ->
                     Viewpoint3d.lookAt
-                        { eyePoint = flying.cameraPosition
+                        { eyePoint = lookingAt
                         , focalPoint = flying.focusPoint
                         , upDirection = Direction3d.positiveZ
                         }
+
+        camera3d =
+            Camera3d.perspective
+                { viewpoint = cameraViewpoint
+                , verticalFieldOfView = Angle.degrees <| 120.0 - context.zoomLevel * 2.0
+                }
+
+        cameraMap =
+            Camera3d.perspective
+                { viewpoint =
+                    Viewpoint3d.orbit
+                        { focalPoint = mapPositionFromTrack (DomainModel.withoutTime lookingAt) track
+                        , groundPlane = SketchPlane3d.yx
+                        , azimuth = Direction2d.toAngle <| Direction2d.rotateCounterclockwise context.cameraAzimuth
+                        , elevation = context.cameraElevation
+                        , distance = scaleToMapWorld track (Length.meters 10)
+                        }
+                , verticalFieldOfView = Angle.degrees 45
+                }
     in
-    Camera3d.perspective
-        { viewpoint = cameraViewpoint
-        , verticalFieldOfView = Angle.degrees <| 120.0 - context.zoomLevel * 2.0
-        }
+    ( camera3d, cameraMap )
 
 
 headUpDisplay gradient =

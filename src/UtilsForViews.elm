@@ -7,7 +7,9 @@ module UtilsForViews exposing
     , fullDepthRenderingBoxSize
     , httpErrorString
     , latitudeString
+    , lngLatFromGps
     , longitudeString
+    , mapWorldFromGps
     , noPadding
     , showAngle
     , showDecimal0
@@ -24,15 +26,30 @@ import Angle
 import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color
+import Direction2d
+import DomainModel exposing (GPXSource)
 import Element exposing (Element)
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
 import Hex
 import Http
 import Length
+import LngLat
+import MapViewer
 import Speed exposing (Speed)
 import String.Interpolate
 import Time
+
+
+lngLatFromGps : DomainModel.GPXSource -> LngLat.LngLat
+lngLatFromGps gps =
+    { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+    , lat = gps.latitude |> Angle.inDegrees
+    }
+
+
+mapWorldFromGps =
+    lngLatFromGps >> MapViewer.lngLatToWorld
 
 
 formattedTime : Maybe Time.Posix -> Element msg

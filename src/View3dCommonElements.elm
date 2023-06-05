@@ -1,7 +1,18 @@
-module View3dCommonElements exposing (Context, DragAction(..), Msg(..), common3dSceneAttributes, placesOverlay, zoomButtons)
+module View3dCommonElements exposing
+    ( Context
+    , DragAction(..)
+    , Msg(..)
+    , common3dSceneAttributes
+    , mapPositionFromTrack
+    , placesOverlay
+    , scaleToMapWorld
+    , toggleMapButtonOnly
+    , zoomButtons
+    )
 
 import Angle exposing (Angle)
 import Axis2d
+import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Circle2d
 import CommonToolStyles
@@ -26,7 +37,9 @@ import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
+import Plane3d
 import Point2d
+import Point3d
 import Point3d.Projection as Point3d
 import Quantity exposing (Quantity)
 import Rectangle2d
@@ -37,6 +50,7 @@ import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.DisplaySettingsOptions
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews
 import ViewPureStyles exposing (stopProp, useIcon)
 
 
@@ -176,6 +190,100 @@ zoomButtons settings msgWrapper context =
                     useIcon FeatherIcons.map
             }
         ]
+
+
+toggleMapButtonOnly : SystemSettings -> (Msg -> msg) -> Context -> Element msg
+toggleMapButtonOnly settings msgWrapper context =
+    column
+        [ alignTop
+        , alignRight
+        , moveDown 5
+        , moveLeft 10
+        , Font.size 40
+        , padding 6
+        , spacing 8
+        , Border.width 1
+        , Border.rounded 4
+        , Border.color FlatColors.AussiePalette.blurple
+        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
+        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
+        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
+        , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
+        , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
+        , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
+        ]
+        [ Input.button
+            [ ToolTip.tooltip
+                onLeft
+                (ToolTip.myTooltip <|
+                    if context.showMap then
+                        "Hide map"
+
+                    else
+                        "Show map"
+                )
+            ]
+            { onPress = Just <| msgWrapper ToggleShowMap
+            , label =
+                if context.showMap then
+                    useIcon FeatherIcons.square
+
+                else
+                    useIcon FeatherIcons.map
+            }
+        ]
+
+
+scaleToMapWorld : TrackLoaded msg -> Quantity Float Meters -> Quantity Float Quantity.Unitless
+scaleToMapWorld track length =
+    let
+        aLeaf =
+            DomainModel.asRecord <|
+                DomainModel.leafFromIndex track.currentPosition track.trackTree
+
+        ( worldStart, worldEnd ) =
+            Tuple.mapBoth UtilsForViews.mapWorldFromGps UtilsForViews.mapWorldFromGps aLeaf.sourceData
+
+        leafLengthInWorld : Quantity Float Quantity.Unitless
+        leafLengthInWorld =
+            Point2d.distanceFrom worldStart worldEnd
+    in
+    length |> Quantity.at_ (Quantity.per leafLengthInWorld aLeaf.trueLength)
+
+
+mapPositionFromTrack : EarthPoint -> TrackLoaded msg -> Point3d.Point3d Quantity.Unitless MapViewer.WorldCoordinates
+mapPositionFromTrack point track =
+    let
+        groundHeight =
+            DomainModel.boundingBox track.trackTree
+                |> BoundingBox3d.minZ
+
+        {-
+           I want a consistent conversion of meters to World Coordinates across the globe.
+           I'll do that by numerically differentiating the Web Mercator formula.
+           If it works, I'll do the proper maths.
+           For now, I'll just take the nearby leaf and use those two points.
+        -}
+        lookingAtHeight =
+            Point3d.zCoordinate point.space
+                |> Quantity.minus groundHeight
+                |> scaleToMapWorld track
+
+        withHeight h pt =
+            let
+                { x, y } =
+                    Point2d.toUnitless pt
+            in
+            Point3d.fromUnitless { x = x, y = y, z = Quantity.toFloat h }
+
+        mapPosition =
+            Point3d.mirrorAcross Plane3d.xy <|
+                withHeight lookingAtHeight <|
+                    UtilsForViews.mapWorldFromGps <|
+                        DomainModel.gpxFromPointWithReference track.referenceLonLat <|
+                            point
+    in
+    mapPosition
 
 
 placesOverlay :

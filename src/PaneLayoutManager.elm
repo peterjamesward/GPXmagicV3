@@ -986,7 +986,9 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                         case ( pane.thirdPersonContext, mTrack ) of
                             ( Just context, Just track ) ->
                                 ViewFirstPerson.view
+                                    settings
                                     context
+                                    options.mapData
                                     ( paneWidth, paneHeight )
                                     track
                                     options.scene3d

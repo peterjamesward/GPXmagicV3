@@ -19,11 +19,7 @@ https://github.com/MartinSStewart/elm-map
 
 ### Third person view.
 
-* Need to improve the zoom and the text size.
-
-* Should be able to tidy up the code so that we can just transform between viewpoints.
-
-### Repeat for Rider view.
+Plumbing not right for 1st person map toggle.
 
 
 ---
