@@ -101,8 +101,6 @@ view settings mapData context display contentArea track scene msgWrapper =
 
         viewDistance : Quantity Float Meters
         viewDistance =
-            --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
-            --Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
             Length.meters <| 2 ^ (21 - context.zoomLevel)
 
         viewDistanceInWorld : Quantity Float Unitless
@@ -223,10 +221,7 @@ deriveCamera refPoint treeNode context currentPosition =
                 { focalPoint = lookingAt.space
                 , azimuth = Direction2d.toAngle context.cameraAzimuth
                 , elevation = context.cameraElevation
-                , distance =
-                    --TODO: Some fudging going on here that should not be needed. See ViewPlan; maybe better.
-                    --Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
-                    Length.meters <| 2 ^ (21 - context.zoomLevel)
+                , distance = Length.meters <| 2 ^ (21 - context.zoomLevel)
                 }
     in
     Camera3d.perspective
@@ -528,13 +523,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                                 |> Vector3d.rotateAround
                                     Axis3d.z
                                     (Direction2d.toAngle context.cameraAzimuth)
-                                |> Vector3d.scaleBy
-                                    (0.1
-                                        -- Empirical
-                                        * Spherical.metresPerPixel
-                                            context.zoomLevel
-                                            (Angle.degrees 30)
-                                    )
+                                |> Vector3d.scaleBy (1.01 ^ (21 - context.zoomLevel))
 
                         newContext =
                             { context
