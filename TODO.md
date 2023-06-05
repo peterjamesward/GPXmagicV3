@@ -19,16 +19,12 @@ https://github.com/MartinSStewart/elm-map
 
 ### Third person view.
 
-BROKEN Plan view (sometimes).
+* Need to improve the zoom and the text size.
 
-Work on distance scale is improvement but I think raw altitude messes it up.
-(This because Switzerland definitely worse).
-Plus, dragging vertically separates the two layers.
-Nearly there despite this, I hope.
-
-Need to improve the zoom and the text size.
+* Should be able to tidy up the code so that we can just transform between viewpoints.
 
 ### Repeat for Rider view.
+
 
 ---
 
