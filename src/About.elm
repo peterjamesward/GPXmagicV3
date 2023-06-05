@@ -2,9 +2,13 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.13.0 (281bd94f, 2023-06-05 14:14)
+    """# GPXmagic v3.13.1 (281bd94f, 2023-06-05 16:00)
 
 **GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
+
+## 3.13.1
+
+Adjust zoom level for clearer map in third person view.
 
 ## 3.13.0
 
