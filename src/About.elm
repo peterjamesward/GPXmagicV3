@@ -15,6 +15,8 @@ _Display settings_ tool. It uses the exact same data from mapbox as the main map
 that integrates much better with GPXmagic. It's not as good as the main map, but it's better than none,
 and may get better.
 
+NOTE: This map was not intended for use in 3D views, so let's enjoy it for what it is.
+
 Main map updated to use mapbox GL JS 2.15.0.
 
 Internal tidy up to make code cleaner and more maintainable.

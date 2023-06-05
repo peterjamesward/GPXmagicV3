@@ -2,9 +2,7 @@ module ViewThirdPerson exposing (initialiseView, resizeOccured, subscriptions, u
 
 import Actions exposing (ToolAction(..))
 import Angle
-import Axis2d
 import Axis3d
-import BoundingBox2d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Color
@@ -19,7 +17,6 @@ import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import MapboxKey
-import Math.Matrix4 exposing (Mat4)
 import Pixels exposing (Pixels)
 import Plane3d
 import Point2d
@@ -28,7 +25,6 @@ import Quantity exposing (Quantity, Unitless, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import SketchPlane3d
-import Spherical
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -36,7 +32,6 @@ import UtilsForViews
 import Vector3d
 import View3dCommonElements exposing (..)
 import Viewpoint3d
-import WebGL.Matrices
 import ZoomLevel
 
 
@@ -376,7 +371,7 @@ update msg msgWrapper track ( width, height ) mapData context =
             in
             MapViewer.withPositionAndZoom
                 lookingAt
-                (ZoomLevel.fromLogZoom ctxt.zoomLevel)
+                (ZoomLevel.fromLogZoom <| 3 + ctxt.zoomLevel)
                 ctxt.map
     in
     case msg of
