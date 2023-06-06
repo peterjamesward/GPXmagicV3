@@ -2,9 +2,15 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.13.1 (b25739b7, 2023-06-05 16:00)
+    """# GPXmagic v3.13.2 (b25739b7, 2023-06-05 16:00)
 
-**GPXmagic V3 works best with Chrome (and some derivatives) and Safari.**
+**GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.13.2
+
+Fixed error in index.html that prevented 3.13.1 from working.
+
+Added map option to Rider view.
 
 ## 3.13.1
 

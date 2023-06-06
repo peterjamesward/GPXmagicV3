@@ -1,6 +1,7 @@
 module ViewFirstPerson exposing (resizeOccured, subscriptions, view)
 
 import Angle
+import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Color
 import ColourPalette exposing (gradientColourPastel)
@@ -17,6 +18,7 @@ import Length
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
+import Point3d
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
 import SketchPlane3d
@@ -24,6 +26,7 @@ import SystemSettings exposing (SystemSettings)
 import Tools.Flythrough
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour, showDecimal1)
+import Vector3d
 import View3dCommonElements exposing (..)
 import Viewpoint3d
 
@@ -59,7 +62,7 @@ view settings context mapData contentArea track scene msgWrapper mFlythrough =
                     inFront none
 
         ( camera3d, cameraMap ) =
-            deriveViewPointAndCamera context track mFlythrough
+            deriveViewPointsAndCameras context track mFlythrough
 
         view3d =
             el
@@ -108,13 +111,17 @@ view settings context mapData contentArea track scene msgWrapper mFlythrough =
         view3d
 
 
-deriveViewPointAndCamera :
+deriveViewPointsAndCameras :
     Context
     -> TrackLoaded msg
     -> Maybe Tools.Flythrough.Flythrough
     -> ( Camera3d Length.Meters LocalCoords, Camera3d Quantity.Unitless MapViewer.WorldCoordinates )
-deriveViewPointAndCamera context track mFlythrough =
+deriveViewPointsAndCameras context track mFlythrough =
     let
+        groundHeight =
+            DomainModel.boundingBox track.trackTree
+                |> BoundingBox3d.minZ
+
         localRoad =
             DomainModel.leafFromIndex track.currentPosition track.trackTree
                 |> asRecord
@@ -130,7 +137,7 @@ deriveViewPointAndCamera context track mFlythrough =
         elevation =
             Angle.degrees 20.0 |> Quantity.minus gradientAsAngle
 
-        lookingAt =
+        riderPosition =
             case mFlythrough of
                 Nothing ->
                     localRoad.startPoint.space
@@ -142,7 +149,7 @@ deriveViewPointAndCamera context track mFlythrough =
             case mFlythrough of
                 Nothing ->
                     Viewpoint3d.orbitZ
-                        { focalPoint = lookingAt
+                        { focalPoint = riderPosition
                         , azimuth = azimuth
                         , elevation = elevation
                         , distance = Length.meters 10
@@ -150,27 +157,45 @@ deriveViewPointAndCamera context track mFlythrough =
 
                 Just flying ->
                     Viewpoint3d.lookAt
-                        { eyePoint = lookingAt
+                        { eyePoint = riderPosition
                         , focalPoint = flying.focusPoint
                         , upDirection = Direction3d.positiveZ
+                        }
+
+        viewpointForMap =
+            case mFlythrough of
+                Nothing ->
+                    Viewpoint3d.orbit
+                        { focalPoint = mapPositionFromTrack (DomainModel.withoutTime riderPosition) track
+                        , groundPlane = SketchPlane3d.yx
+                        , azimuth =
+                            Direction2d.toAngle <|
+                                Direction2d.rotateCounterclockwise <|
+                                    Direction2d.fromAngle
+                                        azimuth
+                        , elevation = elevation
+                        , distance = scaleToMapWorld track (Length.meters 10)
+                        }
+
+                Just flying ->
+                    Viewpoint3d.lookAt
+                        { eyePoint = mapPositionFromTrack (DomainModel.withoutTime riderPosition) track
+                        , focalPoint =
+                            mapPositionFromTrack
+                                (DomainModel.withoutTime <| flying.focusPoint)
+                                track
+                        , upDirection = Direction3d.negativeZ
                         }
 
         camera3d =
             Camera3d.perspective
                 { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees <| 120.0 - context.zoomLevel * 2.0
+                , verticalFieldOfView = Angle.degrees 45
                 }
 
         cameraMap =
             Camera3d.perspective
-                { viewpoint =
-                    Viewpoint3d.orbit
-                        { focalPoint = mapPositionFromTrack (DomainModel.withoutTime lookingAt) track
-                        , groundPlane = SketchPlane3d.yx
-                        , azimuth = Direction2d.toAngle <| Direction2d.rotateCounterclockwise context.cameraAzimuth
-                        , elevation = context.cameraElevation
-                        , distance = scaleToMapWorld track (Length.meters 10)
-                        }
+                { viewpoint = viewpointForMap
                 , verticalFieldOfView = Angle.degrees 45
                 }
     in

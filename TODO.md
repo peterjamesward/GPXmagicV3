@@ -13,15 +13,6 @@ BUG: Route Builder previews not hiding when tool closed.
 
 # WIP
 
-## MapBox without JS
-
-https://github.com/MartinSStewart/elm-map
-
-### Third person view.
-
-Plumbing not right for 1st person map toggle.
-
-
 ---
 
 # BACKLOG
