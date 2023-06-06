@@ -1,6 +1,7 @@
 module MapStyles exposing (..)
 
 import MapViewer
+import UtilsForViews
 
 
 rgb : Float -> Float -> Float -> Color
@@ -23,7 +24,7 @@ mapStyle =
     , ground = rgb255 235 225 205
     , buildings = rgb255 210 212 223
     , nature = rgb255 160 200 130
-    , background = rgb 0.87 0.85 0.83
+    , background = rgb255 59 174 232
     , primaryRoad = rgb255 250 250 250
     , primaryRoadOutline = rgb255 250 250 250
     , primaryRoadLink = rgb 0.9 0.9 0.9
