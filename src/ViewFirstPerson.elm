@@ -69,7 +69,12 @@ view settings context mapData contentArea track scene msgWrapper mFlythrough =
                     Scene3d.sunny
                         { camera = camera3d
                         , dimensions = contentArea
-                        , background = backgroundColor Color.lightBlue
+                        , background =
+                            if context.showMap then
+                                Scene3d.transparentBackground
+
+                            else
+                                backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
                         , entities = scene
                         , upDirection = positiveZ

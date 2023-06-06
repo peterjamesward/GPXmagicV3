@@ -388,7 +388,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                             case ( mTrack, effectiveContext ) of
                                 ( Just track, Just context ) ->
                                     let
-                                        ( newThirdContext, act, newMapData ) =
+                                        ( newContextFromView, act, newMapData ) =
                                             ViewThirdPerson.update
                                                 imageMsg
                                                 (msgWrapper << ThirdPersonViewMessage paneId)
@@ -397,7 +397,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                                 options.mapData
                                                 context
                                     in
-                                    ( Just newThirdContext, act, newMapData )
+                                    ( Just newContextFromView, act, newMapData )
 
                                 _ ->
                                     ( Nothing, [], options.mapData )
@@ -983,7 +983,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                                 none
 
                     ViewFirst ->
-                        case ( pane.thirdPersonContext, mTrack ) of
+                        case ( pane.firstPersonContext, mTrack ) of
                             ( Just context, Just track ) ->
                                 ViewFirstPerson.view
                                     settings
