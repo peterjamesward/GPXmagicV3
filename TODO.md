@@ -13,7 +13,6 @@ BUG: Route Builder previews not hiding when tool closed.
 
 # WIP
 
-There's a mis-alignment on the right hand side of the Rider view map underlay.
 
 ---
 

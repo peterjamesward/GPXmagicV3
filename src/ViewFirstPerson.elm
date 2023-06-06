@@ -66,7 +66,10 @@ view settings context mapData contentArea track scene msgWrapper mFlythrough =
 
         view3d =
             el
-                (flythroughHUD :: common3dSceneAttributes msgWrapper context)
+                (flythroughHUD
+                    :: (inFront <| zoomButtons settings msgWrapper context)
+                    :: common3dSceneAttributes msgWrapper context
+                )
             <|
                 html <|
                     Scene3d.sunny
@@ -100,8 +103,7 @@ view settings context mapData contentArea track scene msgWrapper mFlythrough =
                             context.map
     in
     el
-        [ inFront <| View3dCommonElements.toggleMapButtonOnly settings msgWrapper context
-        , behindContent <|
+        [ behindContent <|
             if context.showMap then
                 mapUnderlay
 

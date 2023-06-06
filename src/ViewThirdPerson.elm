@@ -87,11 +87,18 @@ view settings mapData context display contentArea track scene msgWrapper =
             placesOverlay display contentArea track camera
 
         mapUnderlay =
-            Html.map (msgWrapper << MapMsg) <|
-                MapViewer.view
-                    (Just mapCamera)
-                    mapData
-                    context.map
+            el
+                [ inFront <|
+                    el [ alignLeft, alignBottom ] <|
+                        html MapViewer.attribution
+                ]
+            <|
+                html <|
+                    Html.map (msgWrapper << MapMsg) <|
+                        MapViewer.view
+                            (Just mapCamera)
+                            mapData
+                            context.map
 
         view3d =
             el
@@ -126,13 +133,7 @@ view settings mapData context display contentArea track scene msgWrapper =
     el
         [ behindContent <|
             if context.showMap then
-                el
-                    [ inFront <|
-                        el [ alignLeft, alignBottom ] <|
-                            html MapViewer.attribution
-                    ]
-                <|
-                    html mapUnderlay
+                mapUnderlay
 
             else
                 none
