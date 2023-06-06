@@ -858,6 +858,8 @@ function hidePreview(label) {
 
 }
 
+/** Here be chartjs stuff for Profile 1 **/
+
 function addData(chart, label, data) {
     chart.data.labels.push(label);
     chart.data.datasets.forEach((dataset) => {
