@@ -1,9 +1,8 @@
 module ToolsController exposing
     ( ColourTriplet
     , DockSettings
-    ,  Options
-       --, ToolType(..)
-
+    , Options
+      --, ToolType(..)
     , ToolCategory(..)
     , ToolDock(..)
     , ToolEntry
@@ -15,7 +14,6 @@ module ToolsController exposing
     , decodeColour
     , defaultOptions
     , encodeColour
-    , flythroughTick
     , isToolOpen
     , refreshOpenTools
     , restoreDockSettings
@@ -23,6 +21,7 @@ module ToolsController exposing
     , restoreSettings
     , restoreStoredValues
     , setToolState
+    , subscriptions
     , toolsForDock
     , update
     )
@@ -2852,12 +2851,7 @@ dockList =
     ]
 
 
-flythroughTick : Options msg -> Time.Posix -> TrackLoaded msg -> ( Options msg, List (ToolAction msg) )
-flythroughTick options posix track =
-    let
-        ( updatedFlythrough, actions ) =
-            Tools.Flythrough.advanceFlythrough posix options.flythroughSettings track
-    in
-    ( { options | flythroughSettings = updatedFlythrough }
-    , actions
-    )
+subscriptions : Options msg -> Sub ToolMsg
+subscriptions options =
+    Sub.batch
+        [ Sub.map ToolFlythroughMsg <| Tools.Flythrough.subscriptions options.flythroughSettings ]

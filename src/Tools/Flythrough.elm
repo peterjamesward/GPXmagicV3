@@ -1,13 +1,22 @@
-module Tools.Flythrough exposing (Flythrough, Msg(..), Options, RunState(..), advanceFlythrough, defaultOptions, toolId, toolStateChange, update, view)
+module Tools.Flythrough exposing
+    ( Flythrough
+    , Msg(..)
+    , Options
+    , RunState(..)
+    , defaultOptions
+    , subscriptions
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction)
 import CommonToolStyles
 import DomainModel exposing (asRecord)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FeatherIcons
-import FlatColors.ChinesePalette
 import Length
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
@@ -17,7 +26,6 @@ import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Time
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showLongMeasure, showSpeed)
 import Vector3d
@@ -34,6 +42,7 @@ type Msg
     | PauseFlythrough
     | ResumeFlythrough
     | ResetFlythrough
+    | FlythroughTick Time.Posix
 
 
 type alias Flythrough =
@@ -47,7 +56,7 @@ type alias Flythrough =
 
 
 type RunState
-    = AwaitingFirstTick
+    = WaitingForFirstTick
     | Running
     | Ended
     | Paused
@@ -71,6 +80,16 @@ eyeHeight =
     Length.meters 2.0
 
 
+subscriptions : Options -> Sub Msg
+subscriptions options =
+    case options.flythrough of
+        Just _ ->
+            Time.every 100 FlythroughTick
+
+        Nothing ->
+            Sub.none
+
+
 advanceInternal :
     Time.Posix
     -> Flythrough
@@ -79,12 +98,8 @@ advanceInternal :
     -> Maybe Flythrough
 advanceInternal newTime status speed track =
     case status.running of
-        AwaitingFirstTick ->
-            Just
-                { status
-                    | lastUpdated = newTime
-                    , running = Running
-                }
+        WaitingForFirstTick ->
+            Just { status | lastUpdated = newTime, running = Running }
 
         Paused ->
             Just { status | lastUpdated = newTime }
@@ -261,7 +276,7 @@ toolStateChange opened colour options track =
 
         _ ->
             ( { options | flythrough = Nothing }
-            , [ Actions.StopFlythroughTicks ]
+            , []
             )
 
 
@@ -279,14 +294,14 @@ update options msg track =
 
         StartFlythrough ->
             ( startFlythrough track options
-            , [ Actions.StartFlythoughTicks ]
+            , []
             )
 
         PauseFlythrough ->
             case options.flythrough of
                 Just flythrough ->
                     ( { options | flythrough = Just { flythrough | running = Paused } }
-                    , [ Actions.StopFlythroughTicks ]
+                    , []
                     )
 
                 Nothing ->
@@ -295,8 +310,8 @@ update options msg track =
         ResumeFlythrough ->
             case options.flythrough of
                 Just flythrough ->
-                    ( { options | flythrough = Just { flythrough | running = AwaitingFirstTick } }
-                    , [ Actions.StartFlythoughTicks ]
+                    ( { options | flythrough = Just { flythrough | running = Running } }
+                    , []
                     )
 
                 Nothing ->
@@ -304,52 +319,42 @@ update options msg track =
 
         ResetFlythrough ->
             ( { options | flythrough = Nothing }
-            , [ Actions.StopFlythroughTicks
-              , Actions.SetCurrent options.savedCurrentPosition
-              ]
+            , [ Actions.SetCurrent options.savedCurrentPosition ]
             )
 
+        FlythroughTick posixTime ->
+            case options.flythrough of
+                Just flythrough ->
+                    let
+                        updatedFlythrough =
+                            advanceInternal
+                                posixTime
+                                flythrough
+                                options.flythroughSpeed
+                                track
 
-advanceFlythrough :
-    Time.Posix
-    -> Options
-    -> TrackLoaded msg
-    -> ( Options, List (ToolAction msg) )
-advanceFlythrough posixTime options track =
-    case options.flythrough of
-        Just flythrough ->
-            let
-                updatedFlythrough =
-                    advanceInternal
-                        posixTime
-                        flythrough
-                        options.flythroughSpeed
-                        track
+                        newOptions =
+                            { options | flythrough = updatedFlythrough }
+                    in
+                    ( newOptions
+                    , case updatedFlythrough of
+                        Just stillFlying ->
+                            [ Actions.SetCurrent <|
+                                DomainModel.indexFromDistanceRoundedDown
+                                    stillFlying.metresFromRouteStart
+                                    track.trackTree
+                            ]
 
-                newOptions =
-                    { options | flythrough = updatedFlythrough }
-            in
-            ( newOptions
-            , case updatedFlythrough of
-                Just stillFlying ->
-                    [ Actions.SetCurrent <|
-                        DomainModel.indexFromDistanceRoundedDown
-                            stillFlying.metresFromRouteStart
-                            track.trackTree
-                    ]
+                        Nothing ->
+                            [ Actions.SetCurrent options.savedCurrentPosition ]
+                    )
 
                 Nothing ->
-                    [ Actions.SetCurrent options.savedCurrentPosition
-                    , Actions.StopFlythroughTicks
-                    ]
-            )
-
-        Nothing ->
-            ( options, [ Actions.StopFlythroughTicks ] )
+                    ( options, [] )
 
 
-prepareFlythrough : TrackLoaded msg -> Options -> Maybe Flythrough
-prepareFlythrough track options =
+startFlythrough : TrackLoaded msg -> Options -> Options
+startFlythrough track options =
     let
         currentRoad =
             DomainModel.leafFromIndex track.currentPosition track.trackTree
@@ -364,25 +369,17 @@ prepareFlythrough track options =
             currentRoad.endPoint.space
                 |> Point3d.translateBy
                     (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
-    in
-    Just
-        { metresFromRouteStart = DomainModel.distanceFromIndex track.currentPosition track.trackTree
-        , cameraPosition = eyePoint
-        , focusPoint = focusPoint
-        , lastUpdated = Time.millisToPosix 0
-        , running = AwaitingFirstTick
-        , gradient = currentRoad.gradientAtStart
-        }
 
-
-startFlythrough : TrackLoaded msg -> Options -> Options
-startFlythrough track options =
-    case prepareFlythrough track options of
-        Just flying ->
-            { options
-                | flythrough = Just flying
-                , savedCurrentPosition = track.currentPosition
+        flythrough =
+            { metresFromRouteStart = DomainModel.distanceFromIndex track.currentPosition track.trackTree
+            , cameraPosition = eyePoint
+            , focusPoint = focusPoint
+            , lastUpdated = Time.millisToPosix 0
+            , running = WaitingForFirstTick
+            , gradient = currentRoad.gradientAtStart
             }
-
-        Nothing ->
-            options
+    in
+    { options
+        | flythrough = Just flythrough
+        , savedCurrentPosition = track.currentPosition
+    }

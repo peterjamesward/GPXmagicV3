@@ -138,7 +138,6 @@ type Msg
     | FetchElevationsFromMap String
     | ReplaceTrackOnMapAfterStyleChange
     | SvgMsg SvgPathExtractor.Msg
-    | FlythroughTick Time.Posix
     | HideInfoPopup
     | ReceivedLandUseData (Result Http.Error LandUseDataTypes.OSMLandUseData)
     | I18NMsg I18N.Msg
@@ -173,7 +172,6 @@ type alias Model =
     --, activeTrack : Maybe String
     -- Visuals (scenes now in PaneLayoutManager)
     , previews : Dict String PreviewData
-    , flythroughRunning : Bool
     , needsRendering : Bool
     , mapPointsDraggable : Bool
 
@@ -285,7 +283,6 @@ init mflags origin navigationKey =
       , userLocationsVisible = False
       , previews = Dict.empty
       , needsRendering = False
-      , flythroughRunning = False
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
       , modalMessage = Nothing
@@ -982,23 +979,6 @@ update msg model =
             , performActionCommands actions newModel
             )
 
-        FlythroughTick posix ->
-            -- Like a tool message, just isn't.
-            case Tracks.getActiveTrack model.toolOptions.tracksOptions of
-                Just track ->
-                    let
-                        ( updatedToolOptions, actions ) =
-                            ToolsController.flythroughTick model.toolOptions posix track
-
-                        newModel =
-                            { model | toolOptions = updatedToolOptions }
-                                |> performActionsOnModel actions
-                    in
-                    ( newModel, performActionCommands actions newModel )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
         HideInfoPopup ->
             ( { model | infoText = Nothing }, Cmd.none )
 
@@ -1645,11 +1625,7 @@ subscriptions model =
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
         , Browser.Events.onResize (\w h -> Resize w h)
-        , if model.flythroughRunning then
-            Time.every 100 FlythroughTick
-
-          else
-            Sub.none
+        , Sub.map ToolsMsg <| ToolsController.subscriptions model.toolOptions
         , PaneLayoutManager.subscriptions model.paneLayoutOptions |> Sub.map PaneMsg
         ]
 
@@ -2121,12 +2097,6 @@ performActionsOnModel actions model =
 
                 ( SetMarker maybeMarker, Just track ) ->
                     updateActiveTrack { track | markerPosition = maybeMarker } foldedModel
-
-                ( StartFlythoughTicks, Just _ ) ->
-                    { foldedModel | flythroughRunning = True }
-
-                ( StopFlythroughTicks, Just _ ) ->
-                    { foldedModel | flythroughRunning = False }
 
                 ( StoredValueRetrieved key value, _ ) ->
                     case key of

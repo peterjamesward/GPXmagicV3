@@ -94,7 +94,7 @@ toolStateChange opened colour options track =
 
         _ ->
             ( options
-            , [ Actions.StopFlythroughTicks ]
+            , []
             )
 
 

@@ -86,8 +86,6 @@ type
     | ApplyLandUseAltitudes (List (Maybe Float))
     | SelectSvgFile (File -> msg)
     | TrackFromSvg String
-    | StartFlythoughTicks
-    | StopFlythroughTicks
     | TrackFromStravaActivity StravaActivity StravaActivityStreams
     | LoadGpxFromStrava String
     | PasteStravaSegment Tools.StravaOptions.Options

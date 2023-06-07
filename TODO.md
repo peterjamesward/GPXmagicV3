@@ -13,13 +13,13 @@ BUG: Route Builder previews not hiding when tool closed.
 
 # WIP
 
+## Subscriptions
+
+Use the same as we now do for PaneLayoutManager - cascade through ToolController?
+
 ---
 
 # BACKLOG
-
-## Subscriptions 
-
-Use the same as we now do for PaneLayoutManager - cascade through ToolController?
 
 ## Actions
 
