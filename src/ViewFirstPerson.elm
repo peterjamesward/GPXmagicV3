@@ -21,8 +21,10 @@ import Pixels exposing (Pixels)
 import Point3d
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
+import SceneBuilder3D
 import SketchPlane3d
 import SystemSettings exposing (SystemSettings)
+import Tools.DisplaySettingsOptions
 import Tools.Flythrough
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour, showDecimal1)
@@ -44,6 +46,7 @@ resizeOccured paneArea context =
 view :
     SystemSettings
     -> Context
+    -> Tools.DisplaySettingsOptions.Options
     -> MapViewer.MapData
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
@@ -51,7 +54,7 @@ view :
     -> (Msg -> msg)
     -> Maybe Tools.Flythrough.Flythrough
     -> Element msg
-view settings context mapData contentArea track scene msgWrapper mFlythrough =
+view settings context display mapData contentArea track scene msgWrapper mFlythrough =
     let
         flythroughHUD =
             case mFlythrough of
@@ -63,6 +66,14 @@ view settings context mapData contentArea track scene msgWrapper mFlythrough =
 
         ( camera3d, cameraMap ) =
             deriveViewPointsAndCameras context track mFlythrough
+
+        sceneWithOptionalGround =
+            if display.groundPlane && not context.showMap then
+                (SceneBuilder3D.renderGroundPlane display <| Just <| DomainModel.boundingBox track.trackTree)
+                    ++ scene
+
+            else
+                scene
 
         view3d =
             el
@@ -82,7 +93,7 @@ view settings context mapData contentArea track scene msgWrapper mFlythrough =
                             else
                                 backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
-                        , entities = scene
+                        , entities = sceneWithOptionalGround
                         , upDirection = positiveZ
                         , sunlightDirection = negativeZ
                         , shadows = False

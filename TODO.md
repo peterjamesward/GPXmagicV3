@@ -13,13 +13,6 @@ BUG: Route Builder previews not hiding when tool closed.
 
 # WIP
 
-Fix stack overflow in Route Builder. 
-Is there a non-fold list traversal in there?
-> extendCluster is called with 15813 pairs in list. Should be able to improve on that.
-> To be fair, it should be tail recursive as far as I can see.
-
-Suppress ground plane when map shown. (Move rendering it into view.)
-
 ---
 
 # BACKLOG

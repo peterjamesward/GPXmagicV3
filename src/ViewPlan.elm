@@ -43,10 +43,12 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
+import SceneBuilder3D
 import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
 import ToolTip
 import Tools.DisplaySettingsOptions
+import Tools.Tracks as Tracks
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
