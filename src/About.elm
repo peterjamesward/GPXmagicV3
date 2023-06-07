@@ -2,9 +2,17 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.13.2 (190391a4, 2023-06-06 16:38)
+    """# GPXmagic v3.13.3 (190391a4, 2023-06-07 10:15)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.13.3
+
+Resolved Chrome problem with using Route Builder on some routes.
+
+If anyone cares, the code was designed to be tail-recursive and not consume stack. The compiler didn't spot
+this, so stack was being used up. Safari and Firefox seemed to have adequate stack, Chrome not so much. I
+have rewritten the code with a fold that is definitely tail-recursive.
 
 ## 3.13.2
 

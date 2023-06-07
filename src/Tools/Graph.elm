@@ -603,27 +603,31 @@ identifyPointsToBeMerged tolerance graph =
                     -- If first pair has two free points, start a new cluster.
                     -- If first pair does not, discard and recurse.
                     -- If list empty, return.
-                    case clustersInfo.pairs of
-                        pair1 :: morePairs ->
+                    -- Rewritten as a fold over the pairs list to avoid stack consumption.
+                    -- Note this means we must reflect the fold state carefully.
+                    let
+                        tryThisPair : PointNearbyPoint -> Clustering -> Clustering
+                        tryThisPair pair1 runningClustering =
                             let
                                 ( pointA, pointB ) =
                                     ( ( pair1.aTrack, pair1.aPointIndex )
                                     , ( pair1.bTrack, pair1.bPointIndex )
                                     )
+
+                                pairsWithoutCurrent =
+                                    List.drop 1 runningClustering.pairs
                             in
                             if
-                                Set.member pointA clustersInfo.usedPoints
-                                    || Set.member pointB clustersInfo.usedPoints
+                                Set.member pointA runningClustering.usedPoints
+                                    || Set.member pointB runningClustering.usedPoints
                             then
-                                findClusters { clustersInfo | pairs = morePairs }
+                                { runningClustering | pairs = pairsWithoutCurrent }
 
                             else
-                                { clustersInfo | pairs = morePairs }
+                                { runningClustering | pairs = pairsWithoutCurrent }
                                     |> growClusterFromSeed pair1
-                                    |> findClusters
-
-                        [] ->
-                            clustersInfo
+                    in
+                    List.foldl tryThisPair clustersInfo clustersInfo.pairs
 
                 growClusterFromSeed :
                     PointNearbyPoint
@@ -634,7 +638,8 @@ identifyPointsToBeMerged tolerance graph =
                     -- Return cluster and unused pairs.
                     let
                         centroid =
-                            Point3d.centroid pair1.aPoint [ pair1.bPoint ]
+                            --Point3d.centroid pair1.aPoint [ pair1.bPoint ]
+                            Point3d.midpoint pair1.aPoint pair1.bPoint
 
                         seedCluster : Cluster
                         seedCluster =
@@ -657,6 +662,8 @@ identifyPointsToBeMerged tolerance graph =
                 extendCluster : Cluster -> Clustering -> Clustering
                 extendCluster cluster clustersInfo =
                     let
+                        --_ =
+                        --    Debug.log "extendCluster" <| List.length clustersInfo.pairs
                         centroid2d =
                             Point3d.projectInto SketchPlane3d.xy cluster.centroid
 
