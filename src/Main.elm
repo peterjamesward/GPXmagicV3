@@ -1619,14 +1619,14 @@ showOptionsMenu model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
+        [ randomBytes (GotRandomBytes >> OAuthMessage)
         , MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
         , Browser.Events.onResize (\w h -> Resize w h)
         , Sub.map ToolsMsg <| ToolsController.subscriptions model.toolOptions
-        , PaneLayoutManager.subscriptions model.paneLayoutOptions |> Sub.map PaneMsg
+        , Sub.map PaneMsg <| PaneLayoutManager.subscriptions model.paneLayoutOptions
         ]
 
 
