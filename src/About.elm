@@ -2,9 +2,14 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.13.3 (dc192258, 2023-06-07 10:15)
+    """# GPXmagic v3.13.4 (dc192258, 2023-06-07 10:45)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.13.4
+
+When map is selected in 3D views, the green ground plane is hidden so you have no need to go into
+Display Settings to turn it off.
 
 ## 3.13.3
 
