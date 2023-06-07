@@ -313,6 +313,41 @@ update msg msgWrapper track ( width, height ) mapData context =
             , lat = gps.latitude |> Angle.inDegrees
             }
 
+        -- Let us have some information about the view, making dragging more precise.
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity width, toFloatQuantity height )
+
+        oopsLngLat =
+            { lng = 0, lat = 0 }
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        camera =
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+
+        ( rayOrigin, rayMax ) =
+            ( Camera3d.ray camera screenRectangle Point2d.origin
+            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
+            )
+
+        ( topLeftModel, bottomRightModel ) =
+            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
+            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+            )
+
+        metersPerPixel =
+            case ( topLeftModel, bottomRightModel ) of
+                ( Just topLeft, Just bottomRight ) ->
+                    (Length.inMeters <| Vector3d.xComponent <| Vector3d.from topLeft bottomRight)
+                        / Pixels.toFloat wFloat
+
+                _ ->
+                    -- We hope never to see this.
+                    1
+
         updatedMap ctxt =
             let
                 lookingAt =
@@ -469,24 +504,26 @@ update msg msgWrapper track ( width, height ) mapData context =
                     let
                         shiftVector =
                             Vector3d.meters
-                                ((startY - dy) * Angle.sin context.cameraElevation)
-                                (startX - dx)
-                                ((dy - startY) * Angle.cos context.cameraElevation)
-                                |> Vector3d.rotateAround
-                                    Axis3d.z
-                                    (Direction2d.toAngle context.cameraAzimuth)
-                                |> Vector3d.scaleBy (1.01 ^ (21 - context.zoomLevel))
+                                ((startX - dx) * metersPerPixel)
+                                ((dy - startY) * metersPerPixel)
+                                0.0
+
+                        newFocus =
+                            context.focalPoint
+                                |> .space
+                                |> Point3d.translateBy shiftVector
+                                |> DomainModel.withoutTime
 
                         newContext =
                             { context
-                                | focalPoint =
-                                    context.focalPoint.space
-                                        |> Point3d.translateBy shiftVector
-                                        |> DomainModel.withoutTime
+                                | focalPoint = newFocus
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( { newContext | map = updatedMap newContext }, [], mapData )
+                    ( { newContext | map = updatedMap newContext }
+                    , []
+                    , mapData
+                    )
 
                 _ ->
                     ( context, [], mapData )
