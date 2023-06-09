@@ -19,6 +19,7 @@ type alias Options =
 type SmoothMode
     = SmoothPoint
     | SmoothBend
+    | SmoothWithCircumcircles
 
 
 type alias SmoothedBend =

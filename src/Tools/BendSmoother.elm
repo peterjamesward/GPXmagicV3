@@ -15,7 +15,9 @@ import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
+import Circle2d exposing (Circle2d)
 import CommonToolStyles exposing (noTrackMessage)
+import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
 import Element.Background as Background
@@ -24,6 +26,7 @@ import FlatColors.ChinesePalette
 import Geometry101 as G exposing (distance, findIntercept, interpolateLine, isAfter, isBefore, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
 import Length exposing (Meters, inMeters, meters)
 import LineSegment2d
+import LineSegment3d exposing (LineSegment3d)
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
@@ -67,6 +70,7 @@ type Msg
     | SetBendTrackPointSpacing Float
     | SetMode SmoothMode
     | SetSegments Int
+    | ApplyCircumcircles
 
 
 tryBendSmoother : TrackLoaded msg -> Options -> Options
@@ -89,6 +93,180 @@ tryBendSmoother track options =
     }
 
 
+type
+    InterpolationSource
+    --TODO: CAREFUL. There are two parts to each source, according to the role in interpolation.
+    = Arc (Arc3d Meters LocalCoords)
+    | Straight (LineSegment3d Meters LocalCoords)
+
+
+type alias CircumcircleFold =
+    -- Need something to fold over the route.
+    { prevSource : InterpolationSource
+    , prevStart : Point3d Meters LocalCoords
+    , outputs : List (Point3d Meters LocalCoords)
+    }
+
+
+tryCircumcircles : TrackLoaded msg -> Options -> Options
+tryCircumcircles track options =
+    -- Populate the preview information.
+    let
+        ( fromStart, fromEnd ) =
+            case track.markerPosition of
+                Just _ ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                Nothing ->
+                    ( 0, 0 )
+
+        ( firstLeaf, lastLeaf ) =
+            ( DomainModel.getFirstLeaf track.trackTree
+            , DomainModel.getLastLeaf track.trackTree
+            )
+
+        ( firstInterpolationSource, lastInterpolationSource ) =
+            -- TODO: Loops.
+            -- TODO: Warning - this is not so simple. See `sourceFrom`.
+            -- At track start, if it's a loop, we preload the last leaf.
+            -- Otherwise, just use the first leaf, so we interpolate with it twice.
+            -- Absent loops, alwyas take the first leaf.
+            ( Straight <| LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
+            , Straight <| LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
+            )
+
+        baseFoldState =
+            { prevSource = firstInterpolationSource
+            , prevStart = firstLeaf.startPoint.space
+            , outputs = []
+            }
+
+        finalFoldState =
+            -- Note that we will not have output the transition for the final road section.
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                fromStart
+                fromEnd
+                (always Nothing)
+                0
+                track.trackTree
+                circumcircleInterpolator
+                baseFoldState
+
+        completeOutputs =
+            interpolateBetween
+                (howManyPointsFor lastLeaf)
+                finalFoldState.prevSource
+                lastInterpolationSource
+                ++ finalFoldState.outputs
+
+        howManyPointsFor : RoadSection -> Int
+        howManyPointsFor road =
+            road.trueLength
+                |> Length.inMeters
+                |> sqrt
+                |> truncate
+                |> clamp 1 10
+
+        circumcircleInterpolator : RoadSection -> CircumcircleFold -> CircumcircleFold
+        circumcircleInterpolator road foldState =
+            -- OK, name is misnomer as there can be straights.
+            let
+                ( partAB, partBC ) =
+                    -- Find circumcircle (or straight) by adding in the new end point.
+                    -- Return this as two distinct sources that we merge backwards and forwards.
+                    sourcesFrom foldState.prevStart road.startPoint.space road.endPoint.space
+
+                newInterpolation =
+                    {-
+                       For the number of new points we shall use the heuristic "sqrt length" clamped to [1 .. 10]
+                       that is: we may only emit one point in which case it's the initial point (never emit end points)
+                       and we will never emit more than ten point including the initial point.
+                    -}
+                    List.reverse <|
+                        interpolateBetween
+                            (howManyPointsFor road)
+                            foldState.prevSource
+                            partAB
+            in
+            { prevRoad = partBC
+            , prevStart = road.startPoint.space
+            , outputs = newInterpolation ++ foldState.outputs
+            }
+
+        interpolateBetween : Int -> InterpolationSource -> InterpolationSource -> List (Point3d Meters LocalCoords)
+        interpolateBetween count source1 source2 =
+            {- Finally arrive at the meat in the sandwich.
+               We have two possible circumcircles for a road section (or straights).
+               We want to "fade" from source1 to source2 over the [0..1) parameter in 'count' samples
+               starting at 0.
+               E.g. if count is 2, the samples should be at 0.0 and 0.5.
+               As x varies from 0 to 1, we shift our bias from source1 to source2.
+            -}
+            let
+                emitPointAt =
+                    let
+                        x =
+                            1.0 / (1.0 + toFloat count)
+
+                        ( pt1, pt2 ) =
+                            ( interpolateSource x source1, interpolateSource x source2 )
+
+                        interpolateSource at source =
+                            case source of
+                                Arc arc ->
+                                    Arc3d.pointOn arc x
+
+                                Straight line ->
+                                    LineSegment3d.interpolate line x
+                    in
+                    Point3d.interpolateFrom pt1 pt2 x
+            in
+            List.map emitPointAt (List.range 1 count)
+
+        sourcesFrom :
+            Point3d Meters LocalCoords
+            -> Point3d Meters LocalCoords
+            -> Point3d Meters LocalCoords
+            -> ( InterpolationSource, InterpolationSource )
+        sourcesFrom a b c =
+            -- We find an arc (a straight if no arc) and split it into two parts at the second point.
+            case Arc3d.throughPoints a b c of
+                Just arc ->
+                    let
+                        directionFromCentre =
+                            Direction3d.from (Arc3d.centerPoint arc)
+
+                        ( aDirection, bDirection, cDirection ) =
+                            ( directionFromCentre a
+                            , directionFromCentre b
+                            , directionFromCentre c
+                            )
+                    in
+                    case ( aDirection, bDirection, cDirection ) of
+                        ( Just toA, Just toB, Just toC ) ->
+                            let
+                                ( aToB, bToC ) =
+                                    ( Direction3d.angleFrom toA toB
+                                    , Direction3d.angleFrom toB toC
+                                    )
+                            in
+                            ( Arc <| Arc3d.sweptAround (Arc3d.axis arc) aToB a
+                            , Arc <| Arc3d.sweptAround (Arc3d.axis arc) bToC b
+                            )
+
+                        _ ->
+                            ( Straight <| LineSegment3d.from a b
+                            , Straight <| LineSegment3d.from b c
+                            )
+
+                Nothing ->
+                    ( Straight <| LineSegment3d.from a b
+                    , Straight <| LineSegment3d.from b c
+                    )
+    in
+    options
+
+
 applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
 applyUsingOptions options track =
     let
@@ -99,6 +277,9 @@ applyUsingOptions options track =
 
                 SmoothBend ->
                     applyClassicBendSmoother options track
+
+                SmoothWithCircumcircles ->
+                    applyCircumcircleSmoother options track
     in
     case newTree of
         Just isTree ->
@@ -122,6 +303,31 @@ applyUsingOptions options track =
 
         Nothing ->
             track
+
+
+applyCircumcircleSmoother : Options -> TrackLoaded msg -> Maybe PeteTree
+applyCircumcircleSmoother options track =
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
+        gpxPoints =
+            case options.smoothedBend of
+                Just bend ->
+                    List.map .gpx bend.nodes
+
+                Nothing ->
+                    []
+
+        newTree =
+            DomainModel.replaceRange
+                (fromStart + 1)
+                (fromEnd + 1)
+                track.referenceLonLat
+                gpxPoints
+                track.trackTree
+    in
+    newTree
 
 
 applyClassicBendSmoother : Options -> TrackLoaded msg -> Maybe PeteTree
@@ -383,12 +589,28 @@ update msg options previewColour track =
               ]
             )
 
+        ApplyCircumcircles ->
+            ( options
+            , [ Actions.WithUndo (Actions.BendSmootherApplyWithOptions options)
+              , Actions.BendSmootherApplyWithOptions options
+              , Actions.TrackHasChanged
+              ]
+            )
+
         SetMode mode ->
-            let
-                newOptions =
-                    { options | mode = mode }
-            in
-            ( newOptions, [] )
+            case mode of
+                SmoothWithCircumcircles ->
+                    -- Need to generate preview.
+                    let
+                        newOptions =
+                            { options | mode = mode }
+                    in
+                    ( tryCircumcircles track newOptions
+                    , previewActions newOptions previewColour track
+                    )
+
+                _ ->
+                    ( { options | mode = mode }, [] )
 
         SetSegments segments ->
             let
@@ -402,9 +624,8 @@ viewBendControls :
     SystemSettings
     -> (Msg -> msg)
     -> Options
-    -> Maybe (TrackLoaded msg)
     -> Element msg
-viewBendControls settings wrapper options track =
+viewBendControls settings wrapper options =
     let
         i18n =
             I18N.text settings.location toolId
@@ -427,41 +648,67 @@ viewBendControls settings wrapper options track =
                             i18n "none"
                 }
     in
-    case track of
-        Just _ ->
-            column (CommonToolStyles.toolContentBoxStyle settings)
-                [ el [ centerX ] <| bendSmoothnessSlider settings options wrapper
-                , el [ centerX ] <| fixBendButton options.smoothedBend
-                ]
-
-        Nothing ->
-            noTrackMessage settings
+    column (CommonToolStyles.toolContentBoxStyle settings)
+        [ el [ centerX ] <| bendSmoothnessSlider settings options wrapper
+        , el [ centerX ] <| fixBendButton options.smoothedBend
+        ]
 
 
-viewPointControls : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-viewPointControls settings wrapper options track =
-    case track of
-        Just _ ->
-            let
-                fixButton =
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrapper ApplySmoothBend
-                        , label = text "Smooth points"
-                        }
-            in
-            column
-                [ padding 5
-                , spacing 5
-                , width fill
-                , centerX
-                ]
-                [ el [ centerX ] <| segmentSlider settings.imperial options wrapper
-                , el [ centerX ] <| fixButton
-                ]
+viewPointControls : SystemSettings -> (Msg -> msg) -> Options -> Element msg
+viewPointControls settings wrapper options =
+    let
+        fixButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper ApplySmoothBend
+                , label = text "Smooth points"
+                }
+    in
+    column
+        [ padding 10
+        , spacing 10
+        , width fill
+        , centerX
+        ]
+        [ el [ centerX ] <| segmentSlider settings.imperial options wrapper
+        , el [ centerX ] <| fixButton
+        ]
 
-        Nothing ->
-            noTrackMessage settings
+
+viewCircumcircleControls :
+    SystemSettings
+    -> (Msg -> msg)
+    -> Options
+    -> TrackLoaded msg
+    -> Element msg
+viewCircumcircleControls settings wrapper options track =
+    let
+        fixButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper ApplyCircumcircles
+                , label = text "Do your thing"
+                }
+
+        i18n =
+            I18N.text settings.location toolId
+    in
+    column
+        [ padding 10
+        , spacing 10
+        , width fill
+        , centerX
+        ]
+        [ paragraph [ centerX ] <|
+            List.singleton <|
+                el [ centerX ] <|
+                    if track.markerPosition == Nothing then
+                        i18n "whole"
+
+                    else
+                        i18n "part"
+        , el [ centerX ] <| fixButton
+        ]
 
 
 view : SystemSettings -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
@@ -470,27 +717,36 @@ view settings wrapper options track =
         i18n =
             I18N.text settings.location toolId
     in
-    column
-        (CommonToolStyles.toolContentBoxStyle settings)
-    <|
-        [ el [ centerX ] <|
-            Input.radioRow
-                [ spacing 5 ]
-                { options =
-                    [ Input.option SmoothBend <| i18n "Bend"
-                    , Input.option SmoothPoint <| i18n "Point"
-                    ]
-                , onChange = wrapper << SetMode
-                , selected = Just options.mode
-                , label = Input.labelHidden "mode"
-                }
-        , case options.mode of
-            SmoothBend ->
-                viewBendControls settings wrapper options track
+    case track of
+        Just isTrack ->
+            column
+                (CommonToolStyles.toolContentBoxStyle settings)
+            <|
+                [ el [ centerX ] <|
+                    Input.radioRow
+                        [ spacing 5 ]
+                        { options =
+                            [ Input.option SmoothBend <| i18n "Bend"
+                            , Input.option SmoothPoint <| i18n "Point"
+                            , Input.option SmoothWithCircumcircles <| i18n "Circumcircles"
+                            ]
+                        , onChange = wrapper << SetMode
+                        , selected = Just options.mode
+                        , label = Input.labelHidden "mode"
+                        }
+                , case options.mode of
+                    SmoothBend ->
+                        viewBendControls settings wrapper options
 
-            SmoothPoint ->
-                viewPointControls settings wrapper options track
-        ]
+                    SmoothPoint ->
+                        viewPointControls settings wrapper options
+
+                    SmoothWithCircumcircles ->
+                        viewCircumcircleControls settings wrapper options isTrack
+                ]
+
+        Nothing ->
+            noTrackMessage settings
 
 
 bendSmoothnessSlider : SystemSettings -> Options -> (Msg -> msg) -> Element msg

@@ -50,6 +50,7 @@
             "justgook/alt-linear-algebra": "2.0.0",
             "ktonon/elm-crypto": "1.1.2",
             "ktonon/elm-word": "2.1.2",
+            "league/difference-list": "2.0.0",
             "lukewestby/elm-string-interpolate": "1.0.4",
             "lydell/elm-app-url": "1.0.3",
             "marcosh/elm-html-to-unicode": "1.0.4",
