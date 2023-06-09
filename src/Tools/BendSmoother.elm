@@ -122,8 +122,10 @@ tryCircumcircles track options =
                     ( 0, 0 )
 
         ( firstLeaf, lastLeaf ) =
-            ( DomainModel.getFirstLeaf track.trackTree
-            , DomainModel.getLastLeaf track.trackTree
+            ( DomainModel.asRecord <|
+                DomainModel.leafFromIndex fromStart track.trackTree
+            , DomainModel.asRecord <|
+                DomainModel.leafFromIndex (skipCount track.trackTree - fromEnd - 1) track.trackTree
             )
 
         ( firstInterpolationSource, lastInterpolationSource ) =
@@ -146,7 +148,7 @@ tryCircumcircles track options =
             -- Note that we will not have output the transition for the final road section.
             DomainModel.traverseTreeBetweenLimitsToDepth
                 fromStart
-                fromEnd
+                (skipCount track.trackTree - fromEnd - 1)
                 (always Nothing)
                 0
                 track.trackTree
@@ -268,14 +270,13 @@ tryCircumcircles track options =
         offsetToStart =
             DomainModel.distanceFromIndex fromStart track.trackTree
     in
-    Debug.log "options" <|
-        { options
-            | curlyWurly =
-                Just <|
-                    TrackLoaded.asPreviewPoints track offsetToStart <|
-                        List.map DomainModel.withoutTime <|
-                            List.reverse completeOutputs
-        }
+    { options
+        | curlyWurly =
+            Just <|
+                TrackLoaded.asPreviewPoints track offsetToStart <|
+                    List.map DomainModel.withoutTime <|
+                        List.reverse completeOutputs
+    }
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
