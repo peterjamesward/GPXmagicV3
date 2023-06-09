@@ -189,7 +189,7 @@ tryCircumcircles track options =
                             foldState.prevSource
                             partAB
             in
-            { prevRoad = partBC
+            { prevSource = partBC
             , prevStart = road.startPoint.space
             , outputs = newInterpolation ++ foldState.outputs
             }
@@ -204,10 +204,10 @@ tryCircumcircles track options =
                As x varies from 0 to 1, we shift our bias from source1 to source2.
             -}
             let
-                emitPointAt =
+                emitPointAt i =
                     let
                         x =
-                            1.0 / (1.0 + toFloat count)
+                            toFloat i * 1.0 / (1.0 + toFloat count)
 
                         ( pt1, pt2 ) =
                             ( interpolateSource x source1, interpolateSource x source2 )
@@ -268,13 +268,14 @@ tryCircumcircles track options =
         offsetToStart =
             DomainModel.distanceFromIndex fromStart track.trackTree
     in
-    { options
-        | curlyWurly =
-            Just <|
-                TrackLoaded.asPreviewPoints track offsetToStart <|
-                    List.map DomainModel.withoutTime <|
-                        List.reverse completeOutputs
-    }
+    Debug.log "options" <|
+        { options
+            | curlyWurly =
+                Just <|
+                    TrackLoaded.asPreviewPoints track offsetToStart <|
+                        List.map DomainModel.withoutTime <|
+                            List.reverse completeOutputs
+        }
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
@@ -552,7 +553,15 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             let
                 newOptions =
-                    options |> tryBendSmoother theTrack
+                    case options.mode of
+                        SmoothBend ->
+                            tryBendSmoother theTrack options
+
+                        SmoothWithCircumcircles ->
+                            tryCircumcircles theTrack options
+
+                        _ ->
+                            options
             in
             ( newOptions, previewActions newOptions colour theTrack )
 
@@ -561,17 +570,36 @@ toolStateChange opened colour options track =
 
 
 previewActions options colour track =
-    case options.smoothedBend of
-        Just bend ->
-            [ ShowPreview
-                { tag = "bend"
-                , shape = PreviewCircle
-                , colour = colour
-                , points = bend.nodes
-                }
-            ]
+    case options.mode of
+        SmoothBend ->
+            case options.smoothedBend of
+                Just bend ->
+                    [ ShowPreview
+                        { tag = "bend"
+                        , shape = PreviewCircle
+                        , colour = colour
+                        , points = bend.nodes
+                        }
+                    ]
 
-        Nothing ->
+                Nothing ->
+                    []
+
+        SmoothWithCircumcircles ->
+            case options.curlyWurly of
+                Just curly ->
+                    [ ShowPreview
+                        { tag = "bend"
+                        , shape = PreviewCircle
+                        , colour = colour
+                        , points = curly
+                        }
+                    ]
+
+                Nothing ->
+                    [ HidePreview "bend" ]
+
+        _ ->
             [ HidePreview "bend" ]
 
 
@@ -614,8 +642,9 @@ update msg options previewColour track =
                     let
                         newOptions =
                             { options | mode = mode }
+                                |> tryCircumcircles track
                     in
-                    ( tryCircumcircles track newOptions
+                    ( newOptions
                     , previewActions newOptions previewColour track
                     )
 
