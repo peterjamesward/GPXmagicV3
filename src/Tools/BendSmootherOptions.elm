@@ -13,6 +13,7 @@ type alias Options =
     , smoothedBend : Maybe SmoothedBend
     , segments : Int
     , mode : SmoothMode
+    , curlyWurly : Maybe (List PreviewPoint)
     }
 
 

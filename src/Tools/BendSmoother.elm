@@ -58,6 +58,7 @@ defaultOptions =
     , smoothedBend = Nothing
     , segments = 1
     , mode = SmoothBend
+    , curlyWurly = Nothing
     }
 
 
@@ -263,8 +264,17 @@ tryCircumcircles track options =
                     ( Straight <| LineSegment3d.from a b
                     , Straight <| LineSegment3d.from b c
                     )
+
+        offsetToStart =
+            DomainModel.distanceFromIndex fromStart track.trackTree
     in
-    options
+    { options
+        | curlyWurly =
+            Just <|
+                TrackLoaded.asPreviewPoints track offsetToStart <|
+                    List.map DomainModel.withoutTime <|
+                        List.reverse completeOutputs
+    }
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
