@@ -1626,8 +1626,7 @@ subscriptions model =
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
         , Browser.Events.onResize (\w h -> Resize w h)
         , Sub.map ToolsMsg <| ToolsController.subscriptions model.toolOptions
-
-        --, Sub.map PaneMsg <| PaneLayoutManager.subscriptions model.paneLayoutOptions
+        , Sub.map PaneMsg <| PaneLayoutManager.subscriptions model.paneLayoutOptions
         ]
 
 
@@ -2291,20 +2290,24 @@ performActionCommands actions model =
         showPreviewOnMap tag =
             case Dict.get tag model.previews of
                 Just useThisData ->
-                    case useThisData.shape of
-                        PreviewCircle ->
-                            MapPortController.showPreview
-                                model.toolOptions.displaySettings.previewSize
-                                useThisData.tag
-                                "circle"
-                                (uiColourHexString useThisData.colour)
-                                (SceneBuilderMap.renderPreview useThisData)
+                    let
+                        shape =
+                            case useThisData.shape of
+                                PreviewCircle ->
+                                    Just "circle"
 
-                        PreviewLine ->
+                                PreviewLine ->
+                                    Just "line"
+
+                                _ ->
+                                    Nothing
+                    in
+                    case shape of
+                        Just theShape ->
                             MapPortController.showPreview
                                 model.toolOptions.displaySettings.previewSize
                                 useThisData.tag
-                                "line"
+                                theShape
                                 (uiColourHexString useThisData.colour)
                                 (SceneBuilderMap.renderPreview useThisData)
 
@@ -2331,7 +2334,6 @@ performActionCommands actions model =
                     MapPortController.addMarkersToMap track
 
                 ( SetCurrentFromMapClick _, Just _ ) ->
-                    --MapPortController.addMarkersToMap track
                     Cmd.none
 
                 ( MapCenterOnCurrent, Just track ) ->
