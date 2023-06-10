@@ -21,7 +21,7 @@ import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Input as Input exposing (button)
+import Element.Input as Input exposing (button, checkbox)
 import FlatColors.ChinesePalette
 import Geometry101 as G exposing (distance, findIntercept, interpolateLine, isAfter, isBefore, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
 import Length exposing (Meters, inMeters, meters)
@@ -59,6 +59,7 @@ defaultOptions =
     , segments = 1
     , mode = SmoothBend
     , curlyWurly = Nothing
+    , circlesIn3d = True
     }
 
 
@@ -72,6 +73,7 @@ type Msg
     | SetMode SmoothMode
     | SetSegments Int
     | ApplyCircumcircles
+    | Set3dMode Bool
 
 
 tryBendSmoother : TrackLoaded msg -> Options -> Options
@@ -109,9 +111,10 @@ type alias CircumcircleFold =
     }
 
 
-tryCircumcircles : TrackLoaded msg -> Options -> Options
-tryCircumcircles track options =
-    -- Populate the preview information.
+try3dCircumcircles : TrackLoaded msg -> Options -> Options
+try3dCircumcircles track options =
+    -- Populate the preview information, and we will use that when we Apply.
+    -- This version using 3d geometry. Version with XY Arcs to follow.
     let
         ( fromStart, fromEnd ) =
             case track.markerPosition of
@@ -313,7 +316,7 @@ applyUsingOptions options track =
                 SmoothBend ->
                     applyClassicBendSmoother options track
 
-                SmoothWithCircumcircles ->
+                SmoothWithCircumcircle ->
                     applyCircumcircleSmoother options track
     in
     case newTree of
@@ -582,8 +585,8 @@ toolStateChange opened colour options track =
                         SmoothBend ->
                             tryBendSmoother theTrack options
 
-                        SmoothWithCircumcircles ->
-                            tryCircumcircles theTrack options
+                        SmoothWithCircumcircle ->
+                            try3dCircumcircles theTrack options
 
                         _ ->
                             options
@@ -610,7 +613,7 @@ previewActions options colour track =
                 Nothing ->
                     []
 
-        SmoothWithCircumcircles ->
+        SmoothWithCircumcircle ->
             case options.curlyWurly of
                 Just curly ->
                     [ ShowPreview
@@ -644,6 +647,14 @@ update msg options previewColour track =
             in
             ( newOptions, previewActions newOptions previewColour track )
 
+        Set3dMode use3d ->
+            let
+                newOptions =
+                    { options | circlesIn3d = use3d }
+                        |> tryBendSmoother track
+            in
+            ( newOptions, previewActions newOptions previewColour track )
+
         ApplySmoothBend ->
             ( options
             , [ Actions.WithUndo (Actions.BendSmootherApplyWithOptions options)
@@ -662,12 +673,12 @@ update msg options previewColour track =
 
         SetMode mode ->
             case mode of
-                SmoothWithCircumcircles ->
+                SmoothWithCircumcircle ->
                     -- Need to generate preview.
                     let
                         newOptions =
                             { options | mode = mode }
-                                |> tryCircumcircles track
+                                |> try3dCircumcircles track
                     in
                     ( newOptions
                     , previewActions newOptions previewColour track
@@ -754,6 +765,15 @@ viewCircumcircleControls settings wrapper options track =
                 , label = text "Apply"
                 }
 
+        choose3d =
+            checkbox
+                ViewPureStyles.subtleToolStyles
+                { onChange = wrapper << Set3dMode
+                , icon = Input.defaultCheckbox
+                , checked = options.circlesIn3d
+                , label = Input.labelRight [] <| text "Work in 3D"
+                }
+
         i18n =
             I18N.text settings.location toolId
     in
@@ -763,7 +783,8 @@ viewCircumcircleControls settings wrapper options track =
         , width fill
         , centerX
         ]
-        [ el [ centerX ] <|
+        [ choose3d
+        , el [ centerX ] <|
             if track.markerPosition == Nothing then
                 i18n "whole"
 
@@ -790,7 +811,7 @@ view settings wrapper options track =
                         { options =
                             [ Input.option SmoothBend <| i18n "Bend"
                             , Input.option SmoothPoint <| i18n "Point"
-                            , Input.option SmoothWithCircumcircles <| i18n "Circumcircles"
+                            , Input.option SmoothWithCircumcircle <| i18n "Circumcircles"
                             ]
                         , onChange = wrapper << SetMode
                         , selected = Just options.mode
@@ -803,7 +824,7 @@ view settings wrapper options track =
                     SmoothPoint ->
                         viewPointControls settings wrapper options
 
-                    SmoothWithCircumcircles ->
+                    SmoothWithCircumcircle ->
                         viewCircumcircleControls settings wrapper options isTrack
                 ]
 
