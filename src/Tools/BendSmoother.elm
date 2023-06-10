@@ -103,7 +103,7 @@ type
 
 type alias CircumcircleFold =
     -- Need something to fold over the route.
-    { prevSource : InterpolationSource
+    { prevSource : Maybe InterpolationSource
     , prevStart : Point3d Meters LocalCoords
     , outputs : List (Point3d Meters LocalCoords)
     }
@@ -140,29 +140,37 @@ tryCircumcircles track options =
             , Straight <| LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
             )
 
+        baseFoldState : CircumcircleFold
         baseFoldState =
-            { prevSource = firstInterpolationSource
+            { prevSource = Nothing
             , prevStart = firstLeaf.startPoint.space
             , outputs = []
             }
 
+        finalFoldState : CircumcircleFold
         finalFoldState =
             -- Note that we will not have output the transition for the final road section.
             DomainModel.traverseTreeBetweenLimitsToDepth
                 firstLeafIndex
-                lastLeafIndex
+                (lastLeafIndex + 1)
                 (always Nothing)
                 0
                 track.trackTree
-                circumcircleInterpolator
+                interpolatingFold
                 baseFoldState
 
         completeOutputs =
-            interpolateBetween
-                (howManyPointsFor lastLeaf)
-                finalFoldState.prevSource
-                lastInterpolationSource
-                ++ finalFoldState.outputs
+            case finalFoldState.prevSource of
+                Just previousSource ->
+                    interpolateBetween
+                        (howManyPointsFor lastLeaf)
+                        previousSource
+                        lastInterpolationSource
+                        ++ finalFoldState.outputs
+
+                Nothing ->
+                    -- Should not occur
+                    finalFoldState.outputs
 
         howManyPointsFor : RoadSection -> Int
         howManyPointsFor road =
@@ -171,31 +179,39 @@ tryCircumcircles track options =
                 |> sqrt
                 |> truncate
                 |> clamp 1 10
+                |> Debug.log "count"
 
-        circumcircleInterpolator : RoadSection -> CircumcircleFold -> CircumcircleFold
-        circumcircleInterpolator road foldState =
-            -- OK, name is misnomer as there can be straights.
-            let
-                ( partAB, partBC ) =
-                    -- Find circumcircle (or straight) by adding in the new end point.
-                    -- Return this as two distinct sources that we merge backwards and forwards.
-                    sourcesFrom foldState.prevStart road.startPoint.space road.endPoint.space
+        interpolatingFold : RoadSection -> CircumcircleFold -> CircumcircleFold
+        interpolatingFold road foldState =
+            case foldState.prevSource of
+                Just previousSource ->
+                    let
+                        ( partAB, partBC ) =
+                            -- Find circumcircle (or straight) by adding in the new end point.
+                            -- Return this as two distinct sources that we merge backwards and forwards.
+                            sourcesFrom foldState.prevStart road.startPoint.space road.endPoint.space
 
-                newInterpolation =
-                    {-
-                       For the number of new points we shall use the heuristic "sqrt length" clamped to [1 .. 10]
-                       that is: we may only emit one point in which case it's the initial point (never emit end points)
-                       and we will never emit more than ten point including the initial point.
-                    -}
-                    interpolateBetween
-                        (howManyPointsFor road)
-                        foldState.prevSource
-                        partAB
-            in
-            { prevSource = partBC
-            , prevStart = road.startPoint.space
-            , outputs = newInterpolation ++ foldState.outputs
-            }
+                        newInterpolation =
+                            {-
+                               For the number of new points we shall use the heuristic "sqrt length" clamped to [1 .. 10]
+                               that is: we may only emit one point in which case it's the initial point (never emit end points)
+                               and we will never emit more than ten point including the initial point.
+                            -}
+                            interpolateBetween
+                                (howManyPointsFor road)
+                                previousSource
+                                partAB
+                    in
+                    { prevSource = Just partBC
+                    , prevStart = road.startPoint.space
+                    , outputs = newInterpolation ++ foldState.outputs
+                    }
+
+                Nothing ->
+                    { prevSource = Just firstInterpolationSource
+                    , prevStart = firstLeaf.startPoint.space
+                    , outputs = []
+                    }
 
         interpolateBetween : Int -> InterpolationSource -> InterpolationSource -> List (Point3d Meters LocalCoords)
         interpolateBetween count source1 source2 =

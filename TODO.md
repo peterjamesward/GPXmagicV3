@@ -19,7 +19,7 @@
 
 Nice!
 
-* Something weird happening in first leaf.
+* Something weird happening in first leaf - spacing is wrong.
 * Add the minimum radius option.
 * Consider a "sticky" option where we add in the base road segment (less curly).
 * Loops.
