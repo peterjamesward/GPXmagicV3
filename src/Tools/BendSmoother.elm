@@ -131,14 +131,18 @@ tryCircumcircles track options =
             )
 
         ( firstInterpolationSource, lastInterpolationSource ) =
-            -- TODO: Loops.
-            -- TODO: Warning - this is not so simple. See `sourceFrom`.
-            -- At track start, if it's a loop, we preload the last leaf.
+            -- At track start, if it's a loop, we preload the *last* leaf.
             -- Otherwise, just use the first leaf, so we interpolate with it twice.
             -- Absent loops, alwyas take the first leaf.
-            ( Straight <| LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
-            , Straight <| LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
-            )
+            if DomainModel.isLoop track.trackTree then
+                ( Straight <| LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
+                , Straight <| LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
+                )
+
+            else
+                ( Straight <| LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
+                , Straight <| LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
+                )
 
         baseFoldState : CircumcircleFold
         baseFoldState =

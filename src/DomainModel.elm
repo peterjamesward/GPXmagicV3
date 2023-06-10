@@ -19,7 +19,6 @@ module DomainModel exposing
     , getDualCoords
     , getFirstLeaf
     , getLastLeaf
-    , gpxDistance
     , gpxFromPointWithReference
     , gpxPointFromIndex
     , gradientFromNode
@@ -28,6 +27,7 @@ module DomainModel exposing
     , indexFromDistanceRoundedUp
     , insertPointsIntoLeaf
     , interpolateTrack
+    , isLoop
     , leafFromIndex
     , lngLatPair
     , midPoint
@@ -193,6 +193,18 @@ skipCount treeNode =
 boundingBox : PeteTree -> BoundingBox3d Meters LocalCoords
 boundingBox treeNode =
     treeNode |> asRecord |> .boundingBox
+
+
+isLoop : PeteTree -> Bool
+isLoop tree =
+    let
+        ( start, end ) =
+            ( .space <| .startPoint <| getFirstLeaf tree
+            , .space <| .endPoint <| getLastLeaf tree
+            )
+    in
+    Point3d.distanceFrom start end
+        |> Quantity.lessThan (Length.meters 5)
 
 
 pointFromGpxWithReference : GPXSource -> GPXSource -> EarthPoint
@@ -805,14 +817,6 @@ nearestToRay ray tree leafIndex current =
     nearestPoints
         |> List.Extra.minimumBy (\pointIndex -> abs (pointIndex - current))
         |> Maybe.withDefault current
-
-
-gpxDistance : GPXSource -> GPXSource -> Length.Length
-gpxDistance p1 p2 =
-    Length.meters <|
-        range
-            ( Direction2d.toAngle p1.longitude, p1.latitude )
-            ( Direction2d.toAngle p2.longitude, p2.latitude )
 
 
 nearestToLonLat :

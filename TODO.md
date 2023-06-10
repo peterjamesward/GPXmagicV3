@@ -18,7 +18,6 @@
 ## Potential new smoother with circumcircles.
 
 * Add the minimum radius option.
-* Loops.
 
 ---
 
