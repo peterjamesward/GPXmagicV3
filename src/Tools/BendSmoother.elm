@@ -179,7 +179,6 @@ tryCircumcircles track options =
                 |> sqrt
                 |> truncate
                 |> clamp 1 10
-                |> Debug.log "count"
 
         interpolatingFold : RoadSection -> CircumcircleFold -> CircumcircleFold
         interpolatingFold road foldState =
@@ -748,7 +747,7 @@ viewCircumcircleControls settings wrapper options track =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper ApplyCircumcircles
-                , label = text "Do your thing"
+                , label = text "Apply"
                 }
 
         i18n =
@@ -760,14 +759,12 @@ viewCircumcircleControls settings wrapper options track =
         , width fill
         , centerX
         ]
-        [ paragraph [ centerX ] <|
-            List.singleton <|
-                el [ centerX ] <|
-                    if track.markerPosition == Nothing then
-                        i18n "whole"
+        [ el [ centerX ] <|
+            if track.markerPosition == Nothing then
+                i18n "whole"
 
-                    else
-                        i18n "part"
+            else
+                i18n "part"
         , el [ centerX ] <| fixButton
         ]
 

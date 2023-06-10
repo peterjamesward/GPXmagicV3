@@ -2,9 +2,16 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.13.5 (79d4ccb0, 2023-06-07 11:00)
+    """# GPXmagic v3.14.0 (79d4ccb0, 2023-06-10 11:15)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.14.0
+
+**New smoothing option**: "Curly-Wurly" to be found in the _Smooth with arcs_ tool.
+
+This attempts to negotiate the known track points by stringing together a series of curves with a
+changing radius. Sometimes, it will swing rather too wide. It's maths, not magic.
 
 ## 3.13.5
 
