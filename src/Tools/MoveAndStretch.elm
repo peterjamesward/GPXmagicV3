@@ -174,10 +174,7 @@ computeNewPoints options track =
                 Stretch drag ->
                     stretchPoints options drag track
     in
-    TrackLoaded.asPreviewPoints
-        track
-        (DomainModel.distanceFromIndex fromStart track.trackTree)
-        newPoints
+    TrackLoaded.asPreviewPoints track newPoints
 
 
 apply : Options -> TrackLoaded msg -> TrackLoaded msg

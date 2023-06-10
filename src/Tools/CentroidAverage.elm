@@ -58,13 +58,10 @@ computeNewPoints options track =
                 Nothing ->
                     ( 0, 0 )
 
-        distanceToPreview =
-            DomainModel.distanceFromIndex (fromStart + 1) track.trackTree
-
         earthPoints =
             centroidAverage False options fromStart fromEnd track.trackTree
     in
-    TrackLoaded.asPreviewPoints track distanceToPreview earthPoints
+    TrackLoaded.asPreviewPoints track earthPoints
 
 
 applyUsingOptions :

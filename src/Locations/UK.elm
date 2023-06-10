@@ -278,7 +278,7 @@ serious issues.
                 [ ( "label", """Smooth with arcs""" )
                 , ( "Bend", """Bend""" )
                 , ( "Point", """Point""" )
-                , ( "Circumcircles", """Circumcircles""" )
+                , ( "Circumcircles", """Curly-Wurly""" )
                 , ( "whole", """Applies to whole track""" )
                 , ( "part", """Applies between markers""" )
                 , ( "none", """No bend found""" )

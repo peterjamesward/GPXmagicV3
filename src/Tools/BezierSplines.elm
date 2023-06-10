@@ -57,9 +57,6 @@ computeNewPoints options track =
             else
                 ( 0, 0 )
 
-        distanceToPreview =
-            distanceFromIndex fromStart track.trackTree
-
         splineFunction =
             case options.bezierStyle of
                 ThroughExisting ->
@@ -77,7 +74,7 @@ computeNewPoints options track =
                 (skipCount track.trackTree - fromEnd)
                 track.trackTree
     in
-    TrackLoaded.asPreviewPoints track distanceToPreview splineEarthPoints
+    TrackLoaded.asPreviewPoints track splineEarthPoints
 
 
 

@@ -121,11 +121,13 @@ tryCircumcircles track options =
                 Nothing ->
                     ( 0, 0 )
 
+        ( firstLeafIndex, lastLeafIndex ) =
+            -- Which leaves do we fold over?
+            ( fromStart, skipCount track.trackTree - fromEnd - 1 )
+
         ( firstLeaf, lastLeaf ) =
-            ( DomainModel.asRecord <|
-                DomainModel.leafFromIndex fromStart track.trackTree
-            , DomainModel.asRecord <|
-                DomainModel.leafFromIndex (skipCount track.trackTree - fromEnd - 1) track.trackTree
+            ( DomainModel.asRecord <| DomainModel.leafFromIndex firstLeafIndex track.trackTree
+            , DomainModel.asRecord <| DomainModel.leafFromIndex lastLeafIndex track.trackTree
             )
 
         ( firstInterpolationSource, lastInterpolationSource ) =
@@ -147,8 +149,8 @@ tryCircumcircles track options =
         finalFoldState =
             -- Note that we will not have output the transition for the final road section.
             DomainModel.traverseTreeBetweenLimitsToDepth
-                fromStart
-                (skipCount track.trackTree - fromEnd - 1)
+                firstLeafIndex
+                lastLeafIndex
                 (always Nothing)
                 0
                 track.trackTree
@@ -156,10 +158,12 @@ tryCircumcircles track options =
                 baseFoldState
 
         completeOutputs =
-            interpolateBetween
-                (howManyPointsFor lastLeaf)
-                finalFoldState.prevSource
-                lastInterpolationSource
+            (List.reverse <|
+                interpolateBetween
+                    (howManyPointsFor lastLeaf)
+                    finalFoldState.prevSource
+                    lastInterpolationSource
+            )
                 ++ finalFoldState.outputs
 
         howManyPointsFor : RoadSection -> Int
@@ -224,7 +228,7 @@ tryCircumcircles track options =
                     in
                     Point3d.interpolateFrom pt1 pt2 x
             in
-            List.map emitPointAt (List.range 1 count)
+            List.map emitPointAt (List.range 0 count)
 
         sourcesFrom :
             Point3d Meters LocalCoords
@@ -273,9 +277,10 @@ tryCircumcircles track options =
     { options
         | curlyWurly =
             Just <|
-                TrackLoaded.asPreviewPoints track offsetToStart <|
+                TrackLoaded.asPreviewPoints track <|
                     List.map DomainModel.withoutTime <|
-                        List.reverse completeOutputs
+                        List.drop 1 <|
+                            List.reverse completeOutputs
     }
 
 
@@ -321,15 +326,16 @@ applyCircumcircleSmoother : Options -> TrackLoaded msg -> Maybe PeteTree
 applyCircumcircleSmoother options track =
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
-
-        gpxPoints =
-            case options.smoothedBend of
-                Just bend ->
-                    List.map .gpx bend.nodes
+            case track.markerPosition of
+                Just _ ->
+                    TrackLoaded.getRangeFromMarkers track
 
                 Nothing ->
-                    []
+                    ( 0, 0 )
+
+        gpxPoints =
+            Maybe.map (List.map .gpx) options.curlyWurly
+                |> Maybe.withDefault []
 
         newTree =
             DomainModel.replaceRange
@@ -591,7 +597,7 @@ previewActions options colour track =
                 Just curly ->
                     [ ShowPreview
                         { tag = "bend"
-                        , shape = PreviewCircle
+                        , shape = PreviewLine
                         , colour = colour
                         , points = curly
                         }
@@ -912,7 +918,7 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
 
                 previewsWithAdjustedDistance =
                     -- Untidy distance adjustment
-                    TrackLoaded.asPreviewPoints track distanceToBend nodes
+                    TrackLoaded.asPreviewPoints track nodes
             in
             Just
                 { nodes = previewsWithAdjustedDistance

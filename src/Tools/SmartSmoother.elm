@@ -488,7 +488,7 @@ computeNewPoints options track =
     derivedTrackForwards
         |> Utils.elide
         |> List.reverse
-        |> TrackLoaded.asPreviewPoints track distanceAtStart
+        |> TrackLoaded.asPreviewPoints track
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg

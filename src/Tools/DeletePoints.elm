@@ -1,9 +1,8 @@
 module Tools.DeletePoints exposing
     ( Msg(..)
     , Options
-    ,  defaultOptions
-       --, deletePointsBetween
-
+    , defaultOptions
+      --, deletePointsBetween
     , delete
     , toolId
     , toolStateChange
@@ -73,9 +72,6 @@ toolStateChange opened colour options track =
                 ( fromStart, fromEnd ) =
                     TrackLoaded.getRangeFromMarkers theTrack
 
-                distanceToPreview =
-                    DomainModel.distanceFromIndex fromStart theTrack.trackTree
-
                 depthFunction : RoadSection -> Maybe Int
                 depthFunction road =
                     if road.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
@@ -111,7 +107,7 @@ toolStateChange opened colour options track =
                     { tag = "delete"
                     , shape = PreviewCircle
                     , colour = colour
-                    , points = TrackLoaded.asPreviewPoints theTrack distanceToPreview previews
+                    , points = TrackLoaded.asPreviewPoints theTrack previews
                     }
               ]
             )

@@ -258,7 +258,7 @@ closeTheLoop track =
                 |> List.map (DomainModel.withTime lastLeaf.endPoint.time)
     in
     --TODO: Proper times for new points.
-    TrackLoaded.asPreviewPoints track (trueLength track.trackTree) vertices
+    TrackLoaded.asPreviewPoints track vertices
 
 
 applyCloseLoop : Options -> TrackLoaded msg -> TrackLoaded msg

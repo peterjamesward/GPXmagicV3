@@ -422,35 +422,25 @@ previewFromTree tree start end depthLimit =
     getAsPreviewPoint tree start :: endPoints
 
 
-asPreviewPoints : TrackLoaded msg -> Length.Length -> List EarthPoint -> List PreviewPoint
-asPreviewPoints track startDistance earths =
+asPreviewPoints : TrackLoaded msg -> List EarthPoint -> List PreviewPoint
+asPreviewPoints track earths =
     let
-        foldFn earth ( distance, mLastGpx, outputs ) =
+        foldFn earth ( mLastGpx, outputs ) =
             let
                 thisGpx =
                     DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-
-                thisDistance =
-                    case mLastGpx of
-                        Just lastGpx ->
-                            DomainModel.gpxDistance lastGpx thisGpx
-
-                        Nothing ->
-                            -- Avoid divide by zero
-                            Length.centimeter
 
                 thisPreview =
                     { earthPoint = earth
                     , gpx = thisGpx
                     }
             in
-            ( distance |> Quantity.plus thisDistance
-            , Just thisGpx
+            ( Just thisGpx
             , thisPreview :: outputs
             )
 
-        ( _, _, reversed ) =
-            List.foldl foldFn ( startDistance, Nothing, [] ) earths
+        ( _, reversed ) =
+            List.foldl foldFn ( Nothing, [] ) earths
     in
     List.reverse reversed
 

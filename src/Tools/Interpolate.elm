@@ -105,10 +105,7 @@ computeNewPoints excludeExisting options track =
                 []
                 |> List.reverse
     in
-    TrackLoaded.asPreviewPoints
-        track
-        (DomainModel.distanceFromIndex fromStart track.trackTree)
-        newPoints
+    TrackLoaded.asPreviewPoints track newPoints
 
 
 apply : Options -> TrackLoaded msg -> Maybe PeteTree

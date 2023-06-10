@@ -333,10 +333,7 @@ computeNudgedPoints settings track =
                 ++ fadeOutZoneNudged
 
         previewPoints =
-            TrackLoaded.asPreviewPoints
-                track
-                fadeInStartDistance
-                newEarthPoints
+            TrackLoaded.asPreviewPoints track newEarthPoints
     in
     ( ( firstReplacedPoint, lastReplacedPoint ), previewPoints )
 

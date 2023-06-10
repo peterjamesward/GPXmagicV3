@@ -17,22 +17,14 @@
 
 ## Potential new smoother with circumcircles.
 
-Each three consecutive points define a circumcircle. 
-We start by constructing the circumcircle.
-We also construct the "next" circumcircle.
-Use straight line if points are colinear, maybe if radius is sufficiently large.
-Imagine we transit the original first edge (circle chord) but emit points equally spaced
-on the (first circumcircle). These would pass through all three points.
-The "trick" is to fade between the "current" and the "next" circumcircle,
-which also passes through the last two points.
-When we reach the second point, we then advance to the "next" circumcircle.
-This is (probably) an approximate clothoid.
-There is an obvious extension to enforce a minimum radius, but then we have to
-(let the user) decide whether to fix the centre and widen the curve, or fix the
-curve to the road, moving the radius (where, exactly?). Or somewhere in-between.
-Anyhow, this all sounds straightforward.
-Is it a new tool, or can I slip it in as an option somewhere?
-> Tempted to add into "Smooth with arcs", because it does, and it doesn't need much UI.
+Nice!
+
+* Check whether is replacing the existing points.
+* Apply!
+* Add the minimum radius option.
+* Maybe increase point density, maybe user guided.
+* Consider a "sticky" option where we add in the base road segment (less curly).
+* Loops.
 
 ---
 
