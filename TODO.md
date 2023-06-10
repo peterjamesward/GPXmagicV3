@@ -19,10 +19,8 @@
 
 Nice!
 
-* Check whether is replacing the existing points.
-* Apply!
+* Something weird happening in first leaf.
 * Add the minimum radius option.
-* Maybe increase point density, maybe user guided.
 * Consider a "sticky" option where we add in the base road segment (less curly).
 * Loops.
 

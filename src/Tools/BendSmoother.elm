@@ -158,12 +158,10 @@ tryCircumcircles track options =
                 baseFoldState
 
         completeOutputs =
-            (List.reverse <|
-                interpolateBetween
-                    (howManyPointsFor lastLeaf)
-                    finalFoldState.prevSource
-                    lastInterpolationSource
-            )
+            interpolateBetween
+                (howManyPointsFor lastLeaf)
+                finalFoldState.prevSource
+                lastInterpolationSource
                 ++ finalFoldState.outputs
 
         howManyPointsFor : RoadSection -> Int
@@ -189,11 +187,10 @@ tryCircumcircles track options =
                        that is: we may only emit one point in which case it's the initial point (never emit end points)
                        and we will never emit more than ten point including the initial point.
                     -}
-                    List.reverse <|
-                        interpolateBetween
-                            (howManyPointsFor road)
-                            foldState.prevSource
-                            partAB
+                    interpolateBetween
+                        (howManyPointsFor road)
+                        foldState.prevSource
+                        partAB
             in
             { prevSource = partBC
             , prevStart = road.startPoint.space
@@ -208,6 +205,7 @@ tryCircumcircles track options =
                starting at 0.
                E.g. if count is 2, the samples should be at 0.0 and 0.5.
                As x varies from 0 to 1, we shift our bias from source1 to source2.
+               NOTE: We do this backwards to avoid multiple list reversals.
             -}
             let
                 emitPointAt i =
@@ -228,7 +226,7 @@ tryCircumcircles track options =
                     in
                     Point3d.interpolateFrom pt1 pt2 x
             in
-            List.map emitPointAt (List.range 0 count)
+            List.map emitPointAt (List.reverse <| List.range 0 count)
 
         sourcesFrom :
             Point3d Meters LocalCoords
@@ -270,18 +268,19 @@ tryCircumcircles track options =
                     ( Straight <| LineSegment3d.from a b
                     , Straight <| LineSegment3d.from b c
                     )
-
-        offsetToStart =
-            DomainModel.distanceFromIndex fromStart track.trackTree
     in
-    { options
-        | curlyWurly =
-            Just <|
-                TrackLoaded.asPreviewPoints track <|
-                    List.map DomainModel.withoutTime <|
-                        List.drop 1 <|
-                            List.reverse completeOutputs
-    }
+    if firstLeafIndex <= lastLeafIndex - 2 then
+        { options
+            | curlyWurly =
+                Just <|
+                    TrackLoaded.asPreviewPoints track <|
+                        List.map DomainModel.withoutTime <|
+                            List.drop 1 <|
+                                List.reverse completeOutputs
+        }
+
+    else
+        { options | curlyWurly = Nothing }
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg
@@ -597,7 +596,7 @@ previewActions options colour track =
                 Just curly ->
                     [ ShowPreview
                         { tag = "bend"
-                        , shape = PreviewLine
+                        , shape = PreviewCircle
                         , colour = colour
                         , points = curly
                         }
@@ -903,21 +902,7 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
                 nodes =
                     makeSmoothBend trackPointSpacing roadAB roadCD arc
 
-                distanceToBend =
-                    DomainModel.distanceFromIndex pointA track.trackTree
-                        |> Quantity.plus
-                            (case nodes of
-                                p1 :: _ ->
-                                    Point3d.distanceFrom
-                                        (.space <| DomainModel.earthPointFromIndex pointA track.trackTree)
-                                        p1.space
-
-                                _ ->
-                                    Quantity.zero
-                            )
-
                 previewsWithAdjustedDistance =
-                    -- Untidy distance adjustment
                     TrackLoaded.asPreviewPoints track nodes
             in
             Just
