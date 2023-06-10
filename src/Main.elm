@@ -1626,7 +1626,8 @@ subscriptions model =
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
         , Browser.Events.onResize (\w h -> Resize w h)
         , Sub.map ToolsMsg <| ToolsController.subscriptions model.toolOptions
-        , Sub.map PaneMsg <| PaneLayoutManager.subscriptions model.paneLayoutOptions
+
+        --, Sub.map PaneMsg <| PaneLayoutManager.subscriptions model.paneLayoutOptions
         ]
 
 
