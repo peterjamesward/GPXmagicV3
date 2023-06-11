@@ -2,9 +2,13 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.14.0 (60284008, 2023-06-10 11:15)
+    """# GPXmagic v3.14.1 (60284008, 2023-06-11 09:33)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.14.1
+
+Curly-wurly uses planar arcs to give better results on sharp bends with gradient transitions.
 
 ## 3.14.0
 
