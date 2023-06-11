@@ -222,7 +222,7 @@ tryCircumcircles track options =
                We have two possible circumcircles for a road section (or straights).
                We want to "fade" from source1 to source2 over the [0..1) parameter in 'count' samples
                starting at 0.
-               E.g. if count is 2, the samples should be at 0.0 and 0.5.
+               E.g. if count is 2, the samples should be at 0.0 and 0x.5.
                As x varies from 0 to 1, we shift our bias from source1 to source2.
                NOTE: We do this backwards to avoid multiple list reversals.
             -}
