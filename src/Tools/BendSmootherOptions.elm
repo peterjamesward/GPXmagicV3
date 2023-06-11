@@ -14,14 +14,13 @@ type alias Options =
     , segments : Int
     , mode : SmoothMode
     , curlyWurly : Maybe (List PreviewPoint)
-    , circlesIn3d : Bool
     }
 
 
 type SmoothMode
     = SmoothPoint
     | SmoothBend
-    | SmoothWithCircumcircle
+    | SmoothWithCircumcircles
 
 
 type alias SmoothedBend =

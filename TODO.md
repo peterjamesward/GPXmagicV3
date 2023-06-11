@@ -15,10 +15,6 @@
 
 # WIP
 
-## Curly-wurly
-
-Option to work with Arc2d, focusing on planar smoothing, just interpolating altitude.
-
 ---
 
 # BACKLOG
@@ -31,6 +27,41 @@ In several cases, only reason to use Actions is for Undo stack. That don't seem 
 
 Refetch data when more tracks loaded. Or provide button in the tool.
 = Make the Land Use tool actually do something.
+
+## Merge terrain and land use painting
+
+(Experiment proved the idea (of roads partitioning polygons) but implementation was weak.
+Roads should divide polygons, but care needed over directionality and crossing points.
+It needs doing properly, including the start and finish cases.)
+
+Using similar but less regular recursion scheme, use Land Use to colour terrain.
+Maybe put some buildings, trees, water in for suitable land types, provided not on road.
+Previous attempt at doing precise road occlusion was complex and not well done.
+Maybe would be OK to just paint any land use parts that don't intersect any roads,
+then devise some recursion scheme for those that do. Simple would be to split into
+four (NE,NW,SE,SW) and repeat, but perhaps could be more influenced by leaf index.
+
+1. The geometry
+   More specifically, in SceneBuilder3D.makeLandUsePlanar(|Sloped), when we have the
+   triangulated polygon, do this:
+- If the polygon (bounding box) intersects no roads, paint it.
+- If any of the polygon intersects any roads:
+- For all triangles in polygon:
+  - If triangle intersects any road then (recursively)
+    - if triangle area > some threshold, subdivide (by splitting longest edge)
+    - else make sure the triangle is _below_ the road section
+    - Repeat intersection test on split triangles
+- This will cease recursion based on size or absence of overlaps
+- Paint revised triangulation.
+
+2. The rendering
+   For Industrial, Retail, Residential, consider placing some grey or brown blocks in each triangle.
+   For Wood, Forest, see if some cones would create a pleasing effect.
+   For Water, Rock, Farmland, etc, consider some textures.
+
+On triangles, I think we could make Terrain look less blocky by starting out with a
+simple triangulation based on bounding box centroid to each edge (with random perturbation?),
+then using the above triangle splitting recursion. Mmm.
 
 ## Test cases for edits.
 
@@ -62,40 +93,10 @@ Provide info text capability on top bar and on view panes.
 
 # The cellar
 
-## Merge terrain and land use painting
+## Remove Actions
 
-(Experiment proved the idea (of roads partitioning polygons) but implementation was weak.
-Roads should divide polygons, but care needed over directionality and crossing points.
-It needs doing properly, including the start and finish cases.)
-
-Using similar but less regular recursion scheme, use Land Use to colour terrain.
-Maybe put some buildings, trees, water in for suitable land types, provided not on road.
-Previous attempt at doing precise road occlusion was complex and not well done.
-Maybe would be OK to just paint any land use parts that don't intersect any roads,
-then devise some recursion scheme for those that do. Simple would be to split into
-four (NE,NW,SE,SW) and repeat, but perhaps could be more influenced by leaf index.
-
-1. The geometry
-   More specifically, in SceneBuilder3D.makeLandUsePlanar(|Sloped), when we have the
-   triangulated polygon, do this:
-- If the polygon (bounding box) intersects no roads, paint it.
-- If any of the polygon intersects any roads:
-- For all triangles in polygon:
-    - If triangle intersects any road then (recursively)
-        - if triangle area > some threshold, subdivide (by splitting longest edge)
-        - else make sure the triangle is _below_ the road section
-        - Repeat intersection test on split triangles
-- This will cease recursion based on size or absence of overlaps
-- Paint revised triangulation.
-
-2. The rendering
-   For Industrial, Retail, Residential, consider placing some grey or brown blocks in each triangle.
-   For Wood, Forest, see if some cones would create a pleasing effect.
-   For Water, Rock, Farmland, etc, consider some textures.
-
-On triangles, I think we could make Terrain look less blocky by starting out with a
-simple triangulation based on bounding box centroid to each edge (with random perturbation?),
-then using the above triangle splitting recursion. Mmm.
+It's a challenge to avoid import loops, the interaction between tools and track (and graph) is hairy.
+Whilst something of a burden, the Actions approach provides flexibility (yes, maybe too much).
 
 ## Snap to Roads with TomTom
 
