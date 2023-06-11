@@ -105,6 +105,7 @@ type
 type alias CircumcircleFold =
     -- Need something to fold over the route.
     { prevSource : Maybe InterpolationSource
+    , original : Maybe (LineSegment3d Meters LocalCoords)
     , prevStart : Point3d Meters LocalCoords
     , outputs : List (Point3d Meters LocalCoords)
     }
@@ -156,6 +157,7 @@ tryCircumcircles track options =
         baseFoldState : CircumcircleFold
         baseFoldState =
             { prevSource = Nothing
+            , original = Nothing
             , prevStart = firstLeaf.startPoint.space
             , outputs = []
             }
@@ -196,8 +198,8 @@ tryCircumcircles track options =
 
         interpolatingFold : RoadSection -> CircumcircleFold -> CircumcircleFold
         interpolatingFold road foldState =
-            case foldState.prevSource of
-                Just previousSource ->
+            case ( foldState.prevSource, foldState.original ) of
+                ( Just previousSource, Just original ) ->
                     let
                         ( partAB, partBC ) =
                             -- Find circumcircle (or straight) by adding in the new end point.
@@ -212,17 +214,19 @@ tryCircumcircles track options =
                             -}
                             interpolateBetween
                                 (howManyPointsFor road)
-                                (LineSegment3d.from road.startPoint.space road.endPoint.space)
+                                original
                                 previousSource
                                 partAB
                     in
                     { prevSource = Just partBC
+                    , original = Just <| LineSegment3d.from road.startPoint.space road.endPoint.space -- for next iteration
                     , prevStart = road.startPoint.space
                     , outputs = newInterpolation ++ foldState.outputs
                     }
 
-                Nothing ->
+                _ ->
                     { prevSource = Just firstInterpolationSource
+                    , original = Just <| LineSegment3d.from road.startPoint.space road.endPoint.space
                     , prevStart = firstLeaf.startPoint.space
                     , outputs = []
                     }
