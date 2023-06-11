@@ -17,6 +17,7 @@ import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
 import Circle2d exposing (Circle2d)
 import CommonToolStyles exposing (noTrackMessage)
+import Direction2d
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
@@ -25,7 +26,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Geometry101 as G exposing (distance, findIntercept, interpolateLine, isAfter, isBefore, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
 import Length exposing (Meters, inMeters, meters)
-import LineSegment2d
+import LineSegment2d exposing (LineSegment2d)
 import LineSegment3d exposing (LineSegment3d)
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
@@ -97,8 +98,8 @@ tryBendSmoother track options =
 type
     InterpolationSource
     --TODO: CAREFUL. There are two parts to each source, according to the role in interpolation.
-    = Arc (Arc3d Meters LocalCoords)
-    | Straight (LineSegment3d Meters LocalCoords)
+    = Arc (Arc2d Meters LocalCoords)
+    | Straight (LineSegment2d Meters LocalCoords)
 
 
 type alias CircumcircleFold =
@@ -135,13 +136,21 @@ tryCircumcircles track options =
             -- Otherwise, just use the first leaf, so we interpolate with it twice.
             -- Absent loops, alwyas take the first leaf.
             if DomainModel.isLoop track.trackTree then
-                ( Straight <| LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
-                , Straight <| LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
+                ( Straight <|
+                    LineSegment3d.projectInto SketchPlane3d.xy <|
+                        LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
+                , Straight <|
+                    LineSegment3d.projectInto SketchPlane3d.xy <|
+                        LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
                 )
 
             else
-                ( Straight <| LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
-                , Straight <| LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
+                ( Straight <|
+                    LineSegment3d.projectInto SketchPlane3d.xy <|
+                        LineSegment3d.from firstLeaf.startPoint.space firstLeaf.endPoint.space
+                , Straight <|
+                    LineSegment3d.projectInto SketchPlane3d.xy <|
+                        LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
                 )
 
         baseFoldState : CircumcircleFold
@@ -168,6 +177,7 @@ tryCircumcircles track options =
                 Just previousSource ->
                     interpolateBetween
                         (howManyPointsFor lastLeaf)
+                        (LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space)
                         previousSource
                         lastInterpolationSource
                         ++ finalFoldState.outputs
@@ -202,6 +212,7 @@ tryCircumcircles track options =
                             -}
                             interpolateBetween
                                 (howManyPointsFor road)
+                                (LineSegment3d.from road.startPoint.space road.endPoint.space)
                                 previousSource
                                 partAB
                     in
@@ -216,8 +227,13 @@ tryCircumcircles track options =
                     , outputs = []
                     }
 
-        interpolateBetween : Int -> InterpolationSource -> InterpolationSource -> List (Point3d Meters LocalCoords)
-        interpolateBetween count source1 source2 =
+        interpolateBetween :
+            Int
+            -> LineSegment3d Meters LocalCoords
+            -> InterpolationSource
+            -> InterpolationSource
+            -> List (Point3d Meters LocalCoords)
+        interpolateBetween count original source1 source2 =
             {- Finally arrive at the meat in the sandwich.
                We have two possible circumcircles for a road section (or straights).
                We want to "fade" from source1 to source2 over the [0..1) parameter in 'count' samples
@@ -233,17 +249,20 @@ tryCircumcircles track options =
                             toFloat i * 1.0 / (1.0 + toFloat count)
 
                         ( pt1, pt2 ) =
-                            ( interpolateSource x source1, interpolateSource x source2 )
+                            ( interpolateSource source1, interpolateSource source2 )
 
-                        interpolateSource at source =
+                        altitude =
+                            LineSegment3d.interpolate original x |> Point3d.zCoordinate
+
+                        interpolateSource source =
                             case source of
                                 Arc arc ->
-                                    Arc3d.pointOn arc x
+                                    Arc2d.pointOn arc x
 
                                 Straight line ->
-                                    LineSegment3d.interpolate line x
+                                    LineSegment2d.interpolate line x
                     in
-                    Point3d.interpolateFrom pt1 pt2 x
+                    Point2d.interpolateFrom pt1 pt2 x |> withElevation (Length.inMeters altitude)
             in
             List.map emitPointAt (List.reverse <| List.range 0 count)
 
@@ -254,38 +273,45 @@ tryCircumcircles track options =
             -> ( InterpolationSource, InterpolationSource )
         sourcesFrom a b c =
             -- We find an arc (a straight if no arc) and split it into two parts at the second point.
-            case Arc3d.throughPoints a b c of
+            let
+                ( a2d, b2d, c2d ) =
+                    ( Point3d.projectInto SketchPlane3d.xy a
+                    , Point3d.projectInto SketchPlane3d.xy b
+                    , Point3d.projectInto SketchPlane3d.xy c
+                    )
+            in
+            case Arc2d.throughPoints a2d b2d c2d of
                 Just arc ->
                     let
                         directionFromCentre =
-                            Direction3d.from (Arc3d.centerPoint arc)
+                            Direction2d.from (Arc2d.centerPoint arc)
 
                         ( aDirection, bDirection, cDirection ) =
-                            ( directionFromCentre a
-                            , directionFromCentre b
-                            , directionFromCentre c
+                            ( directionFromCentre a2d
+                            , directionFromCentre b2d
+                            , directionFromCentre c2d
                             )
                     in
                     case ( aDirection, bDirection, cDirection ) of
                         ( Just toA, Just toB, Just toC ) ->
                             let
                                 ( aToB, bToC ) =
-                                    ( Direction3d.angleFrom toA toB
-                                    , Direction3d.angleFrom toB toC
+                                    ( Direction2d.angleFrom toA toB
+                                    , Direction2d.angleFrom toB toC
                                     )
                             in
-                            ( Arc <| Arc3d.sweptAround (Arc3d.axis arc) aToB a
-                            , Arc <| Arc3d.sweptAround (Arc3d.axis arc) bToC b
+                            ( Arc <| Arc2d.sweptAround (Arc2d.centerPoint arc) aToB a2d
+                            , Arc <| Arc2d.sweptAround (Arc2d.centerPoint arc) bToC b2d
                             )
 
                         _ ->
-                            ( Straight <| LineSegment3d.from a b
-                            , Straight <| LineSegment3d.from b c
+                            ( Straight <| LineSegment2d.from a2d b2d
+                            , Straight <| LineSegment2d.from b2d c2d
                             )
 
                 Nothing ->
-                    ( Straight <| LineSegment3d.from a b
-                    , Straight <| LineSegment3d.from b c
+                    ( Straight <| LineSegment2d.from a2d b2d
+                    , Straight <| LineSegment2d.from b2d c2d
                     )
     in
     if firstLeafIndex <= lastLeafIndex - 2 then
