@@ -15,6 +15,8 @@
 
 # WIP
 
+Think about V4, another wholesale refactor, still in Elm. probably.
+
 ---
 
 # BACKLOG
