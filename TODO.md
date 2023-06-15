@@ -15,11 +15,18 @@
 
 # WIP
 
-Think about V4, another wholesale refactor, still in Elm. probably.
-
 ---
 
 # BACKLOG
+
+## Smart smoother
+
+Add the "desire" to return to the baseline road position? That would 
+mean not just tracking theta but also the lateral deviation, and thereby 
+ensure that a turn extends not only until we match the current theta but 
+exceed that to return to the baseline. Or -- having done CurlyWurly, we 
+could just do a linear (or cosine) transition back to baseline when we have 
+matched theta (subject to theta derivatives of course).
 
 ## Actions
 
