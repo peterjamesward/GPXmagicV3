@@ -55,7 +55,7 @@ toolId =
 
 defaultOptions : Options
 defaultOptions =
-    { bendTrackPointSpacing = 5.0
+    { bendTrackPointSpacing = 1.0
     , smoothedBend = Nothing
     , segments = 1
     , mode = SmoothBend
@@ -858,17 +858,17 @@ bendSmoothnessSlider settings options wrap =
         , min =
             Length.inMeters <|
                 if settings.imperial then
-                    Length.feet 3.0
+                    Length.foot
 
                 else
-                    Length.meters 1.0
+                    Length.meters 0.3
         , max =
             Length.inMeters <|
                 if settings.imperial then
-                    Length.feet 30.0
+                    Length.feet 16.0
 
                 else
-                    Length.meters 10.0
+                    Length.meters 5.0
         , step = Nothing
         , value = options.bendTrackPointSpacing
         , thumb = Input.defaultThumb
