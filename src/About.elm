@@ -2,9 +2,15 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.14.1 (60284008, 2023-06-11 09:33)
+    """# GPXmagic v3.14.2 (60284008, 2023-06-21 12:11)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.14.2
+
+Show correct preview when switching modes in Smooth with Arcs.
+
+Reduce default spacing and change range to 0.5 -- 10.0 metres.
 
 ## 3.14.1
 
