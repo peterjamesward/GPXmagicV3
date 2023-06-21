@@ -15,9 +15,14 @@
 
 # WIP
 
+**BUG** Switching out of curly-wurly mode should hide preview.
 ---
 
 # BACKLOG
+
+## Reduce point spacing on bends
+
+All tools -- better results in RGT with 1 meter spacing.
 
 ## Smart smoother
 

@@ -691,20 +691,23 @@ update msg options previewColour track =
             )
 
         SetMode mode ->
-            case mode of
-                SmoothWithCircumcircles ->
-                    -- Need to generate preview.
-                    let
-                        newOptions =
-                            { options | mode = mode }
-                                |> tryCircumcircles track
-                    in
-                    ( newOptions
-                    , previewActions newOptions previewColour track
-                    )
+            let
+                newOptions =
+                    { options | mode = mode }
+                        |> (case mode of
+                                SmoothWithCircumcircles ->
+                                    tryCircumcircles track
 
-                _ ->
-                    ( { options | mode = mode }, [] )
+                                SmoothBend ->
+                                    tryBendSmoother track
+
+                                _ ->
+                                    identity
+                           )
+            in
+            ( newOptions
+            , previewActions newOptions previewColour track
+            )
 
         SetSegments segments ->
             let
