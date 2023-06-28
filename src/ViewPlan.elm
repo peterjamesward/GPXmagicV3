@@ -10,10 +10,12 @@ module ViewPlan exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import Arc2d
+import Axis2d
 import Axis3d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
-import Color
+import Circle2d
 import CommonToolStyles
 import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
@@ -21,17 +23,22 @@ import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Cursor as Cursor
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
 import FlatColors.IndianPalette
+import Frame2d
+import Geometry.Svg as Svg
 import Html
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
+import LineSegment2d
+import LineSegment3d
 import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
@@ -44,7 +51,10 @@ import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import SceneBuilder3D
+import SketchPlane3d
 import Spherical exposing (metresPerPixel)
+import Svg
+import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip
 import Tools.DisplaySettingsOptions
@@ -74,6 +84,7 @@ type Msg
     | ToggleFollowOrange
     | MapMsg MapViewer.Msg
     | ToggleShowMap
+    | ToggleFingerpainting
 
 
 subscriptions : MapViewer.MapData -> PlanContext -> Sub Msg
@@ -119,6 +130,7 @@ initialiseView current track contentArea currentContext =
             , followSelectedPoint = True
             , map = initialMap
             , showMap = False
+            , fingerPainting = False
             }
 
         ( lngLat1, lngLat2 ) =
@@ -131,8 +143,8 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : SystemSettings -> (Msg -> msg) -> PlanContext -> Element msg
-zoomButtons settings msgWrapper context =
+viewMenu : SystemSettings -> (Msg -> msg) -> PlanContext -> Element msg
+viewMenu settings msgWrapper context =
     column
         [ alignTop
         , alignRight
@@ -188,6 +200,25 @@ zoomButtons settings msgWrapper context =
                 else
                     useIcon FeatherIcons.map
             }
+        , Input.button
+            [ ToolTip.tooltip
+                onLeft
+                (ToolTip.myTooltip <|
+                    if context.fingerPainting then
+                        "Mouse moves view mode"
+
+                    else
+                        "Fingerpainting mode"
+                )
+            ]
+            { onPress = Just <| msgWrapper ToggleFingerpainting
+            , label =
+                if context.fingerPainting then
+                    useIcon FeatherIcons.move
+
+                else
+                    useIcon FeatherIcons.zap
+            }
         ]
 
 
@@ -221,9 +252,6 @@ view context mapData settings display contentArea track scene msgWrapper =
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
-        overlay =
-            placesOverlay display contentArea track camera
-
         plan3dView =
             el
                 [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
@@ -242,8 +270,14 @@ view context mapData settings display contentArea track scene msgWrapper =
                 , pointer
                 , Border.width 0
                 , Border.color FlatColors.ChinesePalette.peace
-                , inFront <| overlay
-                , inFront <| zoomButtons settings msgWrapper context
+                , inFront <| placesOverlay display contentArea track camera
+                , inFront <| fingerPainting context contentArea track camera
+                , inFront <| viewMenu settings msgWrapper context
+                , if context.fingerPainting then
+                    Cursor.pointer
+
+                  else
+                    Cursor.default
                 ]
             <|
                 html <|
@@ -285,6 +319,64 @@ view context mapData settings display contentArea track scene msgWrapper =
                 none
         ]
         plan3dView
+
+
+fingerPainting :
+    PlanContext
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
+    -> Camera3d Meters LocalCoords
+    -> Element msg
+fingerPainting context ( givenWidth, givenHeight ) track camera =
+    --TODO: Use this to show the location of any fingerpainting tool.
+    let
+        ( svgWidth, svgHeight ) =
+            ( String.fromInt <| Pixels.inPixels givenWidth
+            , String.fromInt <| Pixels.inPixels givenHeight
+            )
+
+        screenRectangle =
+            Rectangle2d.from
+                Point2d.origin
+                (Point2d.xy
+                    (Quantity.toFloatQuantity givenWidth)
+                    (Quantity.toFloatQuantity givenHeight)
+                )
+
+        topLeftFrame =
+            Frame2d.atPoint
+                (Point2d.xy Quantity.zero (Quantity.toFloatQuantity givenHeight))
+
+        --|> Frame2d.reverseY
+    in
+    case context.dragAction of
+        DragPaint paintInfo ->
+            let
+                paintNodes =
+                    paintInfo.path
+                        |> List.map
+                            (\place ->
+                                Svg.circle2d
+                                    [ Svg.Attributes.stroke "white"
+                                    , Svg.Attributes.strokeWidth "1"
+                                    , Svg.Attributes.fill "none"
+                                    ]
+                                    (Circle2d.withRadius (Pixels.float 3) place)
+                            )
+                        |> Svg.g []
+            in
+            html <|
+                Svg.svg
+                    [ Svg.Attributes.width svgWidth
+                    , Svg.Attributes.height svgHeight
+                    ]
+                    [ Svg.relativeTo topLeftFrame paintNodes ]
+
+        DragPush pushInfo ->
+            none
+
+        _ ->
+            none
 
 
 resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> PlanContext -> PlanContext
@@ -392,9 +484,6 @@ update msg msgWrapper track ( width, height ) context mapData =
         ( wFloat, hFloat ) =
             ( toFloatQuantity width, toFloatQuantity height )
 
-        oopsLngLat =
-            { lng = 0, lat = 0 }
-
         screenRectangle =
             Rectangle2d.from
                 (Point2d.xy Quantity.zero hFloat)
@@ -447,11 +536,73 @@ update msg msgWrapper track ( width, height ) context mapData =
             )
 
         ImageGrab event ->
-            -- Mouse behaviour depends which view is in use...
-            -- Right-click or ctrl-click to mean rotate; otherwise pan.
+            {-
+               Plan view only has pan, no rotation. Obviously no tilt.
+               For fingerpainting, we do a click detect to see whether to paint or push track.
+               Painting if within one meter of track.
+               Apologies for near duplication of detectHit here.
+            -}
+            let
+                ( x, y ) =
+                    event.offsetPos
+
+                screenPoint =
+                    Point2d.pixels x y
+
+                ray =
+                    Camera3d.ray camera screenRectangle screenPoint
+
+                touchPointInWorld =
+                    ray
+                        |> Axis3d.intersectionWithPlane Plane3d.xy
+
+                nearestLeafIndex =
+                    nearestToRay
+                        ray
+                        track.trackTree
+                        track.leafIndex
+                        track.currentPosition
+
+                nearestLeaf =
+                    asRecord <|
+                        DomainModel.leafFromIndex nearestLeafIndex track.trackTree
+
+                leafLineSegment =
+                    LineSegment3d.from nearestLeaf.startPoint.space nearestLeaf.endPoint.space
+                        |> LineSegment3d.projectInto SketchPlane3d.xy
+
+                leafLineAxis =
+                    Axis2d.throughPoints
+                        (LineSegment2d.startPoint leafLineSegment)
+                        (LineSegment2d.endPoint leafLineSegment)
+
+                newState =
+                    case ( context.fingerPainting, touchPointInWorld, leafLineAxis ) of
+                        ( True, Just touchPoint, Just leafAxis ) ->
+                            let
+                                touchPointXY =
+                                    touchPoint |> Point3d.projectInto SketchPlane3d.xy
+
+                                touchPointOnTrack =
+                                    touchPointXY |> Point2d.projectOnto leafAxis
+                            in
+                            -- Still need to determine Paint or Push.
+                            if
+                                Point2d.distanceFrom touchPointXY touchPointOnTrack
+                                    |> Quantity.lessThanOrEqualTo Length.meter
+                            then
+                                DragPaint <| ViewPlanContext.PaintInfo [ screenPoint ]
+
+                            else
+                                DragPush <| ViewPlanContext.PushInfo
+
+                        --touchPointXY
+                        _ ->
+                            DragPan
+            in
             ( { context
                 | orbiting = Just event.offsetPos
-                , dragAction = DragPan
+                , dragAction = newState
                 , waitingForClickDelay = True
               }
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
@@ -488,6 +639,28 @@ update msg msgWrapper track ( width, height ) context mapData =
                             { context
                                 | focalPoint = newFocus
                                 , orbiting = Just ( dx, dy )
+                            }
+                    in
+                    ( { newContext | map = updatedMap newContext }
+                    , []
+                    , mapData
+                    )
+
+                ( DragPaint paintInfo, _ ) ->
+                    let
+                        screenPoint =
+                            Point2d.pixels dx dy
+
+                        path =
+                            Debug.log "path" <|
+                                screenPoint
+                                    :: paintInfo.path
+
+                        newContext =
+                            { context
+                                | dragAction =
+                                    DragPaint <|
+                                        ViewPlanContext.PaintInfo path
                             }
                     in
                     ( { newContext | map = updatedMap newContext }
@@ -603,6 +776,12 @@ update msg msgWrapper track ( width, height ) context mapData =
 
         ToggleShowMap ->
             ( { context | showMap = not context.showMap }
+            , []
+            , mapData
+            )
+
+        ToggleFingerpainting ->
+            ( { context | fingerPainting = not context.fingerPainting }
             , []
             , mapData
             )
