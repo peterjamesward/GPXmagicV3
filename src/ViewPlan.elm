@@ -359,19 +359,19 @@ fingerPainting context ( givenWidth, givenHeight ) track camera =
                                 Svg.circle2d
                                     [ Svg.Attributes.stroke "white"
                                     , Svg.Attributes.strokeWidth "1"
-                                    , Svg.Attributes.fill "none"
+                                    , Svg.Attributes.fill "white"
                                     ]
-                                    (Circle2d.withRadius (Pixels.float 3) place)
+                                    (Circle2d.withRadius (Pixels.float 5) place)
                             )
-                        |> Svg.g []
             in
             html <|
                 Svg.svg
                     [ Svg.Attributes.width svgWidth
                     , Svg.Attributes.height svgHeight
                     ]
-                    [ Svg.relativeTo topLeftFrame paintNodes ]
+                    paintNodes
 
+        --[ Svg.relativeTo topLeftFrame paintNodes ]
         DragPush pushInfo ->
             none
 
@@ -589,7 +589,7 @@ update msg msgWrapper track ( width, height ) context mapData =
                             -- Still need to determine Paint or Push.
                             if
                                 Point2d.distanceFrom touchPointXY touchPointOnTrack
-                                    |> Quantity.lessThanOrEqualTo Length.meter
+                                    |> Quantity.lessThanOrEqualTo (Length.meters 2)
                             then
                                 DragPaint <| ViewPlanContext.PaintInfo [ screenPoint ]
 
@@ -649,12 +649,12 @@ update msg msgWrapper track ( width, height ) context mapData =
                 ( DragPaint paintInfo, _ ) ->
                     let
                         screenPoint =
+                            --Debug.log "point" <|
                             Point2d.pixels dx dy
 
                         path =
-                            Debug.log "path" <|
-                                screenPoint
-                                    :: paintInfo.path
+                            screenPoint
+                                :: paintInfo.path
 
                         newContext =
                             { context
@@ -663,7 +663,7 @@ update msg msgWrapper track ( width, height ) context mapData =
                                         ViewPlanContext.PaintInfo path
                             }
                     in
-                    ( { newContext | map = updatedMap newContext }
+                    ( newContext
                     , []
                     , mapData
                     )
