@@ -675,11 +675,24 @@ update msg msgWrapper track ( width, height ) context mapData =
                     )
 
         ImageRelease _ ->
+            let
+                actions =
+                    case context.dragAction of
+                        DragPaint paintInfo ->
+                            -- One of those occasions where I'm pleased I have Actions, avoiding much plumbing.
+                            [ Actions.WithUndo <| Actions.FingerPaint paintInfo
+                            , Actions.FingerPaint paintInfo
+                            , Actions.TrackHasChanged
+                            ]
+
+                        _ ->
+                            []
+            in
             ( { context
                 | orbiting = Nothing
                 , dragAction = DragNone
               }
-            , []
+            , actions
             , mapData
             )
 

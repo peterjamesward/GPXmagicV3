@@ -27,6 +27,7 @@ import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaActivity, StravaActivityStreams, StravaRoute, StravaSegment, StravaSegmentStreams)
 import Tools.TimestampOptions
+import ViewPlanContext
 import ViewProfileChartContext
 
 
@@ -113,6 +114,7 @@ type
     | UnloadActiveTrack String
     | RemoveAllFromMap (List String)
     | ExternalCommand (Cmd msg)
+    | FingerPaint ViewPlanContext.PaintInfo
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String
