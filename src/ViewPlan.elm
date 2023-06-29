@@ -512,16 +512,11 @@ update msg msgWrapper track ( width, height ) context mapData =
 
         ImageMouseWheel deltaY ->
             let
-                increment =
-                    -0.001 * deltaY
-
                 newZoom =
-                    clamp 0.0 22.0 <| context.zoomLevel + increment
+                    clamp 0.0 22.0 <| context.zoomLevel - (0.001 * deltaY)
 
                 newContext =
-                    { context
-                        | zoomLevel = newZoom
-                    }
+                    { context | zoomLevel = newZoom }
             in
             ( { newContext | map = updatedMap newContext }
             , []

@@ -3,7 +3,7 @@
 
 **Stretch** Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
-**Delete** Delete should display "Sorry" message unless one leaf remains.
+**Delete** Delete should display "Sorry" message unless one leaf will remain.
 
 **Map projection** not restored correctly on reload.
 
@@ -14,6 +14,7 @@
 # WIP
 
 **BUG** Map and course part company! 3D and Plan. Disappointing.
+> Now won't go wrong. Something smells.
 
 ---
 
