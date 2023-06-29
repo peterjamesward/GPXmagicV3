@@ -9,13 +9,12 @@
 
 **Route Builder** previews not hiding when tool closed.
 
-**Sometimes**, when you've been playing with 3D view and Map, the Plan view map position breaks.
-
 --- 
 
 # WIP
 
-**BUG** Switching out of curly-wurly mode should hide preview.
+**BUG** Map and course part company! 3D and Plan. Disappointing.
+
 ---
 
 # BACKLOG
