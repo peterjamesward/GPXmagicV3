@@ -1760,6 +1760,11 @@ performActionsOnModel actions model =
                         (TrackLoaded.addToUndoStack undoAction track)
                         foldedModel
 
+                ( FingerPaint paintInfo, Just track ) ->
+                    updateActiveTrack
+                        (ViewPlan.applyFingerpaint paintInfo track)
+                        foldedModel
+
                 ( BendSmootherApplyWithOptions options, Just track ) ->
                     updateActiveTrack
                         (Tools.BendSmoother.applyUsingOptions options track)

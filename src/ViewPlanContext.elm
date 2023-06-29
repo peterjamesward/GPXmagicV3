@@ -1,13 +1,15 @@
 module ViewPlanContext exposing (..)
 
 import Angle exposing (Angle)
+import Camera3d exposing (Camera3d)
 import Direction2d exposing (Direction2d)
 import DomainModel exposing (EarthPoint)
-import Length
+import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
 import Point2d exposing (Point2d)
+import Rectangle2d exposing (Rectangle2d)
 
 
 type DragAction
@@ -31,6 +33,8 @@ type alias PaintInfo =
     -- Whatever we need to draw the Painter and its trail.
     -- Start leaf index (?), touch point (XY), all drag locations (in LocalCoords or screen points?).
     { path : List (Point2d Pixels ScreenCoords)
+    , screenRectangle : Rectangle2d Pixels ScreenCoords
+    , camera : Camera3d Meters LocalCoords
     }
 
 
