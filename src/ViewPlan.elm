@@ -425,7 +425,7 @@ applyFingerPaint paintInfo track =
                                         proximity.proportionAlong
 
                                 ( x, y, z ) =
-                                    Point3d.coordinates pointOnTrack
+                                    Point3d.coordinates proximity.worldPoint
 
                                 earthPoint =
                                     { space = Point3d.xyz x y (Point3d.zCoordinate pointOnTrack)
