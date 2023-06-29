@@ -1,5 +1,6 @@
 module ViewPlan exposing
     ( Msg(..)
+    , applyFingerPaint
     , initialiseView
     , resizeOccured
     , subscriptions
@@ -10,7 +11,6 @@ module ViewPlan exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import Arc2d
 import Axis2d
 import Axis3d
 import BoundingBox3d
@@ -45,12 +45,11 @@ import MapViewer
 import MapboxKey
 import Pixels exposing (Pixels)
 import Plane3d
-import Point2d
+import Point2d exposing (Point2d)
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
-import Rectangle2d
-import Scene3d exposing (Entity, backgroundColor)
-import SceneBuilder3D
+import Rectangle2d exposing (Rectangle2d)
+import Scene3d exposing (Entity)
 import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import Svg
@@ -58,12 +57,11 @@ import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip
 import Tools.DisplaySettingsOptions
-import Tools.Tracks as Tracks
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
-import ViewPlanContext exposing (DragAction(..), PlanContext)
+import ViewPlanContext exposing (DragAction(..), PlanContext, PointLeafProximity, ScreenCoords)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d
 import ZoomLevel
@@ -354,13 +352,13 @@ fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
                 paintNodes =
                     paintInfo.path
                         |> List.map
-                            (\place ->
+                            (\proximity ->
                                 Svg.circle2d
                                     [ Svg.Attributes.stroke "red"
                                     , Svg.Attributes.strokeWidth "1"
                                     , Svg.Attributes.fill "white"
                                     ]
-                                    (Circle2d.withRadius (Pixels.float 5) place)
+                                    (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
                             )
             in
             html <|
@@ -378,103 +376,70 @@ fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
             none
 
 
-type alias PointLeafProximity =
-    --TODO: This is what we want returned from a function that maps screen point to model.
-    { leafIndex : Int
-    , distanceAlong : Float -- not Quantity, so it's readily sortable
-    , distanceFrom : Length.Meters
-    }
-
-
 applyFingerPaint : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
 applyFingerPaint paintInfo track =
     case paintInfo.path of
         pathHead :: pathMore ->
-            -- At least two points makes it worthwhile
+            -- At least two points makes it worthwhile.
             case List.reverse pathMore of
                 pathLast :: pathMiddle ->
                     let
                         {-
-                           TODO: Refactor common code here and in `update`.
-                           TODO: Add in all the stuff missing from PaintInfo and make this work ...
                            1. Use first and last points to work out where we splice the new track section.
-                           2. Make new 2D points from the path.
                            (remember path could be drawn in either direction!)
                            (cater for case when painting is entirely in one section!)
+                           2. Make new 2D points from the path.
                            3. Apply altitudes by interpolation from base track.
                            4. Splice the new section into the track.
                            5. Return with adjusted pointers and new leaf index.
                         -}
-                        ray screenPoint =
-                            Camera3d.ray paintInfo.camera paintInfo.screenRectangle screenPoint
+                        locationsAreInCorrectOrder =
+                            -- I find the prefix notation clearer here, parentheses important.
+                            (||) (pathHead.leafIndex < pathLast.leafIndex)
+                                ((&&) (pathHead.leafIndex == pathLast.leafIndex)
+                                    (pathHead.distanceAlong |> Quantity.lessThan pathLast.distanceAlong)
+                                )
 
-                        touchPointInWorld screenPoint =
-                            --TODO: Simle coordinate transform to avoid this Maybe valye.
-                            screenPoint |> ray |> Axis3d.intersectionWithPlane Plane3d.xy
+                        ( preTrackPoint, postTrackPoint, locations ) =
+                            -- Unchanged points that we connect the new track to.
+                            if locationsAreInCorrectOrder then
+                                ( pathHead.leafIndex, pathLast.leafIndex + 1, paintInfo.path )
 
-                        nearestLeafIndex screenPoint =
-                            nearestToRay
-                                (ray screenPoint)
-                                track.trackTree
-                                track.leafIndex
-                                track.currentPosition
+                            else
+                                ( pathLast.leafIndex, pathHead.leafIndex + 1, List.reverse paintInfo.path )
 
-                        nearestLeaf screenPoint =
-                            asRecord <|
-                                DomainModel.leafFromIndex (nearestLeafIndex screenPoint) track.trackTree
+                        newGpxPoints =
+                            List.map makeNewGpxPointFromProximity locations
 
-                        ( pathStartLeafIndex, pathEndLeafIndex ) =
-                            ( nearestLeafIndex pathHead
-                            , nearestLeafIndex pathLast
-                            )
+                        makeNewGpxPointFromProximity : PointLeafProximity -> GPXSource
+                        makeNewGpxPointFromProximity proximity =
+                            let
+                                leaf : RoadSection
+                                leaf =
+                                    asRecord <| leafFromIndex proximity.leafIndex track.trackTree
 
-                        ( pathStartLeaf, pathEndLeaf ) =
-                            ( nearestLeaf pathHead
-                            , nearestLeaf pathLast
-                            )
+                                pointOnTrack =
+                                    Point3d.interpolateFrom
+                                        leaf.startPoint.space
+                                        leaf.endPoint.space
+                                        proximity.proportionAlong
 
-                        ( pathStartLineSegment, pathEndLineSegment ) =
-                            ( LineSegment3d.from pathStartLeaf.startPoint.space pathStartLeaf.endPoint.space
-                                |> LineSegment3d.projectInto SketchPlane3d.xy
-                            , LineSegment3d.from pathEndLeaf.startPoint.space pathEndLeaf.endPoint.space
-                                |> LineSegment3d.projectInto SketchPlane3d.xy
-                            )
+                                ( x, y, z ) =
+                                    Point3d.coordinates pointOnTrack
 
-                        ( pathStartLineAxis, pathEndLineAxis ) =
-                            ( Axis2d.throughPoints
-                                (LineSegment2d.startPoint pathStartLineSegment)
-                                (LineSegment2d.endPoint pathStartLineSegment)
-                            , Axis2d.throughPoints
-                                (LineSegment2d.startPoint pathEndLineSegment)
-                                (LineSegment2d.endPoint pathEndLineSegment)
-                            )
-
-                        pathStart : Maybe ( Int, Length.Meters )
-                        pathStart =
-                            -- We know there is an axis but we still must check here.
-                            case ( touchPointInWorld, leafLineAxis ) of
-                                ( Just touchPoint, Just leafAxis ) ->
-                                    let
-                                        touchPointXY =
-                                            touchPoint |> Point3d.projectInto SketchPlane3d.xy
-
-                                        touchPointOnTrack =
-                                            touchPointXY |> Point2d.projectOnto leafAxis
-                                    in
-                                    ()
-
-                                _ ->
-                                    Nothing
-
-                        gpxPointsXY =
-                            []
+                                earthPoint =
+                                    { space = Point3d.xyz x y (Point3d.zCoordinate pointOnTrack)
+                                    , time = Nothing
+                                    }
+                            in
+                            gpxFromPointWithReference track.referenceLonLat earthPoint
 
                         newTree =
                             DomainModel.replaceRange
-                                (fromStart + 1)
-                                (fromEnd + 1)
+                                preTrackPoint
+                                (skipCount track.trackTree - postTrackPoint)
                                 track.referenceLonLat
-                                gpxPoints
+                                newGpxPoints
                                 track.trackTree
                     in
                     case newTree of
@@ -597,6 +562,72 @@ mapBoundsFromScene updatedContext ( width, height ) track =
             ( oopsLngLat, oopsLngLat )
 
 
+pointLeafProximity :
+    PlanContext
+    -> TrackLoaded msg
+    -> Rectangle2d Pixels ScreenCoords
+    -> Point2d Pixels ScreenCoords
+    -> Maybe PointLeafProximity
+pointLeafProximity context track screenRectangle screenPoint =
+    let
+        camera =
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+
+        ray =
+            Camera3d.ray camera screenRectangle screenPoint
+
+        touchPointInWorld =
+            -- Yes, there is a more direct way to convert coordinates.
+            -- I may figure it out one day.
+            ray |> Axis3d.intersectionWithPlane Plane3d.xy
+
+        nearestLeafIndex =
+            nearestToRay
+                ray
+                track.trackTree
+                track.leafIndex
+                track.currentPosition
+
+        nearestLeaf =
+            asRecord <|
+                DomainModel.leafFromIndex nearestLeafIndex track.trackTree
+
+        leafLineSegment =
+            LineSegment3d.from nearestLeaf.startPoint.space nearestLeaf.endPoint.space
+                |> LineSegment3d.projectInto SketchPlane3d.xy
+
+        leafLineAxis =
+            Axis2d.throughPoints
+                (LineSegment2d.startPoint leafLineSegment)
+                (LineSegment2d.endPoint leafLineSegment)
+    in
+    case ( touchPointInWorld, leafLineAxis ) of
+        ( Just touchPoint, Just leafAxis ) ->
+            let
+                touchPointXY =
+                    touchPoint |> Point3d.projectInto SketchPlane3d.xy
+
+                touchPointOnTrack =
+                    touchPointXY |> Point2d.projectOnto leafAxis
+
+                proportion =
+                    Quantity.ratio
+                        (Point2d.signedDistanceAlong leafAxis touchPointOnTrack)
+                        (LineSegment2d.length leafLineSegment)
+            in
+            Just
+                { leafIndex = nearestLeafIndex
+                , distanceAlong = Point2d.signedDistanceAlong leafAxis touchPointXY
+                , distanceFrom = Point2d.signedDistanceFrom leafAxis touchPointXY
+                , proportionAlong = proportion
+                , screenPoint = screenPoint
+                , worldPoint = touchPoint
+                }
+
+        _ ->
+            Nothing
+
+
 update :
     Msg
     -> (Msg -> msg)
@@ -676,49 +707,11 @@ update msg msgWrapper track ( width, height ) context mapData =
                 screenPoint =
                     Point2d.pixels x y
 
-                ray =
-                    Camera3d.ray camera screenRectangle screenPoint
-
-                touchPointInWorld =
-                    ray
-                        |> Axis3d.intersectionWithPlane Plane3d.xy
-
-                nearestLeafIndex =
-                    nearestToRay
-                        ray
-                        track.trackTree
-                        track.leafIndex
-                        track.currentPosition
-
-                nearestLeaf =
-                    asRecord <|
-                        DomainModel.leafFromIndex nearestLeafIndex track.trackTree
-
-                leafLineSegment =
-                    LineSegment3d.from nearestLeaf.startPoint.space nearestLeaf.endPoint.space
-                        |> LineSegment3d.projectInto SketchPlane3d.xy
-
-                leafLineAxis =
-                    Axis2d.throughPoints
-                        (LineSegment2d.startPoint leafLineSegment)
-                        (LineSegment2d.endPoint leafLineSegment)
-
                 newState =
-                    case ( context.fingerPainting, touchPointInWorld, leafLineAxis ) of
-                        ( True, Just touchPoint, Just leafAxis ) ->
-                            let
-                                touchPointXY =
-                                    touchPoint |> Point3d.projectInto SketchPlane3d.xy
-
-                                touchPointOnTrack =
-                                    touchPointXY |> Point2d.projectOnto leafAxis
-                            in
-                            -- Still need to determine Paint or Push.
-                            if
-                                Point2d.distanceFrom touchPointXY touchPointOnTrack
-                                    |> Quantity.lessThanOrEqualTo (Length.meters 2)
-                            then
-                                DragPaint <| ViewPlanContext.PaintInfo [ screenPoint ]
+                    case pointLeafProximity context track screenRectangle screenPoint of
+                        Just proximity ->
+                            if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
+                                DragPaint <| ViewPlanContext.PaintInfo [ proximity ]
 
                             else
                                 DragPush <| ViewPlanContext.PushInfo
@@ -776,12 +769,15 @@ update msg msgWrapper track ( width, height ) context mapData =
                 ( DragPaint paintInfo, _ ) ->
                     let
                         screenPoint =
-                            --Debug.log "point" <|
                             Point2d.pixels dx dy
 
                         path =
-                            screenPoint
-                                :: paintInfo.path
+                            case pointLeafProximity context track screenRectangle screenPoint of
+                                Just proximity ->
+                                    proximity :: paintInfo.path
+
+                                Nothing ->
+                                    paintInfo.path
 
                         newContext =
                             { context

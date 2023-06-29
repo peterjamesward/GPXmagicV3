@@ -15,31 +15,34 @@
 
 # WIP
 
----
-
-# BACKLOG
-
 ## Finger painting
 
-Tool selects finger size. 
-Trace on track to adjust it. 
-Push from off-track to nudge. 
+Trace on track to adjust it.
+Push from off-track to nudge.
 Plan (first) & Profile (maybe) only (tricky in 3D).
 
 1. Get the SVG feedback stuff working.
-2. The track movement is easier.
+2. The track movement is "easier".
 
 * Click-detect to see if we're on the track or not. (Two modes: Paint, Push)
-* 
+
+### Paint mode
 * In Paint mode, render cursor track while dragging. SVG overlay.
 * When drag stops, track between start and end of drag (nearest to track) is replaced
-* by a (possibly smoothed with splines or curly-wurly) new track section.
-* 
+* by a new track section using the drawn points, with interpolated altitudes.
+
+### Push mode
 * In Push mode, show a disc (in pixels, not meters, so zoom in for fine adjustment).
 * When start to drag, show a "brush" perpendicular to drag direction. SVG overlay.
 * Grows as you drag, until touches first point.
 * As this encounters track points, they are "pushed".
 * If you pull back, points revert but no further than their start positions.
+
+Ooh, don't even need a track. Can finger paint on the map. Maybe a place search function?
+
+---
+
+# BACKLOG
 
 ## Smart smoother
 

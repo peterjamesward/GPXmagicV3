@@ -1762,7 +1762,7 @@ performActionsOnModel actions model =
 
                 ( FingerPaint paintInfo, Just track ) ->
                     updateActiveTrack
-                        (ViewPlan.applyFingerpaint paintInfo track)
+                        (ViewPlan.applyFingerPaint paintInfo track)
                         foldedModel
 
                 ( BendSmootherApplyWithOptions options, Just track ) ->
