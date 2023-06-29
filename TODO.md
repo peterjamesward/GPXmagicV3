@@ -11,6 +11,8 @@
 
 **Sometimes**, when you've been playing with 3D view and Map, the Plan view map position breaks.
 
+**Ghost points** after Delete? (Ric Svanberg)
+
 --- 
 
 # WIP
@@ -21,17 +23,15 @@ Trace on track to adjust it.
 Push from off-track to nudge.
 Plan (first) & Profile (maybe) only (tricky in 3D).
 
-1. Get the SVG feedback stuff working.
-2. The track movement is "easier".
-
-* Click-detect to see if we're on the track or not. (Two modes: Paint, Push)
-
 ### Paint mode
-* In Paint mode, render cursor track while dragging. SVG overlay.
-* When drag stops, track between start and end of drag (nearest to track) is replaced
-* by a new track section using the drawn points, with interpolated altitudes.
+* Needs correct Undo message
+* Doesn't exit the mode properly (can still paint)
 
-### Push mode
+### Sketch on the Plan map
+* Need to be able to finger paint with no track.
+* Need to be able to search on map, or have Plan view default to position like Map view does.
+
+### Push mode (later)
 * In Push mode, show a disc (in pixels, not meters, so zoom in for fine adjustment).
 * When start to drag, show a "brush" perpendicular to drag direction. SVG overlay.
 * Grows as you drag, until touches first point.
@@ -43,6 +43,10 @@ Ooh, don't even need a track. Can finger paint on the map. Maybe a place search 
 ---
 
 # BACKLOG
+
+## Out and Back
+
+Make the final turn optional.
 
 ## Smart smoother
 
