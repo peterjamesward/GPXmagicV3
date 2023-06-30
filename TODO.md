@@ -25,19 +25,14 @@
 
 ### Use as tool applicator
 
-Fingerpainting is a meta-tool. Should be able to use it to Straighten, Smooth, without 
-needing to place markers.
+Fingerpainting is a meta-tool. 
+Should be able to use it to Straighten, Smooth, without needing to place markers.
+Indeed, may be more useful as such.
+Need to set the painting mode - should this be in Tools, on the View, both?
 
 ### Sketch on the Plan map
 * Need to be able to finger paint with no track.
 * Need to be able to search on map, or have Plan view default to position like Map view does.
-
-### Push mode (later)
-* In Push mode, show a disc (in pixels, not meters, so zoom in for fine adjustment).
-* When start to drag, show a "brush" perpendicular to drag direction. SVG overlay.
-* Grows as you drag, until touches first point.
-* As this encounters track points, they are "pushed".
-* If you pull back, points revert but no further than their start positions.
 
 ---
 
