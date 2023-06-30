@@ -113,7 +113,6 @@ toolStateChange opened colour options track =
             )
 
         _ ->
-            -- Hide preview
             ( options, [ HidePreview "delete" ] )
 
 
@@ -134,6 +133,7 @@ update msg options previewColour hasTrack =
             , [ WithUndo (Actions.DeletePointOrPoints fromStart fromEnd)
               , Actions.DeletePointOrPoints fromStart fromEnd
               , TrackHasChanged
+              , HidePreview "delete"
               ]
             )
 
