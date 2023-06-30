@@ -64,8 +64,10 @@ import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Plane3d
+import Point2d
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
+import SketchPlane3d
 import SpatialIndex
 import Spherical exposing (range)
 import Time
@@ -782,12 +784,13 @@ nearestLeafToRay ray tree leafIndex current =
                         leafToTest =
                             asRecord <| leafFromIndex leafEntry.leafIndex tree
                     in
-                    Point3d.distanceFrom
-                        searchPoint
-                    <|
-                        Point3d.midpoint
-                            leafToTest.startPoint.space
-                            leafToTest.endPoint.space
+                    Point2d.distanceFrom
+                        (searchPoint |> Point3d.projectInto SketchPlane3d.xy)
+                        (Point3d.projectInto SketchPlane3d.xy <|
+                            Point3d.midpoint
+                                leafToTest.startPoint.space
+                                leafToTest.endPoint.space
+                        )
 
                 nearestLeafs =
                     SpatialIndex.queryNearestToAxisUsing

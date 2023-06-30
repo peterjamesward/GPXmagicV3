@@ -11,16 +11,22 @@
 
 **Sometimes**, when you've been playing with 3D view and Map, the Plan view map position breaks.
 
-**Ghost points** after Delete? (Ric Svanberg)
-
 --- 
 
 # WIP
 
+**Simplify** should work between markers, else no good post fingerpainting.
+
+**Ghost points** after Delete? (Ric Svanberg)
+
 ## Finger painting
 
-* Not very good with Lacets. Seems to drop out of mode, sometimes proximity search seems wrong.
 * Try in in 3D, might "just work" well enough.
+
+### Use as tool applicator
+
+Fingerpainting is a meta-tool. Should be able to use it to Straighten, Smooth, without 
+needing to place markers.
 
 ### Sketch on the Plan map
 * Need to be able to finger paint with no track.
@@ -32,9 +38,6 @@
 * Grows as you drag, until touches first point.
 * As this encounters track points, they are "pushed".
 * If you pull back, points revert but no further than their start positions.
-
-Beyond this, could have selection of tools -- apply a chosen tool, e.g. spline, curly-wurly, 
-delete, straighten, ...
 
 ---
 
