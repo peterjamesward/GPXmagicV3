@@ -58,6 +58,7 @@ import SystemSettings exposing (SystemSettings)
 import ToolTip
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
+import Utils
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
@@ -410,9 +411,10 @@ applyFingerPaint paintInfo track =
 
                         newGpxPoints =
                             -- Splicing is more stable if we preserve the extremities?
-                            gpxPointFromIndex preTrackPoint track.trackTree
-                                :: List.map makeNewGpxPointFromProximity locations
-                                ++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
+                            Utils.deDupe (==) <|
+                                gpxPointFromIndex preTrackPoint track.trackTree
+                                    :: List.map makeNewGpxPointFromProximity locations
+                                    ++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
 
                         --++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
                         makeNewGpxPointFromProximity : PointLeafProximity -> GPXSource

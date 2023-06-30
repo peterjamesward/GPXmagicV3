@@ -19,6 +19,7 @@
 
 ## Finger painting
 
+* Not very good with Lacets. Seems to drop out of mode, sometimes proximity search seems wrong.
 * Try in in 3D, might "just work" well enough.
 
 ### Sketch on the Plan map

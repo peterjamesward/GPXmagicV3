@@ -255,13 +255,14 @@ view settings msgWrapper options isTrack =
                                                 [ String.fromInt quantity ]
                                         ]
                                 }
-                , el [ centerX ] <|
-                    Input.button neatToolsBorder
-                        { onPress = Just <| msgWrapper FlushUndo
-                        , label =
-                            paragraph [] <|
-                                [ i18n "flush" ]
-                        }
+
+                --, el [ centerX ] <|
+                --    Input.button neatToolsBorder
+                --        { onPress = Just <| msgWrapper FlushUndo
+                --        , label =
+                --            paragraph [] <|
+                --                [ i18n "flush" ]
+                --        }
                 ]
 
         Nothing ->
