@@ -122,6 +122,9 @@ actionTextForUndo location action =
     -- Only needed for track modifying actions that go in the undo stack.
     I18N.localisedString location "action" <|
         case action of
+            FingerPaint _ ->
+                "fingerpaint"
+
             DeletePointOrPoints _ _ ->
                 "delete1"
 

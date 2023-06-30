@@ -31,9 +31,10 @@ module DomainModel exposing
     , leafFromIndex
     , lngLatPair
     , midPoint
+    , nearestLeafToRay
+    , nearestPointToRay
     , nearestToEarthPoint
     , nearestToLonLat
-    , nearestToRay
     , pointFromGpxWithReference
     , preserveDistanceFromStart
     , queryRoadsUsingFilter
@@ -59,8 +60,10 @@ import Direction3d
 import Json.Encode as E
 import LeafIndex exposing (LeafIndex, LeafIndexEntry)
 import Length exposing (Meters)
+import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
+import Plane3d
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 import SpatialIndex
@@ -762,13 +765,56 @@ interpolateTrack distance treeNode =
                 )
 
 
-nearestToRay :
+nearestLeafToRay :
     Axis3d Meters LocalCoords
     -> PeteTree
     -> LeafIndex
     -> Int
     -> Int
-nearestToRay ray tree leafIndex current =
+nearestLeafToRay ray tree leafIndex current =
+    -- Find leaf nearest to point in XY. This variant created for fingerpainting and may not be generic.
+    case ray |> Axis3d.intersectionWithPlane Plane3d.xy of
+        Just searchPoint ->
+            let
+                valuationFunction : LeafIndexEntry -> Quantity Float Meters
+                valuationFunction leafEntry =
+                    let
+                        leafToTest =
+                            asRecord <| leafFromIndex leafEntry.leafIndex tree
+                    in
+                    Point3d.distanceFrom
+                        searchPoint
+                    <|
+                        Point3d.midpoint
+                            leafToTest.startPoint.space
+                            leafToTest.endPoint.space
+
+                nearestLeafs =
+                    SpatialIndex.queryNearestToAxisUsing
+                        leafIndex
+                        ray
+                        valuationFunction
+                        { currentBestMetric = Quantity.positiveInfinity
+                        , currentBestContent = []
+                        }
+            in
+            nearestLeafs.currentBestContent
+                |> List.head
+                |> Maybe.map (.content >> .leafIndex)
+                |> Maybe.withDefault 0
+
+        Nothing ->
+            -- Oops
+            0
+
+
+nearestPointToRay :
+    Axis3d Meters LocalCoords
+    -> PeteTree
+    -> LeafIndex
+    -> Int
+    -> Int
+nearestPointToRay ray tree leafIndex current =
     -- Find track point nearest to ray, but where there's a tie, use closest (numerically) to current point.
     let
         valuationFunction : LeafIndexEntry -> Quantity Float Meters
@@ -845,7 +891,7 @@ nearestToEarthPoint earthPoint current treeNode leafIndex =
         ray =
             Axis3d.withDirection Direction3d.negativeZ earthPoint.space
     in
-    nearestToRay ray treeNode leafIndex current
+    nearestPointToRay ray treeNode leafIndex current
 
 
 lngLatPair : ( Angle, Angle, Length.Length ) -> E.Value

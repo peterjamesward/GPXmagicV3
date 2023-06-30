@@ -19,13 +19,7 @@
 
 ## Finger painting
 
-Trace on track to adjust it.
-Push from off-track to nudge.
-Plan (first) & Profile (maybe) only (tricky in 3D).
-
-### Paint mode
-* Needs correct Undo message
-* Doesn't exit the mode properly (can still paint)
+* Try in in 3D, might "just work" well enough.
 
 ### Sketch on the Plan map
 * Need to be able to finger paint with no track.
@@ -38,7 +32,8 @@ Plan (first) & Profile (maybe) only (tricky in 3D).
 * As this encounters track points, they are "pushed".
 * If you pull back, points revert but no further than their start positions.
 
-Ooh, don't even need a track. Can finger paint on the map. Maybe a place search function?
+Beyond this, could have selection of tools -- apply a chosen tool, e.g. spline, curly-wurly, 
+delete, straighten, ...
 
 ---
 

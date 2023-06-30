@@ -308,7 +308,7 @@ makeLandUsePlanar landUse index track groundPlane =
             let
                 nearestPoint =
                     DomainModel.earthPointFromIndex
-                        (DomainModel.nearestToRay
+                        (DomainModel.nearestPointToRay
                             (Axis3d.withDirection Direction3d.positiveZ at.space)
                             track.trackTree
                             track.leafIndex

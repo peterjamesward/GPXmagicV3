@@ -409,8 +409,12 @@ applyFingerPaint paintInfo track =
                                 ( pathLast.leafIndex, pathHead.leafIndex + 1, List.reverse paintInfo.path )
 
                         newGpxPoints =
-                            List.map makeNewGpxPointFromProximity locations
+                            -- Splicing is more stable if we preserve the extremities?
+                            gpxPointFromIndex preTrackPoint track.trackTree
+                                :: List.map makeNewGpxPointFromProximity locations
+                                ++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
 
+                        --++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
                         makeNewGpxPointFromProximity : PointLeafProximity -> GPXSource
                         makeNewGpxPointFromProximity proximity =
                             let
@@ -444,19 +448,12 @@ applyFingerPaint paintInfo track =
                     in
                     case newTree of
                         Just isTree ->
-                            let
-                                pointerReposition =
-                                    DomainModel.preserveDistanceFromStart track.trackTree isTree
-
-                                ( newOrange, newPurple ) =
-                                    ( pointerReposition track.currentPosition
-                                    , Maybe.map pointerReposition track.markerPosition
-                                    )
-                            in
                             { track
                                 | trackTree = Maybe.withDefault track.trackTree newTree
-                                , currentPosition = newOrange
-                                , markerPosition = newPurple
+                                , currentPosition = preTrackPoint + 1
+                                , markerPosition =
+                                    Just <|
+                                        (postTrackPoint + skipCount isTree - skipCount track.trackTree - 1)
                                 , leafIndex = TrackLoaded.indexLeaves isTree
                             }
 
@@ -582,7 +579,7 @@ pointLeafProximity context track screenRectangle screenPoint =
             ray |> Axis3d.intersectionWithPlane Plane3d.xy
 
         nearestLeafIndex =
-            nearestToRay
+            nearestLeafToRay
                 ray
                 track.trackTree
                 track.leafIndex
@@ -708,17 +705,21 @@ update msg msgWrapper track ( width, height ) context mapData =
                     Point2d.pixels x y
 
                 newState =
-                    case pointLeafProximity context track screenRectangle screenPoint of
-                        Just proximity ->
-                            if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
-                                DragPaint <| ViewPlanContext.PaintInfo [ proximity ]
+                    if context.fingerPainting then
+                        case pointLeafProximity context track screenRectangle screenPoint of
+                            Just proximity ->
+                                if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
+                                    DragPaint <| ViewPlanContext.PaintInfo [ proximity ]
 
-                            else
-                                DragPush <| ViewPlanContext.PushInfo
+                                else
+                                    --TODO: DragPush <| ViewPlanContext.PushInfo
+                                    DragPan
 
-                        --touchPointXY
-                        _ ->
-                            DragPan
+                            _ ->
+                                DragPan
+
+                    else
+                        DragPan
             in
             ( { context
                 | orbiting = Just event.offsetPos
@@ -977,7 +978,7 @@ detectHit event track ( w, h ) context =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
     in
-    nearestToRay
+    nearestPointToRay
         ray
         track.trackTree
         track.leafIndex
