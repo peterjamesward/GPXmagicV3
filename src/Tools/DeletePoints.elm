@@ -15,13 +15,10 @@ import BoundingBox3d
 import CommonToolStyles
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, earthPointFromIndex, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input
-import FlatColors.ChinesePalette
 import PreviewData exposing (PreviewShape(..))
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import ViewPureStyles exposing (neatToolsBorder)

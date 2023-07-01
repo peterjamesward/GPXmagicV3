@@ -9,12 +9,18 @@
 
 **Route Builder** previews not hiding when tool closed.
 
+**BUG** Map and course part company! 3D and Plan. Disappointing.
+> Now won't go wrong. Something smells.
+
+
+**BUG** Dragging in 3D view when rotated does not respect rotation!
+
 --- 
 
 # WIP
 
-**BUG** Map and course part company! 3D and Plan. Disappointing.
-> Now won't go wrong. Something smells.
+**BUG** Shows original graph nodes all the time. 
+> Should recompute after any track change, new track, removed track.
 
 ---
 

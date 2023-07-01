@@ -235,7 +235,6 @@ render toolSettings options tracks display previews =
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews display previews
-                --++ (SceneBuilder3D.renderGroundPlane toolSettings.displaySettings <| Tracks.boundingBox tracks)
                 ++ (List.concat <| Tracks.mapOverVisibleTracks renderTrack tracks)
                 ++ (SceneBuilder3D.renderKeyPlaces display <| Tracks.getKeyPlaces tracks)
     }
