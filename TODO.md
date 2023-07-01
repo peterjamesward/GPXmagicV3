@@ -15,11 +15,11 @@
 
 # WIP
 
-**Simplify** should work between markers, else no good post fingerpainting.
-
-**Ghost points** after Delete? (Ric Svanberg)
-
 ## Finger painting
+
+nearest leaf code still wrong. Should find nearest point then look at each
+leaf there. If "proportionAlong" is (0,1) in only one, use that, if both or neither,
+use the nearest `distanceFrom`.
 
 * Try in in 3D, might "just work" well enough.
 
