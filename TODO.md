@@ -15,8 +15,6 @@
 
 # WIP
 
-* Simplify -- pointer repositioning is wrong.
-
 ## Finger painting
 
 * Still not ideal if end of paint is in first half of a segment.
