@@ -29,7 +29,7 @@ these three points. If within tolerance, it's an arc.
 If not line or arc, subdivide at this furthest point and repeat.
 Will terminate, because duh, might not work well. Worth a try.
 
-Mind you, pragmatically, I suspect that if Simplify worked on a range, we could do that a few
+Mind you, pragmatically, now Simplify work on a range, we could do that a few
 times and then use Centroid. Local One-Click Quick-Fix, if you like.
 
 ### Use as tool applicator

@@ -1,7 +1,7 @@
 module Tools.Simplify exposing
     ( Msg(..)
     , Options
-    , apply
+    , applyToWholeTrack
     , defaultOptions
     , toolId
     , toolStateChange
@@ -14,9 +14,7 @@ import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input
-import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, Squared)
@@ -33,11 +31,15 @@ toolId =
 
 
 type alias Options =
-    { pointsToRemove : Dict Int Int }
+    { pointsToRemove : Dict Int Int
+    , range : Maybe ( Int, Int )
+    }
 
 
 defaultOptions =
-    { pointsToRemove = Dict.empty }
+    { pointsToRemove = Dict.empty
+    , range = Nothing
+    }
 
 
 type Msg
@@ -51,6 +53,14 @@ findSimplifications options tree =
     -- This function called when track changes, or we call it when threshold is changed.
     -- We search the tree. At worst, fold over the whole darn tree. Optimize if needed.
     let
+        ( startingAt, endingAt ) =
+            case options.range of
+                Just ( orange, purple ) ->
+                    ( min orange purple, max orange purple )
+
+                Nothing ->
+                    ( 0, skipCount tree )
+
         foldFn :
             RoadSection
             -> ( Int, Maybe RoadSection, List ( Int, Quantity Float (Squared Meters) ) )
@@ -77,8 +87,8 @@ findSimplifications options tree =
 
         ( _, _, triangleInfo ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
-                0
-                (skipCount tree)
+                startingAt
+                endingAt
                 (always Nothing)
                 0
                 tree
@@ -116,9 +126,10 @@ findSimplifications options tree =
     { options | pointsToRemove = nonAdjacentEntries }
 
 
-apply : Options -> TrackLoaded msg -> TrackLoaded msg
-apply options track =
+applyToWholeTrack : Options -> TrackLoaded msg -> TrackLoaded msg
+applyToWholeTrack options track =
     -- Deleting arbitrary collection of non-adjacent points implies rebuild.
+    --TODO: Optimise for application to range.
     let
         originalCourse : Dict Int GPXSource
         originalCourse =
@@ -171,8 +182,16 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             -- Make sure we have up to date breaches and preview is shown.
             let
+                optionsWithRange =
+                    case theTrack.markerPosition of
+                        Just purple ->
+                            { options | range = Just ( theTrack.currentPosition, purple ) }
+
+                        Nothing ->
+                            { options | range = Nothing }
+
                 populatedOptions =
-                    findSimplifications options theTrack.trackTree
+                    findSimplifications optionsWithRange theTrack.trackTree
             in
             ( populatedOptions
             , actions colour populatedOptions theTrack

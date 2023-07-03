@@ -1874,7 +1874,7 @@ performActionsOnModel actions model =
 
                 ( ApplySimplify, Just track ) ->
                     updateActiveTrack
-                        (Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track)
+                        (Tools.Simplify.applyToWholeTrack foldedModel.toolOptions.simplifySettings track)
                         foldedModel
 
                 ( MoveAndStretchWithOptions settings, Just track ) ->

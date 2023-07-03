@@ -49,7 +49,7 @@ apply originalTrack =
                         |> Quantity.divideBy (toFloat <| DomainModel.skipCount anyTrack.trackTree)
 
                 trackWithOneRoundOfPointsRemoved =
-                    Tools.Simplify.apply Tools.Simplify.defaultOptions anyTrack
+                    Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions anyTrack
 
                 numberOfPointsRemoved =
                     DomainModel.skipCount trackWithOneRoundOfPointsRemoved.trackTree
