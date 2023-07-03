@@ -31,6 +31,7 @@ Will terminate, because duh, might not work well. Worth a try.
 
 Mind you, pragmatically, now Simplify work on a range, we could do that a few
 times and then use Centroid. Local One-Click Quick-Fix, if you like.
+> This will be fine but need to estimate how many times for each.
 
 ### Use as tool applicator
 
