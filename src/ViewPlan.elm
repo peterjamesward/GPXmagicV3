@@ -592,7 +592,7 @@ pointLeafProximity context track screenRectangle screenPoint =
             Axis3d.intersectionWithPlane projectionPlane ray
                 |> Maybe.map (Point3d.projectOnto projectionPlane)
 
-        proximityFrom index axis =
+        proximityFrom index =
             let
                 {-
                    I find the closest pass between two axes (ray and leaf) by:
@@ -609,87 +609,71 @@ pointLeafProximity context track screenRectangle screenPoint =
                 leafSegment =
                     LineSegment3d.from leaf.startPoint.space leaf.endPoint.space
                         |> LineSegment3d.projectOnto projectionPlane
-
-                touchPointOnTrack =
-                    touchPointXY |> Point2d.projectOnto axis
-
-                proportion =
-                    Quantity.ratio
-                        (Point2d.signedDistanceAlong leafAxis touchPointOnTrack)
-                        (LineSegment2d.length leafLineSegment)
             in
-            Just
-                { leafIndex = nearestPointIndex
-                , distanceAlong = Point2d.signedDistanceAlong leafAxis touchPointXY
-                , distanceFrom = Point2d.signedDistanceFrom leafAxis touchPointXY
-                , proportionAlong = proportion
-                , screenPoint = screenPoint
-                , worldPoint = touchPoint
-                }
+            case ( touchPointInWorld, LineSegment3d.axis leafSegment ) of
+                ( Just touchPoint, Just leafAxis ) ->
+                    let
+                        proportion =
+                            Quantity.ratio
+                                (Point3d.signedDistanceAlong leafAxis touchPoint)
+                                (LineSegment3d.length leafSegment)
+                    in
+                    Just
+                        { leafIndex = nearestPointIndex
+                        , distanceAlong = Point3d.signedDistanceAlong leafAxis touchPoint
+                        , distanceFrom = Point3d.distanceFromAxis leafAxis touchPoint
+                        , proportionAlong = proportion
+                        , screenPoint = screenPoint
+                        , worldPoint = touchPoint
+                        }
+
+                _ ->
+                    Nothing
     in
+    -- So, is the click before or after the point?
     case
-        ( touchPointInWorld
-        , LineSegment2d.axis <| leafSegment leafBefore
-        , LineSegment2d.axis <| leafSegment leafAfter
+        ( proximityFrom <| nearestPointIndex - 1
+        , proximityFrom nearestPointIndex
         )
     of
-        ( Just touch, Just axisBefore, Just axisAfter ) ->
+        ( Just before, Just after ) ->
             let
-                beforeProportion =
-                    Quantity.ratio
-                        (touchPointInWorld |> Point2d.signedDistanceAlong axisBefore)
-                        (LineSegment2d.length (leafSegment leafBefore))
-
-                afterProportion =
-                    Quantity.ratio
-                        (touchPointInWorld |> Point2d.signedDistanceAlong axisAfter)
-                        (LineSegment2d.length (leafSegment leafAfter))
-
                 internal =
                     Interval.from 0.0 1.0
             in
             case
-                ( internal |> Interval.contains beforeProportion
-                , internal |> Interval.contains afterProportion
+                ( internal |> Interval.contains before.proportionAlong
+                , internal |> Interval.contains after.proportionAlong
                 )
             of
                 ( True, False ) ->
-                    proximityFrom (nearestPointIndex - 1) axisBefore
+                    Just before
 
                 ( False, True ) ->
-                    proximityFrom nearestPointIndex axisAfter
+                    Just after
 
                 _ ->
                     -- No clear winner, closest wins.
                     if
-                        touchPointInWorld
-                            |> Point2d.signedDistanceFrom axisBefore
-                            |> Quantity.abs
+                        before.distanceFrom
                             |> Quantity.lessThanOrEqualTo
-                                (touchPointInWorld |> Point2d.signedDistanceFrom axisAfter |> Quantity.abs)
+                                after.distanceFrom
                     then
-                        proximityFrom (nearestPointIndex - 1) axisBefore
+                        Just before
 
                     else
-                        proximityFrom nearestPointIndex axisAfter
+                        Just after
 
-        ( _, Just axisBefore, Nothing ) ->
+        ( Just before, Nothing ) ->
             -- Probably better to choose a non-zero side.
-            proximityFrom (nearestPointIndex - 1) axisBefore
+            Just before
 
-        ( _, Nothing, Just axisAfter ) ->
-            proximityFrom nearestPointIndex axisAfter
+        ( Nothing, Just after ) ->
+            Just after
 
         _ ->
             -- Really bad luck, who cares?
-            Just
-                { leafIndex = nearestPointIndex
-                , distanceAlong = Point2d.signedDistanceAlong leafAxis touchPointXY
-                , distanceFrom = Point2d.signedDistanceFrom leafAxis touchPointXY
-                , proportionAlong = proportion
-                , screenPoint = screenPoint
-                , worldPoint = touchPoint
-                }
+            Nothing
 
 
 update :

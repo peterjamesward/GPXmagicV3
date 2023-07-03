@@ -18,16 +18,14 @@
 ## Finger painting
 
 If I capture the zoom level, is it possible to infer a curved path as we zoom in?
-It's an error to use a precise world point, the whole pixel is "valid".
+It's wrong to use a precise world point, the whole pixel is "valid".
 
-Sometimes (almost always) simple is best. Could look at the screenPoint information (extended 
-with zoom level). If it fits a straight line (within zoom tolerance), it's a straight line.
+Sometimes (almost always) simple is best. Could look at the screenPoint information (and knowing 
+current zoom level). If it fits a straight line (within zoom tolerance), it's a straight line.
 If not straight, look for point farthest from line between endpoints. Try fitting an arc to 
 these three points. If within tolerance, it's an arc.
 If not line or arc, subdivide at this furthest point and repeat.
 Will terminate, because duh, might not work well. Worth a try.
-
-Use 3D nearness testing, will also work for Plan.
 
 ### Use as tool applicator
 
