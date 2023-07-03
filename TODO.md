@@ -17,6 +17,8 @@
 
 ## Finger painting
 
+* Still not ideal if end of paint is in first half of a segment.
+
 If I capture the zoom level, is it possible to infer a curved path as we zoom in?
 It's wrong to use a precise world point, the whole pixel is "valid".
 

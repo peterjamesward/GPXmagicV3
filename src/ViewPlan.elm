@@ -386,6 +386,8 @@ applyFingerPaint paintInfo track =
             case List.reverse pathMore of
                 pathLast :: pathMiddle ->
                     let
+                        --_ =
+                        --    Debug.log "applying" ( pathHead, pathLast )
                         {-
                            1. Use first and last points to work out where we splice the new track section.
                            (remember path could be drawn in either direction!)
@@ -405,10 +407,10 @@ applyFingerPaint paintInfo track =
                         ( preTrackPoint, postTrackPoint, locations ) =
                             -- Unchanged points that we connect the new track to.
                             if locationsAreInCorrectOrder then
-                                ( pathHead.leafIndex, pathLast.leafIndex + 1, paintInfo.path )
+                                ( pathHead.leafIndex, pathLast.leafIndex + 2, paintInfo.path )
 
                             else
-                                ( pathLast.leafIndex, pathHead.leafIndex + 1, List.reverse paintInfo.path )
+                                ( pathLast.leafIndex, pathHead.leafIndex + 2, List.reverse paintInfo.path )
 
                         newGpxPoints =
                             -- Splicing is more stable if we preserve the extremities?
@@ -619,7 +621,7 @@ pointLeafProximity context track screenRectangle screenPoint =
                                 (LineSegment3d.length leafSegment)
                     in
                     Just
-                        { leafIndex = nearestPointIndex
+                        { leafIndex = index
                         , distanceAlong = Point3d.signedDistanceAlong leafAxis touchPoint
                         , distanceFrom = Point3d.distanceFromAxis leafAxis touchPoint
                         , proportionAlong = proportion
@@ -637,33 +639,30 @@ pointLeafProximity context track screenRectangle screenPoint =
         )
     of
         ( Just before, Just after ) ->
-            let
-                internal =
-                    Interval.from 0.0 1.0
-            in
-            case
-                ( internal |> Interval.contains before.proportionAlong
-                , internal |> Interval.contains after.proportionAlong
-                )
-            of
-                ( True, False ) ->
-                    Just before
+            Just before
 
-                ( False, True ) ->
-                    Just after
-
-                _ ->
-                    -- No clear winner, closest wins.
-                    if
-                        before.distanceFrom
-                            |> Quantity.lessThanOrEqualTo
-                                after.distanceFrom
-                    then
-                        Just before
-
-                    else
-                        Just after
-
+        --let
+        --    internal =
+        --        Interval.from 0.0 1.0
+        --in
+        --case
+        --    ( internal |> Interval.contains before.proportionAlong
+        --    , internal |> Interval.contains after.proportionAlong
+        --    )
+        --of
+        --    ( True, False ) ->
+        --        Just before
+        --
+        --    ( False, True ) ->
+        --        Just after
+        --
+        --    _ ->
+        --        -- No clear winner, closest wins.
+        --        if before.distanceFrom |> Quantity.lessThanOrEqualTo after.distanceFrom then
+        --            Just before
+        --
+        --        else
+        --            Just after
         ( Just before, Nothing ) ->
             -- Probably better to choose a non-zero side.
             Just before
