@@ -57,7 +57,9 @@ import Svg
 import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip
+import Tools.CentroidAverage
 import Tools.DisplaySettingsOptions
+import Tools.Simplify
 import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (colorFromElmUiColour)
@@ -380,6 +382,20 @@ fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
 
 applyFingerPaint : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
 applyFingerPaint paintInfo track =
+    -- Wrapper so we can also apply post-paint smoothing.
+    applyFingerPaintInternal paintInfo track
+        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
+        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
+        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
+        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+
+
+applyFingerPaintInternal : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
+applyFingerPaintInternal paintInfo track =
     case paintInfo.path of
         pathHead :: pathMore ->
             -- At least two points makes it worthwhile.
