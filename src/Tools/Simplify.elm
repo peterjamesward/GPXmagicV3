@@ -70,7 +70,7 @@ findSimplifications options tree =
             case previousIfAny of
                 Nothing ->
                     -- Wait for next one
-                    ( 1, Just road, [] )
+                    ( index + 1, Just road, [] )
 
                 Just previous ->
                     ( index + 1
@@ -93,7 +93,7 @@ findSimplifications options tree =
                 0
                 tree
                 foldFn
-                ( 0, Nothing, [] )
+                ( startingAt, Nothing, [] )
 
         selectSmallestAreas : List ( Int, Quantity Float (Squared Meters) )
         selectSmallestAreas =
@@ -150,15 +150,23 @@ applyToWholeTrack options track =
     case newTree of
         Just isTree ->
             let
-                pointerReposition =
-                    --Let's reposition by distance, not uncommon.
-                    --TODO: Arguably, position from the relevant track end would be better.
-                    DomainModel.preserveDistanceFromStart track.trackTree isTree
-
                 ( newOrange, newPurple ) =
-                    ( pointerReposition track.currentPosition
-                    , Maybe.map pointerReposition track.markerPosition
-                    )
+                    case options.range of
+                        Just ( startAt, endAt ) ->
+                            if track.currentPosition == startAt then
+                                ( track.currentPosition
+                                , Just <| endAt - Dict.size options.pointsToRemove
+                                )
+
+                            else
+                                ( track.currentPosition - Dict.size options.pointsToRemove
+                                , Just startAt
+                                )
+
+                        Nothing ->
+                            ( preserveDistanceFromStart track.trackTree isTree track.currentPosition
+                            , Nothing
+                            )
             in
             { track
                 | trackTree = Maybe.withDefault track.trackTree newTree
@@ -185,7 +193,13 @@ toolStateChange opened colour options track =
                 optionsWithRange =
                     case theTrack.markerPosition of
                         Just purple ->
-                            { options | range = Just ( theTrack.currentPosition, purple ) }
+                            { options
+                                | range =
+                                    Just
+                                        ( min theTrack.currentPosition purple
+                                        , max theTrack.currentPosition purple
+                                        )
+                            }
 
                         Nothing ->
                             { options | range = Nothing }
