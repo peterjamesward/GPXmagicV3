@@ -17,22 +17,30 @@
 
 ## Finger painting
 
-nearest leaf code still wrong. Should find nearest point then look at each
-leaf there. If "proportionAlong" is (0,1) in only one, use that, if both or neither,
-use the nearest `distanceFrom`.
+If I capture the zoom level, is it possible to infer a curved path as we zoom in?
+It's an error to use a precise world point, the whole pixel is "valid".
 
-* Try in in 3D, might "just work" well enough.
+Sometimes (almost always) simple is best. Could look at the screenPoint information (extended 
+with zoom level). If it fits a straight line (within zoom tolerance), it's a straight line.
+If not straight, look for point farthest from line between endpoints. Try fitting an arc to 
+these three points. If within tolerance, it's an arc.
+If not line or arc, subdivide at this furthest point and repeat.
+Will terminate, because duh, might not work well. Worth a try.
+
+Use 3D nearness testing, will also work for Plan.
 
 ### Use as tool applicator
 
 Fingerpainting is a meta-tool. 
-Should be able to use it to Straighten, Smooth, without needing to place markers.
+Should be able to use it to Straighten, Smooth, more, without needing to place markers.
 Indeed, may be more useful as such.
 Need to set the painting mode - should this be in Tools, on the View, both?
 
 ### Sketch on the Plan map
+
 * Need to be able to finger paint with no track.
 * Need to be able to search on map, or have Plan view default to position like Map view does.
+* But not urgent as there is already "Draw on Map".
 
 ---
 

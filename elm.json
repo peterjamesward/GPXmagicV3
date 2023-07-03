@@ -39,12 +39,12 @@
             "folkertdev/svg-path-lowlevel": "4.0.1",
             "ianmackenzie/elm-3d-camera": "3.1.0",
             "ianmackenzie/elm-3d-scene": "1.0.1",
-            "ianmackenzie/elm-geometry": "3.9.1",
+            "ianmackenzie/elm-geometry": "3.11.0",
             "ianmackenzie/elm-geometry-svg": "3.0.0",
-            "ianmackenzie/elm-interval": "2.0.0",
+            "ianmackenzie/elm-interval": "3.1.0",
             "ianmackenzie/elm-triangular-mesh": "1.1.0",
             "ianmackenzie/elm-units": "2.10.0",
-            "ianmackenzie/elm-units-interval": "2.3.0",
+            "ianmackenzie/elm-units-interval": "3.2.0",
             "jinjor/elm-xml-parser": "2.0.0",
             "joakin/elm-canvas": "5.0.0",
             "justgook/alt-linear-algebra": "2.0.0",
@@ -77,7 +77,6 @@
             "elm/virtual-dom": "1.0.3",
             "elm-community/basics-extra": "4.1.0",
             "elm-community/result-extra": "2.4.0",
-            "elm-explorations/test": "1.2.2",
             "ianmackenzie/elm-1d-parameter": "1.0.1",
             "ianmackenzie/elm-float-extra": "1.1.0",
             "ianmackenzie/elm-geometry-linear-algebra-interop": "2.0.2",
@@ -92,6 +91,8 @@
     },
     "test-dependencies": {
         "direct": {},
-        "indirect": {}
+        "indirect": {
+            "elm-explorations/test": "1.2.2"
+        }
     }
 }

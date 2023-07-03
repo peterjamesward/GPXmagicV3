@@ -35,6 +35,7 @@ import Html
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
+import Interval
 import Json.Decode as D
 import Length exposing (Meters)
 import LineSegment2d
@@ -575,39 +576,42 @@ pointLeafProximity context track screenRectangle screenPoint =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
 
+        nearestPointIndex =
+            nearestPointToRay ray track.trackTree track.leafIndex track.currentPosition
+
+        sharedPoint =
+            earthPointFromIndex nearestPointIndex track.trackTree
+
+        projectionPlane =
+            -- Will use this to measure separation between leaf axes and the ray.
+            Plane3d.through
+                sharedPoint.space
+                (Axis3d.direction ray)
+
         touchPointInWorld =
-            -- Yes, there is a more direct way to convert coordinates.
-            -- I may figure it out one day.
-            ray |> Axis3d.intersectionWithPlane Plane3d.xy
+            Axis3d.intersectionWithPlane projectionPlane ray
+                |> Maybe.map (Point3d.projectOnto projectionPlane)
 
-        nearestLeafIndex =
-            nearestLeafToRay
-                ray
-                track.trackTree
-                track.leafIndex
-                track.currentPosition
-
-        nearestLeaf =
-            asRecord <|
-                DomainModel.leafFromIndex nearestLeafIndex track.trackTree
-
-        leafLineSegment =
-            LineSegment3d.from nearestLeaf.startPoint.space nearestLeaf.endPoint.space
-                |> LineSegment3d.projectInto SketchPlane3d.xy
-
-        leafLineAxis =
-            Axis2d.throughPoints
-                (LineSegment2d.startPoint leafLineSegment)
-                (LineSegment2d.endPoint leafLineSegment)
-    in
-    case ( touchPointInWorld, leafLineAxis ) of
-        ( Just touchPoint, Just leafAxis ) ->
+        proximityFrom index axis =
             let
-                touchPointXY =
-                    touchPoint |> Point3d.projectInto SketchPlane3d.xy
+                {-
+                   I find the closest pass between two axes (ray and leaf) by:
+                   1. create a plane normal to the ray (origin on the ray, containing nearest point?)
+                   2. project each leaf onto that plane
+                   3. compare projected leafs:
+                       a: is projection of origin to projected leaf within the [start,end]
+                       b: which is closest (distanceFrom).
+                   The Plan View falls out as a special case.
+                -}
+                leaf =
+                    asRecord <| leafFromIndex index track.trackTree
+
+                leafSegment =
+                    LineSegment3d.from leaf.startPoint.space leaf.endPoint.space
+                        |> LineSegment3d.projectOnto projectionPlane
 
                 touchPointOnTrack =
-                    touchPointXY |> Point2d.projectOnto leafAxis
+                    touchPointXY |> Point2d.projectOnto axis
 
                 proportion =
                     Quantity.ratio
@@ -615,16 +619,77 @@ pointLeafProximity context track screenRectangle screenPoint =
                         (LineSegment2d.length leafLineSegment)
             in
             Just
-                { leafIndex = nearestLeafIndex
+                { leafIndex = nearestPointIndex
                 , distanceAlong = Point2d.signedDistanceAlong leafAxis touchPointXY
                 , distanceFrom = Point2d.signedDistanceFrom leafAxis touchPointXY
                 , proportionAlong = proportion
                 , screenPoint = screenPoint
                 , worldPoint = touchPoint
                 }
+    in
+    case
+        ( touchPointInWorld
+        , LineSegment2d.axis <| leafSegment leafBefore
+        , LineSegment2d.axis <| leafSegment leafAfter
+        )
+    of
+        ( Just touch, Just axisBefore, Just axisAfter ) ->
+            let
+                beforeProportion =
+                    Quantity.ratio
+                        (touchPointInWorld |> Point2d.signedDistanceAlong axisBefore)
+                        (LineSegment2d.length (leafSegment leafBefore))
+
+                afterProportion =
+                    Quantity.ratio
+                        (touchPointInWorld |> Point2d.signedDistanceAlong axisAfter)
+                        (LineSegment2d.length (leafSegment leafAfter))
+
+                internal =
+                    Interval.from 0.0 1.0
+            in
+            case
+                ( internal |> Interval.contains beforeProportion
+                , internal |> Interval.contains afterProportion
+                )
+            of
+                ( True, False ) ->
+                    proximityFrom (nearestPointIndex - 1) axisBefore
+
+                ( False, True ) ->
+                    proximityFrom nearestPointIndex axisAfter
+
+                _ ->
+                    -- No clear winner, closest wins.
+                    if
+                        touchPointInWorld
+                            |> Point2d.signedDistanceFrom axisBefore
+                            |> Quantity.abs
+                            |> Quantity.lessThanOrEqualTo
+                                (touchPointInWorld |> Point2d.signedDistanceFrom axisAfter |> Quantity.abs)
+                    then
+                        proximityFrom (nearestPointIndex - 1) axisBefore
+
+                    else
+                        proximityFrom nearestPointIndex axisAfter
+
+        ( _, Just axisBefore, Nothing ) ->
+            -- Probably better to choose a non-zero side.
+            proximityFrom (nearestPointIndex - 1) axisBefore
+
+        ( _, Nothing, Just axisAfter ) ->
+            proximityFrom nearestPointIndex axisAfter
 
         _ ->
-            Nothing
+            -- Really bad luck, who cares?
+            Just
+                { leafIndex = nearestPointIndex
+                , distanceAlong = Point2d.signedDistanceAlong leafAxis touchPointXY
+                , distanceFrom = Point2d.signedDistanceFrom leafAxis touchPointXY
+                , proportionAlong = proportion
+                , screenPoint = screenPoint
+                , worldPoint = touchPoint
+                }
 
 
 update :
