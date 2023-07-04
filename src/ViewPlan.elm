@@ -383,14 +383,9 @@ fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
 applyFingerPaint : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
 applyFingerPaint paintInfo track =
     -- Wrapper so we can also apply post-paint smoothing.
-    applyFingerPaintInternal paintInfo track
-        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
-        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
-        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
-        |> Tools.Simplify.applyToWholeTrack Tools.Simplify.defaultOptions
-        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
-        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
-        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+    track
+        |> applyFingerPaintInternal paintInfo
+        |> Tools.Simplify.fingerpaintHelper
         |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
 
 
@@ -870,10 +865,14 @@ update msg msgWrapper track ( width, height ) context mapData =
                     case context.dragAction of
                         DragPaint paintInfo ->
                             -- One of those occasions where I'm pleased I have Actions, avoiding much plumbing.
-                            [ Actions.WithUndo <| Actions.FingerPaint paintInfo
-                            , Actions.FingerPaint paintInfo
-                            , Actions.TrackHasChanged
-                            ]
+                            if List.length paintInfo.path > 2 then
+                                [ Actions.WithUndo <| Actions.FingerPaint paintInfo
+                                , Actions.FingerPaint paintInfo
+                                , Actions.TrackHasChanged
+                                ]
+
+                            else
+                                []
 
                         _ ->
                             []

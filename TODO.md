@@ -17,23 +17,6 @@
 
 ## Finger painting
 
-* Still not ideal if end of paint is in first half of a segment.
-
-If I capture the zoom level, is it possible to infer a curved path as we zoom in?
-It's wrong to use a precise world point, the whole pixel is "valid".
-
-Sometimes (almost always) simple is best. Could look at the screenPoint information (and knowing 
-current zoom level). If it fits a straight line (within zoom tolerance), it's a straight line.
-If not straight, look for point farthest from line between endpoints. Try fitting an arc to 
-these three points. If within tolerance, it's an arc.
-If not line or arc, subdivide at this furthest point and repeat.
-Will terminate, because duh, might not work well. Worth a try.
-
-Mind you, pragmatically, now Simplify work on a range, we could do that a few
-times and then use Centroid. Local One-Click Quick-Fix, if you like.
-> This will be fine but need to estimate how many times for each. 4?
-
-
 ### Use as tool applicator
 
 Fingerpainting is a meta-tool. 

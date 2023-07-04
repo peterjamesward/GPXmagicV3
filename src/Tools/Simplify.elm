@@ -3,6 +3,8 @@ module Tools.Simplify exposing
     , Options
     , applyToWholeTrack
     , defaultOptions
+    , findSimplifications
+    , fingerpaintHelper
     , toolId
     , toolStateChange
     , update
@@ -46,6 +48,29 @@ type Msg
     = Seek
     | Apply
     | FlushUndo
+
+
+fingerpaintHelper : TrackLoaded msg -> TrackLoaded msg
+fingerpaintHelper track =
+    -- Applies between markers given by track and resets markers at end.
+    let
+        orange =
+            track.currentPosition
+
+        withMarkers =
+            { defaultOptions
+                | range =
+                    case track.markerPosition of
+                        Just purple ->
+                            Just ( min orange purple, max orange purple )
+
+                        Nothing ->
+                            Nothing
+            }
+    in
+    applyToWholeTrack
+        (findSimplifications withMarkers track.trackTree)
+        track
 
 
 findSimplifications : Options -> PeteTree -> Options
