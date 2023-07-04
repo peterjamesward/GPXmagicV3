@@ -1,12 +1,21 @@
-module Tools.ProfileSmooth exposing (Msg(..), SlopeStatus(..), SlopeStuff, apply, defaultOptions, toolId, toolStateChange, update, view)
+module Tools.ProfileSmooth exposing
+    ( Msg(..)
+    , SlopeStatus(..)
+    , SlopeStuff
+    , apply
+    , defaultOptions
+    , fingerpaintingHelper
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import CommonToolStyles
 import DomainModel exposing (..)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input exposing (button)
-import FlatColors.ChinesePalette
 import Length
 import Point3d exposing (zCoordinate)
 import PreviewData exposing (PreviewShape(..))
@@ -14,7 +23,6 @@ import Quantity exposing (multiplyBy, zero)
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import Tools.ProfileSmoothOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded, adjustAltitude)
 import UtilsForViews exposing (showDecimal0)
@@ -167,17 +175,16 @@ update msg options previewColour track =
             )
 
 
+fingerpaintingHelper : TrackLoaded msg -> TrackLoaded msg
+fingerpaintingHelper track =
+    apply
+        { defaultOptions | smoothMethod = MethodUniform }
+        track
+
+
 apply : Options -> TrackLoaded msg -> TrackLoaded msg
 apply options track =
     let
-        ( fromStart, fromEnd ) =
-            case track.markerPosition of
-                Just _ ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                Nothing ->
-                    ( 0, 0 )
-
         newCourse =
             computeNewPoints options track
                 |> List.map Tuple.second

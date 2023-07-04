@@ -59,6 +59,7 @@ import SystemSettings exposing (SystemSettings)
 import ToolTip
 import Tools.CentroidAverage
 import Tools.DisplaySettingsOptions
+import Tools.ProfileSmooth
 import Tools.Simplify
 import TrackLoaded exposing (TrackLoaded)
 import Utils
@@ -385,6 +386,7 @@ applyFingerPaint paintInfo track =
     -- Wrapper so we can also apply post-paint smoothing.
     track
         |> applyFingerPaintInternal paintInfo
+        |> Tools.ProfileSmooth.fingerpaintingHelper
         |> Tools.Simplify.fingerpaintHelper
         |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
 
