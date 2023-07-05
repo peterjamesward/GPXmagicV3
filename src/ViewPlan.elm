@@ -388,6 +388,12 @@ applyFingerPaint paintInfo track =
         |> applyFingerPaintInternal paintInfo
         |> Tools.ProfileSmooth.fingerpaintingHelper
         |> Tools.Simplify.fingerpaintHelper
+        |> Tools.Simplify.fingerpaintHelper
+        |> Tools.Simplify.fingerpaintHelper
+        |> Tools.Simplify.fingerpaintHelper
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
         |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
 
 
