@@ -56,7 +56,7 @@
             "marcosh/elm-html-to-unicode": "1.0.4",
             "mdgriffith/elm-ui": "1.1.8",
             "mgold/elm-nonempty-list": "4.2.0",
-            "mpizenberg/elm-pointer-events": "4.0.2",
+            "mpizenberg/elm-pointer-events": "5.0.0",
             "phollyer/elm-cursor": "1.1.1",
             "prozacchiwawa/elm-urlbase64": "1.0.6",
             "pzp1997/assoc-list": "1.0.0",
@@ -91,8 +91,6 @@
     },
     "test-dependencies": {
         "direct": {},
-        "indirect": {
-            "elm-explorations/test": "1.2.2"
-        }
+        "indirect": {}
     }
 }

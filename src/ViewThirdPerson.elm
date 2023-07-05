@@ -317,9 +317,6 @@ update msg msgWrapper track ( width, height ) mapData context =
         ( wFloat, hFloat ) =
             ( toFloatQuantity width, toFloatQuantity height )
 
-        oopsLngLat =
-            { lng = 0, lat = 0 }
-
         screenRectangle =
             Rectangle2d.from
                 (Point2d.xy Quantity.zero hFloat)
@@ -502,27 +499,22 @@ update msg msgWrapper track ( width, height ) mapData context =
 
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
-                        shiftVector =
-                            Vector3d.meters
-                                --((startX - dx) * metersPerPixel)
-                                --((dy - startY) * metersPerPixel)
-                                --0.0
-                                ((startY - dy) * Angle.sin context.cameraElevation)
-                                (startX - dx)
-                                ((dy - startY) * Angle.cos context.cameraElevation)
-                                |> Vector3d.rotateAround
-                                    Axis3d.z
-                                    (Direction2d.toAngle context.cameraAzimuth)
+                        --TODO: Why can't I get this trivial shit right?
+                        --TODO: Look at some example code.
+                        viewPlane =
+                            SketchPlane3d.withNormalDirection
+                                (Viewpoint3d.viewDirection <| Camera3d.viewpoint camera)
+                                context.focalPoint.space
 
                         newFocus =
-                            context.focalPoint
-                                |> .space
-                                |> Point3d.translateBy shiftVector
-                                |> DomainModel.withoutTime
+                            Point2d.meters
+                                ((dy - startY) * metersPerPixel)
+                                ((startX - dx) * metersPerPixel)
+                                |> Point3d.on viewPlane
 
                         newContext =
                             { context
-                                | focalPoint = newFocus
+                                | focalPoint = withoutTime newFocus
                                 , orbiting = Just ( dx, dy )
                             }
                     in
