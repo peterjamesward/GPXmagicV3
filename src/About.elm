@@ -2,7 +2,7 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.5.0 (bfecfd9d, 2023-07-05 13:45)
+    """# GPXmagic v3.15.0 (bfecfd9d, 2023-07-05 13:45)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
 
@@ -12,7 +12,7 @@ Simplify now works between the pointers if the Purple marker is dropped.
 
 Plan view has a new "finger painting" option.
 This is preliminary work for some upcoming changes but it may appeal to some users.
-Best watch the video.
+Best watch the video -- https://youtu.be/nBNn_jG6FkU
 
 Better attempt at dragging the track around in Third Person.
 
