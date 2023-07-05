@@ -2,7 +2,7 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.5.0 (66821ff2, 2023-07-05 09:47)
+    """# GPXmagic v3.5.0 (66821ff2, 2023-07-05 13:45)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
 
@@ -14,7 +14,7 @@ Plan view has a new "finger painting" option.
 This is preliminary work for some upcoming changes but it may appeal to some users.
 Best watch the video.
 
-Reverted to an older version of dragging the track around in Third Person.
+Better attempt at dragging the track around in Third Person.
 
 ## 3.14.2
 

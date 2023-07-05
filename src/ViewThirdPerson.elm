@@ -499,8 +499,6 @@ update msg msgWrapper track ( width, height ) mapData context =
 
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
-                        --TODO: Why can't I get this trivial shit right?
-                        --TODO: Look at some example code.
                         viewPlane =
                             SketchPlane3d.withNormalDirection
                                 (Viewpoint3d.viewDirection <| Camera3d.viewpoint camera)
