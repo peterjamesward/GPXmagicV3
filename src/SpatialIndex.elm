@@ -224,7 +224,7 @@ queryNearestToAxisUsing :
     -> FoldStateForNearest contentType Meters coords
     -> FoldStateForNearest contentType Meters coords
 queryNearestToAxisUsing current axis valuation initialState =
-    -- Repurposed to improve our hit detection. Not loss of generality in units.
+    -- Repurposed to improve our hit detection. Note loss of generality in units.
     let
         updateNearestWithContent :
             SpatialContent contentType Meters coords

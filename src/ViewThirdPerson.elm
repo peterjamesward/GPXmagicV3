@@ -211,7 +211,7 @@ detectHit event track ( w, h ) context =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
     in
-    nearestToRay
+    nearestPointToRay
         ray
         track.trackTree
         track.leafIndex

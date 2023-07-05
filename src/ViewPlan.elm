@@ -1,5 +1,6 @@
 module ViewPlan exposing
     ( Msg(..)
+    , applyFingerPaint
     , initialiseView
     , resizeOccured
     , subscriptions
@@ -10,10 +11,11 @@ module ViewPlan exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import Axis2d
 import Axis3d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
-import Color
+import Circle2d
 import CommonToolStyles
 import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
@@ -21,39 +23,50 @@ import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Cursor as Cursor
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
 import FlatColors.IndianPalette
+import Frame2d
+import Geometry.Svg as Svg
 import Html
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
+import Interval
 import Json.Decode as D
 import Length exposing (Meters)
+import LineSegment2d
+import LineSegment3d
 import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import MapboxKey
 import Pixels exposing (Pixels)
 import Plane3d
-import Point2d
+import Point2d exposing (Point2d)
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
-import Rectangle2d
-import Scene3d exposing (Entity, backgroundColor)
-import SceneBuilder3D
+import Rectangle2d exposing (Rectangle2d)
+import Scene3d exposing (Entity)
+import SketchPlane3d
 import Spherical exposing (metresPerPixel)
+import Svg
+import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip
+import Tools.CentroidAverage
 import Tools.DisplaySettingsOptions
-import Tools.Tracks as Tracks
+import Tools.ProfileSmooth
+import Tools.Simplify
 import TrackLoaded exposing (TrackLoaded)
+import Utils
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
-import ViewPlanContext exposing (DragAction(..), PlanContext)
+import ViewPlanContext exposing (DragAction(..), PlanContext, PointLeafProximity, ScreenCoords)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d
 import ZoomLevel
@@ -74,6 +87,7 @@ type Msg
     | ToggleFollowOrange
     | MapMsg MapViewer.Msg
     | ToggleShowMap
+    | ToggleFingerpainting
 
 
 subscriptions : MapViewer.MapData -> PlanContext -> Sub Msg
@@ -119,6 +133,7 @@ initialiseView current track contentArea currentContext =
             , followSelectedPoint = True
             , map = initialMap
             , showMap = False
+            , fingerPainting = False
             }
 
         ( lngLat1, lngLat2 ) =
@@ -131,8 +146,8 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : SystemSettings -> (Msg -> msg) -> PlanContext -> Element msg
-zoomButtons settings msgWrapper context =
+viewMenu : SystemSettings -> (Msg -> msg) -> PlanContext -> Element msg
+viewMenu settings msgWrapper context =
     column
         [ alignTop
         , alignRight
@@ -188,6 +203,25 @@ zoomButtons settings msgWrapper context =
                 else
                     useIcon FeatherIcons.map
             }
+        , Input.button
+            [ ToolTip.tooltip
+                onLeft
+                (ToolTip.myTooltip <|
+                    if context.fingerPainting then
+                        "Mouse moves view mode"
+
+                    else
+                        "Fingerpainting mode"
+                )
+            ]
+            { onPress = Just <| msgWrapper ToggleFingerpainting
+            , label =
+                if context.fingerPainting then
+                    useIcon FeatherIcons.move
+
+                else
+                    useIcon FeatherIcons.zap
+            }
         ]
 
 
@@ -221,9 +255,6 @@ view context mapData settings display contentArea track scene msgWrapper =
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
-        overlay =
-            placesOverlay display contentArea track camera
-
         plan3dView =
             el
                 [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
@@ -242,8 +273,14 @@ view context mapData settings display contentArea track scene msgWrapper =
                 , pointer
                 , Border.width 0
                 , Border.color FlatColors.ChinesePalette.peace
-                , inFront <| overlay
-                , inFront <| zoomButtons settings msgWrapper context
+                , inFront <| placesOverlay display contentArea track camera
+                , inFront <| fingerPaintingPreview context contentArea track camera
+                , inFront <| viewMenu settings msgWrapper context
+                , if context.fingerPainting then
+                    Cursor.pointer
+
+                  else
+                    Cursor.default
                 ]
             <|
                 html <|
@@ -285,6 +322,168 @@ view context mapData settings display contentArea track scene msgWrapper =
                 none
         ]
         plan3dView
+
+
+fingerPaintingPreview :
+    PlanContext
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
+    -> Camera3d Meters LocalCoords
+    -> Element msg
+fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
+    let
+        ( svgWidth, svgHeight ) =
+            ( String.fromInt <| Pixels.inPixels givenWidth
+            , String.fromInt <| Pixels.inPixels givenHeight
+            )
+
+        screenRectangle =
+            Rectangle2d.from
+                Point2d.origin
+                (Point2d.xy
+                    (Quantity.toFloatQuantity givenWidth)
+                    (Quantity.toFloatQuantity givenHeight)
+                )
+
+        topLeftFrame =
+            Frame2d.atPoint
+                (Point2d.xy Quantity.zero (Quantity.toFloatQuantity givenHeight))
+
+        --|> Frame2d.reverseY
+    in
+    case context.dragAction of
+        DragPaint paintInfo ->
+            let
+                paintNodes =
+                    paintInfo.path
+                        |> List.map
+                            (\proximity ->
+                                Svg.circle2d
+                                    [ Svg.Attributes.stroke "red"
+                                    , Svg.Attributes.strokeWidth "1"
+                                    , Svg.Attributes.fill "white"
+                                    ]
+                                    (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
+                            )
+            in
+            html <|
+                Svg.svg
+                    [ Svg.Attributes.width svgWidth
+                    , Svg.Attributes.height svgHeight
+                    ]
+                    paintNodes
+
+        --[ Svg.relativeTo topLeftFrame paintNodes ]
+        DragPush pushInfo ->
+            none
+
+        _ ->
+            none
+
+
+applyFingerPaint : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
+applyFingerPaint paintInfo track =
+    -- Wrapper so we can also apply post-paint smoothing.
+    track
+        |> applyFingerPaintInternal paintInfo
+        |> Tools.ProfileSmooth.fingerpaintingHelper
+        |> Tools.Simplify.fingerpaintHelper
+        |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
+
+
+applyFingerPaintInternal : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
+applyFingerPaintInternal paintInfo track =
+    case paintInfo.path of
+        pathHead :: pathMore ->
+            -- At least two points makes it worthwhile.
+            case List.reverse pathMore of
+                pathLast :: pathMiddle ->
+                    let
+                        --_ =
+                        --    Debug.log "applying" ( pathHead, pathLast )
+                        {-
+                           1. Use first and last points to work out where we splice the new track section.
+                           (remember path could be drawn in either direction!)
+                           (cater for case when painting is entirely in one section!)
+                           2. Make new 2D points from the path.
+                           3. Apply altitudes by interpolation from base track.
+                           4. Splice the new section into the track.
+                           5. Return with adjusted pointers and new leaf index.
+                        -}
+                        locationsAreInCorrectOrder =
+                            -- I find the prefix notation clearer here, parentheses important.
+                            (||) (pathHead.leafIndex < pathLast.leafIndex)
+                                ((&&) (pathHead.leafIndex == pathLast.leafIndex)
+                                    (pathHead.distanceAlong |> Quantity.lessThan pathLast.distanceAlong)
+                                )
+
+                        ( preTrackPoint, postTrackPoint, locations ) =
+                            -- Unchanged points that we connect the new track to.
+                            if locationsAreInCorrectOrder then
+                                ( pathHead.leafIndex, pathLast.leafIndex + 2, paintInfo.path )
+
+                            else
+                                ( pathLast.leafIndex, pathHead.leafIndex + 2, List.reverse paintInfo.path )
+
+                        newGpxPoints =
+                            -- Splicing is more stable if we preserve the extremities?
+                            Utils.deDupe (==) <|
+                                gpxPointFromIndex preTrackPoint track.trackTree
+                                    :: List.map makeNewGpxPointFromProximity locations
+                                    ++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
+
+                        --++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
+                        makeNewGpxPointFromProximity : PointLeafProximity -> GPXSource
+                        makeNewGpxPointFromProximity proximity =
+                            let
+                                leaf : RoadSection
+                                leaf =
+                                    asRecord <| leafFromIndex proximity.leafIndex track.trackTree
+
+                                pointOnTrack =
+                                    Point3d.interpolateFrom
+                                        leaf.startPoint.space
+                                        leaf.endPoint.space
+                                        proximity.proportionAlong
+
+                                ( x, y, z ) =
+                                    Point3d.coordinates proximity.worldPoint
+
+                                earthPoint =
+                                    { space = Point3d.xyz x y (Point3d.zCoordinate pointOnTrack)
+                                    , time = Nothing
+                                    }
+                            in
+                            gpxFromPointWithReference track.referenceLonLat earthPoint
+
+                        newTree =
+                            DomainModel.replaceRange
+                                preTrackPoint
+                                (skipCount track.trackTree - postTrackPoint)
+                                track.referenceLonLat
+                                newGpxPoints
+                                track.trackTree
+                    in
+                    case newTree of
+                        Just isTree ->
+                            { track
+                                | trackTree = Maybe.withDefault track.trackTree newTree
+                                , currentPosition = preTrackPoint + 1
+                                , markerPosition =
+                                    Just <|
+                                        (postTrackPoint + skipCount isTree - skipCount track.trackTree - 1)
+                                , leafIndex = TrackLoaded.indexLeaves isTree
+                            }
+
+                        Nothing ->
+                            track
+
+                _ ->
+                    track
+
+        _ ->
+            -- Without two points, do nothing.
+            track
 
 
 resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> PlanContext -> PlanContext
@@ -378,6 +577,117 @@ mapBoundsFromScene updatedContext ( width, height ) track =
             ( oopsLngLat, oopsLngLat )
 
 
+pointLeafProximity :
+    PlanContext
+    -> TrackLoaded msg
+    -> Rectangle2d Pixels ScreenCoords
+    -> Point2d Pixels ScreenCoords
+    -> Maybe PointLeafProximity
+pointLeafProximity context track screenRectangle screenPoint =
+    let
+        camera =
+            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+
+        ray =
+            Camera3d.ray camera screenRectangle screenPoint
+
+        nearestPointIndex =
+            nearestPointToRay ray track.trackTree track.leafIndex track.currentPosition
+
+        sharedPoint =
+            earthPointFromIndex nearestPointIndex track.trackTree
+
+        projectionPlane =
+            -- Will use this to measure separation between leaf axes and the ray.
+            Plane3d.through
+                sharedPoint.space
+                (Axis3d.direction ray)
+
+        touchPointInWorld =
+            Axis3d.intersectionWithPlane projectionPlane ray
+                |> Maybe.map (Point3d.projectOnto projectionPlane)
+
+        proximityFrom index =
+            let
+                {-
+                   I find the closest pass between two axes (ray and leaf) by:
+                   1. create a plane normal to the ray (origin on the ray, containing nearest point?)
+                   2. project each leaf onto that plane
+                   3. compare projected leafs:
+                       a: is projection of origin to projected leaf within the [start,end]
+                       b: which is closest (distanceFrom).
+                   The Plan View falls out as a special case.
+                -}
+                leaf =
+                    asRecord <| leafFromIndex index track.trackTree
+
+                leafSegment =
+                    LineSegment3d.from leaf.startPoint.space leaf.endPoint.space
+                        |> LineSegment3d.projectOnto projectionPlane
+            in
+            case ( touchPointInWorld, LineSegment3d.axis leafSegment ) of
+                ( Just touchPoint, Just leafAxis ) ->
+                    let
+                        proportion =
+                            Quantity.ratio
+                                (Point3d.signedDistanceAlong leafAxis touchPoint)
+                                (LineSegment3d.length leafSegment)
+                    in
+                    Just
+                        { leafIndex = index
+                        , distanceAlong = Point3d.signedDistanceAlong leafAxis touchPoint
+                        , distanceFrom = Point3d.distanceFromAxis leafAxis touchPoint
+                        , proportionAlong = proportion
+                        , screenPoint = screenPoint
+                        , worldPoint = touchPoint
+                        }
+
+                _ ->
+                    Nothing
+    in
+    -- So, is the click before or after the point?
+    case
+        ( proximityFrom <| nearestPointIndex - 1
+        , proximityFrom nearestPointIndex
+        )
+    of
+        ( Just before, Just after ) ->
+            Just before
+
+        --let
+        --    internal =
+        --        Interval.from 0.0 1.0
+        --in
+        --case
+        --    ( internal |> Interval.contains before.proportionAlong
+        --    , internal |> Interval.contains after.proportionAlong
+        --    )
+        --of
+        --    ( True, False ) ->
+        --        Just before
+        --
+        --    ( False, True ) ->
+        --        Just after
+        --
+        --    _ ->
+        --        -- No clear winner, closest wins.
+        --        if before.distanceFrom |> Quantity.lessThanOrEqualTo after.distanceFrom then
+        --            Just before
+        --
+        --        else
+        --            Just after
+        ( Just before, Nothing ) ->
+            -- Probably better to choose a non-zero side.
+            Just before
+
+        ( Nothing, Just after ) ->
+            Just after
+
+        _ ->
+            -- Really bad luck, who cares?
+            Nothing
+
+
 update :
     Msg
     -> (Msg -> msg)
@@ -391,9 +701,6 @@ update msg msgWrapper track ( width, height ) context mapData =
         -- Let us have some information about the view, making dragging more precise.
         ( wFloat, hFloat ) =
             ( toFloatQuantity width, toFloatQuantity height )
-
-        oopsLngLat =
-            { lng = 0, lat = 0 }
 
         screenRectangle =
             Rectangle2d.from
@@ -447,11 +754,39 @@ update msg msgWrapper track ( width, height ) context mapData =
             )
 
         ImageGrab event ->
-            -- Mouse behaviour depends which view is in use...
-            -- Right-click or ctrl-click to mean rotate; otherwise pan.
+            {-
+               Plan view only has pan, no rotation. Obviously no tilt.
+               For fingerpainting, we do a click detect to see whether to paint or push track.
+               Painting if within one meter of track.
+               Apologies for near duplication of detectHit here.
+            -}
+            let
+                ( x, y ) =
+                    event.offsetPos
+
+                screenPoint =
+                    Point2d.pixels x y
+
+                newState =
+                    if context.fingerPainting then
+                        case pointLeafProximity context track screenRectangle screenPoint of
+                            Just proximity ->
+                                if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
+                                    DragPaint <| ViewPlanContext.PaintInfo [ proximity ]
+
+                                else
+                                    --TODO: DragPush <| ViewPlanContext.PushInfo
+                                    DragPan
+
+                            _ ->
+                                DragPan
+
+                    else
+                        DragPan
+            in
             ( { context
                 | orbiting = Just event.offsetPos
-                , dragAction = DragPan
+                , dragAction = newState
                 , waitingForClickDelay = True
               }
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
@@ -495,6 +830,31 @@ update msg msgWrapper track ( width, height ) context mapData =
                     , mapData
                     )
 
+                ( DragPaint paintInfo, _ ) ->
+                    let
+                        screenPoint =
+                            Point2d.pixels dx dy
+
+                        path =
+                            case pointLeafProximity context track screenRectangle screenPoint of
+                                Just proximity ->
+                                    proximity :: paintInfo.path
+
+                                Nothing ->
+                                    paintInfo.path
+
+                        newContext =
+                            { context
+                                | dragAction =
+                                    DragPaint <|
+                                        ViewPlanContext.PaintInfo path
+                            }
+                    in
+                    ( newContext
+                    , []
+                    , mapData
+                    )
+
                 _ ->
                     ( context
                     , []
@@ -502,11 +862,28 @@ update msg msgWrapper track ( width, height ) context mapData =
                     )
 
         ImageRelease _ ->
+            let
+                actions =
+                    case context.dragAction of
+                        DragPaint paintInfo ->
+                            -- One of those occasions where I'm pleased I have Actions, avoiding much plumbing.
+                            if List.length paintInfo.path > 2 then
+                                [ Actions.WithUndo <| Actions.FingerPaint paintInfo
+                                , Actions.FingerPaint paintInfo
+                                , Actions.TrackHasChanged
+                                ]
+
+                            else
+                                []
+
+                        _ ->
+                            []
+            in
             ( { context
                 | orbiting = Nothing
                 , dragAction = DragNone
               }
-            , []
+            , actions
             , mapData
             )
 
@@ -602,6 +979,12 @@ update msg msgWrapper track ( width, height ) context mapData =
             , mapData
             )
 
+        ToggleFingerpainting ->
+            ( { context | fingerPainting = not context.fingerPainting }
+            , []
+            , mapData
+            )
+
         _ ->
             ( context
             , []
@@ -657,7 +1040,7 @@ detectHit event track ( w, h ) context =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
     in
-    nearestToRay
+    nearestPointToRay
         ray
         track.trackTree
         track.leafIndex

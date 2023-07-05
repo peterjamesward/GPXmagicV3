@@ -293,6 +293,7 @@ placesOverlay :
     -> Camera3d Meters LocalCoords
     -> Element msg
 placesOverlay display ( givenWidth, givenHeight ) track camera =
+    --TODO: Use this to show the location of any fingerpainting tool.
     let
         ( svgWidth, svgHeight ) =
             ( String.fromInt <| Pixels.inPixels givenWidth

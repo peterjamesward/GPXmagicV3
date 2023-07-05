@@ -19,16 +19,31 @@
 
 # WIP
 
-**BUG** Shows original graph nodes all the time. 
-> Should recompute after any track change, new track, removed track.
+## Finger painting
+
+### Use as tool applicator
+
+Fingerpainting is a meta-tool. 
+Should be able to use it to Straighten, Smooth, more, without needing to place markers.
+Indeed, may be more useful as such.
+Need to set the painting mode - should this be in Tools, on the View, both?
+
+### Start with no track, just Plan view with Map
+
+* Need to be able to search on map, or have Plan view default to position like Map view does.
+* But not urgent as there is already "Draw on Map".
 
 ---
 
 # BACKLOG
 
-## Reduce point spacing on bends
+## Synthesizer
 
-All tools -- better results in RGT with 1 meter spacing.
+FFT generators for theta (or X, Y) & phi (or Z) as function of s.
+
+## Out and Back
+
+Make the final turn optional.
 
 ## Smart smoother
 

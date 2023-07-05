@@ -31,9 +31,9 @@ module DomainModel exposing
     , leafFromIndex
     , lngLatPair
     , midPoint
+    , nearestPointToRay
     , nearestToEarthPoint
     , nearestToLonLat
-    , nearestToRay
     , pointFromGpxWithReference
     , preserveDistanceFromStart
     , queryRoadsUsingFilter
@@ -59,10 +59,14 @@ import Direction3d
 import Json.Encode as E
 import LeafIndex exposing (LeafIndex, LeafIndexEntry)
 import Length exposing (Meters)
+import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
+import Plane3d
+import Point2d
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
+import SketchPlane3d
 import SpatialIndex
 import Spherical exposing (range)
 import Time
@@ -762,13 +766,13 @@ interpolateTrack distance treeNode =
                 )
 
 
-nearestToRay :
+nearestPointToRay :
     Axis3d Meters LocalCoords
     -> PeteTree
     -> LeafIndex
     -> Int
     -> Int
-nearestToRay ray tree leafIndex current =
+nearestPointToRay ray tree leafIndex current =
     -- Find track point nearest to ray, but where there's a tie, use closest (numerically) to current point.
     let
         valuationFunction : LeafIndexEntry -> Quantity Float Meters
@@ -845,7 +849,7 @@ nearestToEarthPoint earthPoint current treeNode leafIndex =
         ray =
             Axis3d.withDirection Direction3d.negativeZ earthPoint.space
     in
-    nearestToRay ray treeNode leafIndex current
+    nearestPointToRay ray treeNode leafIndex current
 
 
 lngLatPair : ( Angle, Angle, Length.Length ) -> E.Value

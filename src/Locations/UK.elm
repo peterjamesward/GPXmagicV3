@@ -453,6 +453,7 @@ Also, access a quick description of what the tool does and how (and when) to use
           , Dict.fromList
                 [ ( "deleteN", """deletion of points""" )
                 , ( "delete1", """delete""" )
+                , ( "fingerpaint", """finger painting""" )
                 , ( "spline", """smooth with splines""" )
                 , ( "centroid", """smooth with 3D average""" )
                 , ( "radius", """radiused bend""" )

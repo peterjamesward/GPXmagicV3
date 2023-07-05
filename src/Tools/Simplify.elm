@@ -1,8 +1,10 @@
 module Tools.Simplify exposing
     ( Msg(..)
     , Options
-    , apply
+    , applyToWholeTrack
     , defaultOptions
+    , findSimplifications
+    , fingerpaintHelper
     , toolId
     , toolStateChange
     , update
@@ -14,9 +16,7 @@ import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input
-import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, Squared)
@@ -33,11 +33,15 @@ toolId =
 
 
 type alias Options =
-    { pointsToRemove : Dict Int Int }
+    { pointsToRemove : Dict Int Int
+    , range : Maybe ( Int, Int )
+    }
 
 
 defaultOptions =
-    { pointsToRemove = Dict.empty }
+    { pointsToRemove = Dict.empty
+    , range = Nothing
+    }
 
 
 type Msg
@@ -46,11 +50,42 @@ type Msg
     | FlushUndo
 
 
+fingerpaintHelper : TrackLoaded msg -> TrackLoaded msg
+fingerpaintHelper track =
+    -- Applies between markers given by track and resets markers at end.
+    let
+        orange =
+            track.currentPosition
+
+        withMarkers =
+            { defaultOptions
+                | range =
+                    case track.markerPosition of
+                        Just purple ->
+                            Just ( min orange purple, max orange purple )
+
+                        Nothing ->
+                            Nothing
+            }
+    in
+    applyToWholeTrack
+        (findSimplifications withMarkers track.trackTree)
+        track
+
+
 findSimplifications : Options -> PeteTree -> Options
 findSimplifications options tree =
     -- This function called when track changes, or we call it when threshold is changed.
     -- We search the tree. At worst, fold over the whole darn tree. Optimize if needed.
     let
+        ( startingAt, endingAt ) =
+            case options.range of
+                Just ( orange, purple ) ->
+                    ( min orange purple, max orange purple )
+
+                Nothing ->
+                    ( 0, skipCount tree )
+
         foldFn :
             RoadSection
             -> ( Int, Maybe RoadSection, List ( Int, Quantity Float (Squared Meters) ) )
@@ -60,7 +95,7 @@ findSimplifications options tree =
             case previousIfAny of
                 Nothing ->
                     -- Wait for next one
-                    ( 1, Just road, [] )
+                    ( index + 1, Just road, [] )
 
                 Just previous ->
                     ( index + 1
@@ -77,13 +112,13 @@ findSimplifications options tree =
 
         ( _, _, triangleInfo ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
-                0
-                (skipCount tree)
+                startingAt
+                endingAt
                 (always Nothing)
                 0
                 tree
                 foldFn
-                ( 0, Nothing, [] )
+                ( startingAt, Nothing, [] )
 
         selectSmallestAreas : List ( Int, Quantity Float (Squared Meters) )
         selectSmallestAreas =
@@ -116,9 +151,10 @@ findSimplifications options tree =
     { options | pointsToRemove = nonAdjacentEntries }
 
 
-apply : Options -> TrackLoaded msg -> TrackLoaded msg
-apply options track =
+applyToWholeTrack : Options -> TrackLoaded msg -> TrackLoaded msg
+applyToWholeTrack options track =
     -- Deleting arbitrary collection of non-adjacent points implies rebuild.
+    --TODO: Optimise for application to range.
     let
         originalCourse : Dict Int GPXSource
         originalCourse =
@@ -139,15 +175,23 @@ apply options track =
     case newTree of
         Just isTree ->
             let
-                pointerReposition =
-                    --Let's reposition by distance, not uncommon.
-                    --TODO: Arguably, position from the relevant track end would be better.
-                    DomainModel.preserveDistanceFromStart track.trackTree isTree
-
                 ( newOrange, newPurple ) =
-                    ( pointerReposition track.currentPosition
-                    , Maybe.map pointerReposition track.markerPosition
-                    )
+                    case options.range of
+                        Just ( startAt, endAt ) ->
+                            if track.currentPosition == startAt then
+                                ( track.currentPosition
+                                , Just <| endAt - Dict.size options.pointsToRemove
+                                )
+
+                            else
+                                ( track.currentPosition - Dict.size options.pointsToRemove
+                                , Just startAt
+                                )
+
+                        Nothing ->
+                            ( preserveDistanceFromStart track.trackTree isTree track.currentPosition
+                            , Nothing
+                            )
             in
             { track
                 | trackTree = Maybe.withDefault track.trackTree newTree
@@ -171,8 +215,22 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             -- Make sure we have up to date breaches and preview is shown.
             let
+                optionsWithRange =
+                    case theTrack.markerPosition of
+                        Just purple ->
+                            { options
+                                | range =
+                                    Just
+                                        ( min theTrack.currentPosition purple
+                                        , max theTrack.currentPosition purple
+                                        )
+                            }
+
+                        Nothing ->
+                            { options | range = Nothing }
+
                 populatedOptions =
-                    findSimplifications options theTrack.trackTree
+                    findSimplifications optionsWithRange theTrack.trackTree
             in
             ( populatedOptions
             , actions colour populatedOptions theTrack
@@ -255,13 +313,14 @@ view settings msgWrapper options isTrack =
                                                 [ String.fromInt quantity ]
                                         ]
                                 }
-                , el [ centerX ] <|
-                    Input.button neatToolsBorder
-                        { onPress = Just <| msgWrapper FlushUndo
-                        , label =
-                            paragraph [] <|
-                                [ i18n "flush" ]
-                        }
+
+                --, el [ centerX ] <|
+                --    Input.button neatToolsBorder
+                --        { onPress = Just <| msgWrapper FlushUndo
+                --        , label =
+                --            paragraph [] <|
+                --                [ i18n "flush" ]
+                --        }
                 ]
 
         Nothing ->

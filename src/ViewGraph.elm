@@ -740,7 +740,7 @@ detectHit event graph ( w, h ) context =
                     (\( edgeIndex, edgeInfo ) ->
                         let
                             thisEdgeNearestIndex =
-                                nearestToRay
+                                nearestPointToRay
                                     ray
                                     edgeInfo.track.trackTree
                                     edgeInfo.track.leafIndex

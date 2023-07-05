@@ -6,6 +6,14 @@ aboutText =
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
 
+## 3.15.0
+
+Simplify now works between the pointers if the Purple marker is dropped.
+
+Plan view has a new "finger painting" option.
+This is preliminary work for some upcoming changes but it may appeal to some users.
+Best watch the video.
+
 ## 3.14.2
 
 Show correct preview when switching modes in Smooth with Arcs.
