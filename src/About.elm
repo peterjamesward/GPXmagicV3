@@ -11,6 +11,8 @@ aboutText =
 Simplify now works between the pointers if the Purple marker is dropped.
 
 Plan view has a new "finger painting" option.
+This is preliminary work for some upcoming changes but it may appeal to some users.
+Best watch the video.
 
 ## 3.14.2
 

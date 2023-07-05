@@ -24,15 +24,18 @@ Should be able to use it to Straighten, Smooth, more, without needing to place m
 Indeed, may be more useful as such.
 Need to set the painting mode - should this be in Tools, on the View, both?
 
-### Sketch on the Plan map
+### Start with no track, just Plan view with Map
 
-* Need to be able to finger paint with no track.
 * Need to be able to search on map, or have Plan view default to position like Map view does.
 * But not urgent as there is already "Draw on Map".
 
 ---
 
 # BACKLOG
+
+## Synthesizer
+
+FFT generators for theta (or X, Y) & phi (or Z) as function of s.
 
 ## Out and Back
 
