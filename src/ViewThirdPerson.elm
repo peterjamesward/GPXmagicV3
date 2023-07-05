@@ -549,6 +549,12 @@ update msg msgWrapper track ( width, height ) mapData context =
             , mapData
             )
 
+        ToggleFingerpainting ->
+            ( { context | fingerPainting = not context.fingerPainting }
+            , []
+            , mapData
+            )
+
         SetEmphasis _ ->
             ( context, [], mapData )
 
@@ -607,6 +613,7 @@ initialiseView current contentArea track currentContext =
                     , followSelectedPoint = True
                     , map = initialMap
                     , showMap = False
+                    , fingerPainting = False
                     }
 
         ( lngLat1, lngLat2 ) =

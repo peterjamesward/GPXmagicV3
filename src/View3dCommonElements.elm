@@ -72,6 +72,7 @@ type Msg
     | MouseMove Mouse.Event
     | MapMsg MapViewer.Msg
     | ToggleShowMap
+    | ToggleFingerpainting
 
 
 type DragAction
@@ -94,6 +95,7 @@ type alias Context =
     , followSelectedPoint : Bool
     , map : MapViewer.Model
     , showMap : Bool
+    , fingerPainting : Bool
     }
 
 
@@ -194,6 +196,25 @@ zoomButtons settings msgWrapper context =
 
                 else
                     useIcon FeatherIcons.map
+            }
+        , Input.button
+            [ ToolTip.tooltip
+                onLeft
+                (ToolTip.myTooltip <|
+                    if context.fingerPainting then
+                        "Leave Freehand mode"
+
+                    else
+                        "Start Freehand mode"
+                )
+            ]
+            { onPress = Just <| msgWrapper ToggleFingerpainting
+            , label =
+                if context.fingerPainting then
+                    useIcon FeatherIcons.move
+
+                else
+                    useIcon FeatherIcons.penTool
             }
         ]
 
