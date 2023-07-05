@@ -208,10 +208,10 @@ viewMenu settings msgWrapper context =
                 onLeft
                 (ToolTip.myTooltip <|
                     if context.fingerPainting then
-                        "Mouse moves view mode"
+                        "Leave Freehand mode"
 
                     else
-                        "Fingerpainting mode"
+                        "Start Freehand mode"
                 )
             ]
             { onPress = Just <| msgWrapper ToggleFingerpainting
@@ -220,7 +220,7 @@ viewMenu settings msgWrapper context =
                     useIcon FeatherIcons.move
 
                 else
-                    useIcon FeatherIcons.zap
+                    useIcon FeatherIcons.penTool
             }
         ]
 
@@ -276,11 +276,11 @@ view context mapData settings display contentArea track scene msgWrapper =
                 , inFront <| placesOverlay display contentArea track camera
                 , inFront <| fingerPaintingPreview context contentArea track camera
                 , inFront <| viewMenu settings msgWrapper context
-                , if context.fingerPainting then
-                    Cursor.pointer
+                , if context.followSelectedPoint then
+                    Cursor.default
 
                   else
-                    Cursor.default
+                    Cursor.pointer
                 ]
             <|
                 html <|

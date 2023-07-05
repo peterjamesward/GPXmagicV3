@@ -504,9 +504,15 @@ update msg msgWrapper track ( width, height ) mapData context =
                     let
                         shiftVector =
                             Vector3d.meters
-                                ((startX - dx) * metersPerPixel)
-                                ((dy - startY) * metersPerPixel)
-                                0.0
+                                --((startX - dx) * metersPerPixel)
+                                --((dy - startY) * metersPerPixel)
+                                --0.0
+                                ((startY - dy) * Angle.sin context.cameraElevation)
+                                (startX - dx)
+                                ((dy - startY) * Angle.cos context.cameraElevation)
+                                |> Vector3d.rotateAround
+                                    Axis3d.z
+                                    (Direction2d.toAngle context.cameraAzimuth)
 
                         newFocus =
                             context.focalPoint

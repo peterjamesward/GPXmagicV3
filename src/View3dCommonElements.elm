@@ -22,6 +22,7 @@ import DomainModel exposing (EarthPoint)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Cursor as Cursor
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
@@ -120,6 +121,11 @@ common3dSceneAttributes msgWrapper context =
     , pointer
     , Border.width 0
     , Border.color FlatColors.ChinesePalette.peace
+    , if context.followSelectedPoint then
+        Cursor.default
+
+      else
+        Cursor.pointer
     ]
 
 
