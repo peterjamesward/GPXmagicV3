@@ -742,7 +742,7 @@ initialisePane track options paneArea pane =
                     pane.thirdPersonContext
         , firstPersonContext =
             Just <|
-                ViewThirdPerson.initialiseView
+                ViewFirstPerson.initialiseView
                     0
                     paneArea
                     track
@@ -764,8 +764,9 @@ viewModeChoices :
     -> (Msg -> msg)
     -> PaneContext
     -> PaneLayoutOptions
+    -> Bool
     -> Element msg
-viewModeChoices settings msgWrapper context options =
+viewModeChoices settings msgWrapper context options includeMap =
     let
         localise =
             I18N.localisedString settings.location "panes"
@@ -785,33 +786,12 @@ viewModeChoices settings msgWrapper context options =
         { onChange = msgWrapper << SetViewMode context.paneId
         , selected = Just context.activeView
         , label = Input.labelHidden "Choose view"
-        , options = fullOptionList
-        }
+        , options =
+            if includeMap then
+                fullOptionList
 
-
-viewModeChoicesNoMap : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> Element msg
-viewModeChoicesNoMap location msgWrapper pane =
-    let
-        localise =
-            I18N.localisedString location "panes"
-
-        reducedOptionList =
-            [ Input.optionWith ViewThird <| viewModeTab First <| localise "Perspective"
-            , Input.optionWith ViewFirst <| viewModeTab Mid <| localise "Rider"
-            , Input.optionWith ViewProfileCanvas <| viewModeTab Mid <| localise "Profile"
-            , Input.optionWith ViewProfileWebGL <| viewModeTab Mid <| localise "OldProfile"
-            , Input.optionWith ViewPlan <| viewModeTab Mid <| localise "Plan"
-            , Input.optionWith ViewGraph <| viewModeTab Last <| localise "Route"
-
-            --, Input.optionWith ViewDerivatives <| viewModeTab Last <| localise "Calculus"
-            ]
-    in
-    Input.radioRow
-        []
-        { onChange = msgWrapper << SetViewMode pane.paneId
-        , selected = Just pane.activeView
-        , label = Input.labelHidden "Choose view"
-        , options = reducedOptionList
+            else
+                List.drop 1 fullOptionList
         }
 
 
@@ -1062,7 +1042,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
             column [ width fill, centerX ]
-                [ viewModeChoices settings msgWrapper pane options
+                [ viewModeChoices settings msgWrapper pane options True
                 , showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
                     ViewMap.view
@@ -1076,7 +1056,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
         viewPaneNoMap : PaneContext -> Element msg
         viewPaneNoMap pane =
             column [ width fill, centerX ]
-                [ viewModeChoicesNoMap settings.location msgWrapper pane
+                [ viewModeChoices settings msgWrapper pane options False
                 , showNonMapViews pane
                 ]
 

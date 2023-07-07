@@ -50,7 +50,7 @@ import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews
-import ViewMode exposing (ViewMode)
+import ViewMode exposing (ViewMode(..))
 import ViewPureStyles exposing (stopProp, useIcon)
 
 
@@ -224,13 +224,22 @@ onViewControls settings msgWrapper context =
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
         ]
-        [ zoomIn
-        , zoomOut
-        , resetView
-        , toggleFollowOrange
-        , toggleShowMap
-        , toggleFreehandMode
-        ]
+    <|
+        if context.viewMode == ViewFirst then
+            [ zoomIn
+            , zoomOut
+            , resetView
+            , toggleShowMap
+            ]
+
+        else
+            [ zoomIn
+            , zoomOut
+            , resetView
+            , toggleFollowOrange
+            , toggleShowMap
+            , toggleFreehandMode
+            ]
 
 
 scaleToMapWorld : TrackLoaded msg -> Quantity Float Meters -> Quantity Float Quantity.Unitless

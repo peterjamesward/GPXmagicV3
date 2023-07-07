@@ -1,4 +1,9 @@
-module ViewFirstPerson exposing (resizeOccured, subscriptions, view)
+module ViewFirstPerson exposing
+    ( initialiseView
+    , resizeOccured
+    , subscriptions
+    , view
+    )
 
 import Angle
 import BoundingBox3d
@@ -28,6 +33,8 @@ import Tools.Flythrough
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour, showDecimal1)
 import View3dCommonElements exposing (..)
+import ViewMode exposing (ViewMode(..))
+import ViewThirdPerson
 import Viewpoint3d
 
 
@@ -39,6 +46,20 @@ subscriptions mapData context =
 resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> Context -> Context
 resizeOccured paneArea context =
     { context | map = MapViewer.resizeCanvas 1.0 paneArea context.map }
+
+
+initialiseView :
+    Int
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
+    -> Maybe Context
+    -> Context
+initialiseView current contentArea track currentContext =
+    let
+        sameAsThird =
+            ViewThirdPerson.initialiseView current contentArea track currentContext
+    in
+    { sameAsThird | viewMode = ViewFirst }
 
 
 view :
