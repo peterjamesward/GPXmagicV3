@@ -1,13 +1,11 @@
 module View3dCommonElements exposing
     ( Context
-    , DragAction(..)
     , Msg(..)
     , common3dSceneAttributes
     , mapPositionFromTrack
+    , onViewControls
     , placesOverlay
     , scaleToMapWorld
-    , toggleMapButtonOnly
-    , zoomButtons
     )
 
 import Angle exposing (Angle)
@@ -19,6 +17,7 @@ import CommonToolStyles
 import Dict
 import Direction2d exposing (Direction2d)
 import DomainModel exposing (EarthPoint)
+import Drag3dCommonStructures exposing (DragAction)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -39,8 +38,8 @@ import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
 import Plane3d
-import Point2d
-import Point3d
+import Point2d exposing (Point2d)
+import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
 import Quantity exposing (Quantity)
 import Rectangle2d
@@ -49,9 +48,9 @@ import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.DisplaySettingsOptions
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews
+import ViewMode exposing (ViewMode)
 import ViewPureStyles exposing (stopProp, useIcon)
 
 
@@ -75,13 +74,8 @@ type Msg
     | ToggleFingerpainting
 
 
-type DragAction
-    = DragNone
-    | DragRotate
-    | DragPan
-
-
 type alias Context =
+    --TODO: Use the same structure (and, largely, functions) for all 3d views.
     { cameraAzimuth : Direction2d LocalCoords --Camera relative to plane normal at focus point
     , cameraElevation : Angle -- Above local horizon plane
     , cameraDistance : Quantity Float Length.Meters
@@ -96,6 +90,7 @@ type alias Context =
     , map : MapViewer.Model
     , showMap : Bool
     , fingerPainting : Bool
+    , viewMode : ViewMode
     }
 
 
@@ -131,96 +126,86 @@ common3dSceneAttributes msgWrapper context =
     ]
 
 
-zoomButtons : SystemSettings -> (Msg -> msg) -> Context -> Element msg
-zoomButtons settings msgWrapper context =
-    column
-        [ alignTop
-        , alignRight
-        , moveDown 5
-        , moveLeft 10
-        , Font.size 40
-        , padding 6
-        , spacing 8
-        , Border.width 1
-        , Border.rounded 4
-        , Border.color FlatColors.AussiePalette.blurple
-        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
-        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
-        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
-        , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
-        , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
-        , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
-        ]
-        [ Input.button []
-            { onPress = Just <| msgWrapper ImageZoomIn
-            , label = useIcon FeatherIcons.plus
-            }
-        , Input.button []
-            { onPress = Just <| msgWrapper ImageZoomOut
-            , label = useIcon FeatherIcons.minus
-            }
-        , Input.button []
-            { onPress = Just <| msgWrapper ImageReset
-            , label = useIcon FeatherIcons.maximize
-            }
-        , Input.button
-            (if context.followSelectedPoint then
-                [ tooltip onLeft (localisedTooltip settings.location "panes" "locked") ]
+onViewControls : SystemSettings -> (Msg -> msg) -> Context -> Element msg
+onViewControls settings msgWrapper context =
+    let
+        zoomIn =
+            Input.button []
+                { onPress = Just <| msgWrapper ImageZoomIn
+                , label = useIcon FeatherIcons.plus
+                }
 
-             else
-                [ tooltip onLeft (localisedTooltip settings.location "panes" "unlocked") ]
-            )
-            { onPress = Just <| msgWrapper ToggleFollowOrange
-            , label =
-                if context.followSelectedPoint then
-                    useIcon FeatherIcons.lock
+        zoomOut =
+            Input.button []
+                { onPress = Just <| msgWrapper ImageZoomOut
+                , label = useIcon FeatherIcons.minus
+                }
 
-                else
-                    useIcon FeatherIcons.unlock
-            }
-        , Input.button
-            [ ToolTip.tooltip
-                onLeft
-                (ToolTip.myTooltip <|
-                    if context.showMap then
-                        "Hide map"
+        resetView =
+            Input.button []
+                { onPress = Just <| msgWrapper ImageReset
+                , label = useIcon FeatherIcons.maximize
+                }
+
+        toggleFollowOrange =
+            Input.button
+                (if context.followSelectedPoint then
+                    [ tooltip onLeft (localisedTooltip settings.location "panes" "locked") ]
+
+                 else
+                    [ tooltip onLeft (localisedTooltip settings.location "panes" "unlocked") ]
+                )
+                { onPress = Just <| msgWrapper ToggleFollowOrange
+                , label =
+                    if context.followSelectedPoint then
+                        useIcon FeatherIcons.lock
 
                     else
-                        "Show map"
-                )
-            ]
-            { onPress = Just <| msgWrapper ToggleShowMap
-            , label =
-                if context.showMap then
-                    useIcon FeatherIcons.square
+                        useIcon FeatherIcons.unlock
+                }
 
-                else
-                    useIcon FeatherIcons.map
-            }
-        , Input.button
-            [ ToolTip.tooltip
-                onLeft
-                (ToolTip.myTooltip <|
+        toggleShowMap =
+            Input.button
+                [ ToolTip.tooltip
+                    onLeft
+                    (ToolTip.myTooltip <|
+                        if context.showMap then
+                            "Hide map"
+
+                        else
+                            "Show map"
+                    )
+                ]
+                { onPress = Just <| msgWrapper ToggleShowMap
+                , label =
+                    if context.showMap then
+                        useIcon FeatherIcons.square
+
+                    else
+                        useIcon FeatherIcons.map
+                }
+
+        toggleFreehandMode =
+            Input.button
+                [ ToolTip.tooltip
+                    onLeft
+                    (ToolTip.myTooltip <|
+                        if context.fingerPainting then
+                            "Leave Freehand mode"
+
+                        else
+                            "Start Freehand mode"
+                    )
+                ]
+                { onPress = Just <| msgWrapper ToggleFingerpainting
+                , label =
                     if context.fingerPainting then
-                        "Leave Freehand mode"
+                        useIcon FeatherIcons.move
 
                     else
-                        "Start Freehand mode"
-                )
-            ]
-            { onPress = Just <| msgWrapper ToggleFingerpainting
-            , label =
-                if context.fingerPainting then
-                    useIcon FeatherIcons.move
-
-                else
-                    useIcon FeatherIcons.penTool
-            }
-        ]
-
-
-toggleMapButtonOnly : SystemSettings -> (Msg -> msg) -> Context -> Element msg
-toggleMapButtonOnly settings msgWrapper context =
+                        useIcon FeatherIcons.penTool
+                }
+    in
     column
         [ alignTop
         , alignRight
@@ -239,25 +224,12 @@ toggleMapButtonOnly settings msgWrapper context =
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
         ]
-        [ Input.button
-            [ ToolTip.tooltip
-                onLeft
-                (ToolTip.myTooltip <|
-                    if context.showMap then
-                        "Hide map"
-
-                    else
-                        "Show map"
-                )
-            ]
-            { onPress = Just <| msgWrapper ToggleShowMap
-            , label =
-                if context.showMap then
-                    useIcon FeatherIcons.square
-
-                else
-                    useIcon FeatherIcons.map
-            }
+        [ zoomIn
+        , zoomOut
+        , resetView
+        , toggleFollowOrange
+        , toggleShowMap
+        , toggleFreehandMode
         ]
 
 

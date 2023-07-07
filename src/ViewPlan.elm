@@ -1,6 +1,5 @@
 module ViewPlan exposing
-    ( Msg(..)
-    , applyFingerPaint
+    ( applyFingerPaint
     , initialiseView
     , resizeOccured
     , subscriptions
@@ -11,34 +10,25 @@ module ViewPlan exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import Axis2d
 import Axis3d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Circle2d
-import CommonToolStyles
 import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
+import Drag3dCommonStructures exposing (DragAction(..), PaintInfo, PointLeafProximity, ScreenCoords)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Border as Border
 import Element.Cursor as Cursor
-import Element.Font as Font
-import Element.Input as Input
-import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
 import FlatColors.IndianPalette
 import Frame2d
 import Geometry.Svg as Svg
 import Html
-import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
-import Interval
-import Json.Decode as D
 import Length exposing (Meters)
-import LineSegment2d
 import LineSegment3d
 import LngLat
 import LocalCoords exposing (LocalCoords)
@@ -51,12 +41,10 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d exposing (Rectangle2d)
 import Scene3d exposing (Entity)
-import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import Svg
 import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
-import ToolTip
 import Tools.CentroidAverage
 import Tools.DisplaySettingsOptions
 import Tools.ProfileSmooth
@@ -65,32 +53,13 @@ import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
-import View3dCommonElements exposing (placesOverlay)
-import ViewPlanContext exposing (DragAction(..), PlanContext, PointLeafProximity, ScreenCoords)
-import ViewPureStyles exposing (useIcon)
+import View3dCommonElements exposing (Context, Msg(..), onViewControls, placesOverlay)
+import ViewMode exposing (ViewMode(..))
 import Viewpoint3d
 import ZoomLevel
 
 
-type Msg
-    = ImageMouseWheel Float
-    | ImageGrab Mouse.Event
-    | ImageDrag Mouse.Event
-    | ImageRelease Mouse.Event
-    | ImageNoOp
-    | ImageClick Mouse.Event
-    | ImageDoubleClick Mouse.Event
-    | ImageZoomIn
-    | ImageZoomOut
-    | ImageReset
-    | ClickDelayExpired
-    | ToggleFollowOrange
-    | MapMsg MapViewer.Msg
-    | ToggleShowMap
-    | ToggleFingerpainting
-
-
-subscriptions : MapViewer.MapData -> PlanContext -> Sub Msg
+subscriptions : MapViewer.MapData -> Context -> Sub Msg
 subscriptions mapData context =
     MapViewer.subscriptions mapData context.map |> Sub.map MapMsg
 
@@ -99,8 +68,8 @@ initialiseView :
     Int
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Maybe PlanContext
-    -> PlanContext
+    -> Maybe Context
+    -> Context
 initialiseView current track contentArea currentContext =
     let
         treeNode =
@@ -122,6 +91,7 @@ initialiseView current track contentArea currentContext =
                 1
                 contentArea
 
+        newContext : Context
         newContext =
             { fieldOfView = Angle.degrees 45
             , orbiting = Nothing
@@ -134,6 +104,10 @@ initialiseView current track contentArea currentContext =
             , map = initialMap
             , showMap = False
             , fingerPainting = False
+            , viewMode = ViewPlan
+            , cameraAzimuth = Direction2d.y
+            , cameraElevation = Angle.degrees 90
+            , cameraDistance = Length.kilometer -- irrelevant for orthographic projection
             }
 
         ( lngLat1, lngLat2 ) =
@@ -146,99 +120,8 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-viewMenu : SystemSettings -> (Msg -> msg) -> PlanContext -> Element msg
-viewMenu settings msgWrapper context =
-    column
-        [ alignTop
-        , alignRight
-        , moveDown 5
-        , moveLeft 5
-        , Font.size 40
-        , padding 6
-        , spacing 8
-        , Background.color (CommonToolStyles.themeBackground settings.colourTheme)
-        , Font.color (CommonToolStyles.themeForeground settings.colourTheme)
-        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
-        , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
-        , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
-        , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
-        ]
-        [ Input.button []
-            { onPress = Just <| msgWrapper ImageZoomIn
-            , label = useIcon FeatherIcons.plus
-            }
-        , Input.button []
-            { onPress = Just <| msgWrapper ImageZoomOut
-            , label = useIcon FeatherIcons.minus
-            }
-        , Input.button []
-            { onPress = Just <| msgWrapper ImageReset
-            , label = useIcon FeatherIcons.maximize
-            }
-        , Input.button []
-            { onPress = Just <| msgWrapper ToggleFollowOrange
-            , label =
-                if context.followSelectedPoint then
-                    useIcon FeatherIcons.lock
-
-                else
-                    useIcon FeatherIcons.unlock
-            }
-        , Input.button
-            [ ToolTip.tooltip
-                onLeft
-                (ToolTip.myTooltip <|
-                    if context.showMap then
-                        "Hide map"
-
-                    else
-                        "Show map"
-                )
-            ]
-            { onPress = Just <| msgWrapper ToggleShowMap
-            , label =
-                if context.showMap then
-                    useIcon FeatherIcons.square
-
-                else
-                    useIcon FeatherIcons.map
-            }
-        , Input.button
-            [ ToolTip.tooltip
-                onLeft
-                (ToolTip.myTooltip <|
-                    if context.fingerPainting then
-                        "Leave Freehand mode"
-
-                    else
-                        "Start Freehand mode"
-                )
-            ]
-            { onPress = Just <| msgWrapper ToggleFingerpainting
-            , label =
-                if context.fingerPainting then
-                    useIcon FeatherIcons.move
-
-                else
-                    useIcon FeatherIcons.penTool
-            }
-        ]
-
-
-onContextMenu : a -> Element.Attribute a
-onContextMenu msg =
-    HE.custom "contextmenu"
-        (D.succeed
-            { message = msg
-            , stopPropagation = True
-            , preventDefault = True
-            }
-        )
-        |> htmlAttribute
-
-
 view :
-    PlanContext
+    Context
     -> MapViewer.MapData
     -> SystemSettings
     -> Tools.DisplaySettingsOptions.Options
@@ -267,7 +150,6 @@ view context mapData settings display contentArea track scene msgWrapper =
                 , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
                 , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
                 , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-                , onContextMenu (msgWrapper ImageNoOp)
                 , width fill
                 , height fill
                 , pointer
@@ -275,7 +157,7 @@ view context mapData settings display contentArea track scene msgWrapper =
                 , Border.color FlatColors.ChinesePalette.peace
                 , inFront <| placesOverlay display contentArea track camera
                 , inFront <| fingerPaintingPreview context contentArea track camera
-                , inFront <| viewMenu settings msgWrapper context
+                , inFront <| onViewControls settings msgWrapper context
                 , if context.followSelectedPoint then
                     Cursor.default
 
@@ -325,7 +207,7 @@ view context mapData settings display contentArea track scene msgWrapper =
 
 
 fingerPaintingPreview :
-    PlanContext
+    Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> Camera3d Meters LocalCoords
@@ -373,15 +255,11 @@ fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
                     ]
                     paintNodes
 
-        --[ Svg.relativeTo topLeftFrame paintNodes ]
-        DragPush pushInfo ->
-            none
-
         _ ->
             none
 
 
-applyFingerPaint : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
+applyFingerPaint : PaintInfo -> TrackLoaded msg -> TrackLoaded msg
 applyFingerPaint paintInfo track =
     -- Wrapper so we can also apply post-paint smoothing.
     track
@@ -397,7 +275,7 @@ applyFingerPaint paintInfo track =
         |> Tools.CentroidAverage.applyUsingOptions Tools.CentroidAverage.defaultOptions
 
 
-applyFingerPaintInternal : ViewPlanContext.PaintInfo -> TrackLoaded msg -> TrackLoaded msg
+applyFingerPaintInternal : PaintInfo -> TrackLoaded msg -> TrackLoaded msg
 applyFingerPaintInternal paintInfo track =
     case paintInfo.path of
         pathHead :: pathMore ->
@@ -492,12 +370,12 @@ applyFingerPaintInternal paintInfo track =
             track
 
 
-resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> PlanContext -> PlanContext
+resizeOccured : ( Quantity Int Pixels, Quantity Int Pixels ) -> Context -> Context
 resizeOccured paneArea context =
     { context | map = MapViewer.resizeCanvas 1.0 paneArea context.map }
 
 
-deriveCamera : GPXSource -> PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
+deriveCamera : GPXSource -> PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
 deriveCamera refPoint treeNode context currentPosition =
     let
         latitude =
@@ -530,7 +408,7 @@ deriveCamera refPoint treeNode context currentPosition =
 
 
 mapBoundsFromScene :
-    PlanContext
+    Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> ( LngLat.LngLat, LngLat.LngLat )
@@ -584,7 +462,7 @@ mapBoundsFromScene updatedContext ( width, height ) track =
 
 
 pointLeafProximity :
-    PlanContext
+    Context
     -> TrackLoaded msg
     -> Rectangle2d Pixels ScreenCoords
     -> Point2d Pixels ScreenCoords
@@ -699,9 +577,9 @@ update :
     -> (Msg -> msg)
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> PlanContext
+    -> Context
     -> MapViewer.MapData
-    -> ( PlanContext, List (ToolAction msg), MapViewer.MapData )
+    -> ( Context, List (ToolAction msg), MapViewer.MapData )
 update msg msgWrapper track ( width, height ) context mapData =
     let
         -- Let us have some information about the view, making dragging more precise.
@@ -778,10 +656,10 @@ update msg msgWrapper track ( width, height ) context mapData =
                         case pointLeafProximity context track screenRectangle screenPoint of
                             Just proximity ->
                                 if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
-                                    DragPaint <| ViewPlanContext.PaintInfo [ proximity ]
+                                    DragPaint <| PaintInfo [ proximity ]
 
                                 else
-                                    --TODO: DragPush <| ViewPlanContext.PushInfo
+                                    --TODO: DragPush <| ViewContext.PushInfo
                                     DragPan
 
                             _ ->
@@ -848,15 +726,8 @@ update msg msgWrapper track ( width, height ) context mapData =
 
                                 Nothing ->
                                     paintInfo.path
-
-                        newContext =
-                            { context
-                                | dragAction =
-                                    DragPaint <|
-                                        ViewPlanContext.PaintInfo path
-                            }
                     in
-                    ( newContext
+                    ( { context | dragAction = DragPaint <| PaintInfo path }
                     , []
                     , mapData
                     )
@@ -1001,8 +872,8 @@ update msg msgWrapper track ( width, height ) context mapData =
 trackChanged :
     TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> PlanContext
-    -> PlanContext
+    -> Context
+    -> Context
 trackChanged newTrack ( width, height ) context =
     -- Only interest is Orange pointer move.
     let
@@ -1021,7 +892,7 @@ detectHit :
     Mouse.Event
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> PlanContext
+    -> Context
     -> Int
 detectHit event track ( w, h ) context =
     let

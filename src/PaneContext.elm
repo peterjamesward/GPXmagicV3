@@ -8,7 +8,6 @@ import View3dCommonElements
 import ViewGraphContext
 import ViewMapContext
 import ViewMode exposing (ViewMode)
-import ViewPlanContext
 import ViewProfileChartContext
 
 
@@ -54,7 +53,7 @@ type alias PaneContext =
     , firstPersonContext : Maybe View3dCommonElements.Context
     , mapContext : Maybe ViewMapContext.MapContext
     , profileContext : Maybe ViewProfileChartContext.ProfileContext
-    , planContext : Maybe ViewPlanContext.PlanContext
+    , planContext : Maybe View3dCommonElements.Context
     , graphContext : Maybe ViewGraphContext.GraphContext
     }
 

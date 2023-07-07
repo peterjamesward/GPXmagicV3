@@ -19,7 +19,12 @@
 
 # WIP
 
+* Merging structures and functions for 3D views, to reduce duplicated code.
+* Each function will specialise as required for viewMode.
+
 ## Finger painting
+
+Make it work in Third person, ideally with same ray logic shared with Plan.
 
 ### Use as tool applicator
 
@@ -27,6 +32,9 @@ Fingerpainting is a meta-tool.
 Should be able to use it to Straighten, Smooth, more, without needing to place markers.
 Indeed, may be more useful as such.
 Need to set the painting mode - should this be in Tools, on the View, both?
+> May be quite easy to have a brush icon in each tool, which sets the painting mode,
+> and then each tool has a fingerpaint apply function.
+> If second point is "off track", maybe there should be no action -- it's a "cancel".
 
 ### Start with no track, just Plan view with Map
 

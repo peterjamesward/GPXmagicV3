@@ -9,6 +9,7 @@ import Color
 import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
+import Drag3dCommonStructures exposing (DragAction(..))
 import Element exposing (..)
 import Html
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
@@ -32,6 +33,7 @@ import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews
 import Vector3d
 import View3dCommonElements exposing (..)
+import ViewMode exposing (ViewMode(..))
 import Viewpoint3d
 import ZoomLevel
 
@@ -118,7 +120,7 @@ view settings mapData context display contentArea track scene msgWrapper =
                     pointer
                  )
                     :: (inFront <| overlay)
-                    :: (inFront <| zoomButtons settings msgWrapper context)
+                    :: (inFront <| onViewControls settings msgWrapper context)
                     :: common3dSceneAttributes msgWrapper context
                 )
             <|
@@ -614,6 +616,7 @@ initialiseView current contentArea track currentContext =
                     , map = initialMap
                     , showMap = False
                     , fingerPainting = False
+                    , viewMode = ViewThird
                     }
 
         ( lngLat1, lngLat2 ) =

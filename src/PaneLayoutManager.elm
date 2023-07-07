@@ -123,7 +123,7 @@ type Msg
     | SetViewMode PaneId ViewMode
     | ThirdPersonViewMessage PaneId View3dCommonElements.Msg
     | ProfileViewMessage PaneId ViewProfileChartContext.Msg
-    | PlanViewMessage PaneId ViewPlan.Msg
+    | PlanViewMessage PaneId View3dCommonElements.Msg
     | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg

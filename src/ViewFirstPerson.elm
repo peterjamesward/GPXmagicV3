@@ -18,7 +18,6 @@ import Length
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
-import Point3d
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
 import SceneBuilder3D
@@ -28,7 +27,6 @@ import Tools.DisplaySettingsOptions
 import Tools.Flythrough
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour, showDecimal1)
-import Vector3d
 import View3dCommonElements exposing (..)
 import Viewpoint3d
 
@@ -78,7 +76,7 @@ view settings context display mapData contentArea track scene msgWrapper mFlythr
         view3d =
             el
                 (flythroughHUD
-                    :: (inFront <| zoomButtons settings msgWrapper context)
+                    :: (inFront <| onViewControls settings msgWrapper context)
                     :: common3dSceneAttributes msgWrapper context
                 )
             <|
