@@ -31,6 +31,7 @@ import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews
+import Vector2d
 import Vector3d
 import View3dCommonElements exposing (..)
 import ViewMode exposing (ViewMode(..))
@@ -506,17 +507,40 @@ update msg msgWrapper track ( width, height ) mapData context =
                                 (Viewpoint3d.viewDirection <| Camera3d.viewpoint camera)
                                 context.focalPoint.space
 
-                        newFocus =
-                            Point2d.meters
-                                ((dy - startY) * metersPerPixel)
-                                ((startX - dx) * metersPerPixel)
-                                |> Point3d.on viewPlane
+                        grabPointOnScreen =
+                            Point2d.pixels startX startY
+
+                        movePointOnScreen =
+                            Point2d.pixels dx dy
+
+                        grabPointInModel =
+                            Camera3d.ray camera screenRectangle grabPointOnScreen
+                                |> Axis3d.intersectionWithPlane (SketchPlane3d.toPlane viewPlane)
+
+                        movePointInModel =
+                            Camera3d.ray camera screenRectangle movePointOnScreen
+                                |> Axis3d.intersectionWithPlane (SketchPlane3d.toPlane viewPlane)
 
                         newContext =
-                            { context
-                                | focalPoint = withoutTime newFocus
-                                , orbiting = Just ( dx, dy )
-                            }
+                            case ( grabPointInModel, movePointInModel ) of
+                                ( Just pick, Just drop ) ->
+                                    let
+                                        shift =
+                                            Vector3d.from drop pick
+                                                |> Vector3d.projectInto viewPlane
+
+                                        newFocus =
+                                            Point2d.origin
+                                                |> Point2d.translateBy shift
+                                                |> Point3d.on viewPlane
+                                    in
+                                    { context
+                                        | focalPoint = withoutTime newFocus
+                                        , orbiting = Just ( dx, dy )
+                                    }
+
+                                _ ->
+                                    context
                     in
                     ( { newContext | map = updatedMap newContext }
                     , []
