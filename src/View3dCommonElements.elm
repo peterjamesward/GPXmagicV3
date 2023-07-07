@@ -107,23 +107,28 @@ onContextMenu msg =
 
 
 common3dSceneAttributes msgWrapper context =
-    [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-    , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
-    , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
-    , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
-    , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-    , onContextMenu (msgWrapper ImageNoOp)
-    , width fill
-    , height fill
-    , pointer
-    , Border.width 0
-    , Border.color FlatColors.ChinesePalette.peace
-    , if context.followSelectedPoint then
-        Cursor.default
+    (if context.viewMode == ViewThird then
+        [ htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY)) ]
 
-      else
-        Cursor.pointer
-    ]
+     else
+        []
+    )
+        ++ [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
+           , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
+           , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
+           , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
+           , onContextMenu (msgWrapper ImageNoOp)
+           , width fill
+           , height fill
+           , pointer
+           , Border.width 0
+           , Border.color FlatColors.ChinesePalette.peace
+           , if context.followSelectedPoint then
+                Cursor.default
+
+             else
+                Cursor.pointer
+           ]
 
 
 onViewControls : SystemSettings -> (Msg -> msg) -> Context -> Element msg
@@ -226,11 +231,7 @@ onViewControls settings msgWrapper context =
         ]
     <|
         if context.viewMode == ViewFirst then
-            [ zoomIn
-            , zoomOut
-            , resetView
-            , toggleShowMap
-            ]
+            [ toggleShowMap ]
 
         else
             [ zoomIn
