@@ -19,8 +19,11 @@
 
 # WIP
 
+**BUG** At low camera elevations, dragging in 3D is broken.
+
 * Merging structures and functions for 3D views, to reduce duplicated code.
 * Each function will specialise as required for viewMode.
+> Stop mousewheel zooming on First person view.
 
 ## Finger painting
 
