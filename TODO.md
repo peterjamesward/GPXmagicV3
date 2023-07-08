@@ -12,7 +12,6 @@
 **BUG** Map and course part company! 3D and Plan. Disappointing.
 > Now won't go wrong. Something smells.
 
-
 --- 
 
 # WIP
@@ -32,11 +31,6 @@ Need to set the painting mode - should this be in Tools, on the View, both?
 > and then each tool has a fingerpaint apply function.
 > If second point is "off track", maybe there should be no action -- it's a "cancel".
 
-### Start with no track, just Plan view with Map
-
-* Need to be able to search on map, or have Plan view default to position like Map view does.
-* But not urgent as there is already "Draw on Map".
-
 ---
 
 # BACKLOG
@@ -44,10 +38,6 @@ Need to set the painting mode - should this be in Tools, on the View, both?
 ## Synthesizer
 
 FFT generators for theta (or X, Y) & phi (or Z) as function of s.
-
-## Out and Back
-
-Make the final turn optional.
 
 ## Smart smoother
 
@@ -58,30 +48,9 @@ exceed that to return to the baseline. Or -- having done CurlyWurly, we
 could just do a linear (or cosine) transition back to baseline when we have 
 matched theta (subject to theta derivatives of course).
 
-## Actions
-
-In several cases, only reason to use Actions is for Undo stack. That don't seem right.
-
 ## Test cases for edits.
 
 You could do this you know, just not for the visuals.
-
-## Languages
-
-Awaiting French support.
-Possible sign-ups for German, Dutch, Spanish.
-Need more work on number formats.
-
-## Usability
-
-Drag Curve Former circle directly in Plan View. (Add an SVG "handle" to hit detect.)
-Ditto for Move & Stretch, possibly Nudge.
-Provide info text capability on top bar and on view panes.
-
-## Tools: old, updated, & new
-
-- Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
-- Use localised number formatting everywhere (for French use of , and .)
 
 ## Loops
 
@@ -91,6 +60,17 @@ Provide info text capability on top bar and on view panes.
 ---
 
 # The cellar
+
+## Languages
+
+Awaiting French support.
+Possible sign-ups for German, Dutch, Spanish.
+Need more work on number formats.
+
+## Out and Back
+
+Make the final turn optional. 
+> But is easy enough to delete.
 
 ## Land Use
 
