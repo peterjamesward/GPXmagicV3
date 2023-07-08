@@ -13,21 +13,14 @@
 > Now won't go wrong. Something smells.
 
 
-**BUG** Dragging in 3D view when rotated does not respect rotation!
-
 --- 
 
 # WIP
 
-**BUG** At low camera elevations, dragging in 3D is broken.
-
-* Merging structures and functions for 3D views, to reduce duplicated code.
-* Each function will specialise as required for viewMode.
-> Stop mousewheel zooming on First person view.
-
-## Finger painting
-
-Make it work in Third person, ideally with same ray logic shared with Plan.
+Tidy up the 3rd dragging code and use same code for Plan.
+It'll be good to share some code there, maybe put camera in Context so they can 
+then be essentially the same. That should then enable consistent "painting" for tools.
+Don't bother so much about 1st, though it would of course be good to sort that also.
 
 ### Use as tool applicator
 
