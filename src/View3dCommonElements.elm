@@ -233,6 +233,14 @@ onViewControls settings msgWrapper context =
         if context.viewMode == ViewFirst then
             [ toggleShowMap ]
 
+        else if context.viewMode == ViewThird then
+            [ zoomIn
+            , zoomOut
+            , resetView
+            , toggleFollowOrange
+            , toggleShowMap
+            ]
+
         else
             [ zoomIn
             , zoomOut

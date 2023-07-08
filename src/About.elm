@@ -2,9 +2,13 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.15.0 (bfecfd9d, 2023-07-05 13:45)
+    """# GPXmagic v3.15.1 (bfecfd9d, 2023-07-08 15:14)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.15.1
+
+Properly fixed the odd dragging behaviour in Third person view.
 
 ## 3.15.0
 
