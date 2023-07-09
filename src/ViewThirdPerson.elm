@@ -503,6 +503,8 @@ update msg msgWrapper track ( width, height ) mapData context =
                     )
 
                 DragPan startX startY ->
+                    --TODO: It would be slightly cleaner to work out the viewPlan once at grab time
+                    --TODO: and use that until released. But it's a small optimisation.
                     let
                         viewPlane =
                             SketchPlane3d.withNormalDirection
