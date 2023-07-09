@@ -41,6 +41,7 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d exposing (Rectangle2d)
 import Scene3d exposing (Entity)
+import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import Svg
 import Svg.Attributes
@@ -576,24 +577,48 @@ update msg msgWrapper track ( width, height ) context mapData =
             in
             case context.dragAction of
                 DragPan startX startY ->
+                    --TODO: It would be slightly cleaner to work out the viewPlan once at grab time
+                    --TODO: and use that until released. But it's a small optimisation.
                     let
-                        shiftVector =
-                            Vector3d.meters
-                                ((startX - dx) * metersPerPixel)
-                                ((dy - startY) * metersPerPixel)
-                                0.0
+                        viewPlane =
+                            SketchPlane3d.withNormalDirection
+                                (Viewpoint3d.viewDirection <| Camera3d.viewpoint camera)
+                                context.focalPoint.space
 
-                        newFocus =
-                            context.focalPoint
-                                |> .space
-                                |> Point3d.translateBy shiftVector
-                                |> DomainModel.withoutTime
+                        grabPointOnScreen =
+                            Point2d.pixels startX startY
+
+                        movePointOnScreen =
+                            Point2d.pixels dx dy
+
+                        grabPointInModel =
+                            Camera3d.ray camera screenRectangle grabPointOnScreen
+                                |> Axis3d.intersectionWithPlane (SketchPlane3d.toPlane viewPlane)
+
+                        movePointInModel =
+                            Camera3d.ray camera screenRectangle movePointOnScreen
+                                |> Axis3d.intersectionWithPlane (SketchPlane3d.toPlane viewPlane)
 
                         newContext =
-                            { context
-                                | focalPoint = newFocus
-                                , dragAction = DragPan dx dy
-                            }
+                            case ( grabPointInModel, movePointInModel ) of
+                                ( Just pick, Just drop ) ->
+                                    let
+                                        shift =
+                                            Vector3d.from drop pick
+                                                |> Vector3d.projectInto viewPlane
+
+                                        newFocus =
+                                            Point2d.origin
+                                                |> Point2d.translateBy shift
+                                                |> Point3d.on viewPlane
+                                    in
+                                    { context
+                                        | focalPoint = withoutTime newFocus
+                                        , dragAction = DragPan dx dy
+                                    }
+
+                                _ ->
+                                    context
                     in
                     ( { newContext | map = updatedMap newContext }
                     , []
