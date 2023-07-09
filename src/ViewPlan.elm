@@ -423,13 +423,16 @@ update msg msgWrapper track ( width, height ) context mapData =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
         updatedMap ctxt =
+            --TODO: This is only difference here between Plan and Third
             let
+                updatedCamera =
+                    deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+
                 ( lngLat1, lngLat2 ) =
-                    mapBoundsFromScene camera ( width, height ) track
+                    mapBoundsFromScene updatedCamera ( width, height ) track
             in
             MapViewer.withViewBounds UtilsForViews.noPadding lngLat1 lngLat2 ctxt.map
     in
-    -- Second return value indicates whether selection needs to change.
     case msg of
         MapMsg mapMsg ->
             let
@@ -443,6 +446,77 @@ update msg msgWrapper track ( width, height ) context mapData =
             ( { context | map = newModel }
             , [ ExternalCommand <| Cmd.map (msgWrapper << MapMsg) cmd ]
             , newMapData
+            )
+
+        ImageZoomIn ->
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
+            in
+            ( { newContext | map = updatedMap newContext }, [], mapData )
+
+        ImageZoomOut ->
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
+            in
+            ( { newContext | map = updatedMap newContext }, [], mapData )
+
+        ImageReset ->
+            let
+                newContext =
+                    { context | zoomLevel = context.defaultZoomLevel }
+            in
+            ( { newContext | map = updatedMap newContext }, [], mapData )
+
+        ImageNoOp ->
+            ( context, [], mapData )
+
+        ImageClick event ->
+            -- Click moves pointer but does not re-centre view. (Double click will.)
+            if context.waitingForClickDelay then
+                ( context
+                , [ SetCurrent <| detectHit event track ( width, height ) context
+                  , TrackHasChanged
+                  ]
+                , mapData
+                )
+
+            else
+                ( context, [], mapData )
+
+        ImageDoubleClick event ->
+            let
+                nearestPoint =
+                    detectHit event track ( width, height ) context
+
+                newContext =
+                    { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
+            in
+            ( { newContext | map = updatedMap newContext }
+            , [ SetCurrent nearestPoint
+              , TrackHasChanged
+              ]
+            , mapData
+            )
+
+        ClickDelayExpired ->
+            ( { context | waitingForClickDelay = False }
+            , []
+            , mapData
+            )
+
+        ImageMouseWheel deltaY ->
+            let
+                newZoom =
+                    clamp 0.0 22.0 <| context.zoomLevel - (0.001 * deltaY)
+
+                newContext =
+                    { context | zoomLevel = newZoom }
+            in
+            ( { newContext | map = updatedMap newContext }
+            , []
+            , mapData
             )
 
         ImageGrab event ->
@@ -480,12 +554,6 @@ update msg msgWrapper track ( width, height ) context mapData =
                 , waitingForClickDelay = True
               }
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
-            , mapData
-            )
-
-        ClickDelayExpired ->
-            ( { context | waitingForClickDelay = False }
-            , []
             , mapData
             )
 
@@ -591,79 +659,6 @@ update msg msgWrapper track ( width, height ) context mapData =
             , mapData
             )
 
-        ImageMouseWheel deltaY ->
-            let
-                newZoom =
-                    clamp 0.0 22.0 <| context.zoomLevel - (0.001 * deltaY)
-
-                newContext =
-                    { context | zoomLevel = newZoom }
-            in
-            ( { newContext | map = updatedMap newContext }
-            , []
-            , mapData
-            )
-
-        ImageClick event ->
-            -- Click moves pointer but does not re-centre view. (Double click will.)
-            if context.waitingForClickDelay then
-                ( context
-                , [ SetCurrent <| detectHit event track ( width, height ) context
-                  , TrackHasChanged
-                  ]
-                , mapData
-                )
-
-            else
-                ( context
-                , []
-                , mapData
-                )
-
-        ImageDoubleClick event ->
-            let
-                nearestPoint =
-                    detectHit event track ( width, height ) context
-            in
-            ( { context
-                | focalPoint = earthPointFromIndex nearestPoint track.trackTree
-              }
-            , [ SetCurrent nearestPoint
-              , TrackHasChanged
-              ]
-            , mapData
-            )
-
-        ImageZoomIn ->
-            let
-                newContext =
-                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
-            in
-            ( { newContext | map = updatedMap newContext }
-            , []
-            , mapData
-            )
-
-        ImageZoomOut ->
-            let
-                newContext =
-                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
-            in
-            ( { newContext | map = updatedMap newContext }
-            , []
-            , mapData
-            )
-
-        ImageReset ->
-            let
-                newContext =
-                    { context | zoomLevel = context.defaultZoomLevel }
-            in
-            ( { newContext | map = updatedMap newContext }
-            , []
-            , mapData
-            )
-
         ToggleFollowOrange ->
             let
                 newContext =
@@ -690,10 +685,7 @@ update msg msgWrapper track ( width, height ) context mapData =
             )
 
         _ ->
-            ( context
-            , []
-            , mapData
-            )
+            ( context, [], mapData )
 
 
 trackChanged :

@@ -305,17 +305,6 @@ update :
     -> ( Context, List (ToolAction msg), MapViewer.MapData )
 update msg msgWrapper track ( width, height ) mapData context =
     let
-        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
-        lngLatFromXY point =
-            let
-                gps : GPXSource
-                gps =
-                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
-            in
-            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
-            , lat = gps.latitude |> Angle.inDegrees
-            }
-
         -- Let us have some information about the view, making dragging more precise.
         ( wFloat, hFloat ) =
             ( toFloatQuantity width, toFloatQuantity height )
@@ -329,10 +318,11 @@ update msg msgWrapper track ( width, height ) mapData context =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
         updatedMap ctxt =
+            --TODO: This is only difference here between Plan and Third
             let
                 lookingAt =
                     MapViewer.lngLatToWorld <|
-                        lngLatFromXY <|
+                        lngLatFromXY track <|
                             if ctxt.followSelectedPoint then
                                 DomainModel.earthPointFromIndex track.currentPosition track.trackTree
                                     |> .space
@@ -562,11 +552,7 @@ update msg msgWrapper track ( width, height ) mapData context =
             , mapData
             )
 
-        SetEmphasis _ ->
-            ( context, [], mapData )
-
-        MouseMove _ ->
-            -- Only interested if dragging.
+        _ ->
             ( context, [], mapData )
 
 

@@ -2,6 +2,7 @@ module View3dCommonElements exposing
     ( Context
     , Msg(..)
     , common3dSceneAttributes
+    , lngLatFromXY
     , mapBoundsFromScene
     , mapPositionFromTrack
     , onViewControls
@@ -511,24 +512,25 @@ mapBoundsFromScene camera ( width, height ) track =
             ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
             , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
             )
-
-        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
-        lngLatFromXY point =
-            let
-                gps : GPXSource
-                gps =
-                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
-            in
-            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
-            , lat = gps.latitude |> Angle.inDegrees
-            }
     in
     case ( topLeftModel, bottomRightModel ) of
         ( Just topLeft, Just bottomRight ) ->
-            ( lngLatFromXY topLeft
-            , lngLatFromXY bottomRight
+            ( lngLatFromXY track topLeft
+            , lngLatFromXY track bottomRight
             )
 
         _ ->
             -- We hope never to see this.
             ( oopsLngLat, oopsLngLat )
+
+
+lngLatFromXY : TrackLoaded msg -> Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
+lngLatFromXY track point =
+    let
+        gps : GPXSource
+        gps =
+            DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
+    in
+    { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+    , lat = gps.latitude |> Angle.inDegrees
+    }
