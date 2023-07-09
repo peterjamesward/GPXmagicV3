@@ -452,15 +452,17 @@ update msg msgWrapper track ( width, height ) mapData context =
                 alternate =
                     event.keys.ctrl || event.button == SecondButton
 
+                ( x, y ) =
+                    event.offsetPos
+
                 newContext =
                     { context
-                        | orbiting = Just event.offsetPos
-                        , dragAction =
+                        | dragAction =
                             if alternate then
-                                DragRotate
+                                DragRotate x y
 
                             else
-                                DragPan
+                                DragPan x y
                         , waitingForClickDelay = True
                     }
             in
@@ -474,8 +476,8 @@ update msg msgWrapper track ( width, height ) mapData context =
                 ( dx, dy ) =
                     event.offsetPos
             in
-            case ( context.dragAction, context.orbiting ) of
-                ( DragRotate, Just ( startX, startY ) ) ->
+            case context.dragAction of
+                DragRotate startX startY ->
                     -- Change the camera azimuth and elevation
                     let
                         newAzimuth =
@@ -492,7 +494,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                             { context
                                 | cameraAzimuth = Direction2d.fromAngle newAzimuth
                                 , cameraElevation = newElevation
-                                , orbiting = Just ( dx, dy )
+                                , dragAction = DragRotate dx dy
                             }
                     in
                     ( { newContext | map = updatedMap newContext }
@@ -500,7 +502,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                     , mapData
                     )
 
-                ( DragPan, Just ( startX, startY ) ) ->
+                DragPan startX startY ->
                     let
                         viewPlane =
                             SketchPlane3d.withNormalDirection
@@ -536,7 +538,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                                     in
                                     { context
                                         | focalPoint = withoutTime newFocus
-                                        , orbiting = Just ( dx, dy )
+                                        , dragAction = DragPan dx dy
                                     }
 
                                 _ ->
@@ -553,10 +555,7 @@ update msg msgWrapper track ( width, height ) mapData context =
         ImageRelease _ ->
             let
                 newContext =
-                    { context
-                        | orbiting = Nothing
-                        , dragAction = DragNone
-                    }
+                    { context | dragAction = DragNone }
             in
             ( newContext, [], mapData )
 
@@ -615,7 +614,6 @@ initialiseView current contentArea track currentContext =
                         , cameraElevation = Angle.degrees 30
                         , cameraDistance = Length.kilometers 10
                         , fieldOfView = Angle.degrees 45
-                        , orbiting = Nothing
                         , dragAction = DragNone
                         , zoomLevel = 14.0
                         , defaultZoomLevel = 14.0
@@ -629,7 +627,6 @@ initialiseView current contentArea track currentContext =
                     , cameraElevation = Angle.degrees 30
                     , cameraDistance = Length.kilometers 10
                     , fieldOfView = Angle.degrees 45
-                    , orbiting = Nothing
                     , dragAction = DragNone
                     , zoomLevel = 14.0
                     , defaultZoomLevel = 14.0

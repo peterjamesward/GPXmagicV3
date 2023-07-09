@@ -80,7 +80,6 @@ type alias Context =
     , cameraElevation : Angle -- Above local horizon plane
     , cameraDistance : Quantity Float Length.Meters
     , fieldOfView : Angle
-    , orbiting : Maybe ( Float, Float )
     , dragAction : DragAction
     , zoomLevel : Float
     , defaultZoomLevel : Float

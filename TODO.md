@@ -10,7 +10,7 @@
 **Route Builder** previews not hiding when tool closed.
 
 **BUG** Map and course part company! 3D and Plan. Disappointing.
-> Now won't go wrong. Something smells.
+> Now won't go wrong. Something smells. Maybe related to resize (ehich seems to fix it).
 
 --- 
 

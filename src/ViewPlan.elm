@@ -94,7 +94,6 @@ initialiseView current track contentArea currentContext =
         newContext : Context
         newContext =
             { fieldOfView = Angle.degrees 45
-            , orbiting = Nothing
             , dragAction = DragNone
             , zoomLevel = 12
             , defaultZoomLevel = 12
@@ -649,7 +648,7 @@ update msg msgWrapper track ( width, height ) context mapData =
                     event.offsetPos
 
                 screenPoint =
-                    Point2d.pixels x y
+                    Point2d.fromTuple Pixels.pixels event.offsetPos
 
                 newState =
                     if context.fingerPainting then
@@ -660,17 +659,16 @@ update msg msgWrapper track ( width, height ) context mapData =
 
                                 else
                                     --TODO: DragPush <| ViewContext.PushInfo
-                                    DragPan
+                                    DragPan x y
 
                             _ ->
-                                DragPan
+                                DragPan x y
 
                     else
-                        DragPan
+                        DragPan x y
             in
             ( { context
-                | orbiting = Just event.offsetPos
-                , dragAction = newState
+                | dragAction = newState
                 , waitingForClickDelay = True
               }
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
@@ -688,8 +686,8 @@ update msg msgWrapper track ( width, height ) context mapData =
                 ( dx, dy ) =
                     event.offsetPos
             in
-            case ( context.dragAction, context.orbiting ) of
-                ( DragPan, Just ( startX, startY ) ) ->
+            case context.dragAction of
+                DragPan startX startY ->
                     let
                         shiftVector =
                             Vector3d.meters
@@ -706,7 +704,7 @@ update msg msgWrapper track ( width, height ) context mapData =
                         newContext =
                             { context
                                 | focalPoint = newFocus
-                                , orbiting = Just ( dx, dy )
+                                , dragAction = DragPan dx dy
                             }
                     in
                     ( { newContext | map = updatedMap newContext }
@@ -714,7 +712,7 @@ update msg msgWrapper track ( width, height ) context mapData =
                     , mapData
                     )
 
-                ( DragPaint paintInfo, _ ) ->
+                DragPaint paintInfo ->
                     let
                         screenPoint =
                             Point2d.pixels dx dy
@@ -756,10 +754,7 @@ update msg msgWrapper track ( width, height ) context mapData =
                         _ ->
                             []
             in
-            ( { context
-                | orbiting = Nothing
-                , dragAction = DragNone
-              }
+            ( { context | dragAction = DragNone }
             , actions
             , mapData
             )

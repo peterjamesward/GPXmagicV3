@@ -10,8 +10,8 @@ import Quantity exposing (Quantity)
 
 type DragAction
     = DragNone
-    | DragRotate
-    | DragPan
+    | DragRotate Float Float
+    | DragPan Float Float
     | DragPaint PaintInfo
 
 
