@@ -328,26 +328,6 @@ update msg msgWrapper track ( width, height ) mapData context =
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
-        ( rayOrigin, rayMax ) =
-            ( Camera3d.ray camera screenRectangle Point2d.origin
-            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
-            )
-
-        ( topLeftModel, bottomRightModel ) =
-            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
-            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
-            )
-
-        metersPerPixel =
-            case ( topLeftModel, bottomRightModel ) of
-                ( Just topLeft, Just bottomRight ) ->
-                    (Length.inMeters <| Vector3d.xComponent <| Vector3d.from topLeft bottomRight)
-                        / Pixels.toFloat wFloat
-
-                _ ->
-                    -- We hope never to see this.
-                    1
-
         updatedMap ctxt =
             let
                 lookingAt =

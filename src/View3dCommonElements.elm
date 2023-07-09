@@ -2,6 +2,7 @@ module View3dCommonElements exposing
     ( Context
     , Msg(..)
     , common3dSceneAttributes
+    , mapBoundsFromScene
     , mapPositionFromTrack
     , onViewControls
     , placesOverlay
@@ -18,7 +19,7 @@ import Circle2d
 import CommonToolStyles
 import Dict
 import Direction2d exposing (Direction2d)
-import DomainModel exposing (EarthPoint, asRecord, earthPointFromIndex, leafFromIndex, nearestPointToRay)
+import DomainModel exposing (EarthPoint, GPXSource, asRecord, earthPointFromIndex, leafFromIndex, nearestPointToRay)
 import Drag3dCommonStructures exposing (DragAction, PointLeafProximity, ScreenCoords)
 import Element exposing (..)
 import Element.Background as Background
@@ -37,6 +38,7 @@ import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
 import LineSegment3d
+import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
@@ -44,7 +46,7 @@ import Plane3d
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
-import Quantity exposing (Quantity)
+import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d exposing (Rectangle2d)
 import Svg
 import Svg.Attributes
@@ -479,3 +481,54 @@ pointLeafProximity camera track screenRectangle screenPoint =
         _ ->
             -- Really bad luck, who cares?
             Nothing
+
+
+mapBoundsFromScene :
+    Camera3d Meters LocalCoords
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
+    -> ( LngLat.LngLat, LngLat.LngLat )
+mapBoundsFromScene camera ( width, height ) track =
+    -- Call this after updating context after any update changing the view/
+    let
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity width, toFloatQuantity height )
+
+        oopsLngLat =
+            { lng = 0, lat = 0 }
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        ( rayOrigin, rayMax ) =
+            ( Camera3d.ray camera screenRectangle Point2d.origin
+            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
+            )
+
+        ( topLeftModel, bottomRightModel ) =
+            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
+            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
+            )
+
+        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
+        lngLatFromXY point =
+            let
+                gps : GPXSource
+                gps =
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
+            in
+            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
+            , lat = gps.latitude |> Angle.inDegrees
+            }
+    in
+    case ( topLeftModel, bottomRightModel ) of
+        ( Just topLeft, Just bottomRight ) ->
+            ( lngLatFromXY topLeft
+            , lngLatFromXY bottomRight
+            )
+
+        _ ->
+            -- We hope never to see this.
+            ( oopsLngLat, oopsLngLat )

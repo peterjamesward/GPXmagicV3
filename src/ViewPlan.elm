@@ -54,7 +54,7 @@ import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
-import View3dCommonElements exposing (Context, Msg(..), onViewControls, placesOverlay, pointLeafProximity)
+import View3dCommonElements exposing (Context, Msg(..), mapBoundsFromScene, onViewControls, placesOverlay, pointLeafProximity)
 import ViewMode exposing (ViewMode(..))
 import Viewpoint3d
 import ZoomLevel
@@ -110,14 +110,21 @@ initialiseView current track contentArea currentContext =
             , cameraDistance = Length.kilometer -- irrelevant for orthographic projection
             }
 
+        camera =
+            Camera3d.perspective
+                { viewpoint =
+                    Viewpoint3d.lookAt
+                        { focalPoint = Point3d.origin
+                        , eyePoint = Point3d.meters 0 0 1000
+                        , upDirection = positiveZ
+                        }
+                , verticalFieldOfView = Angle.degrees 90
+                }
+
         ( lngLat1, lngLat2 ) =
-            mapBoundsFromScene newContext contentArea track
+            mapBoundsFromScene camera contentArea track
     in
     { newContext | map = MapViewer.withViewBounds noPadding lngLat1 lngLat2 newContext.map }
-
-
-stopProp =
-    { stopPropagation = True, preventDefault = False }
 
 
 view :
@@ -218,20 +225,6 @@ fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
             ( String.fromInt <| Pixels.inPixels givenWidth
             , String.fromInt <| Pixels.inPixels givenHeight
             )
-
-        screenRectangle =
-            Rectangle2d.from
-                Point2d.origin
-                (Point2d.xy
-                    (Quantity.toFloatQuantity givenWidth)
-                    (Quantity.toFloatQuantity givenHeight)
-                )
-
-        topLeftFrame =
-            Frame2d.atPoint
-                (Point2d.xy Quantity.zero (Quantity.toFloatQuantity givenHeight))
-
-        --|> Frame2d.reverseY
     in
     case context.dragAction of
         DragPaint paintInfo ->
@@ -407,60 +400,6 @@ deriveCamera refPoint treeNode context currentPosition =
         }
 
 
-mapBoundsFromScene :
-    Context
-    -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> TrackLoaded msg
-    -> ( LngLat.LngLat, LngLat.LngLat )
-mapBoundsFromScene updatedContext ( width, height ) track =
-    -- Call this after updating context after any update changing the view/
-    let
-        ( wFloat, hFloat ) =
-            ( toFloatQuantity width, toFloatQuantity height )
-
-        oopsLngLat =
-            { lng = 0, lat = 0 }
-
-        screenRectangle =
-            Rectangle2d.from
-                (Point2d.xy Quantity.zero hFloat)
-                (Point2d.xy wFloat Quantity.zero)
-
-        camera =
-            deriveCamera track.referenceLonLat track.trackTree updatedContext track.currentPosition
-
-        ( rayOrigin, rayMax ) =
-            ( Camera3d.ray camera screenRectangle Point2d.origin
-            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
-            )
-
-        ( topLeftModel, bottomRightModel ) =
-            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
-            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
-            )
-
-        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
-        lngLatFromXY point =
-            let
-                gps : GPXSource
-                gps =
-                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
-            in
-            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
-            , lat = gps.latitude |> Angle.inDegrees
-            }
-    in
-    case ( topLeftModel, bottomRightModel ) of
-        ( Just topLeft, Just bottomRight ) ->
-            ( lngLatFromXY topLeft
-            , lngLatFromXY bottomRight
-            )
-
-        _ ->
-            -- We hope never to see this.
-            ( oopsLngLat, oopsLngLat )
-
-
 update :
     Msg
     -> (Msg -> msg)
@@ -486,7 +425,7 @@ update msg msgWrapper track ( width, height ) context mapData =
         updatedMap ctxt =
             let
                 ( lngLat1, lngLat2 ) =
-                    mapBoundsFromScene ctxt ( width, height ) track
+                    mapBoundsFromScene camera ( width, height ) track
             in
             MapViewer.withViewBounds UtilsForViews.noPadding lngLat1 lngLat2 ctxt.map
     in
@@ -765,8 +704,15 @@ trackChanged :
 trackChanged newTrack ( width, height ) context =
     -- Only interest is Orange pointer move.
     let
+        camera =
+            deriveCamera
+                newTrack.referenceLonLat
+                newTrack.trackTree
+                context
+                newTrack.currentPosition
+
         ( lngLat1, lngLat2 ) =
-            mapBoundsFromScene context ( width, height ) newTrack
+            mapBoundsFromScene camera ( width, height ) newTrack
 
         noPadding =
             { left = 0, right = 0, top = 0, bottom = 0 }
