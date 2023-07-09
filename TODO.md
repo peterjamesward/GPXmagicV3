@@ -16,12 +16,9 @@
 
 # WIP
 
-Tidy up the 3rd dragging code and use same code for Plan.
-It'll be good to share some code there, maybe put camera in Context so they can 
-then be essentially the same. That should then enable consistent "painting" for tools.
-Don't bother so much about 1st, though it would of course be good to sort that also.
+## Should be able to paint in 3d view
 
-### Use as tool applicator
+## Use as tool applicator
 
 Fingerpainting is a meta-tool. 
 Should be able to use it to Straighten, Smooth, more, without needing to place markers.

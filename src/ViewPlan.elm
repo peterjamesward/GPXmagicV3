@@ -53,7 +53,7 @@ import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
-import View3dCommonElements exposing (Context, Msg(..), onViewControls, placesOverlay)
+import View3dCommonElements exposing (Context, Msg(..), onViewControls, placesOverlay, pointLeafProximity)
 import ViewMode exposing (ViewMode(..))
 import Viewpoint3d
 import ZoomLevel
@@ -460,117 +460,6 @@ mapBoundsFromScene updatedContext ( width, height ) track =
             ( oopsLngLat, oopsLngLat )
 
 
-pointLeafProximity :
-    Context
-    -> TrackLoaded msg
-    -> Rectangle2d Pixels ScreenCoords
-    -> Point2d Pixels ScreenCoords
-    -> Maybe PointLeafProximity
-pointLeafProximity context track screenRectangle screenPoint =
-    let
-        camera =
-            deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
-
-        ray =
-            Camera3d.ray camera screenRectangle screenPoint
-
-        nearestPointIndex =
-            nearestPointToRay ray track.trackTree track.leafIndex track.currentPosition
-
-        sharedPoint =
-            earthPointFromIndex nearestPointIndex track.trackTree
-
-        projectionPlane =
-            -- Will use this to measure separation between leaf axes and the ray.
-            Plane3d.through
-                sharedPoint.space
-                (Axis3d.direction ray)
-
-        touchPointInWorld =
-            Axis3d.intersectionWithPlane projectionPlane ray
-                |> Maybe.map (Point3d.projectOnto projectionPlane)
-
-        proximityFrom index =
-            let
-                {-
-                   I find the closest pass between two axes (ray and leaf) by:
-                   1. create a plane normal to the ray (origin on the ray, containing nearest point?)
-                   2. project each leaf onto that plane
-                   3. compare projected leafs:
-                       a: is projection of origin to projected leaf within the [start,end]
-                       b: which is closest (distanceFrom).
-                   The Plan View falls out as a special case.
-                -}
-                leaf =
-                    asRecord <| leafFromIndex index track.trackTree
-
-                leafSegment =
-                    LineSegment3d.from leaf.startPoint.space leaf.endPoint.space
-                        |> LineSegment3d.projectOnto projectionPlane
-            in
-            case ( touchPointInWorld, LineSegment3d.axis leafSegment ) of
-                ( Just touchPoint, Just leafAxis ) ->
-                    let
-                        proportion =
-                            Quantity.ratio
-                                (Point3d.signedDistanceAlong leafAxis touchPoint)
-                                (LineSegment3d.length leafSegment)
-                    in
-                    Just
-                        { leafIndex = index
-                        , distanceAlong = Point3d.signedDistanceAlong leafAxis touchPoint
-                        , distanceFrom = Point3d.distanceFromAxis leafAxis touchPoint
-                        , proportionAlong = proportion
-                        , screenPoint = screenPoint
-                        , worldPoint = touchPoint
-                        }
-
-                _ ->
-                    Nothing
-    in
-    -- So, is the click before or after the point?
-    case
-        ( proximityFrom <| nearestPointIndex - 1
-        , proximityFrom nearestPointIndex
-        )
-    of
-        ( Just before, Just after ) ->
-            Just before
-
-        --let
-        --    internal =
-        --        Interval.from 0.0 1.0
-        --in
-        --case
-        --    ( internal |> Interval.contains before.proportionAlong
-        --    , internal |> Interval.contains after.proportionAlong
-        --    )
-        --of
-        --    ( True, False ) ->
-        --        Just before
-        --
-        --    ( False, True ) ->
-        --        Just after
-        --
-        --    _ ->
-        --        -- No clear winner, closest wins.
-        --        if before.distanceFrom |> Quantity.lessThanOrEqualTo after.distanceFrom then
-        --            Just before
-        --
-        --        else
-        --            Just after
-        ( Just before, Nothing ) ->
-            -- Probably better to choose a non-zero side.
-            Just before
-
-        ( Nothing, Just after ) ->
-            Just after
-
-        _ ->
-            -- Really bad luck, who cares?
-            Nothing
-
-
 update :
     Msg
     -> (Msg -> msg)
@@ -652,13 +541,12 @@ update msg msgWrapper track ( width, height ) context mapData =
 
                 newState =
                     if context.fingerPainting then
-                        case pointLeafProximity context track screenRectangle screenPoint of
+                        case pointLeafProximity camera track screenRectangle screenPoint of
                             Just proximity ->
                                 if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
                                     DragPaint <| PaintInfo [ proximity ]
 
                                 else
-                                    --TODO: DragPush <| ViewContext.PushInfo
                                     DragPan x y
 
                             _ ->
@@ -718,7 +606,7 @@ update msg msgWrapper track ( width, height ) context mapData =
                             Point2d.pixels dx dy
 
                         path =
-                            case pointLeafProximity context track screenRectangle screenPoint of
+                            case pointLeafProximity camera track screenRectangle screenPoint of
                                 Just proximity ->
                                     proximity :: paintInfo.path
 

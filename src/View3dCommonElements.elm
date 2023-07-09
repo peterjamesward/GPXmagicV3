@@ -5,19 +5,21 @@ module View3dCommonElements exposing
     , mapPositionFromTrack
     , onViewControls
     , placesOverlay
+    , pointLeafProximity
     , scaleToMapWorld
     )
 
 import Angle exposing (Angle)
 import Axis2d
+import Axis3d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Circle2d
 import CommonToolStyles
 import Dict
 import Direction2d exposing (Direction2d)
-import DomainModel exposing (EarthPoint)
-import Drag3dCommonStructures exposing (DragAction)
+import DomainModel exposing (EarthPoint, asRecord, earthPointFromIndex, leafFromIndex, nearestPointToRay)
+import Drag3dCommonStructures exposing (DragAction, PointLeafProximity, ScreenCoords)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -34,6 +36,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
+import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
@@ -42,7 +45,7 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
 import Quantity exposing (Quantity)
-import Rectangle2d
+import Rectangle2d exposing (Rectangle2d)
 import Svg
 import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
@@ -393,3 +396,86 @@ placesOverlay display ( givenWidth, givenHeight ) track camera =
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame placeNames ]
+
+
+pointLeafProximity :
+    Camera3d Meters LocalCoords
+    -> TrackLoaded msg
+    -> Rectangle2d Pixels ScreenCoords
+    -> Point2d Pixels ScreenCoords
+    -> Maybe PointLeafProximity
+pointLeafProximity camera track screenRectangle screenPoint =
+    let
+        ray =
+            Camera3d.ray camera screenRectangle screenPoint
+
+        nearestPointIndex =
+            nearestPointToRay ray track.trackTree track.leafIndex track.currentPosition
+
+        sharedPoint =
+            earthPointFromIndex nearestPointIndex track.trackTree
+
+        projectionPlane =
+            -- Will use this to measure separation between leaf axes and the ray.
+            Plane3d.through
+                sharedPoint.space
+                (Axis3d.direction ray)
+
+        touchPointInWorld =
+            Axis3d.intersectionWithPlane projectionPlane ray
+                |> Maybe.map (Point3d.projectOnto projectionPlane)
+
+        proximityFrom index =
+            let
+                {-
+                   I find the closest pass between two axes (ray and leaf) by:
+                   1. create a plane normal to the ray (origin on the ray, containing nearest point?)
+                   2. project each leaf onto that plane
+                   3. compare projected leafs:
+                       a: is projection of origin to projected leaf within the [start,end]
+                       b: which is closest (distanceFrom).
+                   The Plan View falls out as a special case.
+                -}
+                leaf =
+                    asRecord <| leafFromIndex index track.trackTree
+
+                leafSegment =
+                    LineSegment3d.from leaf.startPoint.space leaf.endPoint.space
+                        |> LineSegment3d.projectOnto projectionPlane
+            in
+            case ( touchPointInWorld, LineSegment3d.axis leafSegment ) of
+                ( Just touchPoint, Just leafAxis ) ->
+                    let
+                        proportion =
+                            Quantity.ratio
+                                (Point3d.signedDistanceAlong leafAxis touchPoint)
+                                (LineSegment3d.length leafSegment)
+                    in
+                    Just
+                        { leafIndex = index
+                        , distanceAlong = Point3d.signedDistanceAlong leafAxis touchPoint
+                        , distanceFrom = Point3d.distanceFromAxis leafAxis touchPoint
+                        , proportionAlong = proportion
+                        , screenPoint = screenPoint
+                        , worldPoint = touchPoint
+                        }
+
+                _ ->
+                    Nothing
+    in
+    -- So, is the click before or after the point?
+    -- Used to check proportion along but now just take the first one.
+    case
+        ( proximityFrom <| nearestPointIndex - 1
+        , proximityFrom nearestPointIndex
+        )
+    of
+        ( Just before, _ ) ->
+            Just before
+
+        ( Nothing, Just after ) ->
+            Just after
+
+        _ ->
+            -- Really bad luck, who cares?
+            Nothing
