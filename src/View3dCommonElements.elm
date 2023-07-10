@@ -9,8 +9,10 @@ module View3dCommonElements exposing
     , placesOverlay
     , pointLeafProximity
     , scaleToMapWorld
+    , update
     )
 
+import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis2d
 import Axis3d
@@ -42,6 +44,7 @@ import LineSegment3d
 import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
+import MapboxKey
 import Pixels exposing (Pixels)
 import Plane3d
 import Point2d exposing (Point2d)
@@ -73,8 +76,6 @@ type Msg
     | ImageReset
     | ClickDelayExpired
     | ToggleFollowOrange
-    | SetEmphasis Int
-    | MouseMove Mouse.Event
     | MapMsg MapViewer.Msg
     | ToggleShowMap
     | ToggleFingerpainting
@@ -97,6 +98,149 @@ type alias Context =
     , fingerPainting : Bool
     , viewMode : ViewMode
     }
+
+
+update :
+    Msg
+    -> (Msg -> msg)
+    -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> MapViewer.MapData
+    -> Context
+    -> (Context -> MapViewer.Model)
+    -> Camera3d Meters LocalCoords
+    -> ( Context, List (ToolAction msg), MapViewer.MapData )
+update msg msgWrapper track ( width, height ) mapData context mapUpdater camera =
+    --Anything NOT handled by ViewPlan or ViewThird drops through to here.
+    --We will need to deal with the different contexts.
+    case msg of
+        MapMsg mapMsg ->
+            let
+                { newModel, newMapData, outMsg, cmd } =
+                    MapViewer.update
+                        (MapViewer.mapboxAccessToken MapboxKey.mapboxKey)
+                        mapData
+                        mapMsg
+                        context.map
+            in
+            ( { context | map = newModel }
+            , [ ExternalCommand <| Cmd.map (msgWrapper << MapMsg) cmd ]
+            , newMapData
+            )
+
+        ImageZoomIn ->
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
+            in
+            ( { newContext | map = mapUpdater newContext }, [], mapData )
+
+        ImageZoomOut ->
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
+            in
+            ( { newContext | map = mapUpdater newContext }, [], mapData )
+
+        ImageNoOp ->
+            ( context, [], mapData )
+
+        ImageClick event ->
+            -- Click moves pointer but does not re-centre view. (Double click will.)
+            if context.waitingForClickDelay then
+                ( context
+                , [ SetCurrent <| detectHit event track ( width, height ) camera
+                  , TrackHasChanged
+                  ]
+                , mapData
+                )
+
+            else
+                ( context, [], mapData )
+
+        ImageDoubleClick event ->
+            let
+                nearestPoint =
+                    detectHit event track ( width, height ) camera
+
+                newContext =
+                    { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
+            in
+            ( { newContext | map = mapUpdater newContext }
+            , [ SetCurrent nearestPoint
+              , TrackHasChanged
+              ]
+            , mapData
+            )
+
+        ClickDelayExpired ->
+            ( { context | waitingForClickDelay = False }, [], mapData )
+
+        ImageMouseWheel deltaY ->
+            let
+                increment =
+                    -0.001 * deltaY
+
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+            in
+            ( { newContext | map = mapUpdater newContext }, [], mapData )
+
+        ToggleFollowOrange ->
+            ( { context
+                | followSelectedPoint = not context.followSelectedPoint
+                , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
+              }
+            , []
+            , mapData
+            )
+
+        ToggleShowMap ->
+            ( { context | showMap = not context.showMap }
+            , []
+            , mapData
+            )
+
+        ToggleFingerpainting ->
+            ( { context | fingerPainting = not context.fingerPainting }
+            , []
+            , mapData
+            )
+
+        _ ->
+            ( context, [], mapData )
+
+
+detectHit :
+    Mouse.Event
+    -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Camera3d Meters LocalCoords
+    -> Int
+detectHit event track ( w, h ) camera =
+    let
+        ( x, y ) =
+            event.offsetPos
+
+        screenPoint =
+            Point2d.pixels x y
+
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity w, toFloatQuantity h )
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        ray =
+            Camera3d.ray camera screenRectangle screenPoint
+    in
+    nearestPointToRay
+        ray
+        track.trackTree
+        track.leafIndex
+        track.currentPosition
 
 
 onContextMenu : a -> Element.Attribute a

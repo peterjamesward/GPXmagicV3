@@ -751,7 +751,7 @@ initialisePane track options paneArea pane =
                     (paneIdToString pane.paneId)
                     track.trackTree
                     pane.profileContext
-        , planContext = Just <| ViewPlan.initialiseView 0 track paneArea pane.planContext
+        , planContext = Just <| ViewPlan.initialiseView 0 paneArea track pane.planContext
         , graphContext = Just <| ViewGraph.initialiseView 0 track.trackTree pane.graphContext
         , mapContext = Just <| ViewMap.initialiseContext pane.mapContext
     }
