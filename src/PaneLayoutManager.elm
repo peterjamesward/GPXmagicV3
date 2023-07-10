@@ -206,8 +206,6 @@ optionList location =
                 [ rotate (pi / 2) ]
                 (useIconWithSize 12 FeatherIcons.columns)
             )
-
-    -- TODO: Rotate!
     , Input.optionWith PanesGrid <| layoutModeTab Last (useIconWithSize 12 FeatherIcons.grid)
     ]
 

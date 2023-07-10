@@ -54,7 +54,7 @@ import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
-import View3dCommonElements exposing (Context, Msg(..), mapBoundsFromScene, onViewControls, placesOverlay, pointLeafProximity)
+import View3dCommonElements exposing (Context, Msg(..), lngLatFromXY, mapBoundsFromScene, onViewControls, placesOverlay, pointLeafProximity)
 import ViewMode exposing (ViewMode(..))
 import Viewpoint3d
 import ZoomLevel
@@ -423,6 +423,22 @@ update msg msgWrapper track ( width, height ) context mapData =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
         updatedMap ctxt =
+            --TODO: This is only difference here between Plan and Third but zoom levels are off.
+            --let
+            --    lookingAt =
+            --        MapViewer.lngLatToWorld <|
+            --            lngLatFromXY track <|
+            --                if ctxt.followSelectedPoint then
+            --                    DomainModel.earthPointFromIndex track.currentPosition track.trackTree
+            --                        |> .space
+            --
+            --                else
+            --                    ctxt.focalPoint.space
+            --in
+            --MapViewer.withPositionAndZoom
+            --    lookingAt
+            --    (ZoomLevel.fromLogZoom <| ctxt.zoomLevel - 1)
+            --    ctxt.map
             --TODO: This is only difference here between Plan and Third
             let
                 updatedCamera =

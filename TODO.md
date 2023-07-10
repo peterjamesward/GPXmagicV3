@@ -18,6 +18,8 @@
 
 ## Should be able to paint in 3d view
 
+* Align the zoom levels with MapView.
+
 ## Use as tool applicator
 
 Fingerpainting is a meta-tool. 
