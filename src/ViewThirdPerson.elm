@@ -221,80 +221,6 @@ detectHit event track ( w, h ) context =
         track.currentPosition
 
 
-mapBoundsFromScene :
-    Context
-    -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> TrackLoaded msg
-    -> ( LngLat.LngLat, LngLat.LngLat )
-mapBoundsFromScene updatedContext ( width, height ) track =
-    -- Call this after updating context after any update changing the view/
-    -- We restrict the bounds here to the track enclosing box.
-    let
-        ( wFloat, hFloat ) =
-            ( toFloatQuantity width, toFloatQuantity height )
-
-        oopsLngLat =
-            { lng = 0, lat = 0 }
-
-        screenRectangle =
-            Rectangle2d.from
-                (Point2d.xy Quantity.zero hFloat)
-                (Point2d.xy wFloat Quantity.zero)
-
-        camera =
-            deriveCamera track.referenceLonLat track.trackTree updatedContext track.currentPosition
-
-        ( rayOrigin, rayMax ) =
-            ( Camera3d.ray camera screenRectangle Point2d.origin
-            , Camera3d.ray camera screenRectangle (Point2d.xy wFloat hFloat)
-            )
-
-        ( topLeftModel, bottomRightModel ) =
-            ( rayOrigin |> Axis3d.intersectionWithPlane Plane3d.xy
-            , rayMax |> Axis3d.intersectionWithPlane Plane3d.xy
-            )
-
-        trackBox =
-            -- Restrict the bounds to the track enclosing box.
-            track.trackTree
-                |> DomainModel.boundingBox
-                |> BoundingBox3d.expandBy Length.kilometer
-
-        lngLatFromXY : Point3d.Point3d Meters LocalCoords -> LngLat.LngLat
-        lngLatFromXY point =
-            let
-                gps : GPXSource
-                gps =
-                    DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime point
-            in
-            { lng = gps.longitude |> Direction2d.toAngle |> Angle.inDegrees
-            , lat = gps.latitude |> Angle.inDegrees
-            }
-    in
-    --Debug.log "BOUNDS" <|
-    case ( topLeftModel, bottomRightModel ) of
-        ( Just topLeft, Just bottomRight ) ->
-            let
-                visibleBox =
-                    BoundingBox3d.from
-                        topLeft
-                        bottomRight
-
-                { minX, minY, maxX, maxY, minZ, maxZ } =
-                    visibleBox
-                        |> BoundingBox3d.intersection trackBox
-                        |> Maybe.withDefault trackBox
-                        |> BoundingBox3d.extrema
-            in
-            ( lngLatFromXY <| Point3d.xyz minX maxY Quantity.zero
-            , lngLatFromXY <| Point3d.xyz maxX minY Quantity.zero
-            )
-
-        _ ->
-            -- We hope never to see this.
-            ( oopsLngLat, oopsLngLat )
-
-
 update :
     Msg
     -> (Msg -> msg)
@@ -585,8 +511,7 @@ initialiseView current contentArea track currentContext =
                         , dragAction = DragNone
                         , zoomLevel = 14.0
                         , defaultZoomLevel = 14.0
-                        , focalPoint =
-                            treeNode |> leafFromIndex current |> startPoint
+                        , focalPoint = treeNode |> leafFromIndex current |> startPoint
                         , waitingForClickDelay = False
                     }
 
@@ -598,8 +523,7 @@ initialiseView current contentArea track currentContext =
                     , dragAction = DragNone
                     , zoomLevel = 14.0
                     , defaultZoomLevel = 14.0
-                    , focalPoint =
-                        treeNode |> leafFromIndex current |> startPoint
+                    , focalPoint = treeNode |> leafFromIndex current |> startPoint
                     , waitingForClickDelay = False
                     , followSelectedPoint = True
                     , map = initialMap
@@ -608,14 +532,16 @@ initialiseView current contentArea track currentContext =
                     , viewMode = ViewThird
                     }
 
-        ( lngLat1, lngLat2 ) =
-            mapBoundsFromScene newContext contentArea track
-    in
-    { newContext
-        | map =
-            MapViewer.withViewBounds
-                UtilsForViews.noPadding
-                lngLat1
-                lngLat2
+        initialMapForTrack =
+            let
+                lookingAt =
+                    MapViewer.lngLatToWorld <|
+                        lngLatFromXY track <|
+                            newContext.focalPoint.space
+            in
+            MapViewer.withPositionAndZoom
+                lookingAt
+                (ZoomLevel.fromLogZoom <| newContext.zoomLevel)
                 newContext.map
-    }
+    in
+    { newContext | map = initialMapForTrack }
