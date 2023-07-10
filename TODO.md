@@ -19,8 +19,9 @@
 ## Should be able to paint in 3d view
 
 Finger painting works in 3D.
-Third and Plan updates only differ in ImageReset and ImageGrab.
-I can make that go away, then work on the tool painting concept!
+Third and Plan updates only differ in ImageReset.
+> Perhaps I should "invert" it so that the common update is called first, and
+> simply delegate in the few cases required, or switch on context.viewMode.
 
 ## Use as tool applicator
 

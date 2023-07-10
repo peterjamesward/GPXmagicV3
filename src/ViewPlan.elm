@@ -9,7 +9,6 @@ module ViewPlan exposing
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import Axis3d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Direction2d
@@ -249,15 +248,6 @@ update :
     -> ( Context, List (ToolAction msg), MapViewer.MapData )
 update msg msgWrapper track ( width, height ) context mapData =
     let
-        -- Let us have some information about the view, making dragging more precise.
-        ( wFloat, hFloat ) =
-            ( toFloatQuantity width, toFloatQuantity height )
-
-        screenRectangle =
-            Rectangle2d.from
-                (Point2d.xy Quantity.zero hFloat)
-                (Point2d.xy wFloat Quantity.zero)
-
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
@@ -279,50 +269,6 @@ update msg msgWrapper track ( width, height ) context mapData =
                     initialiseView track.currentPosition ( width, height ) track (Just context)
             in
             ( { newContext | map = mapUpdater newContext }, [], mapData )
-
-        ImageGrab event ->
-            {-
-               Plan view only has pan, no rotation. Obviously no tilt.
-               For fingerpainting, we do a click detect to see whether to paint or push track.
-               Painting if within one meter of track.
-               Apologies for near duplication of detectHit here.
-            -}
-            let
-                alternate =
-                    event.keys.ctrl || event.button == SecondButton
-
-                ( x, y ) =
-                    event.offsetPos
-
-                screenPoint =
-                    Point2d.fromTuple Pixels.pixels event.offsetPos
-
-                dragging =
-                    DragPan x y
-
-                newState =
-                    if context.fingerPainting then
-                        case pointLeafProximity camera track screenRectangle screenPoint of
-                            Just proximity ->
-                                if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
-                                    DragPaint <| PaintInfo [ proximity ]
-
-                                else
-                                    dragging
-
-                            _ ->
-                                dragging
-
-                    else
-                        dragging
-            in
-            ( { context
-                | dragAction = newState
-                , waitingForClickDelay = True
-              }
-            , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
-            , mapData
-            )
 
         _ ->
             View3dCommonElements.update

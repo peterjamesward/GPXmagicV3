@@ -198,15 +198,6 @@ update :
     -> ( Context, List (ToolAction msg), MapViewer.MapData )
 update msg msgWrapper track ( width, height ) mapData context =
     let
-        -- Let us have some information about the view, making dragging more precise.
-        ( wFloat, hFloat ) =
-            ( toFloatQuantity width, toFloatQuantity height )
-
-        screenRectangle =
-            Rectangle2d.from
-                (Point2d.xy Quantity.zero hFloat)
-                (Point2d.xy wFloat Quantity.zero)
-
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
 
@@ -235,50 +226,6 @@ update msg msgWrapper track ( width, height ) mapData context =
                     initialiseView track.currentPosition ( width, height ) track (Just context)
             in
             ( { newContext | map = mapUpdater newContext }, [], mapData )
-
-        ImageGrab event ->
-            -- Mouse behaviour depends which view is in use...
-            -- Right-click or ctrl-click to mean rotate; otherwise pan.
-            let
-                alternate =
-                    event.keys.ctrl || event.button == SecondButton
-
-                ( x, y ) =
-                    event.offsetPos
-
-                screenPoint =
-                    Point2d.fromTuple Pixels.pixels event.offsetPos
-
-                dragging =
-                    if alternate then
-                        DragRotate x y
-
-                    else
-                        DragPan x y
-
-                newState =
-                    if context.fingerPainting then
-                        case pointLeafProximity camera track screenRectangle screenPoint of
-                            Just proximity ->
-                                if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
-                                    DragPaint <| Drag3dCommonStructures.PaintInfo [ proximity ]
-
-                                else
-                                    dragging
-
-                            _ ->
-                                dragging
-
-                    else
-                        dragging
-            in
-            ( { context
-                | dragAction = newState
-                , waitingForClickDelay = True
-              }
-            , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
-            , mapData
-            )
 
         _ ->
             View3dCommonElements.update

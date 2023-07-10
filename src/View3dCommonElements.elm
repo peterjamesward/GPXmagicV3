@@ -36,7 +36,7 @@ import FlatColors.ChinesePalette exposing (white)
 import Frame2d
 import Geometry.Svg as Svg
 import Html.Events as HE
-import Html.Events.Extra.Mouse as Mouse
+import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
@@ -217,6 +217,52 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
         ToggleFingerpainting ->
             ( { context | fingerPainting = not context.fingerPainting }
             , []
+            , mapData
+            )
+
+        ImageGrab event ->
+            -- Mouse behaviour depends which view is in use...
+            -- Right-click or ctrl-click to mean rotate; otherwise pan.
+            let
+                alternate =
+                    context.viewMode
+                        == ViewThird
+                        && (event.keys.ctrl || event.button == SecondButton)
+
+                ( x, y ) =
+                    event.offsetPos
+
+                screenPoint =
+                    Point2d.fromTuple Pixels.pixels event.offsetPos
+
+                dragging =
+                    if alternate then
+                        DragRotate x y
+
+                    else
+                        DragPan x y
+
+                newState =
+                    if context.fingerPainting then
+                        case pointLeafProximity camera track screenRectangle screenPoint of
+                            Just proximity ->
+                                if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
+                                    DragPaint <| Drag3dCommonStructures.PaintInfo [ proximity ]
+
+                                else
+                                    dragging
+
+                            _ ->
+                                dragging
+
+                    else
+                        dragging
+            in
+            ( { context
+                | dragAction = newState
+                , waitingForClickDelay = True
+              }
+            , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
             , mapData
             )
 
