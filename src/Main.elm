@@ -21,6 +21,7 @@ import FeatherIcons
 import File exposing (File)
 import File.Download as Download
 import File.Select as Select
+import FingerPainting
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
@@ -1762,7 +1763,7 @@ performActionsOnModel actions model =
 
                 ( FingerPaint paintInfo, Just track ) ->
                     updateActiveTrack
-                        (ViewPlan.applyFingerPaint paintInfo track)
+                        (FingerPainting.applyFingerPaint paintInfo track)
                         foldedModel
 
                 ( BendSmootherApplyWithOptions options, Just track ) ->

@@ -16,6 +16,7 @@ import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Drag3dCommonStructures exposing (DragAction(..))
 import Element exposing (..)
+import FingerPainting exposing (fingerPaintingPreview)
 import Html
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Length exposing (Meters)
@@ -122,13 +123,14 @@ view settings mapData context display contentArea track scene msgWrapper =
                     pointer
                  )
                     :: (inFront <| placesOverlay display contentArea track camera)
+                    :: (inFront <| fingerPaintingPreview context contentArea track camera)
                     :: (inFront <| onViewControls settings msgWrapper context)
                     :: common3dSceneAttributes msgWrapper context
                 )
             <|
                 html <|
                     Scene3d.sunny
-                        { camera = deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
+                        { camera = camera
                         , dimensions = contentArea
                         , background =
                             if context.showMap then
@@ -244,18 +246,36 @@ update msg msgWrapper track ( width, height ) mapData context =
                 ( x, y ) =
                     event.offsetPos
 
-                newContext =
-                    { context
-                        | dragAction =
-                            if alternate then
-                                DragRotate x y
+                screenPoint =
+                    Point2d.fromTuple Pixels.pixels event.offsetPos
 
-                            else
-                                DragPan x y
-                        , waitingForClickDelay = True
-                    }
+                dragging =
+                    if alternate then
+                        DragRotate x y
+
+                    else
+                        DragPan x y
+
+                newState =
+                    if context.fingerPainting then
+                        case pointLeafProximity camera track screenRectangle screenPoint of
+                            Just proximity ->
+                                if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
+                                    DragPaint <| Drag3dCommonStructures.PaintInfo [ proximity ]
+
+                                else
+                                    dragging
+
+                            _ ->
+                                dragging
+
+                    else
+                        dragging
             in
-            ( newContext
+            ( { context
+                | dragAction = newState
+                , waitingForClickDelay = True
+              }
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
             , mapData
             )
@@ -336,6 +356,24 @@ update msg msgWrapper track ( width, height ) mapData context =
                                     context
                     in
                     ( { newContext | map = mapUpdater newContext }
+                    , []
+                    , mapData
+                    )
+
+                DragPaint paintInfo ->
+                    let
+                        screenPoint =
+                            Point2d.pixels dx dy
+
+                        path =
+                            case pointLeafProximity camera track screenRectangle screenPoint of
+                                Just proximity ->
+                                    proximity :: paintInfo.path
+
+                                Nothing ->
+                                    paintInfo.path
+                    in
+                    ( { context | dragAction = DragPaint <| Drag3dCommonStructures.PaintInfo path }
                     , []
                     , mapData
                     )
