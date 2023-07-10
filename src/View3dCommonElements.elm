@@ -22,8 +22,8 @@ import Circle2d
 import CommonToolStyles
 import Dict
 import Direction2d exposing (Direction2d)
-import DomainModel exposing (EarthPoint, GPXSource, asRecord, earthPointFromIndex, leafFromIndex, nearestPointToRay)
-import Drag3dCommonStructures exposing (DragAction, PointLeafProximity, ScreenCoords)
+import DomainModel exposing (EarthPoint, GPXSource, asRecord, earthPointFromIndex, leafFromIndex, nearestPointToRay, withoutTime)
+import Drag3dCommonStructures exposing (DragAction(..), PointLeafProximity, ScreenCoords)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -52,6 +52,7 @@ import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d exposing (Rectangle2d)
+import SketchPlane3d
 import Svg
 import Svg.Attributes
 import SystemSettings exposing (SystemSettings)
@@ -59,8 +60,10 @@ import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews
+import Vector3d
 import ViewMode exposing (ViewMode(..))
 import ViewPureStyles exposing (stopProp, useIcon)
+import Viewpoint3d
 
 
 type Msg
@@ -113,6 +116,16 @@ update :
 update msg msgWrapper track ( width, height ) mapData context mapUpdater camera =
     --Anything NOT handled by ViewPlan or ViewThird drops through to here.
     --We will need to deal with the different contexts.
+    let
+        -- Let us have some information about the view, making dragging more precise.
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity width, toFloatQuantity height )
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+    in
     case msg of
         MapMsg mapMsg ->
             let
@@ -204,6 +217,130 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
         ToggleFingerpainting ->
             ( { context | fingerPainting = not context.fingerPainting }
             , []
+            , mapData
+            )
+
+        ImageDrag event ->
+            let
+                ( dx, dy ) =
+                    event.offsetPos
+            in
+            case context.dragAction of
+                DragRotate startX startY ->
+                    -- Change the camera azimuth and elevation
+                    let
+                        newAzimuth =
+                            Angle.degrees <|
+                                (Angle.inDegrees <| Direction2d.toAngle context.cameraAzimuth)
+                                    - (dx - startX)
+
+                        newElevation =
+                            Angle.degrees <|
+                                Angle.inDegrees context.cameraElevation
+                                    + (dy - startY)
+
+                        newContext =
+                            { context
+                                | cameraAzimuth = Direction2d.fromAngle newAzimuth
+                                , cameraElevation = newElevation
+                                , dragAction = DragRotate dx dy
+                            }
+                    in
+                    ( { newContext | map = mapUpdater newContext }
+                    , []
+                    , mapData
+                    )
+
+                DragPan startX startY ->
+                    --TODO: It would be slightly cleaner to work out the viewPlan once at grab time
+                    --TODO: and use that until released. But it's a small optimisation.
+                    let
+                        viewPlane =
+                            SketchPlane3d.withNormalDirection
+                                (Viewpoint3d.viewDirection <| Camera3d.viewpoint camera)
+                                context.focalPoint.space
+
+                        grabPointOnScreen =
+                            Point2d.pixels startX startY
+
+                        movePointOnScreen =
+                            Point2d.pixels dx dy
+
+                        grabPointInModel =
+                            Camera3d.ray camera screenRectangle grabPointOnScreen
+                                |> Axis3d.intersectionWithPlane (SketchPlane3d.toPlane viewPlane)
+
+                        movePointInModel =
+                            Camera3d.ray camera screenRectangle movePointOnScreen
+                                |> Axis3d.intersectionWithPlane (SketchPlane3d.toPlane viewPlane)
+
+                        newContext =
+                            case ( grabPointInModel, movePointInModel ) of
+                                ( Just pick, Just drop ) ->
+                                    let
+                                        shift =
+                                            Vector3d.from drop pick
+                                                |> Vector3d.projectInto viewPlane
+
+                                        newFocus =
+                                            Point2d.origin
+                                                |> Point2d.translateBy shift
+                                                |> Point3d.on viewPlane
+                                    in
+                                    { context
+                                        | focalPoint = withoutTime newFocus
+                                        , dragAction = DragPan dx dy
+                                    }
+
+                                _ ->
+                                    context
+                    in
+                    ( { newContext | map = mapUpdater newContext }
+                    , []
+                    , mapData
+                    )
+
+                DragPaint paintInfo ->
+                    let
+                        screenPoint =
+                            Point2d.pixels dx dy
+
+                        path =
+                            case pointLeafProximity camera track screenRectangle screenPoint of
+                                Just proximity ->
+                                    proximity :: paintInfo.path
+
+                                Nothing ->
+                                    paintInfo.path
+                    in
+                    ( { context | dragAction = DragPaint <| Drag3dCommonStructures.PaintInfo path }
+                    , []
+                    , mapData
+                    )
+
+                _ ->
+                    ( context, [], mapData )
+
+        ImageRelease _ ->
+            let
+                actions =
+                    case context.dragAction of
+                        DragPaint paintInfo ->
+                            -- One of those occasions where I'm pleased I have Actions, avoiding much plumbing.
+                            if List.length paintInfo.path > 2 then
+                                [ Actions.WithUndo <| Actions.FingerPaint paintInfo
+                                , Actions.FingerPaint paintInfo
+                                , Actions.TrackHasChanged
+                                ]
+
+                            else
+                                []
+
+                        _ ->
+                            []
+            in
+            ( { context | dragAction = DragNone }
+            , actions
             , mapData
             )
 

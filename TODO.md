@@ -18,7 +18,9 @@
 
 ## Should be able to paint in 3d view
 
-* Align the zoom levels with MapView.
+Finger painting works in 3D.
+Third and Plan updates only differ in ImageReset and ImageGrab.
+I can make that go away, then work on the tool painting concept!
 
 ## Use as tool applicator
 
