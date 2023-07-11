@@ -39,6 +39,14 @@ fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera 
             ( String.fromInt <| Pixels.inPixels givenWidth
             , String.fromInt <| Pixels.inPixels givenHeight
             )
+
+        circleFromProximity proximity =
+            Svg.circle2d
+                [ Svg.Attributes.stroke "red"
+                , Svg.Attributes.strokeWidth "1"
+                , Svg.Attributes.fill "white"
+                ]
+                (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
     in
     el
         [ centerX
@@ -48,25 +56,24 @@ fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera 
     <|
         case context.dragAction of
             DragPaint paintInfo ->
-                let
-                    paintNodes =
-                        paintInfo.path
-                            |> List.map
-                                (\proximity ->
-                                    Svg.circle2d
-                                        [ Svg.Attributes.stroke "red"
-                                        , Svg.Attributes.strokeWidth "1"
-                                        , Svg.Attributes.fill "white"
-                                        ]
-                                        (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
-                                )
-                in
                 html <|
                     Svg.svg
                         [ Svg.Attributes.width svgWidth
                         , Svg.Attributes.height svgHeight
                         ]
-                        paintNodes
+                    <|
+                        List.map circleFromProximity paintInfo.path
+
+            DragTool tool startInfo endInfo ->
+                --TODO: Add a line between these two points.
+                html <|
+                    Svg.svg
+                        [ Svg.Attributes.width svgWidth
+                        , Svg.Attributes.height svgHeight
+                        ]
+                        [ circleFromProximity startInfo
+                        , circleFromProximity endInfo
+                        ]
 
             _ ->
                 none

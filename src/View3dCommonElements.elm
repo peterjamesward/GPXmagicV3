@@ -373,6 +373,26 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                     , mapData
                     )
 
+                DragTool tool startPaintInfo endPaintInfo ->
+                    --Some playing around with how this should actually work to allow "cancel" effect of
+                    --being off-track.
+                    let
+                        screenPoint =
+                            Point2d.pixels dx dy
+
+                        newEnd =
+                            case pointLeafProximity camera track screenRectangle screenPoint of
+                                Just proximity ->
+                                    proximity
+
+                                Nothing ->
+                                    endPaintInfo
+                    in
+                    ( { context | dragAction = DragTool tool startPaintInfo newEnd }
+                    , []
+                    , mapData
+                    )
+
                 _ ->
                     ( context, [], mapData )
 
