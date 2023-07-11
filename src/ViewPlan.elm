@@ -38,6 +38,7 @@ import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
+import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colorFromElmUiColour)
 import Vector3d
@@ -123,8 +124,9 @@ view :
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
+    -> Maybe String
     -> Element msg
-view context mapData settings display contentArea track scene msgWrapper =
+view context mapData settings display contentArea track scene msgWrapper paintTool =
     let
         dragging =
             context.dragAction
@@ -150,7 +152,7 @@ view context mapData settings display contentArea track scene msgWrapper =
                 , Border.width 0
                 , Border.color FlatColors.ChinesePalette.peace
                 , inFront <| placesOverlay display contentArea track camera
-                , inFront <| fingerPaintingPreview context contentArea track camera
+                , inFront <| fingerPaintingPreview settings context contentArea track camera paintTool
                 , inFront <| onViewControls settings msgWrapper context
                 , if context.followSelectedPoint then
                     Cursor.default

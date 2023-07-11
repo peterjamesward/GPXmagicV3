@@ -1282,6 +1282,7 @@ viewPaneArea model =
             model.paneLayoutOptions
             model.toolOptions.flythroughSettings.flythrough
             model.previews
+            model.toolOptions.paintTool
 
 
 topLoadingBar : Model -> Element Msg

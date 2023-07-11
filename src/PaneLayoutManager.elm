@@ -929,8 +929,9 @@ viewPanes :
     -> PaneLayoutOptions
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
+    -> Maybe String
     -> Element msg
-viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFlythrough previews paintTool =
     let
         mTrack =
             Tracks.getActiveTrack tracksOptions
@@ -955,6 +956,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                                     track
                                     options.scene3d
                                     (msgWrapper << ThirdPersonViewMessage pane.paneId)
+                                    paintTool
 
                             _ ->
                                 none
@@ -988,6 +990,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                                     track
                                     options.scene3d
                                     (msgWrapper << PlanViewMessage pane.paneId)
+                                    paintTool
 
                             _ ->
                                 none

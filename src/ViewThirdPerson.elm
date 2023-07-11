@@ -33,6 +33,7 @@ import SceneBuilder3D
 import SketchPlane3d
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
+import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (..)
@@ -55,8 +56,9 @@ view :
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
+    -> Maybe String
     -> Element msg
-view settings mapData context display contentArea track scene msgWrapper =
+view settings mapData context display contentArea track scene msgWrapper paintTool =
     let
         dragging =
             context.dragAction
@@ -123,7 +125,7 @@ view settings mapData context display contentArea track scene msgWrapper =
                     pointer
                  )
                     :: (inFront <| placesOverlay display contentArea track camera)
-                    :: (inFront <| fingerPaintingPreview context contentArea track camera)
+                    :: (inFront <| fingerPaintingPreview settings context contentArea track camera paintTool)
                     :: (inFront <| onViewControls settings msgWrapper context)
                     :: common3dSceneAttributes msgWrapper context
                 )

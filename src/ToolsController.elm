@@ -2,12 +2,11 @@ module ToolsController exposing
     ( ColourTriplet
     , DockSettings
     , Options
-      --, ToolType(..)
-    , ToolCategory(..)
     , ToolDock(..)
     , ToolEntry
     , ToolMsg(..)
     , ToolState(..)
+    , ToolType(..)
     , anyToolsInLeftDock
     , clearPopups
     , colourDecoder
@@ -24,9 +23,11 @@ module ToolsController exposing
     , subscriptions
     , toolsForDock
     , update
+    , viewToolForPainting
     )
 
 import Actions exposing (ToolAction(..))
+import Color
 import ColourPalette exposing (stravaOrange)
 import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
@@ -37,7 +38,6 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Lazy
 import FeatherIcons
-import FlatColors.AmericanPalette
 import FlatColors.AussiePalette
 import FlatColors.CanadianPalette
 import FlatColors.ChinesePalette
@@ -50,7 +50,6 @@ import Json.Decode as D exposing (field, maybe)
 import Json.Encode as E
 import List.Extra
 import SystemSettings exposing (SystemSettings)
-import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
@@ -147,21 +146,13 @@ type ToolType
     | ToolTracks
 
 
-type ToolCategory
-    = TcInformation
-    | TcBends
-    | TcGradients
-    | TcWholeTrack
-    | TcRoute
-    | TcMisc
-
-
 type alias Options msg =
     -- Tool specific options
     { tools : Dict String ToolEntry
     , docks : Dict String DockSettings
     , azSort : Bool
     , compact : Bool
+    , paintTool : Maybe String
     , directionChangeOptions : DirectionChanges.Options
     , deleteOptions : DeletePoints.Options
     , essentialOptions : Tools.Essentials.Options
@@ -200,6 +191,7 @@ defaultOptions =
     , docks = Dict.fromList dockList
     , azSort = True
     , compact = True
+    , paintTool = Nothing
     , directionChangeOptions = DirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
     , essentialOptions = Tools.Essentials.defaultOptions
@@ -272,6 +264,7 @@ type ToolMsg
     | ToolTimestampMsg Tools.Timestamp.Msg
     | ToolRoutingMsg Tools.MapMatchingRouter.Msg
     | ToolTracksMsg Tools.Tracks.Msg
+    | ToolSetPaintTool String
 
 
 type alias ToolEntry =
@@ -326,6 +319,23 @@ orderedTools =
     , ( routingTool.toolId, routingTool )
     , ( tracksTool.toolId, tracksTool )
     ]
+
+
+paintingTools =
+    -- Keep controller here in charge of keeping track of what is painting.
+    Dict.fromList <|
+        [ ( deleteTool.toolId, deleteTool )
+        , ( bezierSplinesTool.toolId, bezierSplinesTool )
+        , ( centroidAverageTool.toolId, centroidAverageTool )
+        , ( curveFormerTool.toolId, curveFormerTool )
+        , ( bendSmootherTool.toolId, bendSmootherTool )
+        , ( smartSmootherTool.toolId, smartSmootherTool )
+        , ( nudgeTool.toolId, nudgeTool )
+        , ( simplifyTool.toolId, simplifyTool )
+        , ( interpolateTool.toolId, interpolateTool )
+        , ( profileSmoothTool.toolId, profileSmoothTool )
+        , ( straightenTool.toolId, straightenTool )
+        ]
 
 
 toolSettings : ToolEntry
@@ -1395,6 +1405,19 @@ update toolMsg isTrack msgWrapper options =
                 isTrack
                 newOptions
 
+        ToolSetPaintTool toolId ->
+            let
+                newPaintTool =
+                    if Just toolId == options.paintTool then
+                        Nothing
+
+                    else
+                        Just toolId
+            in
+            ( { options | paintTool = newPaintTool }
+            , []
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -2015,10 +2038,6 @@ viewToolLazy :
     -> ToolEntry
     -> Element msg
 viewToolLazy settings msgWrapper isTrack options toolEntry =
-    --TODO: V2: Modified Tool Summary show/hide only.
-    --TODO: Rename "Essentials" to "Markers"
-    --TODO: "Restore defaults" button in Tool Summary (not global options).
-    --TODO: Possibly, track slider in Essentials as per v2.
     let
         popup =
             inFront <|
@@ -2093,6 +2112,15 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
                                 nextToolState toolEntry.state
                 , label = I18N.text settings.location toolEntry.toolId "label"
                 }
+            , if toolEntry.state == Expanded && Dict.member toolEntry.toolId paintingTools then
+                Input.button
+                    [ alignRight ]
+                    { onPress = Just <| msgWrapper <| ToolSetPaintTool toolEntry.toolId
+                    , label = useIconWithSize 14 FeatherIcons.penTool
+                    }
+
+              else
+                none
             , if toolEntry.state == Expanded then
                 Input.button
                     [ alignRight
@@ -2115,6 +2143,36 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
           else
             none
         ]
+
+
+viewToolForPainting :
+    SystemSettings
+    -> Maybe String
+    -> Element msg
+viewToolForPainting settings toolId =
+    Debug.log "viewToolForPainting" <|
+        case toolId of
+            Just isTool ->
+                case Dict.get isTool paintingTools of
+                    Just toolEntry ->
+                        el
+                            [ centerX
+                            , alignTop
+                            , spacing 8
+                            , padding 7
+                            , Font.color <| contrastingColour toolEntry.tabColour
+                            , Background.color toolEntry.tabColour
+                            , Border.color <| contrastingColour toolEntry.tabColour
+                            , Border.roundEach { topRight = 0, topLeft = 0, bottomRight = 8, bottomLeft = 8 }
+                            ]
+                        <|
+                            I18N.text settings.location toolEntry.toolId "label"
+
+                    Nothing ->
+                        none
+
+            Nothing ->
+                none
 
 
 showDockOptions : SystemSettings -> (ToolMsg -> msg) -> ToolEntry -> Element msg

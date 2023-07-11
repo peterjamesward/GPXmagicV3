@@ -16,8 +16,6 @@
 
 # WIP
 
-* minimum point separation 10cm.
-
 Third and Plan updates only differ in ImageReset.
 > Perhaps I should "invert" it so that the common update is called first, and
 > simply delegate in the few cases required, or switch on context.viewMode.
@@ -35,6 +33,9 @@ Need to set the painting mode - should this be in Tools, on the View, both?
 > and only when both on track.
 * Show toolname (elm-ui) centre top of 3D contexts.
 * If possible, tools will work to the paint boundaries, not the existing trackpoints.
+
+Don't really want to update state in the Contexts; it's cleaner (elmish) to have fingerpainting
+state in Model and pass this into View and Update as required. I think.
 
 ---
 

@@ -1,12 +1,11 @@
 module FingerPainting exposing (..)
 
-import Angle
 import Camera3d exposing (Camera3d)
 import Circle2d
 import Direction2d
-import DomainModel exposing (GPXSource, RoadSection, asRecord, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, skipCount)
-import Drag3dCommonStructures exposing (DragAction(..), PaintInfo, PointLeafProximity)
-import Element exposing (Element, html, none)
+import DomainModel exposing (..)
+import Drag3dCommonStructures exposing (..)
+import Element exposing (Element, alignTop, centerX, el, html, inFront, none)
 import Geometry.Svg as Svg
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
@@ -16,51 +15,61 @@ import Quantity exposing (Quantity)
 import Spherical
 import Svg
 import Svg.Attributes
+import SystemSettings exposing (SystemSettings)
 import Tools.CentroidAverage
 import Tools.ProfileSmooth
 import Tools.Simplify
+import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import Utils
 import View3dCommonElements exposing (Context)
 
 
 fingerPaintingPreview :
-    Context
+    SystemSettings
+    -> Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> Camera3d Meters LocalCoords
+    -> Maybe String
     -> Element msg
-fingerPaintingPreview context ( givenWidth, givenHeight ) track camera =
+fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera paintTool =
     let
         ( svgWidth, svgHeight ) =
             ( String.fromInt <| Pixels.inPixels givenWidth
             , String.fromInt <| Pixels.inPixels givenHeight
             )
     in
-    case context.dragAction of
-        DragPaint paintInfo ->
-            let
-                paintNodes =
-                    paintInfo.path
-                        |> List.map
-                            (\proximity ->
-                                Svg.circle2d
-                                    [ Svg.Attributes.stroke "red"
-                                    , Svg.Attributes.strokeWidth "1"
-                                    , Svg.Attributes.fill "white"
-                                    ]
-                                    (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
-                            )
-            in
-            html <|
-                Svg.svg
-                    [ Svg.Attributes.width svgWidth
-                    , Svg.Attributes.height svgHeight
-                    ]
-                    paintNodes
+    el
+        [ centerX
+        , alignTop
+        , inFront <| ToolsController.viewToolForPainting settings paintTool
+        ]
+    <|
+        case context.dragAction of
+            DragPaint paintInfo ->
+                let
+                    paintNodes =
+                        paintInfo.path
+                            |> List.map
+                                (\proximity ->
+                                    Svg.circle2d
+                                        [ Svg.Attributes.stroke "red"
+                                        , Svg.Attributes.strokeWidth "1"
+                                        , Svg.Attributes.fill "white"
+                                        ]
+                                        (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
+                                )
+                in
+                html <|
+                    Svg.svg
+                        [ Svg.Attributes.width svgWidth
+                        , Svg.Attributes.height svgHeight
+                        ]
+                        paintNodes
 
-        _ ->
-            none
+            _ ->
+                none
 
 
 applyFingerPaint : PaintInfo -> TrackLoaded msg -> TrackLoaded msg

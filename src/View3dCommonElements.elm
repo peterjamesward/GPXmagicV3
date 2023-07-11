@@ -115,7 +115,7 @@ update :
     -> ( Context, List (ToolAction msg), MapViewer.MapData )
 update msg msgWrapper track ( width, height ) mapData context mapUpdater camera =
     --Anything NOT handled by ViewPlan or ViewThird drops through to here.
-    --We will need to deal with the different contexts.
+    --(Which is now everything except ImageReset!)
     let
         -- Let us have some information about the view, making dragging more precise.
         ( wFloat, hFloat ) =
