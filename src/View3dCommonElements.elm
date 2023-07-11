@@ -389,7 +389,7 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                                     endPaintInfo
                     in
                     ( { context | dragAction = DragTool tool startPaintInfo newEnd }
-                    , []
+                    , [ PaintToolPreview tool startPaintInfo endPaintInfo ]
                     , mapData
                     )
 

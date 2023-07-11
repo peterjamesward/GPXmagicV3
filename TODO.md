@@ -16,26 +16,12 @@
 
 # WIP
 
-Third and Plan updates only differ in ImageReset.
-> Perhaps I should "invert" it so that the common update is called first, and
-> simply delegate in the few cases required, or switch on context.viewMode.
-
-## Use as tool applicator
-
 Fingerpainting is a meta-tool. 
 
-Need to set the painting mode - should this be in Tools, on the View, both?
-> Context will have `paintMode: PaintMode`.
-> Try withe a brush icon in each tool to set the painting mode,
-> and then each tool has a fingerpaint apply function.
-> If second point is "off track", maybe there should be no action -- it's a "cancel".
-> If not freehand, show only the first and last points in SVG,
-> and only when both on track.
-* Show toolname (elm-ui) centre top of 3D contexts.
-* If possible, tools will work to the paint boundaries, not the existing trackpoints.
+* If possible, tools will work to the drawn boundaries, not the existing trackpoints.
 
-Don't really want to update state in the Contexts; it's cleaner (elmish) to have fingerpainting
-state in Model and pass this into View and Update as required. I think.
+> Implement Actions.PaintToolPreview.
+> Use similar structure for application on ImageDrop.
 
 ---
 

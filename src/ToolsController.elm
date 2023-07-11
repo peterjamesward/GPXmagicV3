@@ -31,6 +31,7 @@ import Color
 import ColourPalette exposing (stravaOrange)
 import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
+import Drag3dCommonStructures
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border

@@ -5,7 +5,7 @@ module Actions exposing (ToolAction(..), UndoEntry, actionTextForUndo)
 --TODO: See if life is just easier without this kerfuffle.
 
 import DomainModel exposing (GPXSource, PeteTree)
-import Drag3dCommonStructures exposing (PaintInfo)
+import Drag3dCommonStructures exposing (PaintInfo, PointLeafProximity)
 import File exposing (File)
 import Json.Decode as E
 import PreviewData exposing (PreviewData)
@@ -115,6 +115,7 @@ type
     | RemoveAllFromMap (List String)
     | ExternalCommand (Cmd msg)
     | FingerPaint PaintInfo
+    | PaintToolPreview String PointLeafProximity PointLeafProximity
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String
