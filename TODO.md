@@ -23,6 +23,13 @@
 > Implement Actions.PaintToolPreview.
 > Use similar structure for application on ImageDrop.
 
+I've not thought this through thoroughly but it may be that the generalised semantics of paint are:
+1. Insert a track point at each "proximity", by interpolation, local tree modification.
+2. Place Orange at the start, Purple at the end.
+3. Use the normal "apply to range" for the tool.
+
+Well, that would be sweet, would it not?
+
 ---
 
 # BACKLOG
