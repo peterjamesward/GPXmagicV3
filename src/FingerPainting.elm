@@ -47,6 +47,23 @@ fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera 
                 , Svg.Attributes.fill "white"
                 ]
                 (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
+
+        onOrOffTrack proximity =
+            if proximity.distanceFrom |> Quantity.greaterThan (Length.meters 2) then
+                Svg.circle2d
+                    [ Svg.Attributes.stroke "blue"
+                    , Svg.Attributes.strokeWidth "1"
+                    , Svg.Attributes.fill "none"
+                    ]
+                    (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
+
+            else
+                Svg.circle2d
+                    [ Svg.Attributes.stroke "red"
+                    , Svg.Attributes.strokeWidth "1"
+                    , Svg.Attributes.fill "white"
+                    ]
+                    (Circle2d.withRadius (Pixels.float 5) proximity.screenPoint)
     in
     el
         [ centerX
@@ -66,13 +83,14 @@ fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera 
 
             DragTool tool startInfo endInfo ->
                 --TODO: Add a line between these two points.
+                --TODO: Show a different symbol if second point aay from tarck
                 html <|
                     Svg.svg
                         [ Svg.Attributes.width svgWidth
                         , Svg.Attributes.height svgHeight
                         ]
-                        [ circleFromProximity startInfo
-                        , circleFromProximity endInfo
+                        [ onOrOffTrack startInfo
+                        , onOrOffTrack endInfo
                         ]
 
             _ ->

@@ -18,7 +18,7 @@
 
 Fingerpainting is a meta-tool. 
 
-* If possible, tools will work to the drawn boundaries, not the existing trackpoints.
+* If sensible & possible, tools will work to the drawn boundaries, not the existing trackpoints.
 
 > Implement Actions.PaintToolPreview.
 > Use similar structure for application on ImageDrop.

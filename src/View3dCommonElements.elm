@@ -396,8 +396,11 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                 _ ->
                     ( context, [], mapData )
 
-        ImageRelease _ ->
+        ImageRelease event ->
             let
+                screenPoint =
+                    Point2d.fromTuple Pixels.pixels event.offsetPos
+
                 actions =
                     case context.dragAction of
                         DragPaint paintInfo ->
@@ -410,6 +413,23 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
 
                             else
                                 []
+
+                        DragTool tool startPaintInfo endPaintInfo ->
+                            --Some playing around with how this should actually work to allow "cancel" effect of
+                            --being off-track.
+                            case pointLeafProximity camera track screenRectangle screenPoint of
+                                Just proximity ->
+                                    if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
+                                        [ WithUndo <| PaintToolApply tool startPaintInfo endPaintInfo
+                                        , PaintToolApply tool startPaintInfo endPaintInfo
+                                        , TrackHasChanged
+                                        ]
+
+                                    else
+                                        []
+
+                                Nothing ->
+                                    []
 
                         _ ->
                             []

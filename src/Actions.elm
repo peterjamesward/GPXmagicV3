@@ -40,10 +40,7 @@ type alias UndoEntry msg =
     }
 
 
-type
-    ToolAction msg
-    --TODO: Untangled this tangled web I wove. Or at least try.
-    --Perhaps by just doing one at a time.
+type ToolAction msg
     = NoAction
     | ReRender
     | WithUndo (ToolAction msg)
@@ -116,6 +113,7 @@ type
     | ExternalCommand (Cmd msg)
     | FingerPaint PaintInfo
     | PaintToolPreview String PointLeafProximity PointLeafProximity
+    | PaintToolApply String PointLeafProximity PointLeafProximity
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String
@@ -125,6 +123,10 @@ actionTextForUndo location action =
         case action of
             FingerPaint _ ->
                 "fingerpaint"
+
+            PaintToolApply tool _ _ ->
+                --First argument is id of tool, ha-ha.
+                tool
 
             DeletePointOrPoints _ _ ->
                 "delete1"
