@@ -8,12 +8,14 @@ module ToolsController exposing
     , ToolState(..)
     , ToolType(..)
     , anyToolsInLeftDock
+    , applyPaintTool
     , clearPopups
     , colourDecoder
     , decodeColour
     , defaultOptions
     , encodeColour
     , isToolOpen
+    , makePaintPreview
     , refreshOpenTools
     , restoreDockSettings
     , restoreMeasure
@@ -31,7 +33,7 @@ import Color
 import ColourPalette exposing (stravaOrange)
 import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
-import Drag3dCommonStructures
+import Drag3dCommonStructures exposing (PointLeafProximity)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -50,6 +52,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field, maybe)
 import Json.Encode as E
 import List.Extra
+import PreviewData exposing (PreviewData)
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
@@ -2174,6 +2177,16 @@ viewToolForPainting settings toolId =
 
             Nothing ->
                 none
+
+
+makePaintPreview : String -> PointLeafProximity -> PointLeafProximity -> Maybe PreviewData
+makePaintPreview tool point1 point2 =
+    Nothing
+
+
+applyPaintTool : String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
+applyPaintTool tool point1 point2 track =
+    track
 
 
 showDockOptions : SystemSettings -> (ToolMsg -> msg) -> ToolEntry -> Element msg
