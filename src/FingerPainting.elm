@@ -83,7 +83,6 @@ fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera 
 
             DragTool tool startInfo endInfo ->
                 --TODO: Add a line between these two points.
-                --TODO: Show a different symbol if second point aay from tarck
                 html <|
                     Svg.svg
                         [ Svg.Attributes.width svgWidth

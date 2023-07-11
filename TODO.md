@@ -16,7 +16,7 @@
 
 # WIP
 
-Fingerpainting is a meta-tool. 
+**Fingerpainting is a meta-tool.**
 
 * If sensible & possible, tools will work to the drawn boundaries, not the existing trackpoints.
 

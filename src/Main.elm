@@ -2285,6 +2285,25 @@ performActionsOnModel actions model =
                         { track | undos = [], redos = [] }
                         foldedModel
 
+                ( PaintToolPreview tool point1 point2, Just track ) ->
+                    case ToolsController.makePaintPreview tool point1 point2 of
+                        Just paintPreview ->
+                            { foldedModel
+                                | previews = Dict.insert "paint" paintPreview foldedModel.previews
+                                , needsRendering = True
+                            }
+
+                        Nothing ->
+                            { foldedModel
+                                | previews = Dict.remove "paint" foldedModel.previews
+                                , needsRendering = True
+                            }
+
+                ( PaintToolApply tool point1 point2, Just track ) ->
+                    updateActiveTrack
+                        (ToolsController.applyPaintTool tool point1 point2 track)
+                        foldedModel
+
                 _ ->
                     foldedModel
     in
