@@ -112,8 +112,9 @@ update :
     -> Context
     -> (Context -> MapViewer.Model)
     -> Camera3d Meters LocalCoords
+    -> Maybe String
     -> ( Context, List (ToolAction msg), MapViewer.MapData )
-update msg msgWrapper track ( width, height ) mapData context mapUpdater camera =
+update msg msgWrapper track ( width, height ) mapData context mapUpdater camera paintTool =
     --Anything NOT handled by ViewPlan or ViewThird drops through to here.
     --(Which is now everything except ImageReset!)
     let
@@ -243,20 +244,28 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                         DragPan x y
 
                 newState =
-                    if context.fingerPainting then
-                        case pointLeafProximity camera track screenRectangle screenPoint of
-                            Just proximity ->
-                                if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
-                                    DragPaint <| Drag3dCommonStructures.PaintInfo [ proximity ]
+                    case ( paintTool, pointLeafProximity camera track screenRectangle screenPoint ) of
+                        ( Just tool, Just proximity ) ->
+                            -- See if we can apply the named tool.
+                            if proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2) then
+                                DragTool tool proximity proximity
 
-                                else
-                                    dragging
-
-                            _ ->
+                            else
                                 dragging
 
-                    else
-                        dragging
+                        ( Nothing, Just proximity ) ->
+                            -- May be manually drawing, not applying another tool.
+                            if
+                                context.fingerPainting
+                                    && (proximity.distanceFrom |> Quantity.lessThanOrEqualTo (Length.meters 2))
+                            then
+                                DragPaint <| Drag3dCommonStructures.PaintInfo [ proximity ]
+
+                            else
+                                dragging
+
+                        _ ->
+                            dragging
             in
             ( { context
                 | dragAction = newState

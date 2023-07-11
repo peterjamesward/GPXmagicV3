@@ -245,8 +245,9 @@ update :
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> PaneLayoutOptions
     -> Dict String PreviewData
+    -> Maybe String
     -> ( PaneLayoutOptions, Tracks.Options msg, List (ToolAction msg) )
-update paneMsg msgWrapper tracks contentArea options previews =
+update paneMsg msgWrapper tracks contentArea options previews paintTool =
     let
         mTrack =
             Tracks.getActiveTrack tracks
@@ -393,6 +394,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 options.mapData
                                                 context
+                                                paintTool
                                     in
                                     ( Just newContextFromView, act, newMapData )
 
@@ -434,6 +436,7 @@ update paneMsg msgWrapper tracks contentArea options previews =
                                                 (dimensionsWithLayout options.paneLayout contentArea)
                                                 planContext
                                                 options.mapData
+                                                paintTool
                                     in
                                     ( Just new, act, newMapData )
 

@@ -823,6 +823,7 @@ update msg model =
                         model.contentArea
                         model.paneLayoutOptions
                         model.previews
+                        model.toolOptions.paintTool
 
                 newToolOptions =
                     { toolOptions | tracksOptions = newTracksOptions }

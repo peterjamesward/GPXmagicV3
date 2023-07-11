@@ -197,8 +197,9 @@ update :
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> MapViewer.MapData
     -> Context
+    -> Maybe String
     -> ( Context, List (ToolAction msg), MapViewer.MapData )
-update msg msgWrapper track ( width, height ) mapData context =
+update msg msgWrapper track ( width, height ) mapData context paintTool =
     let
         camera =
             deriveCamera track.referenceLonLat track.trackTree context track.currentPosition
@@ -239,6 +240,7 @@ update msg msgWrapper track ( width, height ) mapData context =
                 context
                 mapUpdater
                 camera
+                paintTool
 
 
 initialiseView :

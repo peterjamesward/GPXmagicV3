@@ -12,7 +12,8 @@ type DragAction
     = DragNone
     | DragRotate Float Float
     | DragPan Float Float
-    | DragPaint PaintInfo
+    | DragPaint PaintInfo -- freehand drawing, use entire path
+    | DragTool String PointLeafProximity PointLeafProximity -- applying tool, only keep start and end.
 
 
 type ScreenCoords
