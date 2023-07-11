@@ -1,7 +1,9 @@
 module FingerPainting exposing (..)
 
+import Angle
 import Camera3d exposing (Camera3d)
 import Circle2d
+import Direction2d
 import DomainModel exposing (GPXSource, RoadSection, asRecord, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, skipCount)
 import Drag3dCommonStructures exposing (DragAction(..), PaintInfo, PointLeafProximity)
 import Element exposing (Element, html, none)
@@ -11,6 +13,7 @@ import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Point3d
 import Quantity exposing (Quantity)
+import Spherical
 import Svg
 import Svg.Attributes
 import Tools.CentroidAverage
@@ -110,14 +113,27 @@ applyFingerPaintInternal paintInfo track =
                             else
                                 ( pathLast.leafIndex, pathHead.leafIndex + 2, List.reverse paintInfo.path )
 
+                        within10cm : GPXSource -> GPXSource -> Bool
+                        within10cm gpx1 gpx2 =
+                            -- Used as deduper to remove points closer than 10cm.
+                            Spherical.range
+                                ( gpx1.longitude |> Direction2d.toAngle
+                                , gpx1.latitude
+                                )
+                                ( gpx2.longitude |> Direction2d.toAngle
+                                , gpx2.latitude
+                                )
+                                |> Length.meters
+                                |> Quantity.lessThan (Length.centimeters 10)
+
                         newGpxPoints =
                             -- Splicing is more stable if we preserve the extremities?
-                            Utils.deDupe (==) <|
+                            --Utils.deDupe (==) <|
+                            Utils.deDupe within10cm <|
                                 gpxPointFromIndex preTrackPoint track.trackTree
                                     :: List.map makeNewGpxPointFromProximity locations
                                     ++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
 
-                        --++ [ gpxPointFromIndex postTrackPoint track.trackTree ]
                         makeNewGpxPointFromProximity : PointLeafProximity -> GPXSource
                         makeNewGpxPointFromProximity proximity =
                             let

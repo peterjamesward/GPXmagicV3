@@ -16,9 +16,8 @@
 
 # WIP
 
-## Should be able to paint in 3d view
+* minimum point separation 10cm.
 
-Finger painting works in 3D.
 Third and Plan updates only differ in ImageReset.
 > Perhaps I should "invert" it so that the common update is called first, and
 > simply delegate in the few cases required, or switch on context.viewMode.
@@ -26,12 +25,16 @@ Third and Plan updates only differ in ImageReset.
 ## Use as tool applicator
 
 Fingerpainting is a meta-tool. 
-Should be able to use it to Straighten, Smooth, more, without needing to place markers.
-Indeed, may be more useful as such.
+
 Need to set the painting mode - should this be in Tools, on the View, both?
-> May be quite easy to have a brush icon in each tool, which sets the painting mode,
+> Context will have `paintMode: PaintMode`.
+> Try withe a brush icon in each tool to set the painting mode,
 > and then each tool has a fingerpaint apply function.
 > If second point is "off track", maybe there should be no action -- it's a "cancel".
+> If not freehand, show only the first and last points in SVG,
+> and only when both on track.
+* Show toolname (elm-ui) centre top of 3D contexts.
+* If possible, tools will work to the paint boundaries, not the existing trackpoints.
 
 ---
 
