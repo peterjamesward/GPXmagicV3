@@ -1420,9 +1420,17 @@ update toolMsg isTrack msgWrapper options =
 
                     else
                         Just toolId
+
+                ( newOptions, actions ) =
+                    -- See if this will hide any current preview.
+                    toolStateHasChanged
+                        toolId
+                        False
+                        isTrack
+                        { options | paintTool = newPaintTool }
             in
-            ( { options | paintTool = newPaintTool }
-            , []
+            ( newOptions
+            , actions
             )
 
 
@@ -1455,6 +1463,7 @@ toolStateHasChanged :
     -> Options msg
     -> ( Options msg, List (ToolAction msg) )
 toolStateHasChanged toolId showPreviews isTrack options =
+    --TODO: Factor out the "StoreLocally" aspect.
     case
         Dict.get toolId options.tools
             |> Maybe.map .toolType
@@ -1464,8 +1473,6 @@ toolStateHasChanged toolId showPreviews isTrack options =
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolAbruptDirectionChanges ->
-            -- Would like an OO style dispatch table here but what with each tool
-            -- having its own options, that's more tricky than it's worth.
             let
                 ( newToolOptions, actions ) =
                     DirectionChanges.toolStateChange
@@ -2212,9 +2219,6 @@ makePaintPreview options toolId point1 point2 track =
             ( _, actions ) =
                 toolStateHasChanged toolId True trackWithPaintPointsAdded options
 
-            _ =
-                Debug.log "ACTIONS" actions
-
             preview =
                 actions
                     |> List.filterMap
@@ -2235,7 +2239,33 @@ makePaintPreview options toolId point1 point2 track =
 
 applyPaintTool : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
 applyPaintTool tools toolId point1 point2 track =
-    track
+    -- Oh! Sneaky.
+    case makePaintPreview tools toolId point1 point2 track of
+        Just previewData ->
+            let
+                trackWithPaintPointsAdded =
+                    TrackLoaded.insertPointsAt point1 point2 track
+
+                ( fromStart, fromEnd ) =
+                    TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
+
+                newTree =
+                    DomainModel.replaceRange
+                        fromStart
+                        fromEnd
+                        track.referenceLonLat
+                        (List.map .gpx previewData.points)
+                        trackWithPaintPointsAdded.trackTree
+            in
+            case newTree of
+                Just isTree ->
+                    { trackWithPaintPointsAdded | trackTree = isTree }
+
+                Nothing ->
+                    track
+
+        Nothing ->
+            track
 
 
 showDockOptions : SystemSettings -> (ToolMsg -> msg) -> ToolEntry -> Element msg

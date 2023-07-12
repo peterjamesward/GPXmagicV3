@@ -18,19 +18,16 @@
 
 **Fingerpainting is a meta-tool.**
 
-> Implement Actions.PaintToolPreview.
+> Implement Actions.PaintToolPreview. DONE barring special cases.
 > Use similar structure for application on ImageDrop.
+
+* Stop tools from showing **any** other preview while painting is enabled (ToolsController).
 
 I've not thought this through thoroughly but the generalised semantics of "paint" may be:
 1. Insert a track point at each "proximity", by interpolation, localised tree modification.
 2. Place Orange at the new start, Purple at the new end.
 3. Use the normal "apply to range" for the tool.
 4. Leave pointers in these places, e.g for adjusting Nudge.
-
-* Preview is not right yet.
-* You can see what's going wrong using Insert.
-
-* Need to hide "normal" preview when using freehand preview. Perhap just use same tag.
 
 Solution is not quite that generic as some tools may have particular interpretations.
 For example, Radiused bends could try to use the middle of the line joining the ends as the centre
