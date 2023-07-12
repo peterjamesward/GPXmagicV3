@@ -1462,8 +1462,18 @@ toolStateHasChanged :
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> ( Options msg, List (ToolAction msg) )
-toolStateHasChanged toolId showPreviews isTrack options =
+toolStateHasChanged toolId requestPreviews isTrack options =
     --TODO: Factor out the "StoreLocally" aspect.
+    --If using freehand paint mode, only preview the tool that is the painting tool.
+    let
+        showPreviews =
+            case options.paintTool of
+                Just paintTool ->
+                    requestPreviews && (toolId == paintTool)
+
+                Nothing ->
+                    requestPreviews
+    in
     case
         Dict.get toolId options.tools
             |> Maybe.map .toolType
