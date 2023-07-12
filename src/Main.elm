@@ -2286,10 +2286,10 @@ performActionsOnModel actions model =
                         foldedModel
 
                 ( PaintToolPreview tool point1 point2, Just track ) ->
-                    case ToolsController.makePaintPreview tool point1 point2 of
+                    case ToolsController.makePaintPreview foldedModel.toolOptions tool point1 point2 track of
                         Just paintPreview ->
                             { foldedModel
-                                | previews = Dict.insert "paint" paintPreview foldedModel.previews
+                                | previews = Dict.insert paintPreview.tag paintPreview foldedModel.previews
                                 , needsRendering = True
                             }
 
@@ -2301,8 +2301,10 @@ performActionsOnModel actions model =
 
                 ( PaintToolApply tool point1 point2, Just track ) ->
                     updateActiveTrack
-                        (ToolsController.applyPaintTool tool point1 point2 track)
-                        foldedModel
+                        (ToolsController.applyPaintTool foldedModel.toolOptions tool point1 point2 track)
+                        { foldedModel
+                            | previews = Dict.remove "paint" foldedModel.previews
+                        }
 
                 _ ->
                     foldedModel

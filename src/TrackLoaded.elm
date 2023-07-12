@@ -9,6 +9,7 @@ module TrackLoaded exposing
     , getRangeFromMarkers
     , getReferencePoint
     , indexLeaves
+    , insertPointsAt
     , newTrackFromTree
     , previewFromTree
     , removeAdjacentDuplicates
@@ -21,6 +22,7 @@ module TrackLoaded exposing
 
 import Actions exposing (ToolAction, UndoEntry)
 import DomainModel exposing (..)
+import Drag3dCommonStructures exposing (PointLeafProximity)
 import LandUseDataTypes
 import LeafIndex exposing (LeafIndex)
 import Length
@@ -201,6 +203,45 @@ changeReferencePoint newReference track =
     { track
         | trackTree = changedTree
         , referenceLonLat = newReference
+    }
+
+
+insertPointsAt : PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
+insertPointsAt point1 point2 track =
+    {-
+       This supports the freehand tool application, which adds points to reflect drawing start and end.
+       These will also become the new marked points.
+    -}
+    let
+        ( leaf1, leaf2, swapped ) =
+            if point1.leafIndex <= point2.leafIndex then
+                ( point1.leafIndex, point2.leafIndex, False )
+
+            else
+                ( point2.leafIndex, point1.leafIndex, True )
+
+        ( gpx1, gpx2 ) =
+            -- Domain model wants GPX coordinates
+            ( DomainModel.gpxFromPointWithReference track.referenceLonLat <| withoutTime point1.worldPoint
+            , DomainModel.gpxFromPointWithReference track.referenceLonLat <| withoutTime point2.worldPoint
+            )
+
+        newTree =
+            --NOTE: Care to insert highest numbered leaf first, or numbers are messed up!
+            if swapped then
+                track.trackTree
+                    |> DomainModel.insertPointsIntoLeaf point2.leafIndex track.referenceLonLat [ gpx2 ]
+                    |> DomainModel.insertPointsIntoLeaf point1.leafIndex track.referenceLonLat [ gpx1 ]
+
+            else
+                track.trackTree
+                    |> DomainModel.insertPointsIntoLeaf point1.leafIndex track.referenceLonLat [ gpx1 ]
+                    |> DomainModel.insertPointsIntoLeaf point2.leafIndex track.referenceLonLat [ gpx2 ]
+    in
+    { track
+        | trackTree = newTree
+        , currentPosition = leaf1 + 1 -- Should be first inserted point.
+        , markerPosition = Just <| leaf2 + 2 -- end of leaf, plus two inserted points.
     }
 
 

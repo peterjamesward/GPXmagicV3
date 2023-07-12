@@ -502,11 +502,6 @@ identifyPointsToBeMerged tolerance graph =
                 insertPointsInLeaf : Int -> List ProjectedPointOnLeaf -> PeteTree -> PeteTree
                 insertPointsInLeaf leafNumber newPoints tree =
                     let
-                        --_ =
-                        --    Debug.log "asGPX" asGPX
-                        --
-                        --_ =
-                        --    Debug.log "graph.referenceLonLat" graph.referenceLonLat
                         asGPX =
                             List.map
                                 (.projectedPoint

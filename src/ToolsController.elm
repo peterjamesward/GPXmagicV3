@@ -33,6 +33,7 @@ import Color
 import ColourPalette exposing (stravaOrange)
 import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
+import DomainModel
 import Drag3dCommonStructures exposing (PointLeafProximity)
 import Element exposing (..)
 import Element.Background as Background
@@ -51,8 +52,10 @@ import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field, maybe)
 import Json.Encode as E
+import Length
 import List.Extra
 import PreviewData exposing (PreviewData)
+import Quantity
 import SystemSettings exposing (SystemSettings)
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
@@ -2154,38 +2157,84 @@ viewToolForPainting :
     -> Maybe String
     -> Element msg
 viewToolForPainting settings toolId =
-    Debug.log "viewToolForPainting" <|
-        case toolId of
-            Just isTool ->
-                case Dict.get isTool paintingTools of
-                    Just toolEntry ->
-                        el
-                            [ centerX
-                            , alignTop
-                            , spacing 8
-                            , padding 7
-                            , Font.color <| contrastingColour toolEntry.tabColour
-                            , Background.color toolEntry.tabColour
-                            , Border.color <| contrastingColour toolEntry.tabColour
-                            , Border.roundEach { topRight = 0, topLeft = 0, bottomRight = 8, bottomLeft = 8 }
-                            ]
-                        <|
-                            I18N.text settings.location toolEntry.toolId "label"
+    case toolId of
+        Just isTool ->
+            case Dict.get isTool paintingTools of
+                Just toolEntry ->
+                    el
+                        [ centerX
+                        , alignTop
+                        , spacing 8
+                        , padding 7
+                        , Font.color <| contrastingColour toolEntry.tabColour
+                        , Background.color toolEntry.tabColour
+                        , Border.color <| contrastingColour toolEntry.tabColour
+                        , Border.roundEach { topRight = 0, topLeft = 0, bottomRight = 8, bottomLeft = 8 }
+                        ]
+                    <|
+                        I18N.text settings.location toolEntry.toolId "label"
 
-                    Nothing ->
-                        none
+                Nothing ->
+                    none
 
-            Nothing ->
-                none
-
-
-makePaintPreview : String -> PointLeafProximity -> PointLeafProximity -> Maybe PreviewData
-makePaintPreview tool point1 point2 =
-    Nothing
+        Nothing ->
+            none
 
 
-applyPaintTool : String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
-applyPaintTool tool point1 point2 track =
+makePaintPreview :
+    Options msg
+    -> String
+    -> PointLeafProximity
+    -> PointLeafProximity
+    -> TrackLoaded msg
+    -> Maybe PreviewData
+makePaintPreview options toolId point1 point2 track =
+    --Delegate to the tool to do its normal (or not normal) preview creation.
+    --Should return Nothing if there is no "solution".
+    --We won't even bother calling it unless the end points are distinct and on-track.
+    --TODO: Some tools are special (Radiused Bends) and may have their own methods, this is the default.
+    let
+        pointsAreDifferent =
+            point1.leafIndex
+                /= point2.leafIndex
+                || point1.proportionAlong
+                /= point2.proportionAlong
+
+        trackWithPaintPointsAdded =
+            Just <| TrackLoaded.insertPointsAt point1 point2 track
+    in
+    if
+        pointsAreDifferent
+            && Quantity.lessThanOrEqualTo (Length.meters 2) point1.distanceFrom
+            && Quantity.lessThanOrEqualTo (Length.meters 2) point2.distanceFrom
+    then
+        let
+            ( _, actions ) =
+                toolStateHasChanged toolId True trackWithPaintPointsAdded options
+
+            _ =
+                Debug.log "ACTIONS" actions
+
+            preview =
+                actions
+                    |> List.filterMap
+                        (\act ->
+                            case act of
+                                ShowPreview previewData ->
+                                    Just previewData
+
+                                _ ->
+                                    Nothing
+                        )
+        in
+        List.head preview
+
+    else
+        Nothing
+
+
+applyPaintTool : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
+applyPaintTool tools toolId point1 point2 track =
     track
 
 

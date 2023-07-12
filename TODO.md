@@ -18,17 +18,26 @@
 
 **Fingerpainting is a meta-tool.**
 
-* If sensible & possible, tools will work to the drawn boundaries, not the existing trackpoints.
-
 > Implement Actions.PaintToolPreview.
 > Use similar structure for application on ImageDrop.
 
-I've not thought this through thoroughly but it may be that the generalised semantics of paint are:
-1. Insert a track point at each "proximity", by interpolation, local tree modification.
-2. Place Orange at the start, Purple at the end.
+I've not thought this through thoroughly but the generalised semantics of "paint" may be:
+1. Insert a track point at each "proximity", by interpolation, localised tree modification.
+2. Place Orange at the new start, Purple at the new end.
 3. Use the normal "apply to range" for the tool.
+4. Leave pointers in these places, e.g for adjusting Nudge.
 
-Well, that would be sweet, would it not?
+* Preview is not right yet.
+* You can see what's going wrong using Insert.
+
+* Need to hide "normal" preview when using freehand preview. Perhap just use same tag.
+
+Solution is not quite that generic as some tools may have particular interpretations.
+For example, Radiused bends could try to use the middle of the line joining the ends as the centre
+of the circle. This would allow for rapid experimentation, fairly conveniently.
+Could still be true about the inserted points though, just that there's still a special
+entry point for the tool in paint mode. Maybe that's just a case toolType for the few special cases
+with an "otherwise (_)" clause.
 
 ---
 
