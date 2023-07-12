@@ -25,10 +25,10 @@ import DomainModel exposing (..)
 import Drag3dCommonStructures exposing (PointLeafProximity)
 import LandUseDataTypes
 import LeafIndex exposing (LeafIndex)
-import Length
+import Length exposing (Meters)
 import Point3d
 import PreviewData exposing (PreviewPoint)
-import Quantity
+import Quantity exposing (Quantity)
 import SpatialIndex
 import Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment)
 import Utils
@@ -213,35 +213,31 @@ insertPointsAt point1 point2 track =
        These will also become the new marked points.
     -}
     let
-        ( leaf1, leaf2, swapped ) =
-            if point1.leafIndex <= point2.leafIndex then
-                ( point1.leafIndex, point2.leafIndex, False )
+        distanceOf : PointLeafProximity -> Quantity Float Meters
+        distanceOf proximity =
+            --More robust to use distance to specify insertion, not order-dependent.
+            Quantity.interpolateFrom
+                (distanceFromIndex proximity.leafIndex track.trackTree)
+                (distanceFromIndex (proximity.leafIndex + 1) track.trackTree)
+                proximity.proportionAlong
 
-            else
-                ( point2.leafIndex, point1.leafIndex, True )
-
-        ( gpx1, gpx2 ) =
-            -- Domain model wants GPX coordinates
-            ( DomainModel.gpxFromPointWithReference track.referenceLonLat <| withoutTime point1.worldPoint
-            , DomainModel.gpxFromPointWithReference track.referenceLonLat <| withoutTime point2.worldPoint
-            )
+        insertPointAt : Quantity Float Meters -> EarthPoint -> PeteTree -> PeteTree
+        insertPointAt distance earthPoint tree =
+            DomainModel.insertPointsIntoLeaf
+                (indexFromDistanceRoundedDown distance tree)
+                track.referenceLonLat
+                [ gpxFromPointWithReference track.referenceLonLat earthPoint ]
+                tree
 
         newTree =
-            --NOTE: Care to insert highest numbered leaf first, or numbers are messed up!
-            if swapped then
-                track.trackTree
-                    |> DomainModel.insertPointsIntoLeaf point2.leafIndex track.referenceLonLat [ gpx2 ]
-                    |> DomainModel.insertPointsIntoLeaf point1.leafIndex track.referenceLonLat [ gpx1 ]
-
-            else
-                track.trackTree
-                    |> DomainModel.insertPointsIntoLeaf point1.leafIndex track.referenceLonLat [ gpx1 ]
-                    |> DomainModel.insertPointsIntoLeaf point2.leafIndex track.referenceLonLat [ gpx2 ]
+            track.trackTree
+                |> insertPointAt (distanceOf point1) (withoutTime point1.worldPoint)
+                |> insertPointAt (distanceOf point2) (withoutTime point2.worldPoint)
     in
     { track
         | trackTree = newTree
-        , currentPosition = leaf1 + 1 -- Should be first inserted point.
-        , markerPosition = Just <| leaf2 + 2 -- end of leaf, plus two inserted points.
+        , currentPosition = indexFromDistance (distanceOf point1) newTree
+        , markerPosition = Just <| indexFromDistance (distanceOf point2) newTree
     }
 
 
