@@ -2229,7 +2229,12 @@ makePaintPreview options toolId point1 point2 track =
     then
         let
             ( _, actions ) =
-                toolStateHasChanged toolId True trackWithPaintPointsAdded options
+                --Last argument is hack to force preview.
+                toolStateHasChanged
+                    toolId
+                    True
+                    trackWithPaintPointsAdded
+                    { options | paintTool = Nothing }
 
             preview =
                 actions

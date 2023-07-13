@@ -20,28 +20,25 @@
 
 * Snagging
 
-> Apply paint allows normal tool preview to return. 
-> Do tools need to know they are modal?
+Should closing the paint tool exit paint mode? Probably.
+Should there be a button on the view to exit paint mode? Probably.
 
-> Splines -- not sure if this works or not.
+Tools to work through
+> Insert -- sets orange & purple incorrectly
+> Splines -- does not set orange & purple
 > Centroid
-> Smooth with arcs (Curly-wurly not happy)
+> Smooth with arcs 
 > Smart smoother
 > Nudge
 > Simplify
 > Profile smoothing
 > Straighten
+> Radiused bends, if in scope
 
-Solution is not quite generic as some tools may have particular interpretations.
-For example, Radiused bends could try to use the middle of the line joining the ends as the centre
-of the circle. This would allow for rapid experimentation, fairly conveniently.
-Could still be true about the inserted points though, just that there's still a special
-entry point for the tool in paint mode. Maybe that's just a case toolType for the few special cases
-with an "otherwise (_)" clause.
+Make it clearer (in the view) when using freehand drawing mode.
 
-Make it clearer (in the view) when using freehand mode.
-
-* In Freehand mode, click within a foot of track point activates direct dragging of that point.
+* In Freehand drawing mode, click within a foot of track point activates direct dragging of that 
+  point.
 
 ---
 
