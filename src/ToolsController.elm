@@ -2171,12 +2171,13 @@ viewToolLazy settings msgWrapper isTrack options toolEntry =
 
 viewToolForPainting :
     SystemSettings
+    -> Options msg
     -> Maybe String
     -> Element msg
-viewToolForPainting settings toolId =
+viewToolForPainting settings options toolId =
     case toolId of
         Just isTool ->
-            case Dict.get isTool paintingTools of
+            case Dict.get isTool options.tools of
                 Just toolEntry ->
                     el
                         [ centerX
@@ -2250,6 +2251,13 @@ makePaintPreview options toolId point1 point2 track =
 applyPaintTool : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
 applyPaintTool tools toolId point1 point2 track =
     --TODO: Use tool-specific apply, as semantics vary.
+    case toolId of
+        _ ->
+            applyPaintToolGeneric tools toolId point1 point2 track
+
+
+applyPaintToolGeneric : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
+applyPaintToolGeneric tools toolId point1 point2 track =
     --This was good PoC.
     case makePaintPreview tools toolId point1 point2 track of
         Just previewData ->

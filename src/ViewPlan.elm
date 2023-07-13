@@ -120,13 +120,14 @@ view :
     -> MapViewer.MapData
     -> SystemSettings
     -> Tools.DisplaySettingsOptions.Options
+    -> ToolsController.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Maybe String
     -> Element msg
-view context mapData settings display contentArea track scene msgWrapper paintTool =
+view context mapData settings display tools contentArea track scene msgWrapper paintTool =
     let
         dragging =
             context.dragAction
@@ -152,7 +153,7 @@ view context mapData settings display contentArea track scene msgWrapper paintTo
                 , Border.width 0
                 , Border.color FlatColors.ChinesePalette.peace
                 , inFront <| placesOverlay display contentArea track camera
-                , inFront <| fingerPaintingPreview settings context contentArea track camera paintTool
+                , inFront <| fingerPaintingPreview settings tools context contentArea paintTool
                 , inFront <| onViewControls settings msgWrapper context
                 , if context.followSelectedPoint then
                     Cursor.default

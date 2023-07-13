@@ -928,13 +928,14 @@ viewPanes :
     -> (Msg -> msg)
     -> Tracks.Options msg
     -> Tools.DisplaySettingsOptions.Options
+    -> ToolsController.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> PaneLayoutOptions
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Maybe String
     -> Element msg
-viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFlythrough previews paintTool =
+viewPanes settings msgWrapper tracksOptions displayOptions tools ( w, h ) options mFlythrough previews paintTool =
     let
         mTrack =
             Tracks.getActiveTrack tracksOptions
@@ -955,6 +956,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                                     options.mapData
                                     context
                                     displayOptions
+                                    tools
                                     ( paneWidth, paneHeight )
                                     track
                                     options.scene3d
@@ -989,6 +991,7 @@ viewPanes settings msgWrapper tracksOptions displayOptions ( w, h ) options mFly
                                     options.mapData
                                     settings
                                     displayOptions
+                                    tools
                                     ( paneWidth, paneHeight )
                                     track
                                     options.scene3d

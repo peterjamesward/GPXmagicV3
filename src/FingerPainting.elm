@@ -27,13 +27,12 @@ import View3dCommonElements exposing (Context)
 
 fingerPaintingPreview :
     SystemSettings
+    -> ToolsController.Options msg
     -> Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> TrackLoaded msg
-    -> Camera3d Meters LocalCoords
     -> Maybe String
     -> Element msg
-fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera paintTool =
+fingerPaintingPreview settings tools context ( givenWidth, givenHeight ) paintTool =
     let
         ( svgWidth, svgHeight ) =
             ( String.fromInt <| Pixels.inPixels givenWidth
@@ -68,7 +67,7 @@ fingerPaintingPreview settings context ( givenWidth, givenHeight ) track camera 
     el
         [ centerX
         , alignTop
-        , inFront <| ToolsController.viewToolForPainting settings paintTool
+        , inFront <| ToolsController.viewToolForPainting settings tools paintTool
         ]
     <|
         case context.dragAction of

@@ -1279,6 +1279,7 @@ viewPaneArea model =
             PaneMsg
             model.toolOptions.tracksOptions
             model.toolOptions.displaySettings
+            model.toolOptions
             model.contentArea
             model.paneLayoutOptions
             model.toolOptions.flythroughSettings.flythrough

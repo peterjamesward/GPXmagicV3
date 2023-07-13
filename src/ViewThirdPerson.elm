@@ -52,13 +52,14 @@ view :
     -> MapViewer.MapData
     -> Context
     -> Tools.DisplaySettingsOptions.Options
+    -> ToolsController.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Maybe String
     -> Element msg
-view settings mapData context display contentArea track scene msgWrapper paintTool =
+view settings mapData context display tools contentArea track scene msgWrapper paintTool =
     let
         dragging =
             context.dragAction
@@ -125,7 +126,7 @@ view settings mapData context display contentArea track scene msgWrapper paintTo
                     pointer
                  )
                     :: (inFront <| placesOverlay display contentArea track camera)
-                    :: (inFront <| fingerPaintingPreview settings context contentArea track camera paintTool)
+                    :: (inFront <| fingerPaintingPreview settings tools context contentArea paintTool)
                     :: (inFront <| onViewControls settings msgWrapper context)
                     :: common3dSceneAttributes msgWrapper context
                 )
