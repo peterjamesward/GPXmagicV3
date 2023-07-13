@@ -1469,8 +1469,9 @@ toolStateHasChanged toolId requestPreviews isTrack options =
         showPreviews =
             case options.paintTool of
                 Just paintTool ->
-                    requestPreviews && (toolId == paintTool)
+                    False
 
+                --requestPreviews && (toolId == paintTool)
                 Nothing ->
                     requestPreviews
     in

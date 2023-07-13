@@ -23,13 +23,12 @@
 > Apply paint allows normal tool preview to return. 
 > Do tools need to know they are modal?
 
-> Splines
+> Splines -- not sure if this works or not.
 > Centroid
-> Smooth with arcs Curly-wurly not happy.
+> Smooth with arcs (Curly-wurly not happy)
 > Smart smoother
 > Nudge
 > Simplify
-> Insert
 > Profile smoothing
 > Straighten
 
