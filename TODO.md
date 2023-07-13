@@ -22,6 +22,7 @@
 
 Should closing the paint tool exit paint mode? Probably.
 Should there be a button on the view to exit paint mode? Probably.
+Undo text is wrong.
 
 Tools to work through
 > Insert -- sets orange & purple incorrectly
@@ -35,7 +36,11 @@ Tools to work through
 > Straighten
 > Radiused bends, if in scope
 
+Move start and end points to the centreline.
+
 Make it clearer (in the view) when using freehand drawing mode.
+
+Add drawing icon to Tools Summary.
 
 * In Freehand drawing mode, click within a foot of track point activates direct dragging of that 
   point.
