@@ -2249,7 +2249,8 @@ makePaintPreview options toolId point1 point2 track =
 
 applyPaintTool : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
 applyPaintTool tools toolId point1 point2 track =
-    -- Oh! Sneaky.
+    --TODO: Use tool-specific apply, as semantics vary.
+    --This was good PoC.
     case makePaintPreview tools toolId point1 point2 track of
         Just previewData ->
             let
@@ -2266,10 +2267,36 @@ applyPaintTool tools toolId point1 point2 track =
                         track.referenceLonLat
                         (List.map .gpx previewData.points)
                         trackWithPaintPointsAdded.trackTree
+
+                sameCountFromEnd x =
+                    DomainModel.skipCount (Maybe.withDefault track.trackTree newTree)
+                        - (DomainModel.skipCount track.trackTree - x)
+
+                ( newOrange, newPurple ) =
+                    case track.markerPosition of
+                        Just purple ->
+                            if track.currentPosition <= purple then
+                                --Orange from start, purple from end
+                                ( track.currentPosition
+                                , Just <| sameCountFromEnd purple
+                                )
+
+                            else
+                                --Orange from end, purple from start
+                                ( sameCountFromEnd track.currentPosition
+                                , Just purple
+                                )
+
+                        Nothing ->
+                            ( track.currentPosition, Nothing )
             in
             case newTree of
                 Just isTree ->
-                    { trackWithPaintPointsAdded | trackTree = isTree }
+                    { trackWithPaintPointsAdded
+                        | trackTree = isTree
+                        , currentPosition = newOrange
+                        , markerPosition = newPurple
+                    }
 
                 Nothing ->
                     track

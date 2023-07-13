@@ -16,10 +16,14 @@
 
 # WIP
 
-**Fingerpainting is a meta-tool.**
+## Fingerpainting as a meta-tool
 
 > Apply is close.
+> Delete is not working at all. Insert does something. Curly-wurly not happy.
+> Is this because of inconsistent marker semantics?
+> If so, what is to be done?
 
+* Colour for in-view tool name needs to come from active tool set, not the static version.
 
 Solution is not quite generic as some tools may have particular interpretations.
 For example, Radiused bends could try to use the middle of the line joining the ends as the centre
@@ -28,6 +32,11 @@ Could still be true about the inserted points though, just that there's still a 
 entry point for the tool in paint mode. Maybe that's just a case toolType for the few special cases
 with an "otherwise (_)" clause.
 
+Make it clearer (in the view) when using freehand mode.
+
+* In Freehand mode, click within one foot of a track point should allo direct dragging of that 
+  point. Or (more complex) there is a selection mode and then a drag phase.
+
 ---
 
 # BACKLOG
@@ -35,6 +44,12 @@ with an "otherwise (_)" clause.
 ## Synthesizer
 
 FFT generators for theta (or X, Y) & phi (or Z) as function of s.
+
+## Pointer restore after edits
+
+Surely (?) (fromStart, fromEnd) works for ALL edits? If so, do it in one place!
+No. It does not work for Delete, Nudge (with fade), Radiused bends, perhaps others.
+Good where it works though.
 
 ## Smart smoother
 
