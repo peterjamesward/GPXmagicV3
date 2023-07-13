@@ -23,7 +23,6 @@
 > Apply paint allows normal tool preview to return. 
 > Do tools need to know they are modal?
 
-> Insert previews exclude existing points, so must use tool apply.
 > Splines
 > Centroid
 > Smooth with arcs Curly-wurly not happy.

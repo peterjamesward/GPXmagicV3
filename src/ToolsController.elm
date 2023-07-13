@@ -74,7 +74,7 @@ import Tools.Essentials
 import Tools.Flythrough
 import Tools.GradientProblems
 import Tools.I18N as I18N
-import Tools.Interpolate
+import Tools.Interpolate as Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
 import Tools.LandUse
@@ -212,7 +212,7 @@ defaultOptions =
     , displaySettings = Tools.DisplaySettings.defaultOptions
     , outAndBackSettings = Tools.OutAndBack.defaultOptions
     , simplifySettings = Tools.Simplify.defaultOptions
-    , interpolateSettings = Tools.Interpolate.defaultOptions
+    , interpolateSettings = Interpolate.defaultOptions
     , profileSmoothSettings = Tools.ProfileSmooth.defaultOptions
     , moveScaleRotateSettings = Tools.MoveScaleRotate.defaultOptions
     , flythroughSettings = Tools.Flythrough.defaultOptions
@@ -255,7 +255,7 @@ type ToolMsg
     | ToolDisplaySettingMsg Tools.DisplaySettings.Msg
     | ToolOutAndBackMsg Tools.OutAndBack.Msg
     | ToolSimplifyMsg Tools.Simplify.Msg
-    | ToolInterpolateMsg Tools.Interpolate.Msg
+    | ToolInterpolateMsg Interpolate.Msg
     | ToolProfileSmoothMsg Tools.ProfileSmooth.Msg
     | ToolMoveScaleRotateMsg Tools.MoveScaleRotate.Msg
     | ToolFlythroughMsg Tools.Flythrough.Msg
@@ -562,7 +562,7 @@ simplifyTool =
 interpolateTool : ToolEntry
 interpolateTool =
     { toolType = ToolInterpolate
-    , toolId = Tools.Interpolate.toolId
+    , toolId = Interpolate.toolId
     , video = Just "https://youtu.be/i5rALJ_42n0"
     , state = Contracted
     , isVisible = True
@@ -1151,7 +1151,7 @@ update toolMsg isTrack msgWrapper options =
         ToolInterpolateMsg msg ->
             let
                 ( newOptions, actions ) =
-                    Tools.Interpolate.update
+                    Interpolate.update
                         msg
                         options.interpolateSettings
                         (getColour interpolateTool.toolId options.tools)
@@ -1631,7 +1631,7 @@ toolStateHasChanged toolId requestPreviews isTrack options =
         ToolInterpolate ->
             let
                 ( newToolOptions, actions ) =
-                    Tools.Interpolate.toolStateChange
+                    Interpolate.toolStateChange
                         showPreviews
                         (getColour toolId options.tools)
                         options.interpolateSettings
@@ -2256,12 +2256,14 @@ applyPaintTool tools toolId point1 point2 track =
             TrackLoaded.insertPointsAt point1 point2 track
 
         ( fromStart, fromEnd ) =
-            Debug.log "range" <|
-                TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
+            TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
     in
     case Dict.get toolId tools.tools |> Maybe.map .toolType of
         Just ToolDeletePoints ->
             DeletePoints.delete fromStart fromEnd trackWithPaintPointsAdded
+
+        Just ToolInterpolate ->
+            Interpolate.applyFromPaint tools.interpolateSettings trackWithPaintPointsAdded
 
         _ ->
             applyPaintToolGeneric tools toolId point1 point2 track
@@ -2537,7 +2539,7 @@ viewToolByType settings msgWrapper entry isTrack options =
                     isTrack
 
             ToolInterpolate ->
-                Tools.Interpolate.view
+                Interpolate.view
                     settings
                     (msgWrapper << ToolInterpolateMsg)
                     options.interpolateSettings

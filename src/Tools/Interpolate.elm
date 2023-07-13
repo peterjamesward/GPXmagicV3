@@ -1,12 +1,19 @@
-module Tools.Interpolate exposing (Msg(..), apply, defaultOptions, toolId, toolStateChange, update, view)
+module Tools.Interpolate exposing
+    ( Msg(..)
+    , apply
+    , applyFromPaint
+    , defaultOptions
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import CommonToolStyles exposing (noTrackMessage)
 import DomainModel exposing (..)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input exposing (button)
-import FlatColors.ChinesePalette
 import Length
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
@@ -14,7 +21,6 @@ import Quantity
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import Tools.InterpolateOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Utils
@@ -106,6 +112,16 @@ computeNewPoints excludeExisting options track =
                 |> List.reverse
     in
     TrackLoaded.asPreviewPoints track newPoints
+
+
+applyFromPaint : Options -> TrackLoaded msg -> TrackLoaded msg
+applyFromPaint options track =
+    case apply { options | extent = ExtentIsRange } track of
+        Just newTree ->
+            { track | trackTree = newTree }
+
+        Nothing ->
+            track
 
 
 apply : Options -> TrackLoaded msg -> Maybe PeteTree
