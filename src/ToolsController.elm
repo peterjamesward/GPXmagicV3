@@ -2256,7 +2256,8 @@ applyPaintTool tools toolId point1 point2 track =
             TrackLoaded.insertPointsAt point1 point2 track
 
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
+            Debug.log "range" <|
+                TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
     in
     case Dict.get toolId tools.tools |> Maybe.map .toolType of
         Just ToolDeletePoints ->

@@ -18,10 +18,21 @@
 
 ## Fingerpainting as a meta-tool
 
-> Apply is close.
-> Delete is not working at all. Insert does something. Curly-wurly not happy.
-> Is this because of inconsistent marker semantics?
-> If so, what is to be done?
+* Snagging
+
+> Apply paint allows normal tool preview to return. 
+> Do tools need to know they are modal?
+
+> Insert previews exclude existing points, so must use tool apply.
+> Splines
+> Centroid
+> Smooth with arcs Curly-wurly not happy.
+> Smart smoother
+> Nudge
+> Simplify
+> Insert
+> Profile smoothing
+> Straighten
 
 Solution is not quite generic as some tools may have particular interpretations.
 For example, Radiused bends could try to use the middle of the line joining the ends as the centre
@@ -32,8 +43,7 @@ with an "otherwise (_)" clause.
 
 Make it clearer (in the view) when using freehand mode.
 
-* In Freehand mode, click within one foot of a track point should allo direct dragging of that 
-  point. Or (more complex) there is a selection mode and then a drag phase.
+* In Freehand mode, click within a foot of track point activates direct dragging of that point.
 
 ---
 

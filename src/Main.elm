@@ -2303,9 +2303,7 @@ performActionsOnModel actions model =
                 ( PaintToolApply tool point1 point2, Just track ) ->
                     updateActiveTrack
                         (ToolsController.applyPaintTool foldedModel.toolOptions tool point1 point2 track)
-                        { foldedModel
-                            | previews = Dict.empty
-                        }
+                        { foldedModel | previews = Dict.empty }
 
                 _ ->
                     foldedModel

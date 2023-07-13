@@ -795,13 +795,14 @@ pointLeafProximity camera track screenRectangle screenPoint =
 
         projectionPlane =
             -- Will use this to measure separation between leaf axes and the ray.
-            Plane3d.through
-                sharedPoint.space
-                (Axis3d.direction ray)
+            Plane3d.through sharedPoint.space (Axis3d.direction ray)
 
         touchPointInWorld =
             Axis3d.intersectionWithPlane projectionPlane ray
                 |> Maybe.map (Point3d.projectOnto projectionPlane)
+
+        maxLeafIndex =
+            DomainModel.skipCount track.trackTree
 
         proximityFrom index =
             let
@@ -830,7 +831,7 @@ pointLeafProximity camera track screenRectangle screenPoint =
                                 (LineSegment3d.length leafSegment)
                     in
                     Just
-                        { leafIndex = index
+                        { leafIndex = clamp 0 maxLeafIndex index
                         , distanceAlong = Point3d.signedDistanceAlong leafAxis touchPoint
                         , distanceFrom = Point3d.distanceFromAxis leafAxis touchPoint
                         , proportionAlong = proportion
