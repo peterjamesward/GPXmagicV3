@@ -23,8 +23,6 @@
 > Is this because of inconsistent marker semantics?
 > If so, what is to be done?
 
-* Colour for in-view tool name needs to come from active tool set, not the static version.
-
 Solution is not quite generic as some tools may have particular interpretations.
 For example, Radiused bends could try to use the middle of the line joining the ends as the centre
 of the circle. This would allow for rapid experimentation, fairly conveniently.

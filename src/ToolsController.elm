@@ -2251,14 +2251,24 @@ makePaintPreview options toolId point1 point2 track =
 applyPaintTool : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
 applyPaintTool tools toolId point1 point2 track =
     --TODO: Use tool-specific apply, as semantics vary.
-    case toolId of
+    let
+        trackWithPaintPointsAdded =
+            TrackLoaded.insertPointsAt point1 point2 track
+
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
+    in
+    case Dict.get toolId tools.tools |> Maybe.map .toolType of
+        Just ToolDeletePoints ->
+            DeletePoints.delete fromStart fromEnd trackWithPaintPointsAdded
+
         _ ->
             applyPaintToolGeneric tools toolId point1 point2 track
 
 
 applyPaintToolGeneric : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
 applyPaintToolGeneric tools toolId point1 point2 track =
-    --This was good PoC.
+    --This was good PoC, might serve for tools with "normal" semantics.
     case makePaintPreview tools toolId point1 point2 track of
         Just previewData ->
             let
