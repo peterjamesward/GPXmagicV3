@@ -29,7 +29,6 @@ module ToolsController exposing
     )
 
 import Actions exposing (ToolAction(..))
-import Color
 import ColourPalette exposing (stravaOrange)
 import CommonToolStyles exposing (noTrackMessage)
 import Dict exposing (Dict)
@@ -2258,8 +2257,14 @@ applyPaintTool : Options msg -> String -> PointLeafProximity -> PointLeafProximi
 applyPaintTool tools toolId point1 point2 track =
     --TODO: Use tool-specific apply, as semantics vary.
     let
+        ( snap1, snap2 ) =
+            -- Snap to centreline, or things like Insert look poor.
+            ( TrackLoaded.snapToTrack track point1
+            , TrackLoaded.snapToTrack track point2
+            )
+
         trackWithPaintPointsAdded =
-            TrackLoaded.insertPointsAt point1 point2 track
+            TrackLoaded.insertPointsAt snap1 snap2 track
 
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
@@ -2272,7 +2277,7 @@ applyPaintTool tools toolId point1 point2 track =
             Interpolate.applyFromPaint tools.interpolateSettings trackWithPaintPointsAdded
 
         _ ->
-            applyPaintToolGeneric tools toolId point1 point2 track
+            applyPaintToolGeneric tools toolId snap1 snap2 track
 
 
 applyPaintToolGeneric : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg

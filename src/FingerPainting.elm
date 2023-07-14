@@ -1,6 +1,5 @@
 module FingerPainting exposing (..)
 
-import Camera3d exposing (Camera3d)
 import Circle2d
 import Direction2d
 import DomainModel exposing (..)
@@ -8,7 +7,6 @@ import Drag3dCommonStructures exposing (..)
 import Element exposing (Element, alignTop, centerX, el, html, inFront, none)
 import Geometry.Svg as Svg
 import Length exposing (Meters)
-import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Point3d
 import Quantity exposing (Quantity)

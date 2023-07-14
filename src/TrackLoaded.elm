@@ -13,6 +13,7 @@ module TrackLoaded exposing
     , newTrackFromTree
     , previewFromTree
     , removeAdjacentDuplicates
+    , snapToTrack
     , trackFromPoints
     , trackFromSegments
     , undoInfo
@@ -204,6 +205,22 @@ changeReferencePoint newReference track =
         | trackTree = changedTree
         , referenceLonLat = newReference
     }
+
+
+snapToTrack : TrackLoaded msg -> PointLeafProximity -> PointLeafProximity
+snapToTrack track proximity =
+    -- For start and end points, we should place them on the centreline.
+    let
+        leaf =
+            asRecord <| leafFromIndex proximity.leafIndex track.trackTree
+
+        pointOnCentreline =
+            Point3d.interpolateFrom
+                leaf.startPoint.space
+                leaf.endPoint.space
+                proximity.proportionAlong
+    in
+    { proximity | worldPoint = pointOnCentreline }
 
 
 insertPointsAt : PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg

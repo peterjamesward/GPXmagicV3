@@ -18,11 +18,11 @@
 
 ## Fingerpainting as a meta-tool
 
-* Snagging
+### Snagging
 
-Should closing the paint tool exit paint mode? Probably.
-Should there be a button on the view to exit paint mode? Probably.
-Undo text is wrong.
+* Should closing the paint tool exit paint mode? Probably not.
+* Should there be a button on the view to exit paint mode? Probably so.
+* Undo text is wrong.
 
 Tools to work through
 > Insert -- sets orange & purple incorrectly
@@ -35,8 +35,6 @@ Tools to work through
 > Profile smoothing
 > Straighten
 > Radiused bends, if in scope
-
-Move start and end points to the centreline.
 
 Make it clearer (in the view) when using freehand drawing mode.
 

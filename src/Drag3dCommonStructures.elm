@@ -1,5 +1,6 @@
 module Drag3dCommonStructures exposing (..)
 
+import DomainModel exposing (asRecord, leafFromIndex)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
