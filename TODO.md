@@ -20,12 +20,10 @@
 
 ### Snagging
 
-* Should closing the paint tool exit paint mode? Probably not.
 * Should there be a button on the view to exit paint mode? Probably so.
 * Undo text is wrong.
 
 Tools to work through
-> Insert -- sets orange & purple incorrectly
 > Splines -- does not set orange & purple
 > Centroid
 > Smooth with arcs 

@@ -118,7 +118,7 @@ applyFromPaint : Options -> TrackLoaded msg -> TrackLoaded msg
 applyFromPaint options track =
     case apply { options | extent = ExtentIsRange } track of
         Just newTree ->
-            { track | trackTree = newTree }
+            TrackLoaded.useTreeWithRepositionedMarkers (Just newTree) track
 
         Nothing ->
             track
