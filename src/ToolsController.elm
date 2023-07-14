@@ -2212,6 +2212,11 @@ makePaintPreview options toolId point1 point2 track =
     --We won't even bother calling it unless the end points are distinct and on-track.
     --TODO: Some tools are special (Radiused Bends) and may have their own methods, this is the default.
     let
+        ( snap1, snap2 ) =
+            ( TrackLoaded.snapToTrack track point1
+            , TrackLoaded.snapToTrack track point2
+            )
+
         pointsAreDifferent =
             point1.leafIndex
                 /= point2.leafIndex
@@ -2219,7 +2224,7 @@ makePaintPreview options toolId point1 point2 track =
                 /= point2.proportionAlong
 
         trackWithPaintPointsAdded =
-            Just <| TrackLoaded.insertPointsAt point1 point2 track
+            Just <| TrackLoaded.insertPointsAt snap1 snap2 track
     in
     if
         pointsAreDifferent
