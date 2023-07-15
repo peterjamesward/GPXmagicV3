@@ -2308,6 +2308,9 @@ applyPaintTool tools toolId point1 point2 track =
         ( Just ToolNudge, Just previww ) ->
             Tools.Nudge.applyUsingOptions tools.nudgeOptions trackWithPaintPointsAdded
 
+        ( Just ToolSimplify, Just previww ) ->
+            Tools.Simplify.fingerpaintHelper trackWithPaintPointsAdded
+
         ( Just _, Just _ ) ->
             applyPaintToolGeneric tools toolId snap1 snap2 track
 
@@ -2334,12 +2337,15 @@ applyPaintToolGeneric tools toolId point1 point2 track =
                         track.referenceLonLat
                         (List.map .gpx previewData.points)
                         trackWithPaintPointsAdded.trackTree
-
-                ( newOrange, newPurple ) =
-                    ( point1.leafIndex + 1, point2.leafIndex + 1 )
             in
             case newTree of
                 Just isTree ->
+                    let
+                        ( newOrange, newPurple ) =
+                            ( fromStart
+                            , DomainModel.skipCount isTree - fromEnd
+                            )
+                    in
                     { trackWithPaintPointsAdded
                         | trackTree = isTree
                         , currentPosition = newOrange

@@ -21,7 +21,6 @@
 ### Snagging
 
 Tools to work through
-> Simplify
 > Profile smoothing
 > Straighten
 > Radiused bends, if in scope
