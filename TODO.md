@@ -23,7 +23,6 @@
 * Undo text is wrong.
 
 Tools to work through
-> Smart smoother
 > Nudge
 > Simplify
 > Profile smoothing

@@ -2302,6 +2302,9 @@ applyPaintTool tools toolId point1 point2 track =
         ( Just ToolBendSmoother, Just preview ) ->
             Tools.BendSmoother.applyHelperForPaint preview tools.bendSmootherOptions trackWithPaintPointsAdded
 
+        ( Just ToolSmartSmoother, Just preveiw ) ->
+            Tools.SmartSmoother.applyUsingOptions tools.smartSmootherOptions trackWithPaintPointsAdded
+
         ( Just _, Just _ ) ->
             applyPaintToolGeneric tools toolId snap1 snap2 track
 
