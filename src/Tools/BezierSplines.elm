@@ -77,10 +77,6 @@ computeNewPoints options track =
     TrackLoaded.asPreviewPoints track splineEarthPoints
 
 
-
---TODO: Refactor and whilst at it, stop redundant calculations.
-
-
 applyUsingOptions :
     Options
     -> TrackLoaded msg

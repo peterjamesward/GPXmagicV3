@@ -2281,6 +2281,9 @@ applyPaintTool tools toolId point1 point2 track =
         Just ToolInterpolate ->
             Interpolate.applyFromPaint tools.interpolateSettings trackWithPaintPointsAdded
 
+        Just ToolBezierSplines ->
+            Tools.BezierSplines.applyUsingOptions tools.bezierSplineOptions trackWithPaintPointsAdded
+
         _ ->
             applyPaintToolGeneric tools toolId snap1 snap2 track
 

@@ -23,7 +23,6 @@
 * Undo text is wrong.
 
 Tools to work through
-> Splines -- does not set orange & purple
 > Centroid
 > Smooth with arcs 
 > Smart smoother
