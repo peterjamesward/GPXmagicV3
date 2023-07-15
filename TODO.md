@@ -20,17 +20,14 @@
 
 ### Snagging
 
-* Undo text is wrong.
-
 Tools to work through
-> Nudge
 > Simplify
 > Profile smoothing
 > Straighten
 > Radiused bends, if in scope
 
 * In Freehand drawing mode, click within a foot of track point activates direct dragging of that 
-  point. No, make it a distinct "adjust" mode. Click on point to drag, click on track to create 
+  point. **No**, make it a distinct "adjust" mode. Click on point to drag, click on track to create 
   a new point and drag.
 
 Support tool application in one of the profile views?
@@ -38,8 +35,6 @@ Support tool application in one of the profile views?
 Make it clearer (in the view) when using freehand drawing mode.
 
 Add drawing icon to Tools Summary.
-
-Should there be a button _on the view_ to exit paint mode? Probably so.
 
 ---
 
