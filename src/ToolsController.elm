@@ -2258,7 +2258,13 @@ makePaintPreview options toolId point1 point2 track =
         Nothing
 
 
-applyPaintTool : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
+applyPaintTool :
+    Options msg
+    -> String
+    -> PointLeafProximity
+    -> PointLeafProximity
+    -> TrackLoaded msg
+    -> TrackLoaded msg
 applyPaintTool tools toolId point1 point2 track =
     --TODO: Use tool-specific apply, as semantics vary.
     let
@@ -2273,22 +2279,34 @@ applyPaintTool tools toolId point1 point2 track =
 
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
+
+        previewData =
+            makePaintPreview tools toolId point1 point2 track
+
+        tool =
+            Dict.get toolId tools.tools |> Maybe.map .toolType
     in
-    case Dict.get toolId tools.tools |> Maybe.map .toolType of
-        Just ToolDeletePoints ->
+    case ( tool, previewData ) of
+        ( Just ToolDeletePoints, Just preview ) ->
             DeletePoints.delete fromStart fromEnd trackWithPaintPointsAdded
 
-        Just ToolInterpolate ->
+        ( Just ToolInterpolate, Just preview ) ->
             Interpolate.applyFromPaint tools.interpolateSettings trackWithPaintPointsAdded
 
-        Just ToolBezierSplines ->
+        ( Just ToolBezierSplines, Just preview ) ->
             Tools.BezierSplines.applyUsingOptions tools.bezierSplineOptions trackWithPaintPointsAdded
 
-        Just ToolCentroidAverage ->
+        ( Just ToolCentroidAverage, Just preview ) ->
             Tools.CentroidAverage.applyUsingOptions tools.centroidAverageOptions trackWithPaintPointsAdded
 
-        _ ->
+        ( Just ToolBendSmoother, Just preview ) ->
+            Tools.BendSmoother.applyHelperForPaint preview tools.bendSmootherOptions trackWithPaintPointsAdded
+
+        ( Just _, Just _ ) ->
             applyPaintToolGeneric tools toolId snap1 snap2 track
+
+        _ ->
+            track
 
 
 applyPaintToolGeneric : Options msg -> String -> PointLeafProximity -> PointLeafProximity -> TrackLoaded msg -> TrackLoaded msg
@@ -2312,7 +2330,7 @@ applyPaintToolGeneric tools toolId point1 point2 track =
                         trackWithPaintPointsAdded.trackTree
 
                 ( newOrange, newPurple ) =
-                    ( point1.leafIndex, point2.leafIndex + 1 )
+                    ( point1.leafIndex + 1, point2.leafIndex + 1 )
             in
             case newTree of
                 Just isTree ->

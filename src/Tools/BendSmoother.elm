@@ -2,6 +2,7 @@ module Tools.BendSmoother exposing
     ( Msg(..)
     , Point
     , applyAutofix
+    , applyHelperForPaint
     , applyUsingOptions
     , defaultOptions
     , softenMultiplePoints
@@ -15,15 +16,11 @@ import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
-import Circle2d exposing (Circle2d)
 import CommonToolStyles exposing (noTrackMessage)
 import Direction2d
-import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input exposing (button)
-import FlatColors.ChinesePalette
 import Geometry101 as G exposing (distance, findIntercept, interpolateLine, isAfter, isBefore, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
 import Length exposing (Meters, inMeters, meters)
 import LineSegment2d exposing (LineSegment2d)
@@ -33,14 +30,13 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import Polyline2d
 import Polyline3d
-import PreviewData exposing (PreviewShape(..))
+import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity
 import SketchPlane3d
 import String.Interpolate
 import SystemSettings exposing (SystemSettings)
 import Tools.BendSmootherOptions exposing (..)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (showShortMeasure)
@@ -330,6 +326,37 @@ tryCircumcircles track options =
 
     else
         { options | curlyWurly = Nothing }
+
+
+applyHelperForPaint : PreviewData -> Options -> TrackLoaded msg -> TrackLoaded msg
+applyHelperForPaint preview options track =
+    -- With painting this tool, the bend points are not in `options`.
+    let
+        paintOptions =
+            case options.mode of
+                SmoothPoint ->
+                    --TODO: This won't work.
+                    options
+
+                SmoothBend ->
+                    { options
+                        | smoothedBend =
+                            --Only `nodes` is required.
+                            Just
+                                { nodes = preview.points
+                                , centre = Point2d.origin
+                                , radius = 0
+                                , startIndex = 0
+                                , endIndex = 0
+                                }
+                    }
+
+                SmoothWithCircumcircles ->
+                    { options | curlyWurly = Just preview.points }
+    in
+    applyUsingOptions
+        paintOptions
+        track
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> TrackLoaded msg

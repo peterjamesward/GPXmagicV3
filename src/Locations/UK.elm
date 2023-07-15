@@ -459,6 +459,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "centroid", """smooth with 3D average""" )
                 , ( "radius", """radiused bend""" )
                 , ( "arc", """arc smoother""" )
+                , ( "arcs", """arc smoother""" )
                 , ( "map", """move on map""" )
                 , ( "nudge", """nudge""" )
                 , ( "outback", """out and back""" )

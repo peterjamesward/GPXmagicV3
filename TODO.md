@@ -23,7 +23,6 @@
 * Undo text is wrong.
 
 Tools to work through
-> Smooth with arcs 
 > Smart smoother
 > Nudge
 > Simplify
