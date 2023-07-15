@@ -455,6 +455,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "delete1", """delete""" )
                 , ( "fingerpaint", """finger painting""" )
                 , ( "spline", """smooth with splines""" )
+                , ( "splines", """smooth with splines""" )
                 , ( "centroid", """smooth with 3D average""" )
                 , ( "radius", """radiused bend""" )
                 , ( "arc", """arc smoother""" )

@@ -2284,6 +2284,9 @@ applyPaintTool tools toolId point1 point2 track =
         Just ToolBezierSplines ->
             Tools.BezierSplines.applyUsingOptions tools.bezierSplineOptions trackWithPaintPointsAdded
 
+        Just ToolCentroidAverage ->
+            Tools.CentroidAverage.applyUsingOptions tools.centroidAverageOptions trackWithPaintPointsAdded
+
         _ ->
             applyPaintToolGeneric tools toolId snap1 snap2 track
 
@@ -2308,34 +2311,15 @@ applyPaintToolGeneric tools toolId point1 point2 track =
                         (List.map .gpx previewData.points)
                         trackWithPaintPointsAdded.trackTree
 
-                sameCountFromEnd x =
-                    DomainModel.skipCount (Maybe.withDefault track.trackTree newTree)
-                        - (DomainModel.skipCount track.trackTree - x)
-
                 ( newOrange, newPurple ) =
-                    case track.markerPosition of
-                        Just purple ->
-                            if track.currentPosition <= purple then
-                                --Orange from start, purple from end
-                                ( track.currentPosition
-                                , Just <| sameCountFromEnd purple
-                                )
-
-                            else
-                                --Orange from end, purple from start
-                                ( sameCountFromEnd track.currentPosition
-                                , Just purple
-                                )
-
-                        Nothing ->
-                            ( track.currentPosition, Nothing )
+                    ( point1.leafIndex, point2.leafIndex + 1 )
             in
             case newTree of
                 Just isTree ->
                     { trackWithPaintPointsAdded
                         | trackTree = isTree
                         , currentPosition = newOrange
-                        , markerPosition = newPurple
+                        , markerPosition = Just newPurple
                     }
 
                 Nothing ->
