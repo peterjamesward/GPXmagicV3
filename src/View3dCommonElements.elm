@@ -586,10 +586,10 @@ onViewControls settings msgWrapper context =
                 { onPress = Just <| msgWrapper ToggleFingerpainting
                 , label =
                     if context.fingerPainting then
-                        useIcon FeatherIcons.move
+                        useIcon FeatherIcons.edit2
 
                     else
-                        useIcon FeatherIcons.penTool
+                        useIcon FeatherIcons.edit3
                 }
     in
     column

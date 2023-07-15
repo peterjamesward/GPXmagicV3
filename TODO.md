@@ -20,7 +20,6 @@
 
 ### Snagging
 
-* Should there be a button on the view to exit paint mode? Probably so.
 * Undo text is wrong.
 
 Tools to work through
@@ -34,12 +33,17 @@ Tools to work through
 > Straighten
 > Radiused bends, if in scope
 
+* In Freehand drawing mode, click within a foot of track point activates direct dragging of that 
+  point. No, make it a distinct "adjust" mode. Click on point to drag, click on track to create 
+  a new point and drag.
+
+Support tool application in one of the profile views?
+
 Make it clearer (in the view) when using freehand drawing mode.
 
 Add drawing icon to Tools Summary.
 
-* In Freehand drawing mode, click within a foot of track point activates direct dragging of that 
-  point.
+Should there be a button _on the view_ to exit paint mode? Probably so.
 
 ---
 
