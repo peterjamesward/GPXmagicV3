@@ -16,24 +16,14 @@
 
 # WIP
 
-## Fingerpainting as a meta-tool
-
-Tools to work through
-> Radiused bends, if in scope
-
-* In Freehand drawing mode, click within a foot of track point activates direct dragging of that 
-  point. **No**, make it a distinct "adjust" mode. Click on point to drag, click on track to create 
-  a new point and drag.
-
-Support tool application in one of the profile views?
-
-Make it clearer (in the view) when using freehand drawing mode.
-
-Add drawing icons to Tools Summary.
-
 ---
 
 # BACKLOG
+
+* In Freehand drawing mode, click within a foot of track point activates direct dragging of that
+  point.
+
+* Tool ink option displayed in Tools Summary compact view?
 
 ## Synthesizer
 

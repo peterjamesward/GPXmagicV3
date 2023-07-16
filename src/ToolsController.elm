@@ -53,6 +53,7 @@ import Json.Decode as D exposing (field, maybe)
 import Json.Encode as E
 import Length
 import List.Extra
+import Point3d
 import PreviewData exposing (PreviewData)
 import Quantity
 import SystemSettings exposing (SystemSettings)
@@ -2232,35 +2233,44 @@ makePaintPreview options toolId point1 point2 track =
                 /= point2.proportionAlong
 
         trackWithPaintPointsAdded =
-            Just <| TrackLoaded.insertPointsAt snap1 snap2 track
+            TrackLoaded.insertPointsAt snap1 snap2 track
     in
     if
         pointsAreDifferent
             && Quantity.lessThanOrEqualTo (Length.meters 2) point1.distanceFrom
             && Quantity.lessThanOrEqualTo (Length.meters 2) point2.distanceFrom
     then
-        let
-            ( _, actions ) =
-                --Last argument is hack to force preview.
-                toolStateHasChanged
-                    toolId
-                    True
-                    trackWithPaintPointsAdded
-                    { options | paintTool = Nothing }
+        if toolId == Tools.CurveFormer.toolId then
+            -- Special for this one tool
+            Tools.CurveFormer.paintingPreviewHelper
+                (Point3d.midpoint point1.worldPoint point2.worldPoint)
+                trackWithPaintPointsAdded
+                options.curveFormerOptions
+                |> Just
 
-            preview =
-                actions
-                    |> List.filterMap
-                        (\act ->
-                            case act of
-                                ShowPreview previewData ->
-                                    Just previewData
+        else
+            let
+                ( _, actions ) =
+                    --Last argument is hack to force preview.
+                    toolStateHasChanged
+                        toolId
+                        True
+                        (Just trackWithPaintPointsAdded)
+                        { options | paintTool = Nothing }
 
-                                _ ->
-                                    Nothing
-                        )
-        in
-        List.head preview
+                preview =
+                    actions
+                        |> List.filterMap
+                            (\act ->
+                                case act of
+                                    ShowPreview previewData ->
+                                        Just previewData
+
+                                    _ ->
+                                        Nothing
+                            )
+            in
+            List.head preview
 
     else
         Nothing
@@ -2324,6 +2334,13 @@ applyPaintTool tools toolId point1 point2 track =
 
         ( Just ToolStraighten, Just preview ) ->
             Tools.Straightener.apply tools.straightenOptions trackWithPaintPointsAdded
+
+        ( Just ToolCurveFormer, Just preview ) ->
+            let
+                centre =
+                    Point3d.midpoint snap1.worldPoint snap2.worldPoint
+            in
+            Tools.CurveFormer.paintingApplyHelper centre tools.curveFormerOptions trackWithPaintPointsAdded
 
         ( Just _, Just _ ) ->
             applyPaintToolGeneric tools toolId snap1 snap2 track

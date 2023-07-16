@@ -1,4 +1,16 @@
-module Tools.CurveFormer exposing (Msg(..), TransitionMode(..), applyUsingOptions, defaultOptions, highlightPoints, toolId, toolStateChange, update, view)
+module Tools.CurveFormer exposing
+    ( Msg(..)
+    , TransitionMode(..)
+    , applyUsingOptions
+    , defaultOptions
+    , highlightPoints
+    , paintingApplyHelper
+    , paintingPreviewHelper
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -14,9 +26,7 @@ import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, skipCount)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Input as Input
-import FlatColors.ChinesePalette
 import Geometry101
 import Html.Attributes
 import Html.Events.Extra.Pointer as Pointer
@@ -28,10 +38,10 @@ import LocalCoords exposing (LocalCoords)
 import Maybe.Extra
 import Pixels
 import Point2d exposing (Point2d)
-import Point3d
+import Point3d exposing (Point3d)
 import Polyline2d
 import Polyline3d
-import PreviewData exposing (PreviewShape(..))
+import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
@@ -43,7 +53,6 @@ import SweptAngle
 import SystemSettings exposing (SystemSettings)
 import Tools.CurveFormerOptions exposing (GradientSmoothing(..), Options, Point)
 import Tools.I18N as I18N
-import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (flatBox, showShortMeasure)
@@ -68,8 +77,6 @@ defaultOptions =
     , usePullRadius = False
     , pointsWithinCircle = Dict.empty
     , pointsWithinDisc = Dict.empty
-
-    --, circle = Nothing
     , pointsAreContiguous = False
     , newTrackPoints = []
     , fixedAttachmentPoints = Nothing
@@ -515,7 +522,8 @@ getCircle options track =
     let
         translation =
             -- Flip Y because drag control is SVG coordinate based.
-            Vector3d.xyz (Vector2d.xComponent options.vector)
+            Vector3d.xyz
+                (Vector2d.xComponent options.vector)
                 (Vector2d.yComponent options.vector |> Quantity.negate)
                 Quantity.zero
 
@@ -628,6 +636,39 @@ type alias IntersectionInformation =
 type TransitionMode
     = EntryMode
     | ExitMode
+
+
+paintingPreviewHelper : Point3d Meters LocalCoords -> TrackLoaded msg -> Options -> PreviewData
+paintingPreviewHelper centre track options =
+    -- Radiused bends requires this intervention to position the disc, to make the preview.
+    let
+        tempOptions =
+            makeCurveIfPossible
+                track
+                { options
+                    | referencePoint = Just <| DomainModel.withoutTime centre
+                    , vector = Vector2d.zero
+                }
+    in
+    { tag = toolId
+    , shape = PreviewCircle
+    , colour = Element.rgb255 0 0 0
+    , points = tempOptions.newTrackPoints
+    }
+
+
+paintingApplyHelper : Point3d Meters LocalCoords -> Options -> TrackLoaded msg -> TrackLoaded msg
+paintingApplyHelper centre options track =
+    let
+        tempOptions =
+            makeCurveIfPossible
+                track
+                { options
+                    | referencePoint = Just <| DomainModel.withoutTime centre
+                    , vector = Vector2d.zero
+                }
+    in
+    applyUsingOptions tempOptions track
 
 
 makeCurveIfPossible : TrackLoaded msg -> Options -> Options
