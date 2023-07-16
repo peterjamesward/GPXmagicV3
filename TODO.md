@@ -16,6 +16,10 @@
 
 # WIP
 
+## Ink meta-tool
+
+Curve former -- set bend radius to at least half separation.
+
 ---
 
 # BACKLOG

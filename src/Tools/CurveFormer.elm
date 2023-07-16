@@ -638,16 +638,28 @@ type TransitionMode
     | ExitMode
 
 
-paintingPreviewHelper : Point3d Meters LocalCoords -> TrackLoaded msg -> Options -> PreviewData
-paintingPreviewHelper centre track options =
+paintingPreviewHelper :
+    Point3d Meters LocalCoords
+    -> Point3d Meters LocalCoords
+    -> TrackLoaded msg
+    -> Options
+    -> PreviewData
+paintingPreviewHelper point1 point2 track options =
     -- Radiused bends requires this intervention to position the disc, to make the preview.
     let
+        centre =
+            Point3d.midpoint point1 point2
+
+        minRadius =
+            Quantity.half <| Point3d.distanceFrom point1 point2
+
         tempOptions =
             makeCurveIfPossible
                 track
                 { options
                     | referencePoint = Just <| DomainModel.withoutTime centre
                     , vector = Vector2d.zero
+                    , pushRadius = minRadius
                 }
     in
     { tag = toolId
@@ -657,15 +669,27 @@ paintingPreviewHelper centre track options =
     }
 
 
-paintingApplyHelper : Point3d Meters LocalCoords -> Options -> TrackLoaded msg -> TrackLoaded msg
-paintingApplyHelper centre options track =
+paintingApplyHelper :
+    Point3d Meters LocalCoords
+    -> Point3d Meters LocalCoords
+    -> Options
+    -> TrackLoaded msg
+    -> TrackLoaded msg
+paintingApplyHelper point1 point2 options track =
     let
+        centre =
+            Point3d.midpoint point1 point2
+
+        minRadius =
+            Quantity.half <| Point3d.distanceFrom point1 point2
+
         tempOptions =
             makeCurveIfPossible
                 track
                 { options
                     | referencePoint = Just <| DomainModel.withoutTime centre
                     , vector = Vector2d.zero
+                    , pushRadius = minRadius
                 }
     in
     applyUsingOptions tempOptions track

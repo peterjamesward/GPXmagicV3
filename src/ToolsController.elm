@@ -2243,7 +2243,8 @@ makePaintPreview options toolId point1 point2 track =
         if toolId == Tools.CurveFormer.toolId then
             -- Special for this one tool
             Tools.CurveFormer.paintingPreviewHelper
-                (Point3d.midpoint point1.worldPoint point2.worldPoint)
+                point1.worldPoint
+                point2.worldPoint
                 trackWithPaintPointsAdded
                 options.curveFormerOptions
                 |> Just
@@ -2336,11 +2337,11 @@ applyPaintTool tools toolId point1 point2 track =
             Tools.Straightener.apply tools.straightenOptions trackWithPaintPointsAdded
 
         ( Just ToolCurveFormer, Just preview ) ->
-            let
-                centre =
-                    Point3d.midpoint snap1.worldPoint snap2.worldPoint
-            in
-            Tools.CurveFormer.paintingApplyHelper centre tools.curveFormerOptions trackWithPaintPointsAdded
+            Tools.CurveFormer.paintingApplyHelper
+                point1.worldPoint
+                point2.worldPoint
+                tools.curveFormerOptions
+                trackWithPaintPointsAdded
 
         ( Just _, Just _ ) ->
             applyPaintToolGeneric tools toolId snap1 snap2 track
