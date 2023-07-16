@@ -1769,7 +1769,15 @@ toolStateHasChanged toolId requestPreviews isTrack options =
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolStraighten ->
-            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
+            let
+                ( newToolOptions, actions ) =
+                    DirectionChanges.toolStateChange
+                        showPreviews
+                        (getColour toolId options.tools)
+                        options.directionChangeOptions
+                        isTrack
+            in
+            ( options, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolSettings ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
@@ -2302,14 +2310,20 @@ applyPaintTool tools toolId point1 point2 track =
         ( Just ToolBendSmoother, Just preview ) ->
             Tools.BendSmoother.applyHelperForPaint preview tools.bendSmootherOptions trackWithPaintPointsAdded
 
-        ( Just ToolSmartSmoother, Just previww ) ->
+        ( Just ToolSmartSmoother, Just preview ) ->
             Tools.SmartSmoother.applyUsingOptions tools.smartSmootherOptions trackWithPaintPointsAdded
 
         ( Just ToolNudge, Just previww ) ->
             Tools.Nudge.applyUsingOptions tools.nudgeOptions trackWithPaintPointsAdded
 
-        ( Just ToolSimplify, Just previww ) ->
+        ( Just ToolSimplify, Just preview ) ->
             Tools.Simplify.fingerpaintHelper trackWithPaintPointsAdded
+
+        ( Just ToolProfileSmooth, Just preview ) ->
+            Tools.ProfileSmooth.apply tools.profileSmoothSettings trackWithPaintPointsAdded
+
+        ( Just ToolStraighten, Just preview ) ->
+            Tools.Straightener.apply tools.straightenOptions trackWithPaintPointsAdded
 
         ( Just _, Just _ ) ->
             applyPaintToolGeneric tools toolId snap1 snap2 track

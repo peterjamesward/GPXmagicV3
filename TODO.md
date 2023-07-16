@@ -18,11 +18,7 @@
 
 ## Fingerpainting as a meta-tool
 
-### Snagging
-
 Tools to work through
-> Profile smoothing
-> Straighten
 > Radiused bends, if in scope
 
 * In Freehand drawing mode, click within a foot of track point activates direct dragging of that 
@@ -33,7 +29,7 @@ Support tool application in one of the profile views?
 
 Make it clearer (in the view) when using freehand drawing mode.
 
-Add drawing icon to Tools Summary.
+Add drawing icons to Tools Summary.
 
 ---
 
