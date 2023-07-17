@@ -639,34 +639,47 @@ type TransitionMode
 
 
 paintingPreviewHelper :
-    Point3d Meters LocalCoords
+    Color
+    -> Point3d Meters LocalCoords
     -> Point3d Meters LocalCoords
     -> TrackLoaded msg
     -> Options
     -> PreviewData
-paintingPreviewHelper point1 point2 track options =
+paintingPreviewHelper colour point1 point2 track options =
     -- Radiused bends requires this intervention to position the disc, to make the preview.
+    let
+        localOptions =
+            paintingHelperHelper point1 point2 track options
+    in
+    { tag = toolId
+    , shape = PreviewCircle
+    , colour = colour
+    , points = localOptions.newTrackPoints
+    }
+
+
+paintingHelperHelper :
+    Point3d Meters LocalCoords
+    -> Point3d Meters LocalCoords
+    -> TrackLoaded msg
+    -> Options
+    -> Options
+paintingHelperHelper point1 point2 track options =
     let
         centre =
             Point3d.midpoint point1 point2
 
         minRadius =
             Quantity.half <| Point3d.distanceFrom point1 point2
-
-        tempOptions =
-            makeCurveIfPossible
-                track
-                { options
-                    | referencePoint = Just <| DomainModel.withoutTime centre
-                    , vector = Vector2d.zero
-                    , pushRadius = minRadius
-                }
     in
-    { tag = toolId
-    , shape = PreviewCircle
-    , colour = Element.rgb255 0 0 0
-    , points = tempOptions.newTrackPoints
+    { options
+        | referencePoint = Just <| DomainModel.withoutTime centre
+        , vector = Vector2d.zero
+        , pushRadius = minRadius
+        , spacing = Length.meter
+        , transitionRadius = minRadius
     }
+        |> makeCurveIfPossible track
 
 
 paintingApplyHelper :
@@ -677,22 +690,10 @@ paintingApplyHelper :
     -> TrackLoaded msg
 paintingApplyHelper point1 point2 options track =
     let
-        centre =
-            Point3d.midpoint point1 point2
-
-        minRadius =
-            Quantity.half <| Point3d.distanceFrom point1 point2
-
-        tempOptions =
-            makeCurveIfPossible
-                track
-                { options
-                    | referencePoint = Just <| DomainModel.withoutTime centre
-                    , vector = Vector2d.zero
-                    , pushRadius = minRadius
-                }
+        localOptions =
+            paintingHelperHelper point1 point2 track options
     in
-    applyUsingOptions tempOptions track
+    applyUsingOptions localOptions track
 
 
 makeCurveIfPossible : TrackLoaded msg -> Options -> Options

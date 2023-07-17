@@ -2243,6 +2243,7 @@ makePaintPreview options toolId point1 point2 track =
         if toolId == Tools.CurveFormer.toolId then
             -- Special for this one tool
             Tools.CurveFormer.paintingPreviewHelper
+                (getColour toolId options.tools)
                 point1.worldPoint
                 point2.worldPoint
                 trackWithPaintPointsAdded
