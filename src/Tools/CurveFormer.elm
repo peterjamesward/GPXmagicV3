@@ -368,9 +368,9 @@ view settings wrapper options track =
                                     String.Interpolate.interpolate
                                         (I18N.localisedString settings.location toolId "spacing")
                                         [ showShortMeasure settings.imperial options.spacing ]
-                        , min = 2.0
+                        , min = 0.5
                         , max = 10.0
-                        , step = Nothing
+                        , step = Just 0.5
                         , value = options.spacing |> Length.inMeters
                         , thumb = Input.defaultThumb
                         }
@@ -425,7 +425,7 @@ view settings wrapper options track =
                                     Input.labelBelow [] <|
                                         text <|
                                             String.Interpolate.interpolate
-                                                (I18N.localisedString settings.location toolId "join")
+                                                (I18N.localisedString settings.location toolId "inclusion")
                                                 [ showShortMeasure settings.imperial options.pullRadius ]
                                 , min = 1.0
                                 , max = 40.0

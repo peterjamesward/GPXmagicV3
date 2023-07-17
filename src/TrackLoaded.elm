@@ -230,9 +230,6 @@ insertPointsAt point1 point2 track =
        These will also become the new marked points.
     -}
     let
-        _ =
-            Debug.log "insertPointsAt" ( point1, point2 )
-
         distanceOf : PointLeafProximity -> Quantity Float Meters
         distanceOf proximity =
             --More robust to use distance to specify insertion, not order-dependent.
