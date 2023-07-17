@@ -926,17 +926,25 @@ profileViewHandlesClick container trackDistance options track =
 viewPanes :
     SystemSettings
     -> (Msg -> msg)
-    -> Tracks.Options msg
-    -> Tools.DisplaySettingsOptions.Options
     -> ToolsController.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> PaneLayoutOptions
-    -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
-    -> Maybe String
     -> Element msg
-viewPanes settings msgWrapper tracksOptions displayOptions tools ( w, h ) options mFlythrough previews paintTool =
+viewPanes settings msgWrapper tools ( w, h ) options previews =
     let
+        tracksOptions =
+            tools.tracksOptions
+
+        displayOptions =
+            tools.displaySettings
+
+        paintTool =
+            tools.paintTool
+
+        mFlythrough =
+            tools.flythroughSettings.flythrough
+
         mTrack =
             Tracks.getActiveTrack tracksOptions
 

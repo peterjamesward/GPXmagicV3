@@ -1277,14 +1277,10 @@ viewPaneArea model =
         PaneLayoutManager.viewPanes
             model.systemSettings
             PaneMsg
-            model.toolOptions.tracksOptions
-            model.toolOptions.displaySettings
             model.toolOptions
             model.contentArea
             model.paneLayoutOptions
-            model.toolOptions.flythroughSettings.flythrough
             model.previews
-            model.toolOptions.paintTool
 
 
 topLoadingBar : Model -> Element Msg

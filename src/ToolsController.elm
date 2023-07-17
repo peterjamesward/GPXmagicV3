@@ -2244,8 +2244,8 @@ makePaintPreview options toolId point1 point2 track =
             -- Special for this one tool
             Tools.CurveFormer.paintingPreviewHelper
                 (getColour toolId options.tools)
-                point1.worldPoint
-                point2.worldPoint
+                snap1.worldPoint
+                snap2.worldPoint
                 trackWithPaintPointsAdded
                 options.curveFormerOptions
                 |> Just
@@ -2357,11 +2357,8 @@ applyPaintToolGeneric tools toolId point1 point2 track =
     case makePaintPreview tools toolId point1 point2 track of
         Just previewData ->
             let
-                trackWithPaintPointsAdded =
-                    TrackLoaded.insertPointsAt point1 point2 track
-
                 ( fromStart, fromEnd ) =
-                    TrackLoaded.getRangeFromMarkers trackWithPaintPointsAdded
+                    TrackLoaded.getRangeFromMarkers track
 
                 newTree =
                     DomainModel.replaceRange
@@ -2369,7 +2366,7 @@ applyPaintToolGeneric tools toolId point1 point2 track =
                         fromEnd
                         track.referenceLonLat
                         (List.map .gpx previewData.points)
-                        trackWithPaintPointsAdded.trackTree
+                        track.trackTree
             in
             case newTree of
                 Just isTree ->
@@ -2379,7 +2376,7 @@ applyPaintToolGeneric tools toolId point1 point2 track =
                             , DomainModel.skipCount isTree - fromEnd
                             )
                     in
-                    { trackWithPaintPointsAdded
+                    { track
                         | trackTree = isTree
                         , currentPosition = newOrange
                         , markerPosition = Just newPurple
