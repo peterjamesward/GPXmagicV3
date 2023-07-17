@@ -114,6 +114,7 @@ type ToolAction msg
     | FingerPaint PaintInfo
     | PaintToolPreview String PointLeafProximity PointLeafProximity
     | PaintToolApply String PointLeafProximity PointLeafProximity
+    | StopToolInkMode
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

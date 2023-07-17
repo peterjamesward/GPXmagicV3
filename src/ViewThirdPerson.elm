@@ -8,7 +8,6 @@ module ViewThirdPerson exposing
 
 import Actions exposing (ToolAction(..))
 import Angle
-import Axis3d
 import Camera3d exposing (Camera3d)
 import Color
 import Direction2d
@@ -24,10 +23,7 @@ import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
-import Point2d
-import Point3d
 import Quantity exposing (Quantity, Unitless, toFloatQuantity)
-import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import SceneBuilder3D
 import SketchPlane3d
@@ -35,7 +31,6 @@ import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
-import Vector3d
 import View3dCommonElements exposing (..)
 import ViewMode exposing (ViewMode(..))
 import Viewpoint3d
@@ -126,7 +121,15 @@ view settings mapData context display tools contentArea track scene msgWrapper p
                     pointer
                  )
                     :: (inFront <| placesOverlay display contentArea track camera)
-                    :: (inFront <| fingerPaintingPreview settings tools context contentArea paintTool)
+                    :: (inFront <|
+                            fingerPaintingPreview
+                                settings
+                                (msgWrapper StopInkMode)
+                                tools
+                                context
+                                contentArea
+                                paintTool
+                       )
                     :: (inFront <| onViewControls settings msgWrapper context)
                     :: common3dSceneAttributes msgWrapper context
                 )

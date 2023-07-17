@@ -2301,6 +2301,16 @@ performActionsOnModel actions model =
                         (ToolsController.applyPaintTool foldedModel.toolOptions tool point1 point2 track)
                         { foldedModel | previews = Dict.empty }
 
+                ( StopToolInkMode, _ ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        newToolOptions =
+                            { toolOptions | paintTool = Nothing }
+                    in
+                    { foldedModel | toolOptions = newToolOptions }
+
                 _ ->
                     foldedModel
     in

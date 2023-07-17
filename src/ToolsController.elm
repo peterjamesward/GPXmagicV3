@@ -2182,13 +2182,14 @@ viewToolForPainting :
     SystemSettings
     -> Options msg
     -> Maybe String
+    -> msg
     -> Element msg
-viewToolForPainting settings options toolId =
+viewToolForPainting settings options toolId stopMsg =
     case toolId of
         Just isTool ->
             case Dict.get isTool options.tools of
                 Just toolEntry ->
-                    el
+                    row
                         [ centerX
                         , alignTop
                         , spacing 8
@@ -2198,8 +2199,13 @@ viewToolForPainting settings options toolId =
                         , Border.color <| contrastingColour toolEntry.tabColour
                         , Border.roundEach { topRight = 0, topLeft = 0, bottomRight = 8, bottomLeft = 8 }
                         ]
-                    <|
-                        I18N.text settings.location toolEntry.toolId "label"
+                        [ I18N.text settings.location toolEntry.toolId "label"
+                        , Input.button
+                            []
+                            { onPress = Just stopMsg
+                            , label = useIconWithSize 14 FeatherIcons.x
+                            }
+                        ]
 
                 Nothing ->
                     none
@@ -2219,7 +2225,7 @@ makePaintPreview options toolId point1 point2 track =
     --Delegate to the tool to do its normal (or not normal) preview creation.
     --Should return Nothing if there is no "solution".
     --We won't even bother calling it unless the end points are distinct and on-track.
-    --TODO: Some tools are special (Radiused Bends) and may have their own methods, this is the default.
+    --Some tools are special (Radiused Bends) and may have their own methods, this is the default.
     let
         ( snap1, snap2 ) =
             ( TrackLoaded.snapToTrack track point1
@@ -2227,10 +2233,10 @@ makePaintPreview options toolId point1 point2 track =
             )
 
         pointsAreDifferent =
-            point1.leafIndex
-                /= point2.leafIndex
-                || point1.proportionAlong
-                /= point2.proportionAlong
+            snap1.leafIndex
+                /= snap2.leafIndex
+                || snap1.proportionAlong
+                /= snap2.proportionAlong
 
         trackWithPaintPointsAdded =
             TrackLoaded.insertPointsAt snap1 snap2 track

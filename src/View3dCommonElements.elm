@@ -82,6 +82,7 @@ type Msg
     | MapMsg MapViewer.Msg
     | ToggleShowMap
     | ToggleFingerpainting
+    | StopInkMode
 
 
 type alias Context =
@@ -218,6 +219,12 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
         ToggleFingerpainting ->
             ( { context | fingerPainting = not context.fingerPainting }
             , []
+            , mapData
+            )
+
+        StopInkMode ->
+            ( context
+            , [ Actions.StopToolInkMode ]
             , mapData
             )
 

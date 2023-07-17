@@ -153,7 +153,7 @@ view context mapData settings display tools contentArea track scene msgWrapper p
                 , Border.width 0
                 , Border.color FlatColors.ChinesePalette.peace
                 , inFront <| placesOverlay display contentArea track camera
-                , inFront <| fingerPaintingPreview settings tools context contentArea paintTool
+                , inFront <| fingerPaintingPreview settings (msgWrapper StopInkMode) tools context contentArea paintTool
                 , inFront <| onViewControls settings msgWrapper context
                 , if context.followSelectedPoint then
                     Cursor.default

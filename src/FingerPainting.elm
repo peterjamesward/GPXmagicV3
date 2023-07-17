@@ -25,12 +25,13 @@ import View3dCommonElements exposing (Context)
 
 fingerPaintingPreview :
     SystemSettings
+    -> msg
     -> ToolsController.Options msg
     -> Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Maybe String
     -> Element msg
-fingerPaintingPreview settings tools context ( givenWidth, givenHeight ) paintTool =
+fingerPaintingPreview settings stopMsg tools context ( givenWidth, givenHeight ) paintTool =
     let
         ( svgWidth, svgHeight ) =
             ( String.fromInt <| Pixels.inPixels givenWidth
@@ -65,7 +66,7 @@ fingerPaintingPreview settings tools context ( givenWidth, givenHeight ) paintTo
     el
         [ centerX
         , alignTop
-        , inFront <| ToolsController.viewToolForPainting settings tools paintTool
+        , inFront <| ToolsController.viewToolForPainting settings tools paintTool stopMsg
         ]
     <|
         case context.dragAction of
