@@ -132,7 +132,7 @@ tryCircumcircles track options =
             -- At track start, if it's a loop, we preload the *last* leaf.
             -- Otherwise, just use the first leaf, so we interpolate with it twice.
             -- Absent loops, alwyas take the first leaf.
-            if DomainModel.isLoop track.trackTree then
+            if DomainModel.isLoop track.trackTree && track.markerPosition == Nothing then
                 ( Straight <|
                     LineSegment3d.projectInto SketchPlane3d.xy <|
                         LineSegment3d.from lastLeaf.startPoint.space lastLeaf.endPoint.space
