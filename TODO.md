@@ -16,12 +16,6 @@
 
 # WIP
 
-## Ink meta-tool
-
-New videos.
-
-Radiused bends just broke.
-
 ---
 
 # BACKLOG
