@@ -437,7 +437,7 @@ deleteTool : ToolEntry
 deleteTool =
     { toolType = ToolDeletePoints
     , toolId = DeletePoints.toolId
-    , video = Just "https://youtu.be/3qobNm46TQw"
+    , video = Just "https://youtu.be/p8vIK0j5OMg"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -451,7 +451,7 @@ bezierSplinesTool : ToolEntry
 bezierSplinesTool =
     { toolType = ToolBezierSplines
     , toolId = Tools.BezierSplines.toolId
-    , video = Just "https://youtu.be/UuDfZYagvIU"
+    , video = Just "https://youtu.be/reCNC6Uu3bQ"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -465,7 +465,7 @@ centroidAverageTool : ToolEntry
 centroidAverageTool =
     { toolType = ToolCentroidAverage
     , toolId = Tools.CentroidAverage.toolId
-    , video = Just "https://youtu.be/1C8clUhpQ20"
+    , video = Just "https://youtu.be/7IFZURTH9YA"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -479,7 +479,7 @@ curveFormerTool : ToolEntry
 curveFormerTool =
     { toolType = ToolCurveFormer
     , toolId = Tools.CurveFormer.toolId
-    , video = Just "https://youtu.be/J81QZ6P6nV4"
+    , video = Just "https://youtu.be/oyOzdIt0LuE"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -493,7 +493,7 @@ bendSmootherTool : ToolEntry
 bendSmootherTool =
     { toolType = ToolBendSmoother
     , toolId = Tools.BendSmoother.toolId
-    , video = Just "https://youtu.be/Qahop5xkuP0"
+    , video = Just "https://youtu.be/CqeQ3_Bfouw"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -507,7 +507,7 @@ smartSmootherTool : ToolEntry
 smartSmootherTool =
     { toolType = ToolSmartSmoother
     , toolId = Tools.SmartSmoother.toolId
-    , video = Just "https://youtu.be/6cSTQgvcRuw"
+    , video = Just "https://youtu.be/vvyNAPhfOsg"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -521,7 +521,7 @@ nudgeTool : ToolEntry
 nudgeTool =
     { toolType = ToolNudge
     , toolId = Tools.Nudge.toolId
-    , video = Just "https://youtu.be/lZslQzyplPM"
+    , video = Just "https://youtu.be/MDpojD1mS9E"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -549,7 +549,7 @@ simplifyTool : ToolEntry
 simplifyTool =
     { toolType = ToolSimplify
     , toolId = Tools.Simplify.toolId
-    , video = Just "https://youtu.be/dmK9PIlH04c"
+    , video = Just "https://youtu.be/JIQjNKyqFFo"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -563,7 +563,7 @@ interpolateTool : ToolEntry
 interpolateTool =
     { toolType = ToolInterpolate
     , toolId = Interpolate.toolId
-    , video = Just "https://youtu.be/i5rALJ_42n0"
+    , video = Just "https://youtu.be/swPXjOWWizo"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -577,7 +577,7 @@ profileSmoothTool : ToolEntry
 profileSmoothTool =
     { toolType = ToolProfileSmooth
     , toolId = Tools.ProfileSmooth.toolId
-    , video = Just "https://youtu.be/XJGYt8LfTvQ"
+    , video = Just "https://youtu.be/X2r9xjGvX0c"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -703,7 +703,7 @@ straightenTool : ToolEntry
 straightenTool =
     { toolType = ToolStraighten
     , toolId = Tools.Straightener.toolId
-    , video = Just "https://youtu.be/B_LX9BmuoxE"
+    , video = Just "https://youtu.be/t8EXQ4UlZVc"
     , state = Contracted
     , isVisible = True
     , dock = DockRight
@@ -2345,8 +2345,8 @@ applyPaintTool tools toolId point1 point2 track =
 
         ( Just ToolCurveFormer, Just preview ) ->
             Tools.CurveFormer.paintingApplyHelper
-                point1.worldPoint
-                point2.worldPoint
+                snap1.worldPoint
+                snap2.worldPoint
                 tools.curveFormerOptions
                 trackWithPaintPointsAdded
 

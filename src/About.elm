@@ -2,9 +2,20 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.15.1 (a3765478, 2023-07-08 15:14)
+    """# GPXmagic v3.16.0 (a3765478, 2023-07-08 15:14)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
+
+## 3.16.0
+
+Introducing **Ink mode** -- apply some of the best tools directly in the 3D view
+without having to first position the Orange and Purple markers.
+
+Watch the video: https://youtu.be/FyxsYgS1Df0
+
+Fixes bug where Curly-Wurly messed up on a looped track.
+
+Some internal clean-ups.
 
 ## 3.15.1
 
