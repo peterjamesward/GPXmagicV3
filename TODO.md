@@ -23,8 +23,6 @@
 * In Freehand drawing mode, click within a foot of track point activates direct dragging of that
   point.
 
-* Tool ink option displayed in Tools Summary compact view?
-
 ## Synthesizer
 
 FFT generators for theta (or X, Y) & phi (or Z) as function of s.

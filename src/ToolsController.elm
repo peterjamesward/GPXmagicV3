@@ -1964,25 +1964,35 @@ viewToolSettings settings options wrapper =
 
         compactListing : ToolEntry -> Element msg
         compactListing tool =
-            Input.button
-                [ --spacing 5
-                  --, paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
-                  Border.width 1
+            row
+                [ spacing 5
+                , Border.width 1
                 , Border.color FlatColors.FlatUIPalette.silver
                 , Border.rounded 4
                 , padding 2
                 ]
-                { onPress =
-                    if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
-                        Nothing
+                [ Input.button []
+                    { onPress =
+                        if tool.toolType == ToolSettings || tool.toolType == ToolEssentials then
+                            Nothing
 
-                    else
-                        Just <|
-                            wrapper <|
-                                ToolActivate tool.toolId <|
-                                    nextToolState tool.state
-                , label = text <| I18N.localisedString settings.location tool.toolId "label"
-                }
+                        else
+                            Just <|
+                                wrapper <|
+                                    ToolActivate tool.toolId <|
+                                        nextToolState tool.state
+                    , label = text <| I18N.localisedString settings.location tool.toolId "label"
+                    }
+                , if Dict.member tool.toolId paintingTools then
+                    Input.button
+                        []
+                        { onPress = Just <| wrapper <| ToolSetPaintTool tool.toolId
+                        , label = useIconWithSize 14 FeatherIcons.penTool
+                        }
+
+                  else
+                    none
+                ]
 
         sortMethod : Element msg
         sortMethod =
