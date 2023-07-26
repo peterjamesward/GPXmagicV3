@@ -20,27 +20,13 @@
 
 # BACKLOG
 
-* In Freehand drawing mode, click within a foot of track point activates direct dragging of that
-  point.
+## Move point
+
+In Freehand drawing mode, click within a foot of track point activates direct dragging of point.
 
 ## Synthesizer
 
 FFT generators for theta (or X, Y) & phi (or Z) as function of s.
-
-## Pointer restore after edits
-
-Surely (?) (fromStart, fromEnd) works for ALL edits? If so, do it in one place!
-No. It does not work for Delete, Nudge (with fade), Radiused bends, perhaps others.
-Good where it works though.
-
-## Smart smoother
-
-Add the "desire" to return to the baseline road position? That would 
-mean not just tracking theta but also the lateral deviation, and thereby 
-ensure that a turn extends not only until we match the current theta but 
-exceed that to return to the baseline. Or -- having done CurlyWurly, we 
-could just do a linear (or cosine) transition back to baseline when we have 
-matched theta (subject to theta derivatives of course).
 
 ## Test cases for edits.
 
