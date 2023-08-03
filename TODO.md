@@ -10,11 +10,15 @@
 **Route Builder** previews not hiding when tool closed.
 
 **BUG** Map and course part company! 3D and Plan. Disappointing.
-> Now won't go wrong. Something smells. Maybe related to resize (ehich seems to fix it).
+> Something smells. Maybe related to resize (ehich seems to fix it).
 
 --- 
 
 # WIP
+
+## Segments
+
+Consider redo with segment info attached to point (or leaf?).
 
 ---
 
@@ -23,6 +27,7 @@
 ## Move point
 
 In Freehand drawing mode, click within a foot of track point activates direct dragging of point.
+(Maybe should be a long-click, confirmed by pointer change.)
 
 ## Synthesizer
 

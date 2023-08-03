@@ -117,7 +117,6 @@ type Msg
     | AdjustTimeZone Time.Zone
     | ReceivedIpDetails (Result Http.Error IpInfoReceived)
     | PageLoadRecorded (Result P.Error IpInfoReceived)
-    | RecentLocations (Result P.Error (List PageLoadLog.Location))
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitRightDockLeftEdge SplitPane.Msg
@@ -130,7 +129,6 @@ type Msg
     | SetColourTheme SystemSettings.ColourTheme
     | Language I18NOptions.Location
     | ToggleLanguageEditor
-    | UserLocationsVisible Bool
     | RestoreDefaultToolLayout
     | WriteGpxFile
     | FilenameChange String
@@ -164,10 +162,6 @@ type alias Model =
 
     -- State machine for map synchronisation
     , mapState : MapState
-
-    -- User locations, to be visible on map.
-    , userLocations : List PageLoadLog.Location
-    , userLocationsVisible : Bool
 
     -- Track stuff now all in Tools.Tracks.
     --, activeTrack : Maybe String
@@ -280,8 +274,6 @@ init mflags origin navigationKey =
       , loadFromUrl = remoteUrl
       , mapState = MapDivNeeded
       , mapPointsDraggable = False
-      , userLocations = []
-      , userLocationsVisible = False
       , previews = Dict.empty
       , needsRendering = False
       , windowSize = ( 1000, 800 )
@@ -465,23 +457,6 @@ update msg model =
             , LocalStorage.storageSetItem "singleDock" <| E.bool newSettings.singleDock
             )
 
-        UserLocationsVisible visible ->
-            ( { model | userLocationsVisible = visible }
-            , Cmd.batch
-                [ if visible then
-                    MapPortController.showLocations model.userLocations
-
-                  else
-                    MapPortController.showLocations []
-                , if visible && model.userLocations == [] then
-                    PageLoadLog.getRecentLocations
-                        |> P.toCmd (jwt signedToken) RecentLocations
-
-                  else
-                    Cmd.none
-                ]
-            )
-
         DisplayAboutMessage ->
             ( { model | modalMessage = Just "aboutText" }, Cmd.none )
 
@@ -594,20 +569,6 @@ update msg model =
 
         PageLoadRecorded _ ->
             ( model, Cmd.none )
-
-        RecentLocations response ->
-            case response of
-                Err _ ->
-                    ( model, Cmd.none )
-
-                Ok locations ->
-                    ( { model | userLocations = locations }
-                    , if model.userLocationsVisible then
-                        MapPortController.showLocations locations
-
-                      else
-                        MapPortController.showLocations []
-                    )
 
         ReceivedIpDetails response ->
             let
@@ -1581,15 +1542,6 @@ showOptionsMenu model =
                 subtleToolStyles
                 { label = text "Show/Hide language file editor"
                 , onPress = Just ToggleLanguageEditor
-                }
-
-        showUserLocations =
-            Input.checkbox
-                subtleToolStyles
-                { label = Input.labelRight [] <| text "Show user locations"
-                , onChange = UserLocationsVisible
-                , icon = Input.defaultCheckbox
-                , checked = model.userLocationsVisible
                 }
     in
     if model.isPopupOpen then
