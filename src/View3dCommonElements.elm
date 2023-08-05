@@ -118,6 +118,7 @@ update :
 update msg msgWrapper track ( width, height ) mapData context mapUpdater camera paintTool =
     --Anything NOT handled by ViewPlan or ViewThird drops through to here.
     --(Which is now everything except ImageReset!)
+    --TODO: So, should we just pass in the reset function?
     let
         -- Let us have some information about the view, making dragging more precise.
         ( wFloat, hFloat ) =
@@ -237,18 +238,15 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                         == ViewThird
                         && (event.keys.ctrl || event.button == SecondButton)
 
-                ( x, y ) =
-                    event.offsetPos
-
                 screenPoint =
                     Point2d.fromTuple Pixels.pixels event.offsetPos
 
                 dragging =
                     if alternate then
-                        DragRotate x y
+                        DragRotate event.offsetPos
 
                     else
-                        DragPan x y
+                        DragPan event.offsetPos
 
                 newState =
                     case ( paintTool, pointLeafProximity camera track screenRectangle screenPoint ) of
@@ -288,7 +286,7 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                     event.offsetPos
             in
             case context.dragAction of
-                DragRotate startX startY ->
+                DragRotate ( startX, startY ) ->
                     -- Change the camera azimuth and elevation
                     let
                         newAzimuth =
@@ -305,7 +303,7 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                             { context
                                 | cameraAzimuth = Direction2d.fromAngle newAzimuth
                                 , cameraElevation = newElevation
-                                , dragAction = DragRotate dx dy
+                                , dragAction = DragRotate event.offsetPos
                             }
                     in
                     ( { newContext | map = mapUpdater newContext }
@@ -313,7 +311,7 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                     , mapData
                     )
 
-                DragPan startX startY ->
+                DragPan ( startX, startY ) ->
                     --TODO: It would be slightly cleaner to work out the viewPlan once at grab time
                     --TODO: and use that until released. But it's a small optimisation.
                     let
@@ -326,7 +324,7 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                             Point2d.pixels startX startY
 
                         movePointOnScreen =
-                            Point2d.pixels dx dy
+                            Point2d.fromTuple Pixels.pixels event.offsetPos
 
                         grabPointInModel =
                             Camera3d.ray camera screenRectangle grabPointOnScreen
@@ -351,7 +349,7 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                                     in
                                     { context
                                         | focalPoint = withoutTime newFocus
-                                        , dragAction = DragPan dx dy
+                                        , dragAction = DragPan event.offsetPos
                                     }
 
                                 _ ->
@@ -365,7 +363,7 @@ update msg msgWrapper track ( width, height ) mapData context mapUpdater camera 
                 DragPaint paintInfo ->
                     let
                         screenPoint =
-                            Point2d.pixels dx dy
+                            Point2d.fromTuple Pixels.pixels event.offsetPos
 
                         path =
                             case pointLeafProximity camera track screenRectangle screenPoint of

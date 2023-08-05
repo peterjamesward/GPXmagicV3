@@ -29,12 +29,9 @@ import LngLat
 import LocalCoords exposing (LocalCoords)
 import MapViewer
 import Pixels exposing (Pixels)
-import Point2d exposing (Point2d)
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
-import Rectangle2d exposing (Rectangle2d)
 import Scene3d exposing (Entity)
-import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import SystemSettings exposing (SystemSettings)
 import Tools.DisplaySettingsOptions

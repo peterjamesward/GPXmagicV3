@@ -11,8 +11,8 @@ import Quantity exposing (Quantity)
 
 type DragAction
     = DragNone
-    | DragRotate Float Float
-    | DragPan Float Float
+    | DragRotate ( Float, Float )
+    | DragPan ( Float, Float )
     | DragPaint PaintInfo -- freehand drawing, use entire path
     | DragTool String PointLeafProximity PointLeafProximity -- applying tool, only keep start and end.
 
