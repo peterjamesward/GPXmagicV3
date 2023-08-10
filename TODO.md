@@ -16,14 +16,18 @@
 
 # WIP
 
+---
+
+# BACKLOG
+
+## Update Mapbox
+
+Mapbox GL JS V3 beta.
+
 ## Move point
 
 In Freehand drawing mode, click within a foot of track point activates direct dragging of point.
 (Maybe a long click, with change of pointer to confirm mode.)
-
----
-
-# BACKLOG
 
 ## Synthesizer
 
