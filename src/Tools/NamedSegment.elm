@@ -484,7 +484,7 @@ checkForRuleBreaches track options =
                         |> Quantity.lessThan next.startDistance
                     )
                         && (current.endDistance
-                                |> Quantity.plus (Length.meters 190)
+                                |> Quantity.plus (Length.meters 160)
                                 |> Quantity.lessThan (DomainModel.trueLength track.trackTree)
                            )
             }

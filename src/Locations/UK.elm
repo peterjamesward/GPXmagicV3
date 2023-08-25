@@ -1022,7 +1022,7 @@ shorter segments.
 Pre-existing manual (or Strava) segments have precedence over auto-segments.""" )
                 , ( "newname", """TYPE NAME HERE""" )
                 , ( "warning", """
-Named segments should be at least 110m from the start, 190m from the end, and at least 50m apart.
+Named segments should be at least 110m from the start, 160m from the end, and at least 50m apart.
 
 At least one of the segments needs changing!""" )
                 , ( "duplicate", """
