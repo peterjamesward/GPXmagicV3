@@ -20,9 +20,29 @@
 
 # BACKLOG
 
+## Terrain
+
+Oh, I have just had this idea (2024-10-29)! -- 
+> Push terrain generation into a shader.
+Each pixel to extract nearby track (fixed radius or nearest).
+If it's on a road, use the road height. Otherwise some blend.
+Colour roads grey, colour non-roads by altitude and slope.
+Could also have macro-level effects across whole track.
+
+## Alternative 3D thing
+
+There's also a different 3d package
+https://package.elm-lang.org/packages/ryan-haskell/elm-3d/latest/
+which can use (some) OBJ files, like:
+https://kaylousberg.itch.io/kaykit-medieval-hexagon
+Wouldn't that be fun!
+Don't know what I'd do about roads, that's almost irrelevant :~D
+
 ## Update Mapbox
 
-Mapbox GL JS V3 beta.
+Mapbox GL JS V3.
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
 
 ## Move point
 
