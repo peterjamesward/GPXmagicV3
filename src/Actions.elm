@@ -25,6 +25,7 @@ import Tools.OutAndBackOptions
 import Tools.ProfileSmoothOptions
 import Tools.SmartSmootherOptions
 import Tools.StartFinishTypes
+import Tools.StraightenerOptions
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaActivity, StravaActivityStreams, StravaRoute, StravaSegment, StravaSegmentStreams)
 import Tools.TimestampOptions
@@ -96,7 +97,7 @@ type ToolAction msg
     | TrackFromGpx String
     | ParseAndAppend String
     | WriteTrackSections (List ( Int, Float, Float ))
-    | Straighten
+    | Straighten Tools.StraightenerOptions.Options
     | DisplayInfo String String
     | Autofix (List Int)
     | MakeRouteFromGraph
@@ -198,7 +199,7 @@ actionTextForUndo location action =
             ParseAndAppend _ ->
                 "append"
 
-            Straighten ->
+            Straighten _ ->
                 "straighten"
 
             Autofix _ ->

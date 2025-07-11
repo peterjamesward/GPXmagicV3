@@ -53,7 +53,6 @@ import Json.Decode as D exposing (field, maybe)
 import Json.Encode as E
 import Length
 import List.Extra
-import Point3d
 import PreviewData exposing (PreviewData)
 import Quantity
 import SystemSettings exposing (SystemSettings)
@@ -100,6 +99,7 @@ import Tools.SplitAndJoinOptions
 import Tools.StartFinish
 import Tools.StartFinishTypes
 import Tools.Straightener
+import Tools.StraightenerOptions
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.Timestamp
@@ -182,7 +182,7 @@ type alias Options msg =
     , startFinishOptions : Tools.StartFinishTypes.Options
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
-    , straightenOptions : Tools.Straightener.Options
+    , straightenOptions : Tools.StraightenerOptions.Options
     , landUseOptions : Tools.LandUse.Options
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
@@ -1301,7 +1301,8 @@ update toolMsg isTrack msgWrapper options =
                             Tools.Straightener.update
                                 msg
                                 options.straightenOptions
-                                track
+                                (getColour straightenTool.toolId options.tools)
+                                isTrack
                     in
                     ( { options | straightenOptions = newOptions }
                     , actions
@@ -1772,10 +1773,10 @@ toolStateHasChanged toolId requestPreviews isTrack options =
         ToolStraighten ->
             let
                 ( newToolOptions, actions ) =
-                    DirectionChanges.toolStateChange
+                    Tools.Straightener.toolStateChange
                         showPreviews
                         (getColour toolId options.tools)
-                        options.directionChangeOptions
+                        options.straightenOptions
                         isTrack
             in
             ( options, (StoreLocally "tools" <| encodeToolState options) :: actions )
@@ -2351,7 +2352,7 @@ applyPaintTool tools toolId point1 point2 track =
             Tools.ProfileSmooth.apply tools.profileSmoothSettings trackWithPaintPointsAdded
 
         ( Just ToolStraighten, Just preview ) ->
-            Tools.Straightener.apply tools.straightenOptions trackWithPaintPointsAdded
+            Tools.Straightener.applyUsingOptions tools.straightenOptions trackWithPaintPointsAdded
 
         ( Just ToolCurveFormer, Just preview ) ->
             Tools.CurveFormer.paintingApplyHelper

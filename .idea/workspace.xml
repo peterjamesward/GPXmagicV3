@@ -4,9 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f2f9576b-b6e3-4646-b70b-b02b1aeea807" name="Changes" comment="Seemed to be missing a file.">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="f2f9576b-b6e3-4646-b70b-b02b1aeea807" name="Changes" comment="Merge remote-tracking branch 'origin/master'&#10;With updated build ref.">
+      <change afterPath="$PROJECT_DIR$/src/Tools/StraightenerOptions.elm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/site/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/site/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/About.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/About.elm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Actions.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/Actions.elm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Locations/UK.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/Locations/UK.elm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.elm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Tools/Straightener.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/Tools/Straightener.elm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ToolsController.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/ToolsController.elm" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,7 +25,14 @@
     <elmProjects>
       <project path="$PROJECT_DIR$/elm.json" />
     </elmProjects>
-    <settings elmCompilerPath="/usr/local/bin/elm" elmFormatPath="/usr/local/bin/elm-format" elmTestPath="null" isElmFormatOnSaveEnabled="false" />
+    <settings elmCompilerPath="/usr/local/bin/elm" lamderaCompilerPath="" elmFormatPath="/usr/local/bin/elm-format" elmTestPath="null" elmReviewPath="" isElmFormatOnSaveEnabled="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Elm Module" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -38,13 +53,12 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2YIwcQLhjsh7Z62U0p00Q4mfAG9" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="autoscrollFromSource" value="true" />
     <option name="autoscrollToSource" value="true" />
@@ -55,14 +69,20 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/peter/Documents/GitHub/GPXmagicV3&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/peter/Documents/GitHub/GPXmagicV3/src/Tools&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;org.elm.workspace.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;CodeStatsConfigurable&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/Tools" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration default="true" type="ELM_TEST_RUN_CONFIGURATION" factoryName="Elm Test configuration factory">
       <ElmTestRunConfiguration elm-folder="$PROJECT_DIR$" />
@@ -100,6 +120,12 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Updating Mapbox components." />
     <MESSAGE value="Seemed to be missing a file." />
-    <option name="LAST_COMMIT_MESSAGE" value="Seemed to be missing a file." />
+    <MESSAGE value="Merge remote-tracking branch 'origin/master'" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/master'&#10;With updated build ref." />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/master'&#10;With updated build ref." />
+  </component>
+  <component name="com.gk646.codestats.settings.Save">
+    <option name="includedFileTypes" value="elm" />
+    <option name="separateTabsTypes" value="elm;java;cpp;c;hpp;h;rs;css;html;js;php;py;cs;go;rb;swift;ts;kt;sql;pl;lua;groovy;asp;aspx;jsp;json;scss;less;sass;sh;bat;ps1;md;f;r;m;asm;ada;scala;dart;jsx;julia" />
   </component>
 </project>

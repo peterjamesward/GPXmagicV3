@@ -1897,9 +1897,9 @@ performActionsOnModel actions model =
                     in
                     updateActiveTrack newTrack foldedModel
 
-                ( Straighten, Just track ) ->
+                ( Straighten options, Just track ) ->
                     updateActiveTrack
-                        (Tools.Straightener.apply model.toolOptions.straightenOptions track)
+                        (Tools.Straightener.applyUsingOptions options track)
                         foldedModel
 
                 ( ApplySmoothProfile options, Just track ) ->

@@ -2,26 +2,17 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.16.2 (b079f914, 2024-10-29 14:51)
+    """# GPXmagic v3.17.0 (b079f914, 2025-07-11 13:58)
 
 **GPXmagic V3 works best with Safari, Firefox & Chrome.**
 
-## 3.16.2
+## 3.17.0
 
-Updated the Mapbox components to 3.7.0.
+- Fixed an old "out by one" error in Straightener.
 
-## 3.16.1
+- Previews for Straightener better behaved.
 
-Ink mode selector added to _Tools options_ list, for even quicker access.
-
-## 3.16.0
-
-Introducing **Ink mode** -- apply some of the best tools directly in the 3D view
-without having to first position the Orange and Purple markers.
-Watch the video: https://youtu.be/FyxsYgS1Df0
-
-Fixes bug where Curly-Wurly messed up on a looped track.
-Some internal clean-ups.
+- Updated Mapbox to 3.13.0 (was 3.7.0)
 
 ## Acknowledgements
 

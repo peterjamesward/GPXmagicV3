@@ -482,7 +482,6 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "pens", """add RGT rider pens""" )
                 , ( "append", """append GPX track""" )
                 , ( "straighten", """straighten""" )
-                , ( "straight", """straighten""" )
                 , ( "autofix", """point smoothing""" )
                 , ( "route", """turn route into new track""" )
                 , ( "widen", """widen bend""" )
@@ -842,12 +841,13 @@ Here's a few options:
 """ )
                 ]
           )
-        , ( "straight"
+        , ( "straighten"
           , Dict.fromList
                 [ ( "label", """Straightener""" )
                 , ( "straight", """Straighten between markers""" )
                 , ( "altitudes", """Preserve altitudes""" )
                 , ( "range", """This tool requires a range.""" )
+                , ( "Apply", """Apply""" )
                 , ( "info", """
 Sometimes you just want a straight to be straight and it's tedious to get rid of
 all the wriggles. Sure, you could delete some of the points, but you might want to

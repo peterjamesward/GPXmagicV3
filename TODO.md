@@ -1,6 +1,8 @@
 
 # BUGS
 
+**Straightener** deletes one of the endpoints.
+
 **Stretch** Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
 **Delete** Delete should display "Sorry" message unless one leaf will remain.
@@ -39,10 +41,6 @@ Wouldn't that be fun!
 Don't know what I'd do about roads, that's almost irrelevant :~D
 
 ## Update Mapbox
-
-Mapbox GL JS V3.
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
 
 ## Move point
 
