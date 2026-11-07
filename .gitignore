@@ -7,3 +7,4 @@ src/M3O.elm
 site/GPX/*
 /elm-stuff/
 
+.DS_Store

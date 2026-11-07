@@ -1,4 +1,8 @@
 
+# PROBLEMS
+
+org.elm.workspace.ProjectLoadException: Manifest file not found: /Users/peter/.elm/0.19.2/packages/JohnBugner/elm-loop/2.1.0/elm.json
+
 # BUGS
 
 **Straightener** deletes one of the endpoints.
