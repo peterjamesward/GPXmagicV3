@@ -11,7 +11,6 @@ import Json.Encode as E
 import Length
 import MapTypes
 import MapboxKey exposing (mapboxKey)
-import PageLoadLog
 import PaneContext exposing (PaneContext, paneIdToString)
 import Pixels exposing (Pixels)
 import Point3d
@@ -58,19 +57,6 @@ createMap style info ( width, height ) =
             , ( "height", E.int <| Pixels.inPixels height )
             ]
 
-
-showLocations : List PageLoadLog.Location -> Cmd msg
-showLocations locations =
-    let
-        asLngLat : PageLoadLog.Location -> E.Value
-        asLngLat location =
-            E.list E.float [ location.longitude, location.latitude ]
-    in
-    mapCommands <|
-        E.object
-            [ ( "Cmd", E.string "Locations" )
-            , ( "locations", E.list asLngLat locations )
-            ]
 
 
 refreshMap : Cmd msg

@@ -47,11 +47,9 @@ import Maybe.Extra
 import MyIP
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
-import PageLoadLog
 import PaneContext
 import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
-import Postgrest.Client as P exposing (jwt)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SceneBuilderMap
@@ -116,8 +114,6 @@ type Msg
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | ReceivedIpDetails (Result Http.Error IpInfoReceived)
-    | PageLoadRecorded (Result P.Error IpInfoReceived)
-    | RecentLocations (Result P.Error (List PageLoadLog.Location))
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitRightDockLeftEdge SplitPane.Msg
@@ -130,7 +126,6 @@ type Msg
     | SetColourTheme SystemSettings.ColourTheme
     | Language I18NOptions.Location
     | ToggleLanguageEditor
-    | UserLocationsVisible Bool
     | RestoreDefaultToolLayout
     | WriteGpxFile
     | FilenameChange String
@@ -164,10 +159,6 @@ type alias Model =
 
     -- State machine for map synchronisation
     , mapState : MapState
-
-    -- User locations, to be visible on map.
-    , userLocations : List PageLoadLog.Location
-    , userLocationsVisible : Bool
 
     -- Track stuff now all in Tools.Tracks.
     --, activeTrack : Maybe String
@@ -280,8 +271,6 @@ init mflags origin navigationKey =
       , loadFromUrl = remoteUrl
       , mapState = MapDivNeeded
       , mapPointsDraggable = False
-      , userLocations = []
-      , userLocationsVisible = False
       , previews = Dict.empty
       , needsRendering = False
       , windowSize = ( 1000, 800 )
@@ -465,22 +454,6 @@ update msg model =
             , LocalStorage.storageSetItem "singleDock" <| E.bool newSettings.singleDock
             )
 
-        UserLocationsVisible visible ->
-            ( { model | userLocationsVisible = visible }
-            , Cmd.batch
-                [ if visible then
-                    MapPortController.showLocations model.userLocations
-
-                  else
-                    MapPortController.showLocations []
-                , if visible && model.userLocations == [] then
-                    PageLoadLog.getRecentLocations
-                        |> P.toCmd (jwt signedToken) RecentLocations
-
-                  else
-                    Cmd.none
-                ]
-            )
 
         DisplayAboutMessage ->
             ( { model | modalMessage = Just "aboutText" }, Cmd.none )
@@ -592,23 +565,6 @@ update msg model =
             , Cmd.none
             )
 
-        PageLoadRecorded _ ->
-            ( model, Cmd.none )
-
-        RecentLocations response ->
-            case response of
-                Err _ ->
-                    ( model, Cmd.none )
-
-                Ok locations ->
-                    ( { model | userLocations = locations }
-                    , if model.userLocationsVisible then
-                        MapPortController.showLocations locations
-
-                      else
-                        MapPortController.showLocations []
-                    )
-
         ReceivedIpDetails response ->
             let
                 ipInfo =
@@ -628,14 +584,6 @@ update msg model =
                             , centreLat = 0.0
                             }
 
-                databasePost =
-                    case ipInfo of
-                        Just ip ->
-                            PageLoadLog.post ip
-                                |> P.toCmd (jwt signedToken) PageLoadRecorded
-
-                        Nothing ->
-                            Cmd.none
             in
             ( { model | ipInfo = ipInfo }
             , Cmd.batch
@@ -643,8 +591,6 @@ update msg model =
                     ViewMap.defaultStyleUrl
                     mapInfoWithLocation
                     model.contentArea
-
-                --, databasePost
                 ]
             )
 
@@ -1583,14 +1529,6 @@ showOptionsMenu model =
                 , onPress = Just ToggleLanguageEditor
                 }
 
-        showUserLocations =
-            Input.checkbox
-                subtleToolStyles
-                { label = Input.labelRight [] <| text "Show user locations"
-                , onChange = UserLocationsVisible
-                , icon = Input.defaultCheckbox
-                , checked = model.userLocationsVisible
-                }
     in
     if model.isPopupOpen then
         column (spacing 4 :: subtleToolStyles)
