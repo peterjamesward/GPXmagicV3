@@ -1363,10 +1363,10 @@ topLoadingBar model =
 
           else
             aboutButton
-        , StravaAuth.stravaButton
-            trackLoaded
-            model.stravaAuthentication
-            OAuthMessage
+        -- , StravaAuth.stravaButton
+        --     trackLoaded
+        --     model.stravaAuthentication
+        --     OAuthMessage
         , loadGpxButton
         , moreOptionsButton
         , case Tracks.getActiveTrack model.toolOptions.tracksOptions of

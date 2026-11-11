@@ -2,9 +2,25 @@ module About exposing (aboutText)
 
 
 aboutText =
-    """# GPXmagic v3.17.0 (b079f914, 2025-07-11 13:58)
+    """# GPXmagic v3.18.0 (b079f914, 2026-11-11 09:45)
 
-**GPXmagic V3 works best with Safari, Firefox & Chrome.**
+**GPXmagic V3 works fine with Safari, Firefox & Chrome.**
+
+## 3.18.0
+
+Maintenance release.
+
+ - updated mapbox libraries to 3.33.0 (was 3.13.0),
+ 
+ - GPXmagic is now built with Elm 0.19.3 compiler (was 0.19.1),
+
+ - Strava tool removed as strava now requires a subscription for an API key,  
+ (if needed, please send money for Strava subs)
+
+ - Route on map tool removed as didn't work.  
+ (if needed, let me know and I will dig into this) 
+
+ - Changed source of land use data from Kumi to private.coffee but please note this free service is often overloaded.
 
 ## 3.17.0
 

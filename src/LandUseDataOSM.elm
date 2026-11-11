@@ -19,8 +19,8 @@ import Utils
 
 
 apiRoot =
-    "https://overpass.kumi.systems"
-
+    -- "https://overpass.kumi.systems"
+    "https://overpass.private.coffee"
 
 requestLandUseData : (Result Http.Error OSMLandUseData -> msg) -> TrackLoaded msg -> Cmd msg
 requestLandUseData msg track =

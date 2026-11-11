@@ -315,7 +315,7 @@ orderedTools =
     , ( namedSegmentTool.toolId, namedSegmentTool )
     , ( moveScaleRotateTool.toolId, moveScaleRotateTool )
     , ( flythroughTool.toolId, flythroughTool )
-    , ( stravaTool.toolId, stravaTool )
+    -- , ( stravaTool.toolId, stravaTool )
     , ( moveAndStretchTool.toolId, moveAndStretchTool )
     , ( startFinishTool.toolId, startFinishTool )
     , ( splitAndJoinTool.toolId, splitAndJoinTool )
@@ -323,7 +323,7 @@ orderedTools =
     , ( straightenTool.toolId, straightenTool )
     , ( landUseTool.toolId, landUseTool )
     , ( timestampTool.toolId, timestampTool )
-    , ( routingTool.toolId, routingTool )
+    -- , ( routingTool.toolId, routingTool )
     , ( tracksTool.toolId, tracksTool )
     ]
 

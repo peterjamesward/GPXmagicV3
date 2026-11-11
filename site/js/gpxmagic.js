@@ -418,7 +418,7 @@ function updateRoute() {
     const coords = data.features[lastFeature].geometry.coordinates;
 
     // We can now send the coords back to Elm
-    //console.log('COORDS', coords);
+    console.log('COORDS', coords);
     app.ports.mapResponses.send(
       { 'msg' : 'waypoints'
       , 'waypoints' : coords
