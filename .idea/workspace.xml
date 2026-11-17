@@ -5,24 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f2f9576b-b6e3-4646-b70b-b02b1aeea807" name="Changes" comment="Merge remote-tracking branch 'origin/master'&#10;With updated build ref.">
-      <change afterPath="$PROJECT_DIR$/.idea/jsonCatalog.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elm.json" beforeDir="false" afterPath="$PROJECT_DIR$/elm.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ElmBuildTargetSelection">
+    <option name="inputPathForCompiler" value="$PROJECT_DIR$/src/Main.elm" />
+    <option name="name" value="main" />
+    <option name="outputPathForCompiler" value="/dev/null" />
+    <option name="workDir" value="$PROJECT_DIR$" />
+  </component>
   <component name="ElmWorkspace">
-    <elmProjects />
+    <elmProjects>
+      <project path="$PROJECT_DIR$/elm.json" />
+    </elmProjects>
     <settings elmCompilerPath="/usr/local/bin/elm" compilerType="ELM" elmFormatPath="/usr/local/bin/elm-format" elmTestPath="" elmReviewPath="" elmReviewConfigPath="" isElmFormatOnSaveEnabled="false" isElmReviewOnTheFlyEnabled="true" isElmBuildOnSaveEnabled="false" />
     <buildTargets>
-      <project manifestPath="$PROJECT_DIR$/elm.json">
-        <target name="main" inputPath="src/Main.elm" outputPath="" mode="NONE" compilerKind="ELM" compilerPath="/usr/local/bin/elm" compileOnSave="true" />
-      </project>
+      <target name="main" type="APPLICATION" inputPath="$PROJECT_DIR$/src/Main.elm" outputPath="" mode="NONE" compilerKind="ELM" compilerPath="/usr/local/bin/elm" compileOnSave="true" />
     </buildTargets>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -69,23 +71,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/peter/Documents/GitHub/GPXmagicV3/elm.json&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;org.elm.workspace.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/Users/peter/Documents/GitHub/GPXmagicV3/elm.json",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "org.elm.workspace.PROJECT_DISCOVERY": "true",
+    "settings.editor.selected.configurable": "org.elm.workspace.ui.ElmWorkspaceConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/Tools" />
