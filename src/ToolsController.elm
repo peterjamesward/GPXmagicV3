@@ -323,7 +323,7 @@ orderedTools =
     , ( straightenTool.toolId, straightenTool )
     , ( landUseTool.toolId, landUseTool )
     , ( timestampTool.toolId, timestampTool )
-    -- , ( routingTool.toolId, routingTool )
+    , ( routingTool.toolId, routingTool )
     , ( tracksTool.toolId, tracksTool )
     ]
 

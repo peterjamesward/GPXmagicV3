@@ -1,7 +1,6 @@
 
 # PROBLEMS
 
-org.elm.workspace.ProjectLoadException: Manifest file not found: /Users/peter/.elm/0.19.2/packages/JohnBugner/elm-loop/2.1.0/elm.json
 
 # BUGS
 
@@ -35,29 +34,10 @@ If it's on a road, use the road height. Otherwise some blend.
 Colour roads grey, colour non-roads by altitude and slope.
 Could also have macro-level effects across whole track.
 
-## Alternative 3D thing
-
-There's also a different 3d package
-https://package.elm-lang.org/packages/ryan-haskell/elm-3d/latest/
-which can use (some) OBJ files, like:
-https://kaylousberg.itch.io/kaykit-medieval-hexagon
-Wouldn't that be fun!
-Don't know what I'd do about roads, that's almost irrelevant :~D
-
-## Update Mapbox
-
 ## Move point
 
 In Freehand drawing mode, click within a foot of track point activates direct dragging of point.
 (Maybe a long click, with change of pointer to confirm mode.)
-
-## Synthesizer
-
-FFT generators for theta (or X, Y) & phi (or Z) as function of s.
-
-## Test cases for edits.
-
-You could do this you know, just not for the visuals.
 
 ## Loops
 

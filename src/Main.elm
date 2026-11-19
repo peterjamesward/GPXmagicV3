@@ -2435,6 +2435,9 @@ performActionCommands actions model =
                             track
                         ]
 
+                ( FetchMatchingRoute coordinates, Nothing ) ->
+                    Tools.MapMatchingRouter.mapMatchingApi MatchingRoute coordinates
+
                 ( ExternalCommand command, _ ) ->
                     command
 
