@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f2f9576b-b6e3-4646-b70b-b02b1aeea807" name="Changes" comment="Merge remote-tracking branch 'origin/master'&#10;With updated build ref.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
+    <list default="true" id="f2f9576b-b6e3-4646-b70b-b02b1aeea807" name="Changes" comment="Draw on map works again. Some code got lost there.">
       <change beforePath="$PROJECT_DIR$/src/About.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/About.elm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.elm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ToolsController.elm" beforeDir="false" afterPath="$PROJECT_DIR$/src/ToolsController.elm" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0" />
-      <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.0" />
-      <entry key="M10" value="1.0" />
-      <entry key="M15" value="1.0" />
-      <entry key="M30" value="1.0" />
-      <entry key="H1" value="1.0" />
-      <entry key="H2" value="1.0" />
-      <entry key="H4" value="1.0" />
-      <entry key="D1" value="1.0" />
-      <entry key="W1" value="1.0" />
+      <entry key="MS100" value="1.0069446349985203" />
+      <entry key="MS500" value="1.4261199932231001" />
+      <entry key="S2" value="2.2664711657251573" />
+      <entry key="S5" value="2.6549866523715098" />
+      <entry key="S10" value="2.8178340822221957" />
+      <entry key="S30" value="3.4264971090888197" />
+      <entry key="S60" value="5.718545476707833" />
+      <entry key="M2" value="9.56863179329302" />
+      <entry key="M5" value="14.183797322628587" />
+      <entry key="M10" value="16.371246304887897" />
+      <entry key="M15" value="17.194206242963272" />
+      <entry key="M30" value="18.069299999902643" />
+      <entry key="H1" value="18.52747273677871" />
+      <entry key="H2" value="18.761912880535576" />
+      <entry key="H4" value="18.88049686642125" />
+      <entry key="D1" value="18.980018664554557" />
+      <entry key="W1" value="18.997143948423766" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -102,23 +98,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.5471468506303697" />
-      <entry key="MS500" value="0.8863816991948673" />
-      <entry key="S2" value="0.9702981317828073" />
-      <entry key="S5" value="0.9880116785180375" />
-      <entry key="S10" value="0.9939877657788538" />
-      <entry key="S30" value="0.99799189212829" />
-      <entry key="S60" value="0.9989954414952502" />
-      <entry key="M2" value="0.999497594542003" />
-      <entry key="M5" value="0.9997990075193333" />
-      <entry key="M10" value="0.9998994987094119" />
-      <entry key="M15" value="0.999932998017279" />
-      <entry key="M30" value="0.9999664984474624" />
-      <entry key="H1" value="0.9999832490834346" />
-      <entry key="H2" value="0.9999916245066429" />
-      <entry key="H4" value="0.9999958122445528" />
-      <entry key="D1" value="0.9999993020395409" />
-      <entry key="W1" value="0.9999999002913331" />
+      <entry key="MS100" value="0.9460927742580801" />
+      <entry key="MS500" value="1.409021141631458" />
+      <entry key="S2" value="2.2598503226177886" />
+      <entry key="S5" value="2.6519053439197835" />
+      <entry key="S10" value="2.816202485263663" />
+      <entry key="S30" value="3.4257618844729283" />
+      <entry key="S60" value="5.717750260410702" />
+      <entry key="M2" value="9.567832174426051" />
+      <entry key="M5" value="14.183263787879726" />
+      <entry key="M10" value="16.37092555274367" />
+      <entry key="M15" value="17.193978531122678" />
+      <entry key="M30" value="18.069178669025213" />
+      <entry key="H1" value="18.527410095034693" />
+      <entry key="H2" value="18.761881051492637" />
+      <entry key="H4" value="18.880480823052984" />
+      <entry key="D1" value="18.980015972609326" />
+      <entry key="W1" value="18.997143563416074" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -206,7 +202,8 @@
     <MESSAGE value="Seemed to be missing a file." />
     <MESSAGE value="Merge remote-tracking branch 'origin/master'" />
     <MESSAGE value="Merge remote-tracking branch 'origin/master'&#10;With updated build ref." />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/master'&#10;With updated build ref." />
+    <MESSAGE value="Draw on map works again. Some code got lost there." />
+    <option name="LAST_COMMIT_MESSAGE" value="Draw on map works again. Some code got lost there." />
   </component>
   <component name="com.gk646.codestats.settings.Save">
     <option name="includedFileTypes" value="elm" />
